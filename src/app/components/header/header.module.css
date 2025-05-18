@@ -1,0 +1,159 @@
+.container {
+    padding-bottom: 0;
+    height: calc(80 / 1440 * 100vw);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 calc(30 / 1440 * 100vw);
+    position: sticky;
+    top: 0;
+    background: #E7E7E7;
+}
+
+div.container {
+    position: sticky;
+    top: 0;
+    background-color: yellow;
+}
+
+.logo {
+    font-size: calc(14 / 1440 * 100vw);
+}
+
+.navGroup {
+    gap: calc(33 / 1440 * 100vw);
+    color: #999999;
+    display: flex;
+    align-items: center;
+    width: calc(900 / 1440 * 100vw);
+}
+
+.link {
+    font-weight: normal;
+    font-size: calc(14 / 1440 * 100vw);
+    height: calc(80 / 1440 * 100vw);
+    padding: calc(8 / 1440 * 100vw);
+    align-items: center;
+    display: flex;
+}
+
+.activeLink {
+    background: #11456b;
+    color: #fff;
+}
+
+.loginBtn {
+    color: #11456b;
+    font-size: calc(14 / 1440 * 100vw);
+    background: none;
+    border: none;
+    outline: none;
+    transition: 0.5s all;
+    margin-left: auto;
+    text-transform: uppercase;
+}
+
+.loginBtn:hover,
+.link:hover {
+    opacity: 0.7;
+}
+
+.hamburgerIcon,
+.registerBtn {
+    display: none;
+}
+
+@media screen and (max-width: 540px) {
+    .container {
+        justify-content: flex-start;
+        gap: calc(15 / 414 * 100vw);
+        padding-bottom: 0;
+        height: calc(47 / 414 * 100vw);
+        padding: 0 calc(20 / 414 * 100vw);
+    }
+
+    .containerActive {
+        position: relative;
+    }
+
+    .hamburgerIcon {
+        display: flex;
+        width: calc(24 / 414 * 100vw);
+        height: calc(24 / 414 * 100vw);
+    }
+
+
+    .navGroup {
+        position: fixed;
+        background: #fff;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: flex-start;
+        z-index: 200;
+        width: calc(206 / 414 * 100vw);
+        padding: calc(20 / 414 * 100vw);
+        gap: calc(25 / 414 * 100vw);
+        left: 0;
+        top: 0;
+        height: 100%;
+        transition: 0.3s all;
+    }
+
+    .navGroupInactive {
+        width: 0px;
+        padding-left: 0;
+        padding-right: 0;
+        overflow: hidden;
+    }
+
+    .overlay {
+        display: flex;
+        width: 100vw;
+        height: 100%;
+        background: #0000004f;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        position: fixed;
+    }
+
+    .loginBtn {
+        margin-left: 0;
+    }
+
+    .link {
+        font-size: calc(14 / 414 * 100vw);
+        height: calc(35 / 414 * 100vw);
+        padding: calc(10 / 414 * 100vw);
+        border-radius: calc(8 / 414 * 100vw);
+        width: 100%;
+        align-items: center;
+        display: flex;
+    }
+
+    .mobileHorizontalLine {
+        width: calc(50 / 414 * 100vw);
+        height: calc(1 / 414 * 100vw);
+        background: #E7E7E7;
+        margin-left: calc(10 / 414 * 100vw);
+    }
+
+    .registerBtn {
+        display: flex;
+    }
+
+    .loginBtn {
+        font-size: calc(14 / 414 * 100vw);
+        color: #999999;
+        padding: calc(10 / 414 * 100vw);
+        text-transform: capitalize;
+    }
+
+    .logo {
+        font-size: calc(14 / 414 * 100vw);
+    }
+
+    .starsGroupSix {
+        margin-top: calc(10 / 414 * 100vw);
+    }
+}
