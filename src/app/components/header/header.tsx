@@ -15,6 +15,7 @@ export default function Header() {
         setModal(prev => !prev)
     }
 
+    
     return (
         <header className={`${classes.container} ${modal ? classes.containerActive : ''}`}>
             <GiHamburgerMenu onClick={toggleModal} className={classes.hamburgerIcon} />
