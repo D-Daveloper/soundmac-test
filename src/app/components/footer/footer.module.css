@@ -50,9 +50,7 @@
     gap: calc(5 / 1440 * 100vw);
 }
 
-a:hover {
-    text-decoration: underline;
-}
+
 
 @media screen and (max-width: 540px) {
     .container {
