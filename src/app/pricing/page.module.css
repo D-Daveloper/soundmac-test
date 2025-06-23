@@ -1,0 +1,161 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: calc(52 / 1440 * 100vw) calc(10 / 1440 * 100vw);
+    padding-top: calc(100 / 1440 * 100vw);
+}
+
+.h3 {
+    font-size: calc(18 / 1440 * 100vw);
+    margin-bottom: calc(5 / 1440 * 100vw);
+}
+
+
+.subTitle {
+    color: #999;
+    font-size: calc(14 / 1440 * 100vw);
+
+}
+
+.groupedPricingCards {
+    margin-top: calc(30 / 1440 * 100vw);
+    border-radius: calc(10 / 1440 * 100vw);
+    width: calc(1252 / 1440 * 100vw);
+    padding: calc(50 / 1440 * 100vw) calc(70 / 1440 * 100vw);
+    padding-top: calc(80 / 1440 * 100vw);
+    background: #D9D9D9;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: calc(22 / 1440 * 100vw);
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+    gap: calc(18 / 1440 * 100vw);
+    position: relative;
+    z-index: 1;
+}
+
+.smallCard {
+    width: calc(356 / 1440 * 100vw);
+    height: calc(204 / 1440 * 100vw);
+    border-radius: calc(10 / 1440 * 100vw);
+    padding: calc(21 / 1440 * 100vw) calc(40 / 1440 * 100vw);
+    background: #E7E7E7;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.bigCard {
+    width: calc(545 / 1440 * 100vw);
+}
+
+.popularCard {
+    background: #11456B;
+}
+
+.popularCap {
+    position: absolute;
+    background: #D7EAC7;
+    border-radius: calc(20 / 1440 * 100vw) calc(20 / 1440 * 100vw) 0 0;
+    width: calc(185 / 1440 * 100vw);
+    height: calc(27 / 1440 * 100vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: calc(-27 / 1440 * 100vw);
+    left: 0;
+    transform: translateX(50%);
+}
+
+.h4 {
+    font-size: calc(14 / 1440 * 100vw);
+    margin-bottom: calc(5 / 1440 * 100vw);
+}
+
+.pricingCardSubtitle {
+    font-size: calc(14 / 1440 * 100vw);
+    color: #999;
+    text-align: center;
+}
+
+.cardPrice {
+    margin: calc(13 / 1440 * 100vw) 0;
+    font-size: calc(40 / 1440 * 100vw);
+    display: flex;
+    align-items: center;
+    gap: calc(5 / 1440 * 100vw);
+}
+
+.cardDuration {
+    font-size: calc(12 / 1440 * 100vw);
+    color: #999;
+}
+
+.cardPromptBtn{
+    width: 100%;
+    height: calc(33 / 1440 * 100vw);
+    border-radius: calc(10 / 1440 * 100vw);
+    font-size: calc(12 / 1440 * 100vw);
+    background: #DCDBDB;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    outline: none;
+    border: none;
+    transition: 0.5s all;
+}
+
+.popularPromptBtn{
+    background: #fff;
+    color: #5E5E5E;
+}
+
+.contactUsPromptBtn{
+    background: #11456B;
+    color: #fff;
+}
+
+.smallLongCard {
+    width: calc(356 / 1440 * 100vw);
+    height: calc(696 / 1440 * 100vw);
+    border-radius: calc(10 / 1440 * 100vw);
+    padding: calc(22 / 1440 * 100vw) calc(26 / 1440 * 100vw);
+    background: #E7E7E7;
+    display: flex;
+    flex-direction: column;
+    gap: calc(15 / 1440 * 100vw);
+}
+
+.bigLongCard{
+    width: calc(545 / 1440 * 100vw);
+    height: calc(950 / 1440 * 100vw);
+}
+
+.checkAndFeatureGroup{
+    display: flex;
+    gap: calc(5 / 1440 * 100vw);
+    font-size: calc(12 / 1440 * 100vw);
+    color: #5E5E5E;
+    align-items: center;
+}
+
+.horizontalLine{
+    width: 100%;
+    height: calc(1 / 1440 * 100vw);
+    background: #D9D8D8;
+}
+
+.cardCheck{
+    width: calc(13 / 1440 * 100vw);
+    height: calc(13 / 1440 * 100vw);
+}
+
+.cardPromptBtn:hover{
+    opacity: 0.5;
+}

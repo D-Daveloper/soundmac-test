@@ -1,6 +1,6 @@
 'use client'
 import Link from "next/link";
-import { navigationLinks } from "../../utils/constants";
+import { linkRoutes, navigationLinks } from "../../utils/constants";
 import classes from './header.module.css'
 import { usePathname } from 'next/navigation';
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -30,7 +30,7 @@ export default function Header() {
                     </Fragment>
                 ))}
                 <>
-                    <button className={classes.loginBtn}>Login</button>
+                    <Link href={linkRoutes.SignIn} className={classes.loginBtn}>Login</Link>
                     <div className={classes.mobileHorizontalLine} />
                     <button className={`${classes.loginBtn} ${classes.registerBtn}`}>Register</button>
                 </>

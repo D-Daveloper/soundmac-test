@@ -1,5 +1,5 @@
 
-
+export const SERVER = process.env.NEXT_PUBLIC_APP_URL
 export const AYNCardItems = [
     { title: 'Global Distribution', subTitle:'Reach fans worldwide with distribution to Spotify, Apple Music, Amazon, TikTok, and 200+ other platforms in just a few clicks.'},
     { title: 'Keep 100% of Your Royalties', subTitle:'Reach fans worldwide with distribution to Spotify, Apple Music, Amazon, TikTok, and 200+ other platforms in just a few clicks.'},

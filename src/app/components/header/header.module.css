@@ -8,6 +8,7 @@
     position: sticky;
     top: 0;
     background: #E7E7E7;
+    z-index: 2;
 }
 
 div.container {
@@ -85,7 +86,7 @@ div.container {
 
     .navGroup {
         position: fixed;
-        background: #fff;
+        background: #E7E7E7;
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;

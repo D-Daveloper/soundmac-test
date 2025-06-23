@@ -1,0 +1,114 @@
+.loader {
+    width: calc(30 / 1440 * 100vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: calc(5 / 1440 * 100vw) solid #0000;
+    border-right-color: #11456b;
+    position: relative;
+    animation: l24 1s infinite linear;
+    display: flex;
+    justify-self: center;
+}
+
+.loader:before,
+.loader:after {
+    content: "";
+    position: absolute;
+    inset: calc(-5 / 1440 * 100vw);
+    border-radius: 50%;
+    border: inherit;
+    animation: inherit;
+    animation-duration: 2s;
+}
+
+.loader:after {
+    animation-duration: 4s;
+}
+
+@keyframes l24 {
+    100% {
+        transform: rotate(1turn)
+    }
+}
+
+.loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: #E7E7E7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  
+  .logoContainer {
+    position: relative;
+  }
+  
+  .logoContainer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(150 / 1440 * 100vw);
+    height: calc(150 / 1440 * 100vw);
+    border: calc(3 / 1440 * 100vw) solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #11456b;
+    transform: translate(-50%, -50%);
+    animation: smoothSpin 2s linear infinite;
+    z-index: -1;
+  }
+  
+  .logo {
+    animation: 
+      logoSpin 3s ease-in-out infinite,
+      logoPulse 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 calc(8 / 1440 * 100vw) calc(24 / 1440 * 100vw) rgba(0, 0, 0, 0.3));
+    width: calc(100 / 1440 * 100vw);
+    height: auto;
+    transform-origin: center;
+    position: relative;
+    z-index: 2;
+  }
+  
+  /* Smooth Animation */
+  @keyframes logoSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  
+  @keyframes logoPulse {
+    0% { 
+      transform: scale(1);
+      filter: drop-shadow(0 calc(8 / 1440 * 100vw) calc(24 / 1440 * 100vw) rgba(0, 0, 0, 0.3));
+    }
+    100% { 
+      transform: scale(1.05);
+      filter: drop-shadow(0 calc(12 / 1440 * 100vw) calc(32 / 1440 * 100vw) rgba(0, 0, 0, 0.4));
+    }
+  }
+  
+  @keyframes smoothSpin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
+  @media screen and (max-width: 540px) {
+    .logo {
+      width: calc(100 / 414 * 100vw);
+      height: auto;
+    }
+    
+    .logoContainer::before {
+      width: calc(150 / 414 * 100vw);
+      height: calc(150 / 414 * 100vw);
+      border-width: calc(3 / 414 * 100vw);
+    }
+  }

@@ -5,3 +5,4 @@ export interface AYNCardProps {
     subTitle: string
 }
 
+export interface ERROR_PROPS { msg: string }

@@ -7,3 +7,11 @@ export const navigationLinks = [
     { name: 'Blog', link: '/blog' },
     { name: 'Convert', link: '/convert' },
 ]
+
+export const linkRoutes = {
+    'Home': '/',
+    SignIn: '/signIn'
+}
+
+
+
