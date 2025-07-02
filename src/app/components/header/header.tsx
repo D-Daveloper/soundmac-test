@@ -2,22 +2,44 @@
 import Link from "next/link";
 import { linkRoutes, navigationLinks } from "../../utils/constants";
 import classes from './header.module.css'
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { GiHamburgerMenu } from "react-icons/gi";
 import { IoMdClose } from "react-icons/io";
-import { Fragment, useState } from "react";
+import { Fragment, useContext, useState } from "react";
+import UserContext from "@/app/context/userContext/userContext";
+import { NormalLoadingScreen } from "../Loader/loader";
+import { USER } from "@/app/context/userContext/types";
 
 
 export default function Header() {
+    const router = useRouter()
+    const userContext = useContext(UserContext)
+    const token = userContext?.token
     const pathname = usePathname();
     const [modal, setModal] = useState(false)
+    const [gettingUser, setGettingUser] = useState(false)
     const toggleModal = () => {
         setModal(prev => !prev)
     }
 
-    
+    const onSuccess = (user: USER) => {
+        console.log(user)
+        const userRole: string = user?.role;
+        const location = linkRoutes.artists[userRole]
+        router.push(location)
+    }
+
+    const onError = (error: unknown) => {
+        userContext?.handleAPIError(error)
+    }
+
+    const move = () => {
+        userContext?.getUser(setGettingUser, onSuccess, onError)
+    }
+
     return (
         <header className={`${classes.container} ${modal ? classes.containerActive : ''}`}>
+            {gettingUser && <NormalLoadingScreen />}
             <GiHamburgerMenu onClick={toggleModal} className={classes.hamburgerIcon} />
             <Link href={'/'} className={classes.logo}>S O U N D M A C</Link>
             {modal && <div className={classes.overlay} />}
@@ -29,11 +51,18 @@ export default function Header() {
                         <div className={classes.mobileHorizontalLine} />
                     </Fragment>
                 ))}
-                <>
-                    <Link href={linkRoutes.SignIn} className={classes.loginBtn}>Login</Link>
-                    <div className={classes.mobileHorizontalLine} />
-                    <button className={`${classes.loginBtn} ${classes.registerBtn}`}>Register</button>
-                </>
+                {
+                    token ?
+                        <button onClick={move} className={`${classes.loginBtn} ${classes.loginBtn}`}>Dashboard</button>
+                        :
+                        <>
+                            <Link href={linkRoutes.SignIn} className={classes.loginBtn}>Login</Link>
+                            <div className={classes.mobileHorizontalLine} />
+                            <button className={`${classes.loginBtn} ${classes.registerBtn}`}>Register</button>
+                        </>
+
+                }
+
 
             </nav>
 

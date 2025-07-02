@@ -7,12 +7,15 @@ import Image from 'next/image'
 import axios, { AxiosError } from 'axios';
 import { SERVER } from '../constant';
 import Loader from '../components/Loader/loader';
-import InformationContext from '../context/informationContext';
 import OTP_MODAL from '../components/OTPModal/OTPModal';
 import { ERROR_PROPS } from '../type';
+import { linkRoutes } from '../utils/constants';
+import { useRouter } from 'next/navigation';
+import InformationContext from '../context/informationContext/informationContext';
 
 export default function SignIn() {
     const informationContext = useContext(InformationContext)
+    const router = useRouter()
 
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
@@ -40,25 +43,16 @@ export default function SignIn() {
         } catch (err) {
             const error = err as AxiosError<ERROR_PROPS>;
             const message = error?.response?.data?.msg || "unexpected error";
-
-
             if (message.startsWith(`Please check your mailbox to verify.`)) {
                 console.log('verify your account')
                 return;
             }
-
             if (message.startsWith(`An otp has been sent`)) {
-                informationContext?.addToast('info',
-                    'Error!',
-                    message
-                )
                 setIsModalOpen(true)
                 return;
             }
 
-            informationContext?.addToast('error',
-                'Error!',
-                message
+            informationContext?.addToast('error', 'Error!', message
             )
             console.log(error)
         } finally {
@@ -66,9 +60,13 @@ export default function SignIn() {
         }
     };
 
-    const handleVerify = (otp: string) => {
-        console.log('OTP verified:', otp);
+    const handleVerify = (userRole: string) => {
+        const location = linkRoutes.artists[userRole]
+        setEmail('');
+        setPassword('')
+        router.push(location)
         setIsModalOpen(false);
+
     };
 
     return (

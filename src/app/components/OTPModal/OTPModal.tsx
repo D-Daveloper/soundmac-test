@@ -6,13 +6,13 @@ import { MdClose } from 'react-icons/md';
 import axios, { AxiosError } from 'axios';
 import { SERVER } from '@/app/constant';
 import { ERROR_PROPS } from '@/app/type';
-import InformationContext from '@/app/context/informationContext';
 import Loader from '../Loader/loader';
+import InformationContext from '@/app/context/informationContext/informationContext';
 
 interface OTPModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onVerify: (otp: string) => void;
+    onVerify: (userRole: string) => void;
     email?: string;
 }
 
@@ -65,7 +65,7 @@ export default function OTP_MODAL({ isOpen, onClose, onVerify, email = "" }: OTP
                 "Content-Type": "application/json",
             },
         };
-        
+
         const body = JSON.stringify({ otp: otpValue });
         setIsLoading(true);
         setError('');
@@ -74,16 +74,16 @@ export default function OTP_MODAL({ isOpen, onClose, onVerify, email = "" }: OTP
             const res = await axios.patch(`${SERVER}/auth/confirmOtp`, body, config);
             const data = res.data;
             localStorage.setItem("token", data.token);
-            onVerify(otpValue);
+            const userRole: string = data?.user?.role;
+            onVerify(userRole);
         } catch (err) {
             const error = err as AxiosError<ERROR_PROPS>;
             const message = error.response?.data?.msg || "unexpected error";
-
             setError(message);
-            setOtp(['', '', '', '', '', '']);
-            inputRefs.current[0]?.focus();
         } finally {
             setIsLoading(false);
+            setOtp(['', '', '', '', '', '']);
+            inputRefs.current[0]?.focus();
         }
     };
 

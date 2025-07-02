@@ -1,19 +1,10 @@
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import InformationState from "./context/informationState";
 import Root from "./root";
+import InformationState from "./context/informationContext/informationState";
+import UserState from "./context/userContext/userState";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "SOUNDMAC",
@@ -30,9 +21,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <InformationState>
-        <body className={`${geistSans.variable} ${geistMono.variable} parentBody`}>
-          <Root>{children}</Root>
-        </body>
+        <UserState>
+          <body className={`parentBody`}>
+            <Root>{children}</Root>
+          </body>
+        </UserState>
       </InformationState>
     </html>
   );

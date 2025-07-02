@@ -1,4 +1,4 @@
-export default function Page() {
+export default function DashboardComponent() {
     return(
         <main>
             <p>Dashboard</p>

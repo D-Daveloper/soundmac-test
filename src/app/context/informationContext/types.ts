@@ -1,5 +1,5 @@
+import { TOAST_OBJECT } from "@/app/components/toast/types";
 import React from "react";
-import { TOAST_OBJECT } from "../components/toast/types";
 
 
 export interface INFORMATION_CONTEXT {

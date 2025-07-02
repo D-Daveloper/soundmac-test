@@ -1,0 +1,13 @@
+.container {
+    width: calc(263 / 1440 * 100vw);
+    height: 100vh;
+    overflow: auto;
+    background: #363738;
+    padding: calc(30 / 1440 * 100vw) 0;
+}
+
+.logo {
+    font-size: calc(14 / 1440 * 100vw);
+    padding: calc(30 / 1440 * 100vw);
+    color: white;
+}

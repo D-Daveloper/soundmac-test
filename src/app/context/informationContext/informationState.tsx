@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import InformationContext from "./informationContext";
-import { TOAST_OBJECT } from "../components/toast/types";
+import { TOAST_OBJECT } from "@/app/components/toast/types";
 
 const InformationState = ({ children }: { children: React.ReactNode }) => {
   // Define state(s) to pass via context

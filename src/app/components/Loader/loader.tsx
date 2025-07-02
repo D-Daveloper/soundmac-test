@@ -14,7 +14,7 @@ export default function Loader(params: LOADER) {
 
 
 export function LoadingScreen() {
-    const [showLoading, setShowLoading] = useState(true);
+    const [showLoading, setShowLoading] = useState(false);
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -38,6 +38,24 @@ export function LoadingScreen() {
                 />
             </div>
 
+        </div>
+    )
+} 
+
+
+
+export function NormalLoadingScreen() {
+    return (
+        <div className={classes.loadingOverlay}>
+            <div className={classes.logoContainer}>
+                <Image
+                    src={logo}
+                    alt="Soundmac's Logo"
+                    className={classes.logo}
+                    width={200}
+                    height={200}
+                />
+            </div>
         </div>
     )
 } 
