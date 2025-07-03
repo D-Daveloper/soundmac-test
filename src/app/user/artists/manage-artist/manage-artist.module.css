@@ -54,6 +54,7 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    border: calc(4 / 1440 * 100vw) solid #fff;
 }
 
 .artistCard::before {
