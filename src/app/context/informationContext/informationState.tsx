@@ -7,8 +7,9 @@ import { TOAST_OBJECT } from "@/app/components/toast/types";
 const InformationState = ({ children }: { children: React.ReactNode }) => {
   // Define state(s) to pass via context
   const [toasts, setToasts] = useState<TOAST_OBJECT[]>([]);
+  const [upgrades, setUpgrades] = useState<string[] | null>(null);
 
-  const addToast = (type: string, title:string, message:string, duration = 5000) => {
+  const addToast = (type: string, title: string, message: string, duration = 5000) => {
     const newToast = {
       id: Date.now() + Math.random(),
       type,
@@ -20,9 +21,17 @@ const InformationState = ({ children }: { children: React.ReactNode }) => {
   };
 
 
-  const removeToast = (id:number) => {
+  const removeToast = (id: number) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
+
+  const encourageUpgrade = (upgrade: string[]) => {
+    setUpgrades(upgrade)
+  }
+
+  const discourageUpgrade = () => {
+    setUpgrades(null)
+  }
 
 
   return (
@@ -31,7 +40,10 @@ const InformationState = ({ children }: { children: React.ReactNode }) => {
         toasts,
         setToasts,
         addToast,
-        removeToast
+        removeToast,
+        upgrades,
+        encourageUpgrade,
+        discourageUpgrade
       }}
     >
       {children}

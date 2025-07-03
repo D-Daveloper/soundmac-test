@@ -6,7 +6,7 @@ export interface AYNCardProps {
     subTitle: string
 }
 
-export interface ERROR_PROPS { msg: string }
+export interface ERROR_PROPS { msg: string, message: string, data: { upgrade: string[] } }
 
 export type INDEX_ASSIGNOR = { [key: string]: string };
 
@@ -22,6 +22,6 @@ export type ON_ERROR = (error: unknown) => void
 
 export interface LOCATION_TREE_ASSIGNOR {
     [key: string]: {
-        [key: string]: unknown[]
+        [key: string]: INDEX_ASSIGNOR[]
     }
 }

@@ -5,4 +5,8 @@ export const defaultContext = {
     setToasts: () => { },
     addToast: () => { },
     removeToast: () => { },
+    upgrades: null,
+    encourageUpgrade: () => { },
+    discourageUpgrade: () => { },
+
 }

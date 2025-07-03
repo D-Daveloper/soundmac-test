@@ -32,7 +32,8 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
 
     const handleAPIError = (err: unknown) => {
         const error = err as AxiosError<ERROR_PROPS>;
-        const message = error?.response?.data?.msg || "unexpected error";
+        const message = error?.response?.data?.message || error?.response?.data?.msg || "unexpected error";
+        const upgrade = error.response?.data?.data?.upgrade
 
         if (axios.isAxiosError(error)) {
             if (error.response?.status === 401) {
@@ -40,7 +41,13 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
                 router.push(`${linkRoutes?.SignIn}?redirect=${redirect}`);
             }
 
-            informationContext?.addToast('error', 'Error!', message)
+            if (!!upgrade?.length) {
+                console.log('subscribe');
+                informationContext?.encourageUpgrade(upgrade)
+            } else {
+                informationContext?.addToast('error', 'Error!', message)
+            }
+
         } else {
             console.error("Unexpected error:", error);
         }

@@ -1,3 +1,3 @@
 export interface LOADER {
-    color: string | null
+    color?: string | null
 }

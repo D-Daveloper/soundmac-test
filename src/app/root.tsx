@@ -9,8 +9,10 @@ import { usePathname } from "next/navigation";
 import { portalScreens, rootScreenLinks } from "./utils/constants";
 import InformationContext from "./context/informationContext/informationContext";
 import SideBar from "./components/sideBar/sideBar";
+import styles from './page.module.css'
+import UpgradeModal from "./components/upgradeModal/upgradeModal";
 
-export default function Root({ children }: Readonly<{children: React.ReactNode;}>) {
+export default function Root({ children }: Readonly<{ children: React.ReactNode; }>) {
     const pathname = usePathname();
     const informationContext = useContext(InformationContext)
     const nullFunction = () => { }
@@ -19,9 +21,12 @@ export default function Root({ children }: Readonly<{children: React.ReactNode;}
             <style>{cssStyles}</style>
             <ToastContainer toasts={informationContext?.toasts || []} onRemoveToast={informationContext?.removeToast || nullFunction} />
             <LoadingScreen />
+            <UpgradeModal />
             {rootScreenLinks.includes(pathname) && <Header />}
-            {portalScreens.includes(pathname) && <SideBar />}
-            {children}
+            <div className={styles.flexContainer}>
+                {portalScreens.includes(pathname) && <SideBar />}
+                {children}
+            </div>
             {rootScreenLinks.includes(pathname) && <Footer />}
         </>
     )

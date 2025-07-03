@@ -6,6 +6,9 @@ export interface INFORMATION_CONTEXT {
     toasts: TOAST_OBJECT[]
     setToasts: React.Dispatch<React.SetStateAction<TOAST_OBJECT[]>>
     addToast: (type: string, title: string, message: string, duration?: number) => void
-    removeToast: (id: number) => void
+    removeToast: (id: number) => void,
+    upgrades: string[] | null,
+    encourageUpgrade: (upgrade: string[]) => void,
+    discourageUpgrade: () => void
 }
 
