@@ -57,6 +57,11 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
 
     const getUser = async (setLoading: GET_USER, onSuccess: ON_SUCCESS, onError = handleAPIError) => {
         const token = localStorage.getItem("token")
+        if (!token){
+            logOut()
+            router.push(`${linkRoutes?.SignIn}?redirect=${redirect}`);
+            return;
+        }
         const config = { headers: { Authorization: `Bearer ${token}`, }, };
         setLoading(true)
         try {

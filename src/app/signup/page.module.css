@@ -1,0 +1,252 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    padding-top: calc(47 / 1440 * 100vw);
+    min-height: calc(100vh - calc((80 + 47) / 1440 * 100vw));
+}
+
+.sippingGuy {
+    width: calc((177*2) / 1440 * 100vw);
+    height: calc((208 * 2) / 1440 * 100vw);
+}
+
+.form {
+    width: calc(477 / 1440 * 100vw);
+    height: calc(575 / 1440 * 100vw);
+    border-radius: calc(20 / 1440 * 100vw);
+    padding: calc(65 / 1440 * 100vw) calc(51 / 1440 * 100vw);
+    background: #363738;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.intro {
+    width: calc(201 / 1440 * 100vw);
+    font-size: calc(18 / 1440 * 100vw);
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+    margin: 0;
+}
+
+.description {
+    width: calc(340 / 1440 * 100vw);
+    font-size: calc(14 / 1440 * 100vw);
+    margin-top: calc(10 / 1440 * 100vw);
+    margin-bottom: calc(38 / 1440 * 100vw);
+    text-align: center;
+    color: #999;
+    line-height: 1.4;
+}
+
+.inputGroup {
+    width: 100%;
+    margin-bottom: calc(20 / 1440 * 100vw);
+}
+
+.input {
+    width: 100%;
+    height: calc(52 / 1440 * 100vw);
+    background: #2a2a2b;
+    border: calc(1.5 / 1440 * 100vw) solid #444;
+    border-radius: calc(10 / 1440 * 100vw);
+    padding: 0 calc(18 / 1440 * 100vw);
+    color: #fff;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: calc(14 / 1440 * 100vw);
+}
+
+.input::placeholder {
+    color: #999;
+    font-size: calc(14 / 1440 * 100vw);
+    font-weight: 400;
+}
+
+.input:focus {
+    border-color: #5a9fd4;
+    background: #323233;
+    box-shadow:
+        0 0 0 calc(3 / 1440 * 100vw) rgba(90, 159, 212, 0.15),
+        0 calc(2 / 1440 * 100vw) calc(8 / 1440 * 100vw) rgba(0, 0, 0, 0.1);
+    transform: translateY(calc(-1 / 1440 * 100vw));
+}
+
+.input:hover:not(:focus) {
+    border-color: #555;
+    background: #2f2f30;
+}
+
+.passwordWrapper {
+    position: relative;
+    width: 100%;
+}
+
+.passwordWrapper .input {
+    padding-right: calc(52 / 1440 * 100vw);
+}
+
+.togglePassword {
+    position: absolute;
+    right: calc(14 / 1440 * 100vw);
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: calc(6 / 1440 * 100vw);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: calc(6 / 1440 * 100vw);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.togglePassword:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    transform: translateY(-50%) scale(1.05);
+}
+
+.togglePassword:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+.forgotPassword {
+    background: none;
+    border: none;
+    color: #5a9fd4;
+    font-size: calc(12 / 1440 * 100vw);
+    cursor: pointer;
+    margin-bottom: calc(24 / 1440 * 100vw);
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.forgotPassword:hover {
+    color: #7bb3d9;
+}
+
+.signInButton {
+    width: 100%;
+    height: calc(52 / 1440 * 100vw);
+    padding: calc(10 / 1440 * 100vw);
+    background: #fff;
+    border: none;
+    border-radius: calc(10 / 1440 * 100vw);
+    color: #11456b;
+    font-size: calc(14 / 1440 * 100vw);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: calc(20 / 1440 * 100vw);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: calc(0.5 / 1440 * 100vw);
+    position: relative;
+    overflow: hidden;
+}
+
+.signInButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.signInButton:hover {
+    background: linear-gradient(135deg, #4a8bc2 0%, #3a7ab0 100%);
+    transform: translateY(calc(-2 / 1440 * 100vw));
+    color: #fff;
+    box-shadow:
+        0 calc(8 / 1440 * 100vw) calc(25 / 1440 * 100vw) rgba(90, 159, 212, 0.4),
+        0 calc(4 / 1440 * 100vw) calc(10 / 1440 * 100vw) rgba(0, 0, 0, 0.1);
+}
+
+.signInButton:hover::before {
+    left: 100%;
+}
+
+.signInButton:active {
+    transform: translateY(calc(-1 / 1440 * 100vw));
+    box-shadow:
+        0 calc(4 / 1440 * 100vw) calc(15 / 1440 * 100vw) rgba(90, 159, 212, 0.3);
+}
+
+.divider {
+    width: 100%;
+    position: relative;
+    text-align: center;
+    margin: calc(16 / 1440 * 100vw) 0;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: calc(1 / 1440 * 100vw);
+    background: #555;
+}
+
+.divider span {
+    background: #363738;
+    padding: 0 calc(16 / 1440 * 100vw);
+    color: #888;
+    font-size: calc(12 / 1440 * 100vw);
+    position: relative;
+    z-index: 1;
+}
+
+.registerButton {
+    width: 100%;
+    height: calc(52 / 1440 * 100vw);
+    background: transparent;
+    border: calc(2 / 1440 * 100vw) solid #5a9fd4;
+    border-radius: calc(10 / 1440 * 100vw);
+    color: #fff;
+    font-size: calc(14 / 1440 * 100vw);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: calc(0.5 / 1440 * 100vw);
+    position: relative;
+    overflow: hidden;
+}
+
+.registerButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: #5a9fd4;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: -1;
+}
+
+.registerButton:hover {
+    background: linear-gradient(135deg, #4a8bc2 0%, #3a7ab0 100%);
+    transform: translateY(calc(-2 / 1440 * 100vw));
+    color: #fff;
+    box-shadow:
+        0 calc(8 / 1440 * 100vw) calc(25 / 1440 * 100vw) rgba(90, 159, 212, 0.4),
+        0 calc(4 / 1440 * 100vw) calc(10 / 1440 * 100vw) rgba(0, 0, 0, 0.1);
+}
+
+
+.registerButton:hover::before {
+    width: 100%;
+}
+
+.registerButton:active {
+    transform: translateY(calc(-1 / 1440 * 100vw));
+}
+

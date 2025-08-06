@@ -22,12 +22,12 @@ export default function Root({ children }: Readonly<{ children: React.ReactNode;
             <ToastContainer toasts={informationContext?.toasts || []} onRemoveToast={informationContext?.removeToast || nullFunction} />
             <LoadingScreen />
             <UpgradeModal />
-            {rootScreenLinks.includes(pathname) && <Header />}
+            {(rootScreenLinks.includes(pathname) || pathname.includes("/promotion/") || pathname.includes("/blog/")) && <Header />}
             <div className={styles.flexContainer}>
                 {portalScreens.includes(pathname) && <SideBar />}
                 {children}
             </div>
-            {rootScreenLinks.includes(pathname) && <Footer />}
+            {(rootScreenLinks.includes(pathname) || pathname.startsWith("/promotion/") || pathname.startsWith("/blog/"))  && <Footer />}
         </>
     )
 }
