@@ -2,8 +2,8 @@
 import { SearchIcon } from "lucide-react";
 import React from "react";
 import { promotionContent, categories } from "../constant";
-import blogimag1 from "../../assets/images/blog.png";
-import Image from "next/image";
+// import blogimag1 from "../../assets/images/blog.png";
+// import Image from "next/image";
 
 const Promotion = () => {
 

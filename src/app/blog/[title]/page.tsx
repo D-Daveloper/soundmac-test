@@ -14,7 +14,7 @@ import "../../blog/blog.css";
 import { blogContent } from "@/app/constant";
 import { useParams } from "next/navigation";
 import { BLOG_CONTENT } from "@/app/type";
-import Loader, { NormalLoadingScreen } from "@/app/components/Loader/loader";
+import { NormalLoadingScreen } from "@/app/components/Loader/loader";
 import Link from "next/link";
 
 const BlogPost = () => {
