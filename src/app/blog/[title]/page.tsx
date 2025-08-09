@@ -23,7 +23,7 @@ const BlogPost = () => {
   const { title } = useParams(); // Extract the article ID from the URL
   const [article, setArticle] = useState<BLOG_CONTENT | undefined>(undefined);
   const [loading, setLoading] = useState(true);
-  const [post, setPost] = useState(blogContent);
+  const [post, setPost] = useState<BLOG_CONTENT[]>([]);
   //   const navigate = useNavigate();
 
   //   function slugify(title) {
@@ -70,6 +70,7 @@ const BlogPost = () => {
   useEffect(() => {
     const allPosts = async () => {
       try {
+        setPost(blogContent);
         console.log(post);
 
         const mainPost = post.find((item) => {
@@ -86,7 +87,7 @@ const BlogPost = () => {
     allPosts();
   }, [title]);
 
-  if (!article) {
+  if (!article || !loading) {
     return <NormalLoadingScreen />;
   }
   //   const handleViewBlog = (title) => {
