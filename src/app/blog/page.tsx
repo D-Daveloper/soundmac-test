@@ -1,12 +1,33 @@
 "use client";
 import { SearchIcon } from "lucide-react";
-import React, { Fragment } from "react";
+import { useEffect, useState } from "react";
 import { blogContent, categories } from "../constant";
 import blogimag1 from "../../assets/images/blog.png";
 import Image from "next/image";
 import "./blog.css";
+import { NormalLoadingScreen } from "../components/Loader/loader";
 
 const Blog = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const handleLoading = () => {
+    setIsLoading(false);
+  };
+
+useEffect(() => {
+  if (document.readyState === "complete") {
+    // Page already loaded
+    setIsLoading(false);
+  } else {
+    // Wait for it to load
+    window.addEventListener("load", handleLoading);
+    return () => window.removeEventListener("load", handleLoading);
+  }
+}, []);
+
+  if (isLoading) {
+    return <NormalLoadingScreen />;
+  }
   return (
     <section className="min-w-full bg-[#E7E7E7] ">
       <div className="max-w-[80%] mx-auto max-sm:max-w-[90%]">
@@ -38,7 +59,12 @@ const Blog = () => {
         </div>
         <div className="flex flex-wrap gap-5 mb-20 items-center justify-center max-md:justify-center">
           {blogContent.map((item) => (
-            <BlogCard key={item.id} title={item.title} content={item.content} />
+            <BlogCard
+              key={item.id}
+              title={item.title}
+              content={item.content}
+              slug={item.slug}
+            />
           ))}
         </div>
         <button className="mx-auto block">
@@ -66,11 +92,17 @@ interface BlogCardProps {
   id?: number;
   title: string;
   content: string;
+  slug?: string;
 }
 
-const BlogCard = ({ title, content }: BlogCardProps) => {
+const BlogCard = ({ title, content, slug }: BlogCardProps) => {
   return (
-    <div className="bg-white w-[300px] lg:h-[500px] h-[300px] max-md:w-[200px] max-sm:h-[250px] flex flex-col rounded-2xl hover:cursor-pointer justify-between card">
+    <div
+      className="bg-white w-[300px] lg:h-[500px] max-md:h-[300px] max-md:w-[200px] max-sm:h-[250px] flex flex-col rounded-2xl justify-between card"
+      onClick={() => {
+        window.location.href = `/blog/${slug}`;
+      }}
+    >
       <div>
         <Image
           src={blogimag1}
@@ -87,9 +119,12 @@ const BlogCard = ({ title, content }: BlogCardProps) => {
           </p>
         </div>
       </div>
-      <button className="mx-auto block bg-[#cfcfcf] rounded-xl max-sm:hidden mb-10">
+      <a
+        href={`/blog/${slug}`}
+        className="mx-auto block bg-[#cfcfcf] rounded-xl mb-10 max-sm:hidden"
+      >
         <TextBox text={"Learn more"} />
-      </button>
+      </a>
     </div>
   );
 };

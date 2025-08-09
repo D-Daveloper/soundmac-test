@@ -39,54 +39,54 @@ export const categories = [
   "Music Marketing",
 ];
 export const blogContent = [
-  {
-    id: 1,
-    title: "Building A Strong Personal Brand as an Independent Artist",
-    content:
-      "Personal Branding is the deliberate or indeliberate things you that you do that gives the world a perception of you. It is basically what defines you as a person, and in this case, as an artist.",
-  },
-  {
-    id: 2,
-    title: "The Importance of Music Distribution for Independent Artists",
-    content:
-      "Music distribution is the process of getting your music into the hands of listeners. For independent artists, it is crucial to have a reliable distribution strategy to ensure that your music reaches a wide audience.",
-  },
-  {
-    id: 3,
-    title: "How to Promote Your Music Effectively",
-    content:
-      "Promoting your music is essential for gaining visibility and building a fanbase. This article explores various strategies for effectively promoting your music, including social media marketing, collaborations, and live performances.",
-  },
-  {
-    id: 4,
-    title: "Understanding Music Royalties",
-    content:
-      "Music royalties are payments made to artists and songwriters for the use of their music. This article explains the different types of royalties, how they are calculated, and why they are important for independent artists.",
-  },
-  {
-    id: 5,
-    title: "The Role of Social Media in Music Promotion",
-    content:
-      "Social media has become a powerful tool for music promotion. This article discusses how independent artists can leverage social media platforms to connect with fans, share their music, and grow their audience.",
-  },
-  {
-    id: 6,
-    title: "Navigating the Music Industry as an Independent Artist",
-    content:
-      "The music industry can be challenging for independent artists. This article provides insights into navigating the industry, including building a network, understanding contracts, and finding opportunities for growth.",
-  },
-  {
-    id: 7,
-    title: "The Future of Music Distribution",
-    content:
-      "The music distribution landscape is constantly evolving. This article explores the future of music distribution, including emerging technologies, changes in consumer behavior, and the impact of streaming services.",
-  },
-  {
-    id: 8,
-    title: "Tips for Independent Artists to Succeed",
-    content:
-      "Success as an independent artist requires dedication, creativity, and strategic planning. This article offers practical tips for independent artists to succeed in the competitive music industry.",
-  },
+    {
+        "id": 1,
+        "title": "Building A Strong Personal Brand as an Independent Artist",
+        "content": "Personal Branding is the deliberate or indeliberate things you that you do that gives the world a perception of you. It is basically what defines you as a person, and in this case, as an artist.",
+        "slug": "building-a-strong-personal-brand-as-an-independent-artist"
+    },
+    {
+        "id": 2,
+        "title": "The Importance of Music Distribution for Independent Artists",
+        "content": "Music distribution is the process of getting your music into the hands of listeners. For independent artists, it is crucial to have a reliable distribution strategy to ensure that your music reaches a wide audience.",
+        "slug": "the-importance-of-music-distribution-for-independent-artists"
+    },
+    {
+        "id": 3,
+        "title": "How to Promote Your Music Effectively",
+        "content": "Promoting your music is essential for gaining visibility and building a fanbase. This article explores various strategies for effectively promoting your music, including social media marketing, collaborations, and live performances.",
+        "slug": "how-to-promote-your-music-effectively"
+    },
+    {
+        "id": 4,
+        "title": "Understanding Music Royalties",
+        "content": "Music royalties are payments made to artists and songwriters for the use of their music. This article explains the different types of royalties, how they are calculated, and why they are important for independent artists.",
+        "slug": "understanding-music-royalties"
+    },
+    {
+        "id": 5,
+        "title": "The Role of Social Media in Music Promotion",
+        "content": "Social media has become a powerful tool for music promotion. This article discusses how independent artists can leverage social media platforms to connect with fans, share their music, and grow their audience.",
+        "slug": "the-role-of-social-media-in-music-promotion"
+    },
+    {
+        "id": 6,
+        "title": "Navigating the Music Industry as an Independent Artist",
+        "content": "The music industry can be challenging for independent artists. This article provides insights into navigating the industry, including building a network, understanding contracts, and finding opportunities for growth.",
+        "slug": "navigating-the-music-industry-as-an-independent-artist"
+    },
+    {
+        "id": 7,
+        "title": "The Future of Music Distribution",
+        "content": "The music distribution landscape is constantly evolving. This article explores the future of music distribution, including emerging technologies, changes in consumer behavior, and the impact of streaming services.",
+        "slug": "the-future-of-music-distribution"
+    },
+    {
+        "id": 8,
+        "title": "Tips for Independent Artists to Succeed",
+        "content": "Success as an independent artist requires dedication, creativity, and strategic planning. This article offers practical tips for independent artists to succeed in the competitive music industry.",
+        "slug": "tips-for-independent-artists-to-succeed"
+    }
 ];
 
 export const promotionContent = [

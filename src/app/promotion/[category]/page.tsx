@@ -186,7 +186,7 @@ const PromotionCard = () => {
       break;
   }
   return (
-    <UserRoute>
+    // <UserRoute>
       <div className="flex flex-col gap-2 p-5 w-[60%] mx-auto">
         <div className="mt-10 mb-20 text-center">
           <h1 className="font-bold text-xl">
@@ -273,7 +273,7 @@ const PromotionCard = () => {
           click to submit
         </button>
       </div>
-    </UserRoute>
+    // </UserRoute>
   );
 };
 
