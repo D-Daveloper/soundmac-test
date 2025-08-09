@@ -70,9 +70,8 @@ const BlogPost = () => {
   useEffect(() => {
     const allPosts = async () => {
       try {
-        setPost(blogContent);
         console.log(post);
-
+        
         const mainPost = post.find((item) => {
           return item.slug == title;
         });
@@ -85,9 +84,11 @@ const BlogPost = () => {
       }
     };
     allPosts();
-  }, [title]);
+    setPost(blogContent);
+    setLoading(false);
+  }, [title,post,loading]);
 
-  if (!article || !loading) {
+  if (!article || loading) {
     return <NormalLoadingScreen />;
   }
   //   const handleViewBlog = (title) => {
