@@ -15,7 +15,7 @@ const Promotion = () => {
             Welcome to SOUNDMAC Promotion Page
           </h1>
           <p className="text-[#5E5E5E]">
-            Don't just create music push it to the world. Consistency and
+            Don&#39;t just create music push it to the world. Consistency and
             promotion are the keys to success.
           </p>
           {/* <input type="text" className='bg-black min-w[60%]' /> */}
