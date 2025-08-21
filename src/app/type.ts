@@ -25,3 +25,10 @@ export interface LOCATION_TREE_ASSIGNOR {
         [key: string]: INDEX_ASSIGNOR[]
     }
 }
+
+export interface BLOG_CONTENT {
+    id: number;
+    title: string;
+    content: string;
+    slug: string;
+}
