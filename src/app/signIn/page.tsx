@@ -12,18 +12,22 @@ import { ERROR_PROPS } from '../type';
 import { linkRoutes } from '../utils/constants';
 import { useRouter, useSearchParams } from 'next/navigation';
 import InformationContext from '../context/informationContext/informationContext';
+import UserContext from '../context/userContext/userContext';
+import Link from 'next/link';
 
 export default function SignIn() {
     const informationContext = useContext(InformationContext)
     const router = useRouter()
     const searchParams = useSearchParams()
     const redirect = searchParams.get('redirect')
-    const safeRedirect = redirect?.startsWith('/') ? redirect : '/dashboard'
+    const safeRedirect = redirect?.startsWith('/') ? redirect : '/user/artists/create-artist'
     const [showPassword, setShowPassword] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const userContext = useContext(UserContext)
+    const updateUser = userContext?.setUser
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -39,24 +43,33 @@ export default function SignIn() {
         const body = JSON.stringify({ email, password });
         setLoading(true)
         try {
-            const response = await axios.post(`${SERVER}/auth/login`, body, config);
-            const { data } = response.data
+            const response = await axios.post(`${SERVER}/api/auth/login`, body, config);
+            const { data } = response
+            if (data.otp) {
+                setIsModalOpen(true);
+                informationContext?.addToast('success', 'Success!', data.msg);
+                return;
+            }
             localStorage.setItem("token", data.token);
+            console.log(data.user);
+            if(updateUser){
+                updateUser(data.user || null);
+            }
+            informationContext?.addToast('success', 'Success!', data.msg);
             router.push(safeRedirect)
         } catch (err) {
             const error = err as AxiosError<ERROR_PROPS>;
             const message = error?.response?.data?.msg || "unexpected error";
-            if (message.startsWith(`Please check your mailbox to verify.`)) {
-                console.log('verify your account')
-                return;
-            }
-            if (message.startsWith(`An otp has been sent`)) {
-                setIsModalOpen(true)
-                return;
-            }
+            // if (message.startsWith(`Please check your mailbox to verify.`)) {
+            //     console.log('verify your account')
+            //     return;
+            // }
+            // if (message.startsWith(`An otp has been sent`)) {
+            //     setIsModalOpen(true)
+            //     return;
+            // }
 
-            informationContext?.addToast('error', 'Error!', message
-            )
+            informationContext?.addToast('error', 'Error!', message);
             console.log(error)
         } finally {
             setLoading(false)
@@ -139,15 +152,9 @@ export default function SignIn() {
                     <span>or</span>
                 </div>
 
-                <button onClick={() => {
-                    informationContext?.addToast(
-                        'success',
-                        'Success!',
-                        'Your action was completed successfully.'
-                    )
-                }} type="button" className={classes.registerButton}>
+                <Link href='/signup' className={classes.registerButton + ("  flex items-center justify-center")}>
                     Create New Account
-                </button>
+                </Link>
             </form>
         </div>
     )

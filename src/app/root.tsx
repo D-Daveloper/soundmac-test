@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 import { portalScreens, rootScreenLinks } from "./utils/constants";
 import InformationContext from "./context/informationContext/informationContext";
 import SideBar from "./components/sideBar/sideBar";
-import styles from './page.module.css'
+// import styles from './page.module.css'
 import UpgradeModal from "./components/upgradeModal/upgradeModal";
 
 export default function Root({ children }: Readonly<{ children: React.ReactNode; }>) {
@@ -23,10 +23,10 @@ export default function Root({ children }: Readonly<{ children: React.ReactNode;
             <LoadingScreen />
             <UpgradeModal />
             {(rootScreenLinks.includes(pathname) || pathname.includes("/promotion/") || pathname.includes("/blog/")) && <Header />}
-            <div className={styles.flexContainer}>
+            {/* <div className={styles.flexContainer}> */}
                 {portalScreens.includes(pathname) && <SideBar />}
                 {children}
-            </div>
+            {/* </div> */}
             {(rootScreenLinks.includes(pathname) || pathname.startsWith("/promotion/") || pathname.startsWith("/blog/"))  && <Footer />}
         </>
     )

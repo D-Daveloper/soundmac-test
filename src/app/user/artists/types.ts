@@ -7,6 +7,8 @@ export interface ARTIST {
     artistName: string
     artistImage: string
     createdAt: Date
+    appleId: string
+    spotifyId: string
 }
 
 export interface PAGINATION {
@@ -16,4 +18,12 @@ export interface PAGINATION {
     limit: number
     hasNextPage: boolean
     totalCount: number
+}
+
+export interface ARTIST_TABLE extends ARTIST {
+    lastRoyalty:number;
+    totalRoyalty:number;
+    totalTracks:number;
+    totalReleases:number;
+
 }

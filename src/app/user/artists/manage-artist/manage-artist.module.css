@@ -1,7 +1,7 @@
 .container {
     display: flex;
     flex-direction: column;
-    margin-top: calc(100 / 1440 * 100vw);
+    /* margin-top: calc(100 / 1440 * 100vw); */
     align-items: center;
     width: calc(100vw - calc(263 / 1440 * 100vw));
     padding: calc(20 / 1440 * 100vw);
@@ -112,7 +112,7 @@
 }
 
 .artistInfo {
-    margin-bottom: calc(20 / 1440 * 100vw);
+    /* margin-bottom: calc(20 / 1440 * 100vw); */
     position: relative;
     z-index: 2;
 }

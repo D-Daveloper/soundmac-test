@@ -1,10 +1,13 @@
+'use client'
 import Link from 'next/link'
 import classes from './sideBar.module.css'
 import UserContext from '@/app/context/userContext/userContext';
-import { useContext } from 'react';
-import { LOCATION_TREE } from '@/app/utils/constants';
-import { usePathname } from 'next/navigation';
+import { useContext, useEffect, useState } from 'react';
+import { linkRoutes, LOCATION_TREE } from '@/app/utils/constants';
+import { usePathname, useRouter } from 'next/navigation';
 import { profileDropDown } from './constant';
+import { NormalLoadingScreen } from '../Loader/loader';
+import { USER } from '@/app/context/userContext/types';
 
 // Arrow icon component
 const ArrowIcon = () => (
@@ -27,50 +30,87 @@ const ArrowIcon = () => (
 );
 
 export default function SideBar() {
-    const userContext = useContext(UserContext)
-    const userRole = userContext?.user?.role || ""
-    const items = LOCATION_TREE?.[userRole]
-    const pathname = usePathname();
+  const userContext = useContext(UserContext);
+  const getUser = userContext?.getUser;
+  const pathname = usePathname();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter()
+  const [userRole, setUserRole] = useState(userContext?.user?.role || "");
+  const [items, setItems] = useState(LOCATION_TREE?.[userRole] || null);
 
-    if (!items) return null; // 👈 Avoid rendering if no data
+    const onSuccess = (user: USER) => {
+        console.log(user)
+        const userRole: string = user?.role;
+        const location = linkRoutes.artists[userRole]
+        router.push(location)
+    }
 
-    return (
-        <div className={classes.container}>
-            <Link href={'/'} className={classes.logo}>S O U N D M A C</Link>
+    const onError = (error: unknown) => {
+        userContext?.handleAPIError(error)
+    }
+  useEffect(() => {
+      if (!items && getUser) {
+        getUser(setLoading, onSuccess, onError);
+      }
+    // Update role + items whenever context changes
+    const newRole = userContext?.user?.role || "";
+    setUserRole(newRole);
+    setItems(LOCATION_TREE?.[newRole] || null);
+  }, [getUser, userContext]);
 
-            <div className={classes.navContainer}>
-                {
-                    Object.keys(items)?.map((i, index) => (
-                        <div key={index} className={classes.titleContainer}>
-                            <p className={classes.title}>{i}</p>
-                            <div className={classes.subTitleContainer}>
-                                {items[i]?.map((s, idx) => (
-                                    <Link href={s?.link} className={`${classes.subTitle} ${s?.link === pathname ? classes.active : ""}`} key={idx}>{s?.name}</Link>
-                                ))}
-                            </div>
-                        </div>
-                    ))
-                }
+  if (loading || !items) return <NormalLoadingScreen />;
+
+  return (
+    <div className={classes.container}>
+      <Link href={"/"} className={classes.logo}>
+        S O U N D M A C
+      </Link>
+
+      <div className={classes.navContainer}>
+        {Object.keys(items)?.map((i, index) => (
+          <div key={index} className={classes.titleContainer}>
+            <p className={classes.title}>{i}</p>
+            <div className={classes.subTitleContainer}>
+              {items[i]?.map((s, idx) => (
+                <Link
+                  href={s?.link}
+                  className={`${classes.subTitle} ${
+                    s?.link === pathname ? classes.active : ""
+                  }`}
+                  key={idx}
+                >
+                  {s?.name}
+                </Link>
+              ))}
             </div>
+          </div>
+        ))}
+      </div>
 
-            <div className={classes.parentProfileCon}>
-                <div className={classes.profileDropDownCon}>
-                    {
-                        profileDropDown.map((p, index) => (
-                            <button className={classes.profileDropdownBtn} key={index}>{p.name}</button>
-                        ))
-                    }
-                    <button className={`${classes.profileDropdownBtn} ${classes.logOutBtn}`}>Log out</button>
-                </div>
-
-                <div className={classes.profileCon}>
-                    <div className={classes.profileNameCon}>
-                        <p className={classes.profileName}>{userContext?.user?.first_name} {userContext?.user?.last_name}</p>
-                        <p className={classes.profileType}>{userContext?.user?.type.replaceAll('_', " ").toLowerCase()}</p>
-                    </div>
-                    <ArrowIcon />
-                </div>
-            </div>
+      <div className={classes.parentProfileCon}>
+        <div className={classes.profileDropDownCon}>
+          {profileDropDown.map((p, index) => (
+            <button className={classes.profileDropdownBtn} key={index}>
+              {p.name}
+            </button>
+          ))}
+          <button
+            className={`${classes.profileDropdownBtn} ${classes.logOutBtn}`}
+          >
+            Log out
+          </button>
         </div>
-    )
+
+        <div className={classes.profileCon}>
+          <div className={classes.profileNameCon}>
+            <p className={classes.profileName}>
+              {userContext?.user?.first_name} {userContext?.user?.last_name}
+            </p>
+            {/* <p className={classes.profileType}>{userContext?.user?.type.replaceAll('_', " ").toLowerCase()}</p> */}
+          </div>
+          <ArrowIcon />
+        </div>
+      </div>
+    </div>
+  );
 }

@@ -6,7 +6,7 @@ export interface AYNCardProps {
     subTitle: string
 }
 
-export interface ERROR_PROPS { msg: string, message: string, data: { upgrade: string[] } }
+export interface ERROR_PROPS { msg: string, message: string,validationErrs:string[], data: { upgrade: string[] } }
 
 export type INDEX_ASSIGNOR = { [key: string]: string };
 

@@ -66,12 +66,12 @@ export default function OTP_MODAL({ isOpen, onClose, onVerify, email = "" }: OTP
             },
         };
 
-        const body = JSON.stringify({ otp: otpValue });
+        const body = JSON.stringify({ otp: otpValue,email });
         setIsLoading(true);
         setError('');
 
         try {
-            const res = await axios.patch(`${SERVER}/auth/confirmOtp`, body, config);
+            const res = await axios.post(`${SERVER}/api/auth/otp`, body, config);
             const data = res.data;
             localStorage.setItem("token", data.token);
             const userRole: string = data?.user?.role;
@@ -97,7 +97,7 @@ export default function OTP_MODAL({ isOpen, onClose, onVerify, email = "" }: OTP
         const body = JSON.stringify({ email });
         setResending(true);
         try {
-            const res = await axios.patch(`${SERVER}/auth/resendOtp`, body, config);
+            const res = await axios.patch(`${SERVER}/api/auth/otp`, body, config);
             const data = res.data;
 
             informationContext?.addToast('success', "OTP Re-sent!", data.msg)
