@@ -14,7 +14,7 @@
 
 .form {
     width: calc(477 / 1440 * 100vw);
-    height: calc(575 / 1440 * 100vw);
+    /* height: calc(575 / 1440 * 100vw); */
     border-radius: calc(20 / 1440 * 100vw);
     padding: calc(65 / 1440 * 100vw) calc(51 / 1440 * 100vw);
     background: #363738;
