@@ -4,7 +4,7 @@
     align-items: flex-end;
     justify-content: center;
     padding-top: calc(47 / 1440 * 100vw);
-    min-height: calc(100vh - calc((80 + 47) / 1440 * 100vw));
+    /* min-height: calc(100vh - calc((80 + 47) / 1440 * 100vw)); */
 }
 
 .sippingGuy {
@@ -250,3 +250,12 @@
     transform: translateY(calc(-1 / 1440 * 100vw));
 }
 
+/* @media screen and (max-width: 540px) {
+    .togglePassword{
+        width:15px;
+        top: 65%;
+    }
+    .input {
+    font-size: calc(14 / 1440 * 230vw);
+    }
+} */

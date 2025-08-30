@@ -16,6 +16,7 @@ import { useParams } from "next/navigation";
 import { BLOG_CONTENT } from "@/app/type";
 import { NormalLoadingScreen } from "@/app/components/Loader/loader";
 import Link from "next/link";
+import Image from "next/image";
 
 const BlogPost = () => {
   const url =
@@ -136,7 +137,7 @@ const BlogPost = () => {
               {article.title}
             </h1>
             <div className="flex gap-3 py-6">
-              <img
+              <Image
                 src={logo.src}
                 alt="logo"
                 className="rounded-full bg-black object-center"
@@ -150,7 +151,7 @@ const BlogPost = () => {
             </div>
             <div>
               <div className="">
-                <img
+                <Image
                   src={logo.src}
                   alt="main blog post primary image"
                   className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -168,7 +169,7 @@ const BlogPost = () => {
               </div>
               <div className="grid gap-8">
                 <div className="grid grid-cols-1 gap-8">
-                  <img
+                  <Image
                     src={logo.src}
                     alt="main blog post secondary image"
                     className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -176,7 +177,7 @@ const BlogPost = () => {
                   <div dangerouslySetInnerHTML={{ __html: article.content }} />
                 </div>
                 <div className="grid grid-cols-1 gap-8">
-                  <img
+                  <Image
                     src={logo.src}
                     alt="main blog post secondary image"
                     className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -204,7 +205,7 @@ const BlogPost = () => {
                   className="flex gap-3 justify-between flex-col"
                 >
                   <div className="mb-4 flex gap-4">
-                    <img
+                    <Image
                       src={logo.src}
                       alt="Blog post image"
                       className=" object-cover "

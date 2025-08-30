@@ -2,6 +2,7 @@
 import { SearchIcon } from "lucide-react";
 import React from "react";
 import { promotionContent, categories } from "../constant";
+import Image from "next/image";
 // import blogimag1 from "../../assets/images/blog.png";
 // import Image from "next/image";
 
@@ -74,11 +75,14 @@ interface PromotionCardProps {
 
 const BlogCard = ({ title, content, image,category }: PromotionCardProps) => {
   return (
-    <div className="bg-white w-[300px] h-[450px] flex justify-between items-start flex-col rounded-2xl pb-5">
-      <img
+    <div className="bg-white w-[300px] flex justify-between items-start flex-col rounded-2xl pb-5">
+      <Image
         src={image}
         alt="blog"
-        className="w-full object-cover rounded-md h-60"
+        className="w-full object-cover rounded-md h-80"
+        width={100}
+        height={100}
+        
       />
       <div className="flex flex-col gap-3 mt-5 px-5 mb-5">
         <h2 className="font-bold line-clamp-1">{title}</h2>

@@ -11,7 +11,7 @@ export const navigationLinks = [
 
 const nL = navigationLinks.map(n => n.link)
 export const rootScreenLinks = [
-    ...nL, '/signIn'
+    ...nL, '/signIn','/signup'
 ]
 
 
@@ -88,3 +88,15 @@ export const portalScreens = [
       section.map(linkObj => linkObj.link)
     )
   ];
+
+ // utils/debounce.ts
+// export function debounce<F extends (...args: any[]) => void>(func: F, delay: number) {
+//   let timer: ReturnType<typeof setTimeout>;
+
+//   return (...args: Parameters<F>) => {
+//     if (timer) clearTimeout(timer);
+//     timer = setTimeout(() => {
+//       func(...args);
+//     }, delay);
+//   };
+// }

@@ -40,6 +40,9 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
                 logOut()
                 router.push(`${linkRoutes?.SignIn}?redirect=${redirect}`);
             }
+            if (error.response?.status === 404) {
+                informationContext?.addToast('error', 'Error!', message)
+            }
 
             if (!!upgrade?.length) {
                 console.log('subscribe');
@@ -65,7 +68,7 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
         const config = { headers: { Authorization: `Bearer ${token}`, }, };
         setLoading(true)
         try {
-            const res = await axios.get(`${SERVER}/users/user`, config);
+            const res = await axios.get(`${SERVER}/api/users/user`, config);
             const data = res.data;
             setUser(data.user);
             onSuccess(data.user)
