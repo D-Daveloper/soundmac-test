@@ -80,7 +80,6 @@ const RegisterForm = () => {
     email: "",
     referral: "",
   });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -145,8 +144,6 @@ const RegisterForm = () => {
                 placeholder={item.placeholder}
                 updateValue={handleChange}
                 required={item.required}
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
               />
             </div>
           ))}

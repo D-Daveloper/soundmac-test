@@ -53,7 +53,6 @@ const LoginForm = () => {
     password: "",
     email: "",
   });
-  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -115,8 +114,6 @@ router.push("/otp");
                 placeholder={item.placeholder}
                 updateValue={handleChange}
                 required={item.required}
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
               />
             </div>
           ))}

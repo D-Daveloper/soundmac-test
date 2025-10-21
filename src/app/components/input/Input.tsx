@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 interface Props {
   title: string;
@@ -12,8 +12,6 @@ interface Props {
   placeholder: string;
   type?: string;
   alt?: string;
-  isOpen?: boolean;
-  setIsOpen?: Dispatch<SetStateAction<boolean>>;
 }
 
 const Input = ({
@@ -24,6 +22,11 @@ const Input = ({
   updateValue,
   ...props
 }: Props) => {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const handleClick = () => {
+    setIsOpen(!isOpen);
+  };
   return (
     <>
       <div className="flex gap-1">
@@ -58,19 +61,17 @@ const Input = ({
           required={required}
           value={props.value}
           type={
-            type === "password" ? (props.isOpen ? "text" : "password") : type
+            type === "password" ? (isOpen ? "text" : "password") : type
           }
           placeholder={props.placeholder}
           className="w-[90%] outline-0"
         />
         {type === "password" &&
-          (props.isOpen ? (
+          (isOpen ? (
             <button
               type="button"
               className="hover:cursor-pointer"
-              onClick={() => {
-                props.setIsOpen ? props.setIsOpen(!props.isOpen) : null;
-              }}
+              onClick={handleClick}
             >
               <Image
                 priority={false}
@@ -86,9 +87,7 @@ const Input = ({
             <button
               type="button"
               className="hover:cursor-pointer"
-              onClick={() => {
-                props.setIsOpen ? props.setIsOpen(!props.isOpen) : null;
-              }}
+              onClick={handleClick}
             >
               <Image
                 priority={false}
