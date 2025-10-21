@@ -1,29 +1,25 @@
 "use client";
-import { useContext, useEffect } from "react";
-import axios, { AxiosError } from "axios";
+import { useEffect } from "react";
 import { NormalLoadingScreen } from "@/app/components/Loader/loader";
 import { useParams, useRouter } from "next/navigation";
-import InformationContext from "@/app/context/informationContext/informationContext";
-import { ERROR_PROPS } from "@/app/type";
+import UseAxios from "@/util/axios/UseAxios";
+import { toast } from "react-toastify";
 
 const Verify = () => {
-  const informationContext = useContext(InformationContext);
+  const api = UseAxios();
   const router = useRouter();
   const { id } = useParams();
   
   useEffect(() => {
     const verifyAccount = async () => {
       try {
-        const response = await axios.get("/api/auth/register/" + id);
+        const response = await api.get("auth/register/" + id);
         console.log("Verification response:", response);
-        informationContext?.addToast("success", "Success!", response.data.msg);
-        router.push("/signIn");
+        router.push("/login");
+        toast.success(response.data.msg);
       } catch (err) {
-        const error = err as AxiosError<ERROR_PROPS>;
-        const message = error?.response?.data?.msg || "unexpected error";
-        informationContext?.addToast("error", "Error!", message);
-        console.error("Verification failed:", error);
-        router.push("/signup");
+        console.error("Verification failed:", err);
+        router.push("/register");
       }
     };
 

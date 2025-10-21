@@ -10,11 +10,12 @@ body {
   /* overflow-x: hidden; */
   background: #E7E7E7;
   font-family: 'Istok Web', sans-serif;
-  font-size: calc(14 / 1440 * 100vw);
+  /* font-size: calc(14 / 1440 * 100vw); */
   font-weight: normal;
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  scroll-behavior: smooth;
 }
 
 /* * {
@@ -30,10 +31,10 @@ a {
 
 @media screen and (max-width: 540px) {
 
-  html,
+  /* html,
   body {
     font-size: calc(14 / 414 * 100vw);
-  }
+  } */
 }
 
 @theme inline {
@@ -75,6 +76,7 @@ a {
 }
 
 :root {
+      --font-figtree: 'Figtree', sans-serif; /* fallback if needed */
   --radius: 0.625rem;
   --background: #D9D9D9;
   --foreground: ##D9D9D9;
@@ -150,4 +152,18 @@ a {
   body {
     @apply bg-background text-foreground;
   }
+}
+@theme {
+  --color-primary: #11456B;
+  --color-disable: #CFDAE1;
+  --color-p: #494949;
+  --color-lightbackground: #D4E9F9;
+  --color-footer: #1C4E59;
+  --breakpoint-mobile: 850px;
+  --breakpoint-xs: 500px;
+}
+.section{
+transition: all 100s ease-in-out;
+
+  font-family: var(--font-figtree), sans-serif!important;
 }

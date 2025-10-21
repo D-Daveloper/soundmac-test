@@ -95,7 +95,7 @@ const Toast = ({ toast, onClose }: TOAST) => {
     );
 };
 
-const ToastContainer = (params: TOAST_CONTAINER) => {
+const ToastContainer2 = (params: TOAST_CONTAINER) => {
     if (params?.toasts.length === 0) return null;
 
     return (
@@ -188,4 +188,4 @@ const ToastContainer = (params: TOAST_CONTAINER) => {
 //     );
 // };
 
-export default ToastContainer;
+export default ToastContainer2;

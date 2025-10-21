@@ -130,8 +130,8 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Provide a password"],
-    minlength: 6,
-    trim:true,
+    minlength: [6, "Password must be at least 6 characters"],
+    trim: true,
   },
   twoFactorAuthentication: {
     type: String,

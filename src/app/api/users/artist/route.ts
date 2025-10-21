@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import dbConnect from "../../../lib/db";
-import User from "../../../lib/models/userModel";
+import dbConnect from "@/util/db";
+import User from "@/util/models/userModel";
 // import sendEmail from "../../../lib/sendMail/sendEmail";
-import Artist, { IArtist } from "@/app/lib/models/artistModel";
-import { verifyJWT, verifyUser } from "@/app/lib/middleware/verifyJwt";
+import Artist, { IArtist } from "@/util/models/artistModel";
+import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 
 const limit = parseInt(process.env.ARTIST_LIMIT || "10", 10);
 

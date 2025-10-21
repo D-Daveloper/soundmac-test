@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import dbConnect from "../../../lib/db";
-import User from "../../../lib/models/userModel";
-import sendEmail from "../../../lib/sendMail/sendEmail";
+import dbConnect from "@/util/db";
+import User from "@/util/models/userModel";
+import sendEmail from "@/util/sendMail/sendEmail";
 
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
 const otpLength = process.env.OTP_LENGTH as unknown as number;
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       );
     }
     if (!user.confirmed) {
-        return NextResponse.json({ msg: "Please verify your email address" },{ status: 400 });
+        user.confirmed = true;;
     }
     if (!user.otp) {
         return NextResponse.json({ msg: "Please Login" },{ status: 400 });
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     //   create token
     const token = user.createJWT();
     
-    return NextResponse.json({ msg: "Login successful" ,token,user});
+    return NextResponse.json({ msg: "successful" ,token,user});
   } catch (error: unknown) {
     if (error instanceof Error){
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -74,10 +74,9 @@ export async function PATCH(req: Request) {
 		{ status: 404 }
 	  );
 	}
-    if (user.twoFactorAuthentication == "true" && user.otp !== null) {
+    if (user.otp !== null) {
       
         const otp = generateOtp();
-        const currentDate = new Date();
       // update user
       const updatedUser = await User.findByIdAndUpdate(
         {
@@ -85,7 +84,7 @@ export async function PATCH(req: Request) {
         },
         {
           otp: otp,
-          otpExpires: new Date(currentDate.getTime() + 10 * 60000), // 30 minutes in milliseconds (1 minute = 60,000 milliseconds)
+          otpExpires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes in milliseconds (1 minute = 60,000 milliseconds)
         },
         {
           new: true,
@@ -112,7 +111,7 @@ export async function PATCH(req: Request) {
 	<body>
 		<div>
 			Here is your otp ${otp}
-			<p>Expires in 10 mins </p>
+			<p>Expires in 5 mins </p>
 
 		</div>
 	</body>

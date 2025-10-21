@@ -13,6 +13,7 @@ export type INDEX_ASSIGNOR = { [key: string]: string };
 export interface ROUTE_CONFIG {
     Home: string;
     SignIn: string;
+    SignUp: string;
     artists: INDEX_ASSIGNOR;
 }
 

@@ -11,14 +11,15 @@ export const navigationLinks = [
 
 const nL = navigationLinks.map(n => n.link)
 export const rootScreenLinks = [
-    ...nL, '/signIn','/signup'
+    ...nL,
 ]
 
 
 
 export const linkRoutes: ROUTE_CONFIG = {
     'Home': '/',
-    SignIn: '/signIn',
+    SignIn: '/login',
+    SignUp: '/register',
     artists: {
         user: '/user/artists/create-artist',
         admin: '/admin/dashboard',
