@@ -2,7 +2,7 @@
 import UserRoute from "@/app/protectedRoute/protectedRoute";
 import classes from "./manage-artist.module.css";
 import { useContext, useState, useEffect } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import UserContext from "@/app/context/userContext/userContext";
 import InformationContext from "@/app/context/informationContext/informationContext";
 import LoadMore from "@/app/components/loadMore/loadMoare";
@@ -10,11 +10,14 @@ import { ARTIST, ARTIST_TABLE, PAGINATION } from "../types";
 import { SearchIcon } from "lucide-react";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Image from "next/image";
+import UseAxios from "@/util/axios/UseAxios";
+import { toast } from "react-toastify";
 
 const url = process.env.NEXT_PUBLIC_APP_URL_VERSION_2;
 
 export default function ManageArtist() {
   const userContext = useContext(UserContext);
+  const api = UseAxios();
   const informationContext = useContext(InformationContext);
   const [fetchingArtist, setFetchingArtist] = useState(false);
   const [artist, setArtist] = useState<ARTIST[]>([]);
@@ -22,9 +25,8 @@ export default function ManageArtist() {
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<ARTIST_TABLE[]>([]);
   const [sortBy, setSortBy] = useState("created_at");
-  const [search,setSearch] = useState("")
-  const debouncedSearch = useDebounce(search, 1000)
-
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 1000);
 
   // const fetchArtist = async (pageNum = 1) => {
   //   const token = localStorage.getItem("token");
@@ -56,47 +58,38 @@ export default function ManageArtist() {
   //   }
   // };
 
-
   const fetchArtist = async (pageNum = 1) => {
-    const token = localStorage.getItem("token");
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     setFetchingArtist(true);
     try {
-      let response:AxiosResponse;
+      let response: AxiosResponse;
 
       if (debouncedSearch && debouncedSearch.trim() !== "") {
         // 🔎 User is searching
-        response = await axios.get(
-          `${url}/api/users/artist?page=${pageNum}&sort=${sortBy}&artistName=${debouncedSearch}`,
-          config
+        response = await api.get(
+          `users/artist?page=${pageNum}&sort=${sortBy}&artistName=${debouncedSearch}`
         );
         setArtist(response.data?.data?.artists || []);
       } else {
         // 📋 Search is cleared or empty, fetch normally
-        response = await axios.get(
-          `${url}/api/users/artist?page=${pageNum}&sort=${sortBy}`,
-          config
+        response = await api.get(
+          `users/artist?page=${pageNum}&sort=${sortBy}`
         );
         // setArtist((prev) => [...prev, ...(response.data?.data?.artists ?? [])]);
-          if (!pageNum || pageNum === 1) {
-            setArtist(response?.data?.data?.artists);
-          } else {
-            setArtist((prev) => [...prev, ...response?.data.data?.artists]);
-          }
+        if (!pageNum || pageNum === 1) {
+          setArtist(response?.data?.data?.artists);
+        } else {
+          setArtist((prev) => [...prev, ...response?.data.data?.artists]);
+        }
       }
       // setArtist((prev) => [...prev, ...response.data.data?.artists] || []);
       setPagination(response.data?.data?.pagination || null);
       informationContext?.addToast("success", "Success!", response.data.msg);
-
     } catch (error) {
-      userContext?.handleAPIError(error);
-      setArtist([]);
+      if (error instanceof AxiosError) {
+        console.log(error);
+        return;
+      }
+      toast.error(error as string);
     } finally {
       setFetchingArtist(false);
     }
@@ -105,7 +98,7 @@ export default function ManageArtist() {
   useEffect(() => {
     setPage(1);
     fetchArtist(1);
-  }, [sortBy,debouncedSearch]);
+  }, [sortBy, debouncedSearch]);
 
   const handleDelete = async (artistId: string) => {
     if (!confirm("Are you sure you want to delete this artist?")) return;
@@ -129,32 +122,28 @@ export default function ManageArtist() {
       userContext?.handleAPIError(error);
     }
   };
- 
 
-  if(!fetchingArtist && artist.length <= 0){
+  if (!fetchingArtist && artist.length <= 0) {
     return (
-    <div className={classes.emptyState}>
-      <svg
-        className={classes.emptyIcon}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
-        />
-      </svg>
-      <h3 className={classes.emptyTitle}>No Artists Found</h3>
-      <p className={classes.emptyText}>
-        Start by creating your first artist
-      </p>
-    </div>
-  )
-}
-
+      <div className={classes.emptyState}>
+        <svg
+          className={classes.emptyIcon}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+          />
+        </svg>
+        <h3 className={classes.emptyTitle}>No Artists Found</h3>
+        <p className={classes.emptyText}>Start by creating your first artist</p>
+      </div>
+    );
+  }
 
   return (
     <UserRoute>
@@ -230,13 +219,13 @@ export default function ManageArtist() {
                 <div className="p-2 flex bg-[#cfcfcf] rounded-2xl h-13 justify-center items-center ">
                   <input
                     value={search}
-                    onChange={(e)=> setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                     type="text"
                     name="search"
                     placeholder="Search"
                     className="w-full h-full focus:outline-0"
                   />
-                    <SearchIcon className="w-10" />
+                  <SearchIcon className="w-10" />
                 </div>
                 {/* Header Section */}
                 <div className={classes.controls}>
@@ -255,86 +244,97 @@ export default function ManageArtist() {
             <div className="bg-[#d9d9d9] my-12 h-1"></div>
             {/*divider*/}
             <div className="flex flex-col gap-2 overflow-auto h-[250px] w-full py-10">
-              {artist.length >0 && artist?.map((artistItem, index) => (
-                <div
-                  key={index}
-                  className={"flex w-full bg-[#d9d9d9] justify-center hover:cursor-pointer"}
-                  onClick={()=>{
-                    const newRows:ARTIST_TABLE[] = [{...artistItem,lastRoyalty:0,totalRoyalty:0,totalTracks:0,totalReleases:0}];
-                    setRows(newRows);
-                  }}
-                >
-                  <div className="w-20 bg-[#d9d9d9] p-1">
-                    {artistItem.artistImage ? (
-                      <Image
-                        src={artistItem.artistImage}
-                        alt={artistItem.artistName}
-                        className={classes.artistImage + " rounded-full"}
-                        width={40}
-                        height={40}
-                      />
-                    ) : (
-                      <div className={classes.noImage + " rounded-full"}>
+              {artist.length > 0 &&
+                artist?.map((artistItem, index) => (
+                  <div
+                    key={index}
+                    className={
+                      "flex w-full bg-[#d9d9d9] justify-center hover:cursor-pointer"
+                    }
+                    onClick={() => {
+                      const newRows: ARTIST_TABLE[] = [
+                        {
+                          ...artistItem,
+                          lastRoyalty: 0,
+                          totalRoyalty: 0,
+                          totalTracks: 0,
+                          totalReleases: 0,
+                        },
+                      ];
+                      setRows(newRows);
+                    }}
+                  >
+                    <div className="w-20 bg-[#d9d9d9] p-1">
+                      {artistItem.artistImage ? (
+                        <Image
+                          src={artistItem.artistImage}
+                          alt={artistItem.artistName}
+                          className={classes.artistImage + " rounded-full"}
+                          width={40}
+                          height={40}
+                        />
+                      ) : (
+                        <div className={classes.noImage + " rounded-full"}>
+                          <svg
+                            className={classes.noImageIcon}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="w-1 bg-white h-full "></div>
+                    <div className={classes.artistInfo + " flex-1 my-auto p-1"}>
+                      <h3 className={classes.artistName}>
+                        {artistItem.artistName}
+                      </h3>
+                      <p className={classes.artistMeta}>
+                        Created:
+                        {new Date(artistItem.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <div className={classes.artistActions + " p-2"}>
+                      <button className={classes.editBtn}>
                         <svg
-                          className={classes.noImageIcon}
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          viewBox="0 0 24 24"
                         >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                          />
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                          <path d="m18.5 2.5 3 3L12 15l-4 1 1-4z" />
                         </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="w-1 bg-white h-full "></div>
-                  <div className={classes.artistInfo + " flex-1 my-auto p-1"}>
-                    <h3 className={classes.artistName}>
-                      {artistItem.artistName}
-                    </h3>
-                    <p className={classes.artistMeta}>
-                      Created:
-                      {new Date(artistItem.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div className={classes.artistActions + " p-2"}>
-                    <button className={classes.editBtn}>
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
+                        Edit
+                      </button>
+                      <button
+                        className={classes.deleteBtn}
+                        onClick={() => handleDelete(artistItem._id)}
                       >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="m18.5 2.5 3 3L12 15l-4 1 1-4z" />
-                      </svg>
-                      Edit
-                    </button>
-                    <button
-                      className={classes.deleteBtn}
-                      onClick={() => handleDelete(artistItem._id)}
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <polyline points="3,6 5,6 21,6" />
-                        <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" />
-                      </svg>
-                      Delete
-                    </button>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                        >
+                          <polyline points="3,6 5,6 21,6" />
+                          <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2" />
+                        </svg>
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import dbConnect from "../../../lib/db";
-import User from "../../../lib/models/userModel";
-import sendEmail from "@/app/lib/sendMail/sendEmail";
+import dbConnect from "@/util/db";
+import User from "@/util/models/userModel";
+import sendEmail from "@/util/sendMail/sendEmail";
 
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
 const otpLength = process.env.OTP_LENGTH as unknown as number;
@@ -149,7 +149,6 @@ export async function POST(req: Request) {
       );
     };
 
-    if (user.twoFactorAuthentication == "true") {
       otp = generateOtp();
 
       // update user
@@ -211,12 +210,12 @@ export async function POST(req: Request) {
           { status: 500 }
         );
       }
-    }
 
-    //   create token
-    const token = user.createJWT();
+
+    // //   create token
+    // const token = user.createJWT();
     
-    return NextResponse.json({ msg: "Login successful" ,token,user});
+    // return NextResponse.json({ msg: "Login successful" ,token,user});
   } catch (error: unknown) {
     if (error instanceof Error){
       return NextResponse.json({ msg: error.message }, { status: 500 });

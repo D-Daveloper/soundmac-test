@@ -20,11 +20,11 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
 
     // token
     useEffect(() => {
-        setToken(localStorage.getItem("token"))
+        setToken(localStorage.getItem("soundmacToken"))
     }, [user])
 
     const logOut = () => {
-        localStorage.removeItem('token')
+        localStorage.removeItem('soundmacToken')
         setUser(null);
         router.push(linkRoutes?.SignIn);
         setHamburgerOpen(false)
@@ -59,7 +59,7 @@ const UserState = ({ children }: { children: React.ReactNode }) => {
 
 
     const getUser = async (setLoading: GET_USER, onSuccess: ON_SUCCESS, onError = handleAPIError) => {
-        const token = localStorage.getItem("token")
+        const token = localStorage.getItem("soundmacToken")
         if (!token){
             logOut()
             router.push(`${linkRoutes?.SignIn}?redirect=${redirect}`);

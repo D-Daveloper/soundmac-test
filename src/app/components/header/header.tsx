@@ -58,7 +58,7 @@ export default function Header() {
                         <>
                             <Link href={linkRoutes.SignIn} className={classes.loginBtn}>Login</Link>
                             <div className={classes.mobileHorizontalLine} />
-                            <button className={`${classes.loginBtn} ${classes.registerBtn}`}>Register</button>
+                            <Link href={linkRoutes.SignUp} className={`${classes.loginBtn} ${classes.registerBtn}`}>Register</Link>
                         </>
 
                 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import dbConnect from "../../../lib/db";
-import User from "../../../lib/models/userModel";
-import {verifyJWT, verifyUser} from "@/app/lib/middleware/verifyJwt";
+import dbConnect from "@/util/db";
+import User from "@/util/models/userModel";
+import {verifyJWT, verifyUser} from "@/util/middleware/verifyJwt";
 
 export async function GET(req: Request) {
   try {
