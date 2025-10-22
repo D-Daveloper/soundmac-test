@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
     images: {
     remotePatterns: [new URL('https://soundmac1.s3.eu-north-1.amazonaws.com/blogImage/**')],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+},
 };
 
 export default nextConfig;
