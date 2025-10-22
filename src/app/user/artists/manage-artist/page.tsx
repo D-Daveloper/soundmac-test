@@ -10,7 +10,7 @@ import { ARTIST, ARTIST_TABLE, PAGINATION } from "../types";
 import { SearchIcon } from "lucide-react";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Image from "next/image";
-import UseAxios from "@/util/axios/UseAxios";
+import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 
 const url = process.env.NEXT_PUBLIC_APP_URL_VERSION_2;

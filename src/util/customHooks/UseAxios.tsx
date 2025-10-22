@@ -1,8 +1,15 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 const UseAxios = () => {
+      const origin = window.location.origin;
+      const fullUrl = window.location.href;
+      const redirect = fullUrl.split(origin)[1];
+      console.log(redirect);
+      
+
+      
   const router = useRouter();
 
   const api = axios.create({
@@ -42,7 +49,7 @@ const UseAxios = () => {
       // 🔥 Display toast depending on status code
       if (status === 401) {
         toast.error("Session expired. Please login again.");
-        router.push("/login");
+        router.push("/login" + (redirect ? `?redirect=${redirect}` : ''));
       }
       if (status === 400) {
         if (data.validationErrors) {

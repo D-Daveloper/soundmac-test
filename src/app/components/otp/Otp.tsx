@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect, useContext } from "react";
-import UseAxios from "@/util/axios/UseAxios";
+import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
@@ -56,7 +56,7 @@ export default function OtpInput() {
         localStorage.setItem("soundmacToken",res.data.token);
         userContext?.setUser(res.data.user);
         const redirect = localStorage.getItem("soundmacRedirectAfterOtp");
-        router.push(redirect|| "/user/artists/create-artist");
+        router.push(redirect|| "/dashboard?tab=dashboard?section=''");
         localStorage.removeItem("soundmacPendingEmail");
         localStorage.removeItem("soundmacotpExpiry");
         localStorage.removeItem("soundmacRedirectAfterOtp");

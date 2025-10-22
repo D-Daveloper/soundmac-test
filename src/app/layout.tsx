@@ -1,4 +1,4 @@
-import { Figtree } from "next/font/google";
+import { Figtree,Lato } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import Root from "./root";
@@ -8,6 +8,7 @@ import UserState from "./context/userContext/userState";
 
 const figtree = Figtree({
   subsets: ["latin"],
+    weight: ["300","400","500","600","700","800"],
   variable: "--font-figtree", // optional: use CSS variable
 });
 

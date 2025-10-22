@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Input from "../components/input/Input";
 import Select from "@/components/Select";
 import Link from "next/link";
-import UseAxios from "@/util/axios/UseAxios";
+import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
@@ -71,6 +71,7 @@ type RegisterFormType = {
 const RegisterForm = () => {
   const router = useRouter();
   const api = UseAxios();
+  const [loading,setLoading] = useState(false);
   const [registerForm, setRegisterForm] = useState<RegisterFormType>({
     country: "",
     first_name: "",
@@ -94,6 +95,7 @@ const RegisterForm = () => {
       return;
     }
     try {
+      setLoading(true);
       const res = await api.post("auth/register", registerForm);
       console.log(res);
       console.log(res.data?.email);
@@ -108,6 +110,8 @@ const RegisterForm = () => {
         return;
       }
       toast.error(error as string);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -161,8 +165,8 @@ const RegisterForm = () => {
         </div>
         <div className="border-2 border-[#E1E1CF] my-10 w-full"></div>
       </form>
-      <div className="flex justify-end flex-col gap-5 items-center pb-9 max-sm:text-xl">
-        <div className="mt-10 flex gap-3">
+      <div className="flex justify-end flex-col gap-5 items-center pb-5 max-sm:text-xl">
+        <div className="mt-10 flex gap-3 max-xs:mt-80">
           <input
             type="checkbox"
             className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
@@ -176,11 +180,11 @@ const RegisterForm = () => {
         </div>
         <button
           form="signup-form"
-          disabled={!registerForm.isChecked}
+          disabled={!registerForm.isChecked || loading}
           type="submit"
           className={
             "bg-disable py-3 px-8 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
-            (registerForm.isChecked && "bg-primary hover:bg-primary/90")
+            (registerForm.isChecked && !loading && "bg-primary hover:bg-primary/90")
           }
         >
           Sign Up
