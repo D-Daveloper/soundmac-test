@@ -8,7 +8,6 @@ import UserState from "./context/userContext/userState";
 
 const figtree = Figtree({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"], // choose weights you need
   variable: "--font-figtree", // optional: use CSS variable
 });
 

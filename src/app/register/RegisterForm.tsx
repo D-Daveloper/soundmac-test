@@ -35,7 +35,7 @@ const formvals: FormField[] = [
   },
   {
     title: "email",
-    placeholder: "Enter Email Address",
+    placeholder: "you@example.com",
     alt: "an email icon",
     image: "/sms.svg",
     required: true,
@@ -148,7 +148,7 @@ const RegisterForm = () => {
             </div>
           ))}
           <div className="flex flex-col w-[40%] max-sm:w-full">
-            <p className="font-medium mb-2">Country</p>
+            <p className="font-medium mb-2 sm:text-sm text-lg">Country</p>
             <div className="w-full">
               <Select
                 selected={registerForm}
@@ -165,12 +165,12 @@ const RegisterForm = () => {
         <div className="mt-10 flex gap-3">
           <input
             type="checkbox"
-            className="p-5 max-sm:p-3 rounded-lg"
+            className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
             name="isChecked"
             checked={registerForm.isChecked}
             onChange={handleChange}
           />
-          <p className="leading-6 text-sm sm:text-lg">
+          <p className="leading-6 text-sm sm:text-lg text-primary font-semibold">
             I agree to the Terms of Service and Privacy Policy
           </p>
         </div>
@@ -179,15 +179,15 @@ const RegisterForm = () => {
           disabled={!registerForm.isChecked}
           type="submit"
           className={
-            "bg-disable lg:py-5 lg:px-10 max-lg:p-3 max-lg:px-5 rounded-2xl text-white text-center max-w-fit hover:cursor-pointer " +
+            "bg-disable py-3 px-8 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
             (registerForm.isChecked && "bg-primary hover:bg-primary/90")
           }
         >
           Sign Up
         </button>
-        <p className="leading-6 text-xl">
+        <p className="leading-6 text-[16px] text-p font-light">
           Already have an account?
-          <span className="text-primary underline">
+          <span className="text-primary underline font-extrabold">
             <Link href={"/login"}>Sign In</Link>
           </span>
         </p>

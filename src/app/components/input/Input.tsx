@@ -29,8 +29,8 @@ const Input = ({
   };
   return (
     <>
-      <div className="flex gap-1">
-        <p className="font-medium capitalize ">{props.title} </p>
+      <div className="flex gap-1 sm:text-sm text-lg">
+        <p className=" capitalize font-medium">{props.title} </p>
         {required && (
           <Image
             priority={false}
@@ -43,7 +43,7 @@ const Input = ({
           />
         )}
       </div>
-      <div className="flex px-3 rounded-lg border-[#E8E8E8] border-10 outline-1 gap-3 mt-2">
+      <div className="flex px-3 rounded-lg border-[#E8E8E8] border-10 outline-1 gap-3 mt-2 sm:text-sm text-lg">
         {image && (
           <Image
             src={image}
@@ -64,7 +64,7 @@ const Input = ({
             type === "password" ? (isOpen ? "text" : "password") : type
           }
           placeholder={props.placeholder}
-          className="w-[90%] outline-0"
+          className="w-[90%] outline-0 font-normal placeholder:font-extralight "
         />
         {type === "password" &&
           (isOpen ? (

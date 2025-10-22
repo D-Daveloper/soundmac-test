@@ -13,11 +13,13 @@ export default function Select({
   setSelected: Dispatch<SetStateAction<any>>;
 }) {
   const [open, setOpen] = useState(false);
+  const [opt, setopt] = useState(options);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
   const ref = useRef<HTMLDivElement>(null);
 
   const handleSelect = (option: string) => {
     console.log(option);
+    setopt(options);
     
     setSelected((prev: any) => ({ ...prev,country: option }));
     setOpen(false);
@@ -70,17 +72,21 @@ export default function Select({
         break;
     }
   };
+  const handleChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+    const query = e.target.value.toLowerCase();
+    setopt(options.filter(option => option.toLocaleLowerCase().includes(query)))
+  }
 
   return (
-    <div ref={ref} className="relative w-full">
+    <div ref={ref} className="relative w-full text-lg sm:text-sm">
       {/* Trigger button */}
       <button
       type="button"
         onClick={() => setOpen(!open)}
         onKeyDown={handleKeyDown}
-        className=" px-3 w-full flex justify-between items-center border-[#E8E8E8] border-10 outline-1 rounded-lg bg-transparent shadow-sm focus:outline-none hover:cursor-pointer line-clamp-1 truncate"
+        className={" p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +(selected.country? "" : "text-gray-400 font-extralight font-(family-name:--font-figtree)")}
       >
-        {typeof selected === "string" ? selected : selected?.country || placeholder}
+        {selected.country || placeholder}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`w-5 h-5 text-gray-500 transition-transform ${
@@ -101,8 +107,9 @@ export default function Select({
 
       {/* Dropdown options */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-60">
-          {options.map((option, index) => (
+        <div className="absolute mt-2 w-full bg-white/50 border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-60 text-sm">
+          <input type="search" className="w-full p-1" onChange={handleChange} placeholder="Search...."/>
+          {opt.map((option, index) => (
             <button
             type="button"
               key={option}

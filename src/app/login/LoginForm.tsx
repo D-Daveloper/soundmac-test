@@ -95,7 +95,7 @@ router.push("/otp");
         id="signup-form"
         onSubmit={submit}
         action=""
-        className=" text-p leading-5 tracking-[0.5px] text-lg  w-full h-full sm:text-xl"
+        className=" text-p leading-5 tracking-[0.5px] text-lg w-full h-full sm:text-xl"
       >
         <div className="w-full flex flex-wrap justify-between gap-y-10 px-10">
           {formvals.map((item, index) => (
@@ -125,15 +125,15 @@ router.push("/otp");
           form="signup-form"
           type="submit"
           className={
-            "bg-disable py-5 px-10 rounded-2xl text-white text-center max-w-fit hover:cursor-pointer " +
+            "bg-disable px-8 py-3 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
             (loginForm.password && "bg-primary hover:bg-primary/90")
           }
         >
           Sign In
         </button>
-        <p className="leading-6 text-xl">
+        <p className="leading-6 text-[16px] text-p font-light">
           Don&apos;t have an account?
-          <span className="text-primary underline">
+          <span className="text-primary underline font-extrabold">
             <Link href={"/register"}>Sign Up</Link>
           </span>
         </p>

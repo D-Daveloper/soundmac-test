@@ -6,7 +6,7 @@ const UseAxios = () => {
   const router = useRouter();
 
   const api = axios.create({
-    baseURL: "https://3pltvrdk-3000.uks1.devtunnels.ms/api/",
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000/api/",
     headers: {
       "Content-Type": "application/json",
     },

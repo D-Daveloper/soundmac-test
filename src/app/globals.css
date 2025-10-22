@@ -155,7 +155,10 @@ a {
 }
 @theme {
   --color-primary: #11456B;
+  --color-primary-700:#0E2E44;
+  --color-primary-500:#11456B;
   --color-disable: #CFDAE1;
+  --color-main-white:#F9F9F9;
   --color-p: #494949;
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
