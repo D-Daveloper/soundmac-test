@@ -4,19 +4,103 @@ import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { table } from "console";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+// import { sidebarComponents } from "../constant";
+import SideBarCom from "../components/sideBarComponents/sideBarCom";
 
 const page = () => {
-  const { tab,section,setTab,setSection} = useTabQuery();
+  const searchParams = useSearchParams();
+  const {setTab,tab,section,setSection} = useTabQuery();
+  const [isActive,setIsActive] = useState<string>(tab);
+const sidebarComponents = [
+  {
+    title:"music",
+    list:[
+      {
+        title:"upload music",
+        icon:"/add.svg",
+        setSection: () => setSection("upload"),
+        query:"upload"
+      },
+      {
+        title:"manage release",
+        icon:"/musiclibrary2.svg",
+        setSection: () => setSection("manageRelease"),
+        query:"manageRelease"
+      },
+      
+    ],
+    isActive:"",
+    setIsActive:()=> setIsActive("music")
+  },
+  {
+    title:"artists",
+    list:[
+      {
+        title:"create artist",
+        icon:"/add.svg",
+        setSection: () => setSection("create"),
+        query:"create"
+      },
+      {
+        title:"manage artist",
+        icon:"/profile2user.svg",
+        setSection: () => setSection("manageArtist"),
+        query:"manageArtist"
+      },
+      {
+        title:"collaborations",
+        icon:"/likeshapes.svg",
+        setSection: () => setSection("collaboration"),
+        query:"collaboration"
+      },
+      
+    ],
+    isActive:"",
+    setIsActive:()=> setIsActive("artists")
+  },
+  {
+    title:"insights",
+    list:[
+      {
+        title:"song performance",
+        icon:"/musicplay.svg",
+        setSection: () => setSection("song"),
+        query:"song"
+      }
+      
+    ],
+    isActive:"",
+    setIsActive:()=> setIsActive("insights")
+  },
+]
+console.log("1",isActive);
+useEffect(()=>{
+  const tab = searchParams.get("tab");
+  if(!tab){
+    setTab("dashboard");
+  }
+  
+},[]);
 
-    const [music,setMusic] = useState(false);
-    const [artist,setArtist] = useState(false);
-    const [insight,setInsight] = useState(false);
+useEffect(()=>{
+  // const tab = searchParams.get("tab");
+  // if(!tab){
+  //   setTab("dashboard");
+  //   return;
+  // }
+  setIsActive(tab);
+},[tab,section]);
+
+console.log("2",isActive);
+    // const [music,setMusic] = useState(false);
+    // const [artist,setArtist] = useState(false);
+    // const [insight,setInsight] = useState(false);
     // const [loading,setLoading] = useState(false);
     // const [loading,setLoading] = useState(false);
 
   return (
-    <main className="min-h-[100dvh] text-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
+    <main className="min-h-[100dvh] text-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out flex">
       <div className="flex min-h-full">
         <div className="bg-primary-700 min-h-[100dvh] max-w-[250px] w-full py-10 ">
           <div className="flex flex-col gap-15 ml-6 mr-2">
@@ -30,7 +114,7 @@ const page = () => {
               <h1 className="font-light ">SOUNDMAC</h1>
             </div>
             <div className="flex flex-col gap-5">
-              <button className="font-extralight flex gap-3 bg-primary-500 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90">
+              <button className={"font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" + (isActive === "dashboard" && " bg-primary-500")} onClick={() => {setIsActive("dashboard"); setTab("dashboard")}}>
                 <Image
                   src="/home.svg"
                   alt="home logo"
@@ -40,7 +124,16 @@ const page = () => {
                 Dashboard
               </button>
             </div>
-            <div className="capitalize ">
+            {sidebarComponents.map((component, index) => (
+              <SideBarCom
+              isActive={isActive}
+              setIsActive={setIsActive}
+              key={index}
+              title={component.title}
+              list={component.list}
+              />
+            ))}
+            {/* <div className="capitalize ">
               <button onClick={()=>setMusic(!music)} className="w-full flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 ">
                 Music
                   <Image
@@ -77,6 +170,8 @@ const page = () => {
                 </div>
               </div>
             </div>
+              
+
             <div className="capitalize ">
               <button onClick={()=>setArtist(!artist)} className="w-full flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 ">
                 Artists
@@ -150,13 +245,58 @@ const page = () => {
                 </button>
                 </div>
               </div>
-            </div>
+            </div> */}
   
           </div>
         </div>
       </div>
+      <div className="text-black">
+
+        {(tab === "dashboard" || !tab) && <Dashboard />}
+        {tab === "Music" && (
+          <>
+            {section === "uploadMusic" && <Upload />}
+            {section === "manageReleases" && <ManageRelease />}
+            {!section && <Upload />}
+          </>
+        )}
+        {tab === "Artists" && (
+          <>
+            {section === "createArtist" && <CreateArtist />}
+            {section === "manageArtist" && <ManageArtist />}
+            {section === "collaboration" && <Collaboration />}
+            {!section && <CreateArtist />}
+          </>
+        )}
+        {tab === "Insight" && 
+            section === "songPerformance" && <SongPerformance />
+        }
+      </div>
+
     </main>
   );
 };
 
 export default page;
+
+const Dashboard = ()=> {
+    return <div>dashboard</div>
+}
+const Upload = ()=> {
+    return <div>Upload</div>
+}
+const ManageRelease = ()=> {
+    return <div>Manage</div>
+}
+const CreateArtist = ()=> {
+    return <div>createArtist</div>
+}
+const ManageArtist = ()=> {
+    return <div>manageArtist</div>
+}
+const Collaboration = ()=> {
+    return <div>Collaboration</div>
+}
+const SongPerformance = ()=> {
+    return <div>SongPerformance</div>
+}

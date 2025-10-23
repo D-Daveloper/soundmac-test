@@ -1,5 +1,6 @@
+'use client';
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 const UseAxios = () => {
@@ -7,9 +8,7 @@ const UseAxios = () => {
       const fullUrl = window.location.href;
       const redirect = fullUrl.split(origin)[1];
       console.log(redirect);
-      
 
-      
   const router = useRouter();
 
   const api = axios.create({

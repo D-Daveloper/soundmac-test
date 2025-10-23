@@ -4,10 +4,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 const sections = {
     upload:{tab:"Music",section:"uploadMusic"},
     manageRelease:{tab:"Music",section:"manageReleases"},
-    create:{tab:"Artist",section:"createArtist"},
-    manageArtist:{tab:"Artist",section:"manageArtist"},
-    collaboration:{tab:"Artist",section:"collaboration"},
-    song:{tab:"Insight",section:"songPerformance"},
+    create:{tab:"Artists",section:"createArtist"},
+    manageArtist:{tab:"Artists",section:"manageArtist"},
+    collaboration:{tab:"Artists",section:"collaboration"},
+    song:{tab:"Insights",section:"songPerformance"},
     // create:{tab:"Artist",section:"createArtist"},
 }
 /**

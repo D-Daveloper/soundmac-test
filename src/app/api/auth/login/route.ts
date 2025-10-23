@@ -16,6 +16,7 @@ const generateOtp = () => {
 
 export async function POST(req: Request) {
   try {
+    // return NextResponse.json({msg:"login please"}, {status:401});
     await dbConnect();
     const currentDate = new Date();
 
