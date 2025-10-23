@@ -1,18 +1,15 @@
-'use client';
+"use client";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 const UseAxios = () => {
-      const origin = window.location.origin;
-      const fullUrl = window.location.href;
-      const redirect = fullUrl.split(origin)[1];
-      console.log(redirect);
 
   const router = useRouter();
 
   const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000/api/",
+    baseURL:
+      process.env.NEXT_PUBLIC_BACKEND_API_URL || "http://localhost:3000/api/",
     headers: {
       "Content-Type": "application/json",
     },
@@ -23,7 +20,7 @@ const UseAxios = () => {
   api.interceptors.request.use(
     (config) => {
       // Example: attach auth token from localStorage
-      if (typeof window != undefined) {
+      if (typeof window != 'undefined') {
         const token = localStorage.getItem("soundmacToken");
         if (token) {
           config.headers = config.headers || {};
@@ -47,8 +44,14 @@ const UseAxios = () => {
 
       // 🔥 Display toast depending on status code
       if (status === 401) {
-        toast.error("Session expired. Please login again.");
-        router.push("/login" + (redirect ? `?redirect=${redirect}` : ''));
+        if (typeof window != "undefined") {
+          const origin = window.location.origin;
+          const fullUrl = window.location.href;
+          const redirect = fullUrl.split(origin)[1];
+          console.log(redirect);
+          toast.error("Session expired. Please login again.");
+          router.push("/login" + (redirect ? `?redirect=${redirect}` : ""));
+        }
       }
       if (status === 400) {
         if (data.validationErrors) {
