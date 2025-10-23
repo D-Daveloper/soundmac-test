@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Input from "../components/input/Input";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import UseAxios from "@/util/axios/UseAxios";
+import UseAxios from "@/util/customHooks/UseAxios";
 import { AxiosError } from "axios";
 import { useSearchParams, useRouter } from "next/navigation";
 type FormField = {
@@ -48,22 +48,21 @@ const LoginForm = () => {
   const redirect = searchParams.get("redirect");
   const safeRedirect = redirect?.startsWith("/")
     ? redirect
-    : "/user/artists/create-artist";
+    : "/dashboard?tab=dashboard";
   const [loginForm, setLoginForm] = useState<LoginForm>({
     password: "",
     email: "",
   });
+  const [loading,setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (loginForm.password.length < 6) {
-      toast.error("Password must be at least 6 characters long.");
-      return;
-    } else if (loginForm.email === "") {
+    if (loginForm.email === "") {
       toast.error("please select a email.");
       return;
     }
     try {
+      setLoading(true);
       const res = await api.post("auth/login", loginForm);
 
       if (res.status === 200) {
@@ -82,6 +81,9 @@ router.push("/otp");
         return;
       }
       toast.error(error as string);
+    }
+    finally{
+      setLoading(false);
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -122,11 +124,12 @@ router.push("/otp");
       </form>
       <div className="flex justify-end flex-col gap-10 items-center pb-9 max-sm:text-2xl">
         <button
+        disabled={!loginForm.password || !loginForm.email || loading}
           form="signup-form"
           type="submit"
           className={
             "bg-disable px-8 py-3 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
-            (loginForm.password && "bg-primary hover:bg-primary/90")
+            (loginForm.password && !loading && "bg-primary hover:bg-primary/90")
           }
         >
           Sign In

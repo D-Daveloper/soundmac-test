@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 
 interface Props {
   title: string;
@@ -43,7 +43,7 @@ const Input = ({
           />
         )}
       </div>
-      <div className="flex px-3 rounded-lg border-[#E8E8E8] border-10 outline-1 gap-3 mt-2 sm:text-sm text-lg">
+      <div className="flex px-3 rounded-lg border-[#E8E8E8] border-10 outline-1 gap-3 mt-2 sm:text-sm text-[16px]">
         {image && (
           <Image
             src={image}

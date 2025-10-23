@@ -6,8 +6,8 @@ import LoginForm from "./LoginForm";
 
 const page = () => {
   return (
-    <main className="section flex h-[100dvh] overflow-hidden">
-      <div className="w-[40%] h-dvh max-md:hidden">
+    <main className="section flex h-[100dvh] sm:overflow-hidden max-xs:min-h-[100dvh]">
+      <div className="w-[40%] max-md:hidden">
         <Image
           priority={true}
           src={si}

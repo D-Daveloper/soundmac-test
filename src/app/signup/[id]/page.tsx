@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { NormalLoadingScreen } from "@/app/components/Loader/loader";
 import { useParams, useRouter } from "next/navigation";
-import UseAxios from "@/util/axios/UseAxios";
+import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 
 const Verify = () => {

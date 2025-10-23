@@ -1,11 +1,12 @@
 "use client";
+import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
 export default function Select({
   options,
   placeholder = "Select an option",
   selected,
-  setSelected
+  setSelected,
 }: {
   options: string[];
   placeholder?: string;
@@ -20,8 +21,8 @@ export default function Select({
   const handleSelect = (option: string) => {
     console.log(option);
     setopt(options);
-    
-    setSelected((prev: any) => ({ ...prev,country: option }));
+
+    setSelected((prev: any) => ({ ...prev, country: option }));
     setOpen(false);
   };
 
@@ -36,7 +37,7 @@ export default function Select({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-//   🔹 Handle keyboard navigation
+  //   🔹 Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (!open) {
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -72,19 +73,26 @@ export default function Select({
         break;
     }
   };
-  const handleChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value.toLowerCase();
-    setopt(options.filter(option => option.toLocaleLowerCase().includes(query)))
-  }
+    setopt(
+      options.filter((option) => option.toLocaleLowerCase().includes(query))
+    );
+  };
 
   return (
-    <div ref={ref} className="relative w-full text-lg sm:text-sm">
+    <div ref={ref} className="relative w-full text-[16px] sm:text-sm">
       {/* Trigger button */}
       <button
-      type="button"
+        type="button"
         onClick={() => setOpen(!open)}
         onKeyDown={handleKeyDown}
-        className={" p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +(selected.country? "" : "text-gray-400 font-extralight font-(family-name:--font-figtree)")}
+        className={
+          " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +
+          (selected.country
+            ? ""
+            : "text-gray-400 font-extralight font-(family-name:--font-figtree)")
+        }
       >
         {selected.country || placeholder}
         <svg
@@ -107,15 +115,37 @@ export default function Select({
 
       {/* Dropdown options */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white/50 border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-60 text-sm">
-          <input type="search" className="w-full p-1" onChange={handleChange} placeholder="Search...."/>
+        <div className="absolute mt-2 w-full bg-white/50 border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-37 text-sm max-xs:max-h-60">
+          <div className="flex p-2 outline-1 m-2 rounded-lg mb-5">
+            <Image
+            priority={true}
+              src="/search-normal.svg"
+              alt="search icon"
+              width={20}
+              height={20}
+            />
+            <input
+              type="search"
+              className="w-full p-1 text-[16px] sm:text-sm outline-0"
+              onChange={handleChange}
+              placeholder="Search"
+            />
+          </div>
           {opt.map((option, index) => (
             <button
-            type="button"
+              type="button"
               key={option}
               onClick={() => handleSelect(option)}
-              className={`block w-full text-left px-4 py-2 
-                ${index === highlightedIndex? "bg-blue-100": (typeof selected === "string" ? selected === option : selected?.country === option)? "bg-blue-50 text-primary"
+              className={`block w-full text-left px-4 py-3 border-b-2 
+                ${
+                  index === highlightedIndex
+                    ? "bg-blue-100"
+                    : (
+                        typeof selected === "string"
+                          ? selected === option
+                          : selected?.country === option
+                      )
+                    ? "bg-blue-50 text-primary"
                     : "text-p"
                 } 
                 hover:bg-blue-100`}

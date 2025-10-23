@@ -30,11 +30,10 @@ export async function POST(req: Request) {
     }
 	const otp = generateOtp();
 	const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
-    const user = new User({...body,otp, otpExpires });
-    await user.save();
+
     try {
       const mailRes = await sendEmail(
-        `${user.email}`,
+        `${body.email}`,
         "Welcome to SOUNDMAC!",
         `
         
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
 
 			<div style="width: 100%">
 				<div style="width: 400px; display: inline-block; text-align: justify">
-					Dear ${user.first_name}, <br />
+					Dear ${body.first_name}, <br />
 					<br />
 
 					Thank you for choosing us as your music distribution platform. Our
@@ -106,7 +105,8 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-
+    const user = new User({...body,otp, otpExpires });
+    await user.save();
     return NextResponse.json({
       msg: `Please enter the otp sent to ${user.email}`,email: user.email,
     });
