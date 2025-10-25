@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
-// import sendEmail from "../../../lib/sendMail/sendEmail";
 import Artist, { IArtist } from "@/util/models/artistModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 

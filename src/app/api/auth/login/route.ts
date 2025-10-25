@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
     const isMatch = await user.comparePassword(password.trim());
     if (!isMatch) {
-      return NextResponse.json({ msg: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json({ msg: "Invalid credentials" }, { status: 400 });
     };
 
     if (!user.confirmed) {

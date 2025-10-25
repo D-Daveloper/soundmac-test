@@ -159,8 +159,15 @@ a {
   --color-primary-700:#0E2E44;
   --color-primary-500:#11456B;
   --color-disable: #CFDAE1;
+  --color-text-disable: #A4A4A4;
+  --color-text-body: #494949;
   --color-main-white:#F9F9F9;
+  --color-main-heading:#333333;
+  --color-warning-50:#FEF6EA;
   --color-p: #494949;
+  --color-neutral-50: #F4F4F4;
+  --color-neutral-100: #E8E8E8;
+  --color-neutral-500: #8D8D8D;
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
   --breakpoint-mobile: 850px;
