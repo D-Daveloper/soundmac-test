@@ -1,11 +1,8 @@
 "use client";
-import UseAxios from "@/util/customHooks/UseAxios";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
-import { table } from "console";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-// import { sidebarComponents } from "../constant";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import Dashboard from "./Dashboard";
 
@@ -14,7 +11,7 @@ const page = () => {
   const { setTab, tab, section, setSection } = useTabQuery();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
-  const [headerMessage, setHeaderMessage] = useState("Welcome, Thomas");
+  const [headerMessage, setHeaderMessage] = useState("Thomas");
   const sidebarComponents = [
     {
       title: "music",
@@ -100,7 +97,7 @@ const page = () => {
   // const [loading,setLoading] = useState(false);
 
   return (
-    <main className="section min-h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
+    <main className="section h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
       
       <div className="sticky top-0">
         <div
@@ -112,12 +109,12 @@ const page = () => {
           <div className="bg-primary w-5 h-1"></div>
           <div className="bg-primary w-5 h-1"></div>
         </div>
-        <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize">
-          {headerMessage}
+        <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5">
+          Welcome, {headerMessage}
         </h1>
         <div
           className={
-            " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-19 bottom-0 left-0 right-0 " +
+            " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
             (isOpen ? " max-lg:-translate-x-0" : " max-lg:-translate-x-full")
           }
         >
@@ -179,7 +176,7 @@ const page = () => {
       <div className="flex">
         <div className="text-[#333333] lg:ml-[250px] w-full ">
           <div className="px-5 py-5">
-            {(tab === "dashboard" || !tab) && <Dashboard />}
+            {(tab === "dashboard" || !tab) && <Dashboard  />}
             {tab === "Music" && (
               <>
                 {section === "uploadMusic" && <Upload />}
