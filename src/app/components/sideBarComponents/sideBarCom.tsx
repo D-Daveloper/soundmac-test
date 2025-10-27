@@ -1,3 +1,4 @@
+'use client';
 import Image from "next/image";
 import React, { useState } from "react";
 
@@ -17,7 +18,6 @@ interface Props {
 
 const sideBarCom = (props: Props) => {
   const [open, setOpen] = useState(false);
-  console.log(props.title,props.isActive.toLowerCase().trim() == props.title.toLowerCase().trim());  
   return (
     <div className="">
       <button

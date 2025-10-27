@@ -1,4 +1,3 @@
-import { useTabQuery } from "@/util/customHooks/useTabQuery";
 
 export const SERVER = process.env.NEXT_PUBLIC_APP_URL;
 export const AYNCardItems = [
