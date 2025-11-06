@@ -165,6 +165,7 @@ a {
   --color-main-white:#F9F9F9;
   --color-main-heading:#333333;
   --color-warning-50:#FEF6EA;
+  --color-warning-700:#966721;
   --color-p: #494949;
   --color-neutral-50: #F4F4F4;
   --color-neutral-100: #E8E8E8;
@@ -176,4 +177,28 @@ a {
 }
 .section{
   font-family: var(--font-figtree), sans-serif!important;
+}
+button:hover{
+cursor: pointer;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    to right,
+    #e5e7eb 0%,
+    #f3f4f6 20%,
+    #e5e7eb 40%,
+    #e5e7eb 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.5s infinite linear;
 }

@@ -5,13 +5,14 @@ import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import Dashboard from "./Dashboard";
+import UploadMusic from "./uploadMusic/UploadMusic";
 
 const page = () => {
   const searchParams = useSearchParams();
   const { setTab, tab, section, setSection } = useTabQuery();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
-  const [headerMessage, setHeaderMessage] = useState("Thomas");
+  const [headerMessage, setHeaderMessage] = useState("");
   const sidebarComponents = [
     {
       title: "music",
@@ -71,7 +72,6 @@ const page = () => {
       setIsActive: () => setIsActive("insights"),
     },
   ];
-  console.log("1", isActive);
   useEffect(() => {
     const tab = searchParams.get("tab");
     if (!tab) {
@@ -80,108 +80,102 @@ const page = () => {
   }, []);
 
   useEffect(() => {
-    // const tab = searchParams.get("tab");
-    // if(!tab){
-    //   setTab("dashboard");
-    //   return;
-    // }
     setIsActive(tab);
     setIsOpen(false);
   }, [tab, section]);
 
-  console.log("2", isActive);
-  // const [music,setMusic] = useState(false);
-  // const [artist,setArtist] = useState(false);
-  // const [insight,setInsight] = useState(false);
-  // const [loading,setLoading] = useState(false);
-  // const [loading,setLoading] = useState(false);
-
   return (
     <main className="section h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
-      
-      <div className="sticky top-0">
-        <div
-        className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]"
-        
-      >
-        <div className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "onClick={() => setIsOpen(!isOpen)}>
-          <div className="bg-primary w-5 h-1"></div>
-          <div className="bg-primary w-5 h-1"></div>
-          <div className="bg-primary w-5 h-1"></div>
-        </div>
-        <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5">
-          Welcome, {headerMessage}
-        </h1>
-        <div
-          className={
-            " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
-            (isOpen ? " max-lg:-translate-x-0" : " max-lg:-translate-x-full")
-          }
-        >
-          <div className="bg-primary-700 py-10 w-full text-main-white">
-            <div className="flex flex-col gap-15 ml-6 mr-2">
-              <div className="flex justify-between items-center">
-                <div className="flex gap-3 items-center opacity-60">
-                  <Image
-                    src="/logo.svg"
-                    alt="soundmac logo"
-                    width={20}
-                    height={20}
-                  />
-                  <h1 className="font-light ">SOUNDMAC</h1>
+      <div className="sticky top-0 z-20">
+        <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
+          <div
+            className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <div className="bg-primary w-5 h-1"></div>
+            <div className="bg-primary w-5 h-1"></div>
+            <div className="bg-primary w-5 h-1"></div>
+          </div>
+          <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
+            {headerMessage}
+          </h1>
+          <div
+            className={
+              " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
+              (isOpen ? " max-lg:-translate-x-0" : " max-lg:-translate-x-full")
+            }
+          >
+            <div className="bg-primary-700 py-10 w-full text-main-white">
+              <div className="flex flex-col gap-15 ml-6 mr-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex gap-3 items-center opacity-60">
+                    <Image
+                      src="/logo.svg"
+                      alt="soundmac logo"
+                      width={20}
+                      height={20}
+                    />
+                    <h1 className="font-light ">SOUNDMAC</h1>
+                  </div>
+                  <button
+                    className="bg-primary text-white px-5 py-3 rounded-lg lg:hidden"
+                    onClick={() => {
+                      setIsOpen(false);
+                      console.log(isOpen);
+                    }}
+                  >
+                    X
+                  </button>
                 </div>
-                <button
-                  className="bg-primary text-white px-5 py-3 rounded-lg lg:hidden"
-                  onClick={() => {setIsOpen(false); console.log(isOpen);
-                  }}
-                >
-                  X
-                </button>
-              </div>
-              <div className="flex flex-col gap-5">
-                <button
-                  className={
-                    "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" +
-                    (isActive === "dashboard" && " bg-primary-500")
-                  }
-                  onClick={() => {
-                    setIsActive("dashboard");
-                    setTab("dashboard");
-                  }}
-                >
-                  <Image
-                    src="/home.svg"
-                    alt="home logo"
-                    width={20}
-                    height={20}
+                <div className="flex flex-col gap-5">
+                  <button
+                    className={
+                      "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" +
+                      (isActive === "dashboard" && " bg-primary-500")
+                    }
+                    onClick={() => {
+                      setIsActive("dashboard");
+                      setTab("dashboard");
+                    }}
+                  >
+                    <Image
+                      src="/home.svg"
+                      alt="home logo"
+                      width={20}
+                      height={20}
+                    />
+                    Dashboard
+                  </button>
+                </div>
+                {sidebarComponents.map((component, index) => (
+                  <SideBarCom
+                    isActive={isActive}
+                    setIsActive={setIsActive}
+                    key={index}
+                    title={component.title}
+                    list={component.list}
                   />
-                  Dashboard
-                </button>
+                ))}
               </div>
-              {sidebarComponents.map((component, index) => (
-                <SideBarCom
-                  isActive={isActive}
-                  setIsActive={setIsActive}
-                  key={index}
-                  title={component.title}
-                  list={component.list}
-                />
-              ))}
             </div>
           </div>
         </div>
       </div>
-        
-        </div>
       <div className="flex">
         <div className="text-[#333333] lg:ml-[250px] w-full ">
-          <div className="px-5 py-5">
-            {(tab === "dashboard" || !tab) && <Dashboard  />}
+          <div className="">
+            {(tab === "dashboard" || !tab) && (
+              <Dashboard setHeaderMessage={setHeaderMessage} />
+            )}
             {tab === "Music" && (
               <>
-                {section === "uploadMusic" && <Upload />}
+                {section === "uploadMusic" && (
+                  <UploadMusic setHeaderMessage={setHeaderMessage} />
+                )}
                 {section === "manageReleases" && <ManageRelease />}
-                {!section && <Upload />}
+                {!section && (
+                  <UploadMusic setHeaderMessage={setHeaderMessage} />
+                )}
               </>
             )}
             {tab === "Artists" && (
@@ -204,9 +198,6 @@ const page = () => {
 
 export default page;
 
-const Upload = () => {
-  return <div>Upload</div>;
-};
 const ManageRelease = () => {
   return <div>Manage</div>;
 };

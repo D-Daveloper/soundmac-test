@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import Input from "../components/input/Input";
 import Link from "next/link";
@@ -53,7 +53,7 @@ const LoginForm = () => {
     password: "",
     email: "",
   });
-  const [loading,setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,12 +68,9 @@ const LoginForm = () => {
       if (res.status === 200) {
         localStorage.setItem("soundmacPendingEmail", loginForm.email);
         localStorage.setItem("soundmacRedirectAfterOtp", safeRedirect);
-            // Ensure redirect always happens
-            toast.success(res.data.msg);
-            console.log(res.data);
-            
-       await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms delay
-router.push("/otp");
+        toast.success(res.data.msg);
+        console.log(res.data);
+        router.push("/otp");
       }
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -81,8 +78,7 @@ router.push("/otp");
         return;
       }
       toast.error(error as string);
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -124,7 +120,7 @@ router.push("/otp");
       </form>
       <div className="flex justify-end flex-col gap-10 items-center pb-9 max-sm:text-2xl">
         <button
-        disabled={!loginForm.password || !loginForm.email || loading}
+          disabled={!loginForm.password || !loginForm.email || loading}
           form="signup-form"
           type="submit"
           className={

@@ -1,40 +1,51 @@
+'use client'
 import Image from "next/image";
-import React from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 
-const MainDashboard = (dataProp: any) => {
-  console.log(typeof dataProp.dataProp);
-  
-  const data = JSON.parse(dataProp.dataProp);
-console.log(data);
+type MainDashboardProps = {
+  dataProp: any;
+  setHeaderMessage: Dispatch<SetStateAction<string>>;
+};
+
+const MainDashboard = ({ dataProp, setHeaderMessage }: MainDashboardProps) => {
+  console.log(typeof dataProp);
+
+  const data = JSON.parse(dataProp);
+  console.log(data);
+  useEffect(()=>{
+
+    setHeaderMessage("Welcome, " + data.artistData.lastRelease.artist);
+  },[])
 
   return (
-    <div className="flex flex-col gap-5 w-full ">
+    <div className="flex flex-col gap-5 w-full p-5">
       <div className="grid grid-cols-3 max-xl:grid-cols-2 max-sm:grid-cols-1 gap-5 w-full ">
-          <div className="flex-2 bg-warning-50 border-[1px] rounded-3xl border-neutral-100 h-[160px] w-full col-span-1">
-            <div className=" grid grid-cols-2 w-full h-full">
-              <div className=" flex flex-col p-2 justify-between col-span-1">
-                <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm">
-                  Upcoming Release
-                </p>
-                <h2 className="text-2xl line-clamp-2 capitalize font-normal leading-[30px] tracking-tight text-text-body mt-6">
-                  {data.artistData.pendingRelease.name || "No Release name"}
-                </h2>
-                <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
-                  ~{data.artistData.pendingRelease.artist || "No Artist name"}
-                </p>
-              </div>
-              <div className="col-span-1 overflow-hidden">
-                <Image
-                  src={data.artistData.pendingRelease.image}
-                  priority={true}
-                  height={100}
-                  width={100}
-                  alt="picture of the users music cover art"
-                  className=" object-contain h-full w-[99%] "
-                />
-              </div>
+        <div className="flex-2 bg-warning-50 border-[1px] rounded-3xl border-neutral-100 h-[160px] w-full col-span-1">
+          <div className=" grid grid-cols-2 w-full h-full">
+            <div className=" flex flex-col p-2 justify-between col-span-1">
+              <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm">
+                Upcoming Release
+              </p>
+              <h2 className="text-2xl line-clamp-2 capitalize font-normal leading-[30px] tracking-tight text-text-body mt-6">
+                {data.artistData.pendingRelease.name || "No Release name"}
+              </h2>
+              <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
+                ~{data.artistData.pendingRelease.artist || "No Artist name"}
+              </p>
+            </div>
+            <div className="col-span-1 overflow-hidden">
+              <Image
+                src={data.artistData.pendingRelease.image}
+                fetchPriority="high"
+                priority={true}
+                height={100}
+                width={100}
+                alt="picture of the users music cover art"
+                className=" object-contain h-full w-[99%] "
+              />
             </div>
           </div>
+        </div>
         <div className="flex gap-2 max-sm:flex-col max-sm:h-[320px]">
           <div className="flex-1 bg-neutral-50 border-[1px] rounded-3xl border-neutral-100 h-[160px] w-full max-xl:col-span-[1.25]">
             <div className="capitalize flex flex-col gap-3 p-3 h-full justify-center">
@@ -117,12 +128,10 @@ console.log(data);
               </div>
               <div>
                 <h2 className="text-2xl line-clamp-2 capitalize font-normal leading-[30px] tracking-tight text-text-body mt-2">
-                                    {data.artistData.lastRelease.name || "No Release name"}
-
+                  {data.artistData.lastRelease.name || "No Release name"}
                 </h2>
                 <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
-                  ~                  {data.artistData.lastRelease.artist || "No Artist name"}
-
+                  ~ {data.artistData.lastRelease.artist || "No Artist name"}
                 </p>
               </div>
             </div>
@@ -181,6 +190,7 @@ console.log(data);
           <div className=" flex flex-col h-full">
             <Image
               src={"/convert.png"}
+              fetchPriority="high"
               height={700}
               width={1200}
               alt="picture of different audio formats"

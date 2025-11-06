@@ -7,7 +7,9 @@ export default function Select({
   placeholder = "Select an option",
   selected,
   setSelected,
+  name,
 }: {
+  name:string
   options: string[];
   placeholder?: string;
   selected: any;
@@ -21,8 +23,10 @@ export default function Select({
   const handleSelect = (option: string) => {
     console.log(option);
     setopt(options);
+    console.log(name);
+    
 
-    setSelected((prev: any) => ({ ...prev, country: option }));
+    setSelected((prev: any) => ({ ...prev, [name]: option }));
     setOpen(false);
   };
 
@@ -89,12 +93,12 @@ export default function Select({
         onKeyDown={handleKeyDown}
         className={
           " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +
-          (selected.country
+          (selected[name]
             ? ""
             : "text-gray-400 font-extralight font-(family-name:--font-figtree)")
         }
       >
-        {selected.country || placeholder}
+        {selected[name] || placeholder}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`w-5 h-5 text-gray-500 transition-transform ${
@@ -115,7 +119,7 @@ export default function Select({
 
       {/* Dropdown options */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white/50 border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-37 text-sm max-xs:max-h-60">
+        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-39 text-sm max-xs:max-h-60">
           <div className="flex p-2 outline-1 m-2 rounded-lg mb-5">
             <Image
             priority={true}
@@ -143,7 +147,7 @@ export default function Select({
                     : (
                         typeof selected === "string"
                           ? selected === option
-                          : selected?.country === option
+                          : selected[name] === option
                       )
                     ? "bg-blue-50 text-primary"
                     : "text-p"

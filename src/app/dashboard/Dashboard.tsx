@@ -3,23 +3,27 @@ import UseAxios from "@/util/customHooks/UseAxios";
 import Image from "next/image";
 import useSWR from "swr";
 import MainDashboard from "./MainDashboard";
+import { Dispatch, SetStateAction } from "react";
 
-const Dashboard = () => {
+const Dashboard = ({
+  setHeaderMessage,
+}: {
+  setHeaderMessage: Dispatch<SetStateAction<string>>;
+}) => {
   const api = UseAxios();
   const { data, error, isLoading } = useSWR(
     "dashboard",
-    async (url) => (await api.get(url,{headers:{}})).data,
-    {    
+    async (url) => (await api.get(url)).data,
+    {
       dedupingInterval: 60_000, // 1 min: prevent duplicate requests within this time
-    revalidateOnFocus: false, // disable re-fetching when tab/window refocuses
-    revalidateOnReconnect: false,
-    shouldRetryOnError: false,
-    errorRetryCount: 1,
+      revalidateOnFocus: false, // disable re-fetching when tab/window refocuses
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+      errorRetryCount: 1,
     }
   );
   console.log(data);
-  if (isLoading || data == undefined || error){
-    
+  if (isLoading || data == undefined || error) {
     return (
       <div className="flex flex-col gap-5 w-full ">
         <div className="grid grid-cols-3 max-xl:grid-cols-2 max-sm:grid-cols-1 gap-5 w-full ">
@@ -128,9 +132,10 @@ const Dashboard = () => {
         </div>
       </div>
     );
-  }else{
-    console.log(data);
-    return <MainDashboard dataProp={data} />;
+  } else {
+    return (
+      <MainDashboard dataProp={data} setHeaderMessage={setHeaderMessage} />
+    );
   }
 };
 

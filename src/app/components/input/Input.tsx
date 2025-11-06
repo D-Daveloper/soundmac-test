@@ -12,6 +12,7 @@ interface Props {
   placeholder: string;
   type?: string;
   alt?: string;
+  disabled?:boolean
 }
 
 const Input = ({
@@ -43,7 +44,7 @@ const Input = ({
           />
         )}
       </div>
-      <div className="flex px-3 rounded-lg border-[#E8E8E8] border-10 outline-1 gap-3 mt-2 sm:text-sm text-[16px]">
+      <div className={"flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-2 sm:text-sm text-[16px] " + ( props.disabled && " text-text-disable bg-neutral-50")}>
         {image && (
           <Image
             src={image}
@@ -56,6 +57,7 @@ const Input = ({
           />
         )}
         <input
+        disabled={props.disabled}
           onChange={updateValue}
           name={props.name}
           required={required}

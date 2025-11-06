@@ -159,6 +159,7 @@ const RegisterForm = () => {
                 setSelected={setRegisterForm}
                 placeholder="Select Country..."
                 options={country_list}
+                name="country"
               />
             </div>
           </div>
