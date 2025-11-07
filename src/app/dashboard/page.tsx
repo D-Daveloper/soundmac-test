@@ -89,6 +89,7 @@ const page = () => {
       <div className="sticky top-0 z-20">
         <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
           <div
+          role="button"
             className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
             onClick={() => setIsOpen(!isOpen)}
           >
@@ -131,7 +132,7 @@ const page = () => {
                   <button
                     className={
                       "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" +
-                      (isActive === "dashboard" && " bg-primary-500")
+                      (tab === "dashboard" && " bg-primary-500")
                     }
                     onClick={() => {
                       setIsActive("dashboard");
@@ -172,13 +173,13 @@ const page = () => {
                 {section === "uploadMusic" && (
                   <UploadMusic setHeaderMessage={setHeaderMessage} />
                 )}
-                {section === "manageReleases" && <ManageRelease />}
+                {/* {section === "manageReleases" && <ManageRelease />} */}
                 {!section && (
                   <UploadMusic setHeaderMessage={setHeaderMessage} />
                 )}
               </>
             )}
-            {tab === "Artists" && (
+            {/* {tab === "Artists" && (
               <>
                 {section === "createArtist" && <CreateArtist />}
                 {section === "manageArtist" && <ManageArtist />}
@@ -188,7 +189,7 @@ const page = () => {
             )}
             {tab === "Insight" && section === "songPerformance" && (
               <SongPerformance />
-            )}
+            )} */}
           </div>
         </div>
       </div>
@@ -198,18 +199,18 @@ const page = () => {
 
 export default page;
 
-const ManageRelease = () => {
-  return <div>Manage</div>;
-};
-const CreateArtist = () => {
-  return <div>createArtist</div>;
-};
-const ManageArtist = () => {
-  return <div>manageArtist</div>;
-};
-const Collaboration = () => {
-  return <div>Collaboration</div>;
-};
-const SongPerformance = () => {
-  return <div>SongPerformance</div>;
-};
+// const ManageRelease = () => {
+//   return <div>Manage</div>;
+// };
+// const CreateArtist = () => {
+//   return <div>createArtist</div>;
+// };
+// const ManageArtist = () => {
+//   return <div>manageArtist</div>;
+// };
+// const Collaboration = () => {
+//   return <div>Collaboration</div>;
+// };
+// const SongPerformance = () => {
+//   return <div>SongPerformance</div>;
+// };

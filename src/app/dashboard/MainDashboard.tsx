@@ -1,21 +1,14 @@
-'use client'
 import Image from "next/image";
-import React, { Dispatch, SetStateAction, useEffect } from "react";
 
 type MainDashboardProps = {
   dataProp: any;
-  setHeaderMessage: Dispatch<SetStateAction<string>>;
 };
 
-const MainDashboard = ({ dataProp, setHeaderMessage }: MainDashboardProps) => {
+const MainDashboard = ({ dataProp }: MainDashboardProps) => {
   console.log(typeof dataProp);
 
   const data = JSON.parse(dataProp);
   console.log(data);
-  useEffect(()=>{
-
-    setHeaderMessage("Welcome, " + data.artistData.lastRelease.artist);
-  },[])
 
   return (
     <div className="flex flex-col gap-5 w-full p-5">

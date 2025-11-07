@@ -21,7 +21,7 @@ const sideBarCom = (props: Props) => {
   return (
     <div className="">
       <button
-        onClick={() => {setOpen(!open); props.setIsActive(props.title)}}
+        onClick={() => {setOpen(!open);}}
         className={"w-full capitalize flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 " + (props.isActive.toLowerCase().trim() == props.title.toLowerCase().trim() ? "bg-primary-500/90" : "bg-transparent")}
       >
         {props.title}

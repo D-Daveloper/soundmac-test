@@ -36,14 +36,14 @@ export interface IUser extends mongoose.Document {
 
 
 const UserSchema = new mongoose.Schema({
-  first_name: {
+  firstName: {
     type: String,
     required: [true, "Provide your first name!"],
     trim: true,
     minlength: 3,
     maxlength: 32,
   },
-  last_name: {
+  lastName: {
     type: String,
     required: [true, "Provide your last name!"],
     trim: true,
@@ -64,6 +64,7 @@ const UserSchema = new mongoose.Schema({
     ],
     unique: true,
     trim: true,
+    lowercase: true, index: true
   },
 
   confirmed: {
@@ -123,7 +124,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  isrc_count: {
+  isrcCount: {
     type: Number,
     default: null,
   },
@@ -149,7 +150,7 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  referral_code: {
+  referralCode: {
     type: String,
   },
   reportSkip: {
@@ -160,7 +161,7 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-  catalog_count: {
+  catalogCount: {
     type: Number,
     default: 0,
   },

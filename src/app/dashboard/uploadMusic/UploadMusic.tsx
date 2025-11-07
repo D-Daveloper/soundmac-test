@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 import SongForm from "./song/SongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 

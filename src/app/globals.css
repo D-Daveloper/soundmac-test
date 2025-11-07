@@ -9,7 +9,7 @@ body {
   max-width: 100vw;
   /* overflow-x: hidden; */
   background: #E7E7E7;
-  font-family: 'Istok Web', sans-serif;
+  font-family: var(--font-figtree), sans-serif;
   /* font-size: calc(14 / 1440 * 100vw); */
   font-weight: normal;
   box-sizing: border-box;
@@ -175,9 +175,9 @@ a {
   --breakpoint-mobile: 850px;
   --breakpoint-xs: 500px;
 }
-.section{
+/* .section{
   font-family: var(--font-figtree), sans-serif!important;
-}
+} */
 button:hover{
 cursor: pointer;
 }

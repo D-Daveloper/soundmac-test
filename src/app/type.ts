@@ -33,3 +33,35 @@ export interface BLOG_CONTENT {
     content: string;
     slug: string;
 }
+export interface FeaturedArtist {
+  aritistName: string;
+  spotifyId: string;
+  appleId: string;
+}
+export interface SongWriter {
+  first_name: string;
+  last_name: string;
+}
+export interface Performer {
+  name: string;
+  role: string;
+}
+export interface Producer {
+  first_name: string;
+  last_name: string;
+}
+export interface SongForm {
+  song_title: string;
+  genre: string;
+  languages: string;
+  artist: string;
+  release_date: string;
+  featured_artist: FeaturedArtist[];
+  performer: Performer[];
+  song_writer: SongWriter[];
+  producer: Producer[];
+  territories: string[];
+  isChecked: boolean;
+  song_audio: File | null;
+  song_image: File | null;
+}
