@@ -1,7 +1,8 @@
 "use client";
+import { getDashboard } from "@/util/axios/axiosInstance";
 import UseAxios from "@/util/customHooks/UseAxios";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
-import useSWR from "swr";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
 const Dashboard = ({
@@ -10,22 +11,26 @@ const Dashboard = ({
   setHeaderMessage: Dispatch<SetStateAction<string>>;
 }) => {
   const api = UseAxios();
-  const { data, error, isLoading } = useSWR(
-    "dashboard",
-    async (url) => (await api.get(url)).data,
+  useEffect(()=>{
+    setHeaderMessage("Welcome, ");
+
+  },[])
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => getDashboard(api),
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 15, // 5 minutes: consider data fresh
+  });
+  useEffect(() => {
+    if (isError || data?.lastRelease.artist === undefined)
     {
-      dedupingInterval: 60_000, // 1 min: prevent duplicate requests within this time
-      revalidateOnFocus: false, // disable re-fetching when tab/window refocuses
-      revalidateOnReconnect: false,
-      shouldRetryOnError: false,
-      errorRetryCount: 1,
-    }
-  );
-    useEffect(()=>{
-  
+      setHeaderMessage("Welcome, User");
+    }else{
       setHeaderMessage("Welcome, " + data?.lastRelease.artist);
-    },[data])
-  // if (isLoading || data == undefined || error) {
+    } console.log(isError);
+    
+  }, [data]);
+
   return (
     <div className="flex flex-col gap-5 w-full p-5">
       <div className="grid grid-cols-3 max-xl:grid-cols-2 max-sm:grid-cols-1 gap-5 w-full ">
@@ -35,9 +40,7 @@ const Dashboard = ({
             (isLoading && " shimmer")
           }
         >
-          {isLoading ? (
-            <></>
-          ) : data && data.pendingRelease ? (
+          {(data && data.pendingRelease) ? (
             <div className=" flex-2 h-full ">
               <div className=" grid grid-cols-2 w-full h-full">
                 <div className=" flex flex-col p-2 justify-between col-span-1">
@@ -65,7 +68,7 @@ const Dashboard = ({
               </div>
             </div>
           ) : (
-            <div className="flex-2 ">
+            <div className={"flex-2 h-full " + (isLoading && " hidden")}>
               <div className="max-w-[80%] text-center flex flex-col justify-center items-center m-auto h-full">
                 <h2 className="text-lg font-bold leading-[20px] tracking-tight text-text-body">
                   No Pending Release
@@ -98,6 +101,7 @@ const Dashboard = ({
                   height={50}
                   width={53}
                   alt="head phones icon"
+                  className="w-auto h-auto"
                 />
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end">
                   {data?.streams || 0}
@@ -127,6 +131,7 @@ const Dashboard = ({
                   height={50}
                   width={53}
                   alt="music note icon"
+                  className="w-auto h-auto"
                 />
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end">
                   {data?.totalSongs || 0}
@@ -155,8 +160,8 @@ const Dashboard = ({
               priority={false}
               height={50}
               width={53}
-              alt="head phones icon"
-              className="self-start"
+              alt="music note icon"
+              className="self-start w-auto h-auto"
             />
             <div className="mt4 self-end">
               <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
@@ -286,14 +291,15 @@ const Dashboard = ({
       </div>
     </div>
   );
-  // } else {
-  //   return (
-  //     <MainDashboard dataProp={data} setHeaderMessage={setHeaderMessage} />
-  //   );
-  // }
 };
 
 export default Dashboard;
+
+// } else {
+//   return (
+//     <MainDashboard dataProp={data} setHeaderMessage={setHeaderMessage} />
+//   );
+// }
 // return <FilledDashboard />;
 
 // export const FilledDashboard = () => {

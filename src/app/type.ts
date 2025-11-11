@@ -53,15 +53,22 @@ export interface Producer {
 export interface SongForm {
   song_title: string;
   genre: string;
-  languages: string;
+  language: string;
   artist: string;
-  release_date: string;
+  release_date: undefined | Date;
+  preOrderDate:undefined|Date;
   featured_artist: FeaturedArtist[];
   performer: Performer[];
   song_writer: SongWriter[];
   producer: Producer[];
   territories: string[];
-  isChecked: boolean;
+  pre_order_check: boolean;
+  another_distribution_check: boolean;
   song_audio: File | null;
   song_image: File | null;
+  dsp:string[];
+  lyrics:string;
+  start_clip:string;
+  upc:string;
+  isrc:string;
 }

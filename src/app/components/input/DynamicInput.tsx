@@ -18,7 +18,7 @@ interface Props {
   field:keyof SongForm
 }
 
-const DynamicInput = ({
+const DynamicInput = React.memo(({
   image = null,
   type = "text",
   required = false,
@@ -108,6 +108,6 @@ const DynamicInput = ({
       </div>
     </>
   );
-};
+});
 
 export default DynamicInput;

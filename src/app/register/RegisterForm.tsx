@@ -155,8 +155,8 @@ const RegisterForm = () => {
             <p className="font-medium mb-2 sm:text-sm text-lg">Country</p>
             <div className="w-full">
               <Select
-                selected={registerForm}
-                setSelected={setRegisterForm}
+                selected={registerForm.country}
+                setSelected={(t)=>setRegisterForm((prev)=>({...prev,country:t}))}
                 placeholder="Select Country..."
                 options={country_list}
                 name="country"

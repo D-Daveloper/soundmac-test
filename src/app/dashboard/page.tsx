@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import Dashboard from "./Dashboard";
 import UploadMusic from "./uploadMusic/UploadMusic";
+import Link from "next/link";
 
 const page = () => {
   const searchParams = useSearchParams();
@@ -109,7 +110,7 @@ const page = () => {
             <div className="bg-primary-700 py-10 w-full text-main-white">
               <div className="flex flex-col gap-15 ml-6 mr-2">
                 <div className="flex justify-between items-center">
-                  <div className="flex gap-3 items-center opacity-60">
+                  <Link href={"/"} className="flex gap-3 items-center opacity-60">
                     <Image
                       src="/logo.svg"
                       alt="soundmac logo"
@@ -117,7 +118,7 @@ const page = () => {
                       height={20}
                     />
                     <h1 className="font-light ">SOUNDMAC</h1>
-                  </div>
+                  </Link>
                   <button
                     className="bg-primary text-white px-5 py-3 rounded-lg lg:hidden"
                     onClick={() => {
@@ -162,9 +163,9 @@ const page = () => {
           </div>
         </div>
       </div>
-      <div className="flex">
-        <div className="text-[#333333] lg:ml-[250px] w-full ">
-          <div className="">
+      <div className="flex h-full">
+        <div className="text-[#333333] lg:ml-[250px] w-full h-full">
+          <div className="h-full">
             {(tab === "dashboard" || !tab) && (
               <Dashboard setHeaderMessage={setHeaderMessage} />
             )}

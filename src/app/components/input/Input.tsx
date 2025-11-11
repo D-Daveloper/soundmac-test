@@ -13,9 +13,10 @@ interface Props {
   type?: string;
   alt?: string;
   disabled?:boolean
+  uppercase?:boolean
 }
 
-const Input = ({
+const Input = React.memo(({
   image = null,
   type = "text",
   required = false,
@@ -31,7 +32,7 @@ const Input = ({
   return (
     <>
       <div className="flex gap-1 sm:text-sm text-lg">
-        <p className=" capitalize font-medium">{props.title} </p>
+        <p className={"font-medium " + (props.uppercase? " uppercase" : " capitalize")}>{props.title} </p>
         {required && (
           <Image
             priority={false}
@@ -105,6 +106,6 @@ const Input = ({
       </div>
     </>
   );
-};
+});
 
 export default Input;

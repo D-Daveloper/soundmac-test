@@ -10,7 +10,7 @@ interface CheckboxSelectProps {
   title?: string;
 }
 
-const CheckboxSelect: React.FC<CheckboxSelectProps> = ({
+const CheckboxSelect: React.FC<CheckboxSelectProps> = React.memo(({
   options,
   selected,
   onChange,
@@ -175,6 +175,6 @@ const CheckboxSelect: React.FC<CheckboxSelectProps> = ({
       </div>}
     </div>
   );
-};
+});
 
 export default CheckboxSelect;

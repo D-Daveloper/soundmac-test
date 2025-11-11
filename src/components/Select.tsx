@@ -12,8 +12,8 @@ export default function Select({
   name:string
   options: string[];
   placeholder?: string;
-  selected: any;
-  setSelected: Dispatch<SetStateAction<any>>;
+  selected: string;
+  setSelected: (text:string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [opt, setopt] = useState(options);
@@ -26,7 +26,7 @@ export default function Select({
     console.log(name);
     
 
-    setSelected((prev: any) => ({ ...prev, [name]: option }));
+    setSelected(option);
     setOpen(false);
   };
 
@@ -93,12 +93,12 @@ export default function Select({
         onKeyDown={handleKeyDown}
         className={
           " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +
-          (selected[name]
+          (selected
             ? ""
             : "text-gray-400 font-extralight font-(family-name:--font-figtree)")
         }
       >
-        {selected[name] || placeholder}
+        {selected || placeholder}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className={`w-5 h-5 text-gray-500 transition-transform ${
@@ -144,11 +144,7 @@ export default function Select({
                 ${
                   index === highlightedIndex
                     ? "bg-blue-100"
-                    : (
-                        typeof selected === "string"
-                          ? selected === option
-                          : selected[name] === option
-                      )
+                    : selected === option
                     ? "bg-blue-50 text-primary"
                     : "text-p"
                 } 

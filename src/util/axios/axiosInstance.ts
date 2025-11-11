@@ -1,5 +1,7 @@
 // // lib/axiosInstance.ts
 
+import { AxiosInstance } from "axios";
+
 // import axios, { AxiosError } from "axios";
 // import { useRouter } from "next/navigation";
 // import { toast } from "react-toastify";
@@ -164,3 +166,8 @@
                 </div>
               </div>
             </div> */}
+
+export async function getDashboard(api:AxiosInstance) {
+    const res = await api.get("dashboard");
+    return res.data; // Axios auto-parses JSON
+};
