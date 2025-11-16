@@ -169,5 +169,9 @@ import { AxiosInstance } from "axios";
 
 export async function getDashboard(api:AxiosInstance) {
     const res = await api.get("dashboard");
-    return res.data; // Axios auto-parses JSON
+    return res.data;
+};
+export const getCurrentUser = async (api: AxiosInstance): Promise<any> => {
+  const res = await api.get("/users/user");
+  return res.data;
 };

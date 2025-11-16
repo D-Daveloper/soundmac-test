@@ -1,4 +1,3 @@
-"use client"
 import React from "react";
 import si from "@/../public/signinimage.png";
 import Image from "next/image";

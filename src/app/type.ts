@@ -34,7 +34,7 @@ export interface BLOG_CONTENT {
     slug: string;
 }
 export interface FeaturedArtist {
-  aritistName: string;
+  artistName: string;
   spotifyId: string;
   appleId: string;
 }
@@ -71,4 +71,6 @@ export interface SongForm {
   start_clip:string;
   upc:string;
   isrc:string;
+  copyRightHolder:string;
+  copyRightYear:Date | undefined;
 }

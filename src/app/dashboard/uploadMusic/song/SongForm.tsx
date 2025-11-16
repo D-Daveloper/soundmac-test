@@ -10,11 +10,13 @@ import type {
   SongForm,
   SongWriter,
 } from "@/app/type";
-import { genreList, territories } from "@/app/utils/constants";
+import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
+import { isFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
+import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -34,7 +36,7 @@ const SongForm = () => {
     artist: "gggg",
     release_date: undefined,
     preOrderDate: undefined,
-    featured_artist: [{ aritistName: "", spotifyId: "", appleId: "" }],
+    featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
     performer: [{ name: "", role: "" }],
     song_writer: [{ first_name: "", last_name: "" }],
     producer: [{ first_name: "", last_name: "" }],
@@ -48,6 +50,8 @@ const SongForm = () => {
     start_clip: "",
     isrc: "",
     upc: "",
+    copyRightHolder: "",
+    copyRightYear: undefined,
   });
   const { deleteParam } = useTabQuery();
 
@@ -58,7 +62,7 @@ const SongForm = () => {
           ...prev,
           featured_artist: [
             ...prev.featured_artist,
-            { aritistName: "", spotifyId: "", appleId: "" },
+            { artistName: "", spotifyId: "", appleId: "" },
           ],
         }));
         break;
@@ -120,6 +124,8 @@ const SongForm = () => {
     field: keyof SongForm // 'performers' or 'producers'
   ) => {
     const { name, value } = e.target;
+    // console.log(name,value);
+
     switch (field) {
       case "featured_artist":
         setSongForm((prev) => {
@@ -206,40 +212,70 @@ const SongForm = () => {
 
   const handlePreview = (form: SongForm) => {
     console.log(form);
-    if (!preview) {
+   
+    if (preview === false) {
+      const validForm = isFormValid(form);
+      if (validForm != "true")
+        return toast.warn(validForm);
       const string_form = JSON.stringify(form);
+      const featured_artist = JSON.stringify(form.featured_artist);
+      const song_writer = JSON.stringify(form.song_writer);
+      const performer = JSON.stringify(form.performer);
+      const producer = JSON.stringify(form.producer);
+      localStorage.setItem("song_writer", song_writer);
       localStorage.setItem("songForm", string_form);
+      localStorage.setItem("featured_artist", featured_artist);
+      localStorage.setItem("performer", performer);
+      localStorage.setItem("producer", producer);
     }
     setPreview(!preview);
   };
+
   useEffect(() => {
     const string_form = localStorage.getItem("songForm");
+    const featured_artist = localStorage.getItem("featured_artist");
+    const song_writer = localStorage.getItem("song_writer");
+    const performer = localStorage.getItem("performer");
+    const producer = localStorage.getItem("producer");
+
     if (string_form) {
       const songForm = JSON.parse(string_form);
 
+      // Parse with fallback to default value
+      const featured_artist1 = featured_artist
+        ? JSON.parse(featured_artist)
+        : [{ artistName: "", spotifyId: "", appleId: "" }];
+
+      const song_writer1 = song_writer
+        ? JSON.parse(song_writer)
+        : [{ first_name: "", last_name: "" }];
+
+      const performer1 = performer
+        ? JSON.parse(performer)
+        : [{ name: "", role: "" }];
+
+      const producer1 = producer
+        ? JSON.parse(producer)
+        : [{ first_name: "", last_name: "" }];
+
+      console.log(featured_artist1);
+
       setSongForm({
         ...songForm,
-        release_date: new Date(songForm.release_date),
+        featured_artist: featured_artist1,
+        song_writer: song_writer1,
+        performer: performer1,
+        producer: producer1,
+        release_date: songForm.release_date
+          ? new Date(songForm.release_date)
+          : undefined,
         song_image: null,
         song_audio: null,
       });
     }
   }, []);
-  // const handleDynamicChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  //   index: number,
-  //   field: "featured_artist"
-  // ) => {
-  //   const { name, value } = e.target;
 
-  //   setSongForm((prev) => {
-  //     // work explicitly with the featured_artist array so spreading is on an array of objects
-  //     const updatedList = [...prev.featured_artist];
-  //     updatedList[index] = { ...updatedList[index], [name as keyof FeaturedArtist]: value };
-  //     return { ...prev, featured_artist: updatedList };
-  //   });
-  // };
-  return (
+ return (
     <div className="bg-main-white h-full w-full flex flex-col">
       <button
         onClick={() => {
@@ -256,7 +292,7 @@ const SongForm = () => {
       </button>
       <div className="flex gap-8 px-5 py-5">
         {!preview ? (
-          <div className="flex-3 overflow-auto flex flex-col gap-20 px-5 pb-3 h-[64dvh]">
+          <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
             {/* Song info */}
             <div>
               <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -388,10 +424,10 @@ const SongForm = () => {
                       <DynamicInput
                         index={i}
                         field="featured_artist"
-                        value={songForm.featured_artist[i].aritistName}
+                        value={songForm.featured_artist[i].artistName}
                         title={"Artist name"}
                         type={"text"}
-                        name={"aritistName"}
+                        name={"artistName"}
                         placeholder={"Enter Artist Name"}
                         updateValue={handleDynamicChange}
                         required={true}
@@ -423,24 +459,41 @@ const SongForm = () => {
                     </div>
                   </div>
                 ))}
-                <button
-                  disabled={songForm.featured_artist.length === 5}
-                  onClick={() => {
-                    addField("featured_artist");
-                  }}
-                  className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
-                >
-                  <Image
-                    priority={false}
-                    loading="lazy"
-                    src="/add2.svg"
-                    alt="an add icon"
-                    width={0}
-                    height={0}
-                    className="w-4 text-primary"
-                  />
-                  Add featured Artist
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    disabled={songForm.featured_artist.length === 5}
+                    onClick={() => {
+                      addField("featured_artist");
+                    }}
+                    className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
+                  >
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/add2.svg"
+                      alt="an add icon"
+                      width={0}
+                      height={0}
+                      className="w-4 text-primary"
+                    />
+                    Add featured Artist
+                  </button>
+                  <button
+                    disabled={songForm.featured_artist.length === 1}
+                    onClick={() => {
+                      setSongForm((prev) => ({
+                        ...prev,
+                        featured_artist: prev.featured_artist.filter(
+                          (_, index) =>
+                            index !== prev.featured_artist.length - 1
+                        ),
+                      }));
+                    }}
+                    className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
               </div>
 
               {/* song writer */}
@@ -485,22 +538,38 @@ const SongForm = () => {
                     </div>
                   </div>
                 ))}
-                <button
-                  disabled={songForm.song_writer.length === 12}
-                  onClick={() => addField("song_writer")}
-                  className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
-                >
-                  <Image
-                    priority={false}
-                    loading="lazy"
-                    src="/add2.svg"
-                    alt="an add icon"
-                    width={0}
-                    height={0}
-                    className="w-4 text-primary"
-                  />
-                  Add Songwriter
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    disabled={songForm.song_writer.length === 12}
+                    onClick={() => addField("song_writer")}
+                    className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
+                  >
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/add2.svg"
+                      alt="an add icon"
+                      width={0}
+                      height={0}
+                      className="w-4 text-primary"
+                    />
+                    Add Songwriter
+                  </button>
+                  <button
+                    disabled={songForm.song_writer.length === 1}
+                    onClick={() => {
+                      setSongForm((prev) => ({
+                        ...prev,
+                        song_writer: prev.song_writer.filter(
+                          (_, index) => index !== prev.song_writer.length - 1
+                        ),
+                      }));
+                    }}
+                    className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
               </div>
 
               {/* performers */}
@@ -530,36 +599,71 @@ const SongForm = () => {
                       />
                     </div>
                     <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <DynamicInput
-                        index={index}
-                        field="performer"
-                        value={songForm.performer[index].role}
-                        title={"role"}
-                        type={"text"}
-                        name={"role"}
-                        placeholder={"Enter role"}
-                        updateValue={handleDynamicChange}
-                        required={true}
+                      <div className="flex gap-1">
+                        <p className="font-medium mb-2 sm:text-sm text-lg">
+                          Role
+                        </p>
+                        <Image
+                          priority={false}
+                          loading="lazy"
+                          src="/required.svg"
+                          alt="a star marking this field as required"
+                          width={0}
+                          height={0}
+                          className="w-2 -mt-5"
+                        />
+                      </div>
+                      <Select
+                        selected={songForm.performer[index].role}
+                        setSelected={(t) =>
+                          setSongForm((prev) => {
+                            const updatedList = [...prev.performer];
+                            updatedList[index] = {
+                              ...updatedList[index],
+                              role: t,
+                            };
+                            return { ...prev, performer: updatedList };
+                          })
+                        }
+                        placeholder="Select role..."
+                        options={performerRoles}
+                        name="perfomer"
                       />
                     </div>
                   </div>
                 ))}
-                <button
-                  disabled={songForm.performer.length === 5}
-                  onClick={() => addField("performer")}
-                  className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
-                >
-                  <Image
-                    priority={false}
-                    loading="lazy"
-                    src="/add2.svg"
-                    alt="an add icon"
-                    width={0}
-                    height={0}
-                    className="w-4 text-primary"
-                  />
-                  Add Performer
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    disabled={songForm.performer.length === 5}
+                    onClick={() => addField("performer")}
+                    className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
+                  >
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/add2.svg"
+                      alt="an add icon"
+                      width={0}
+                      height={0}
+                      className="w-4 text-primary"
+                    />
+                    Add Performer
+                  </button>
+                  <button
+                    disabled={songForm.performer.length === 1}
+                    onClick={() => {
+                      setSongForm((prev) => ({
+                        ...prev,
+                        performer: prev.performer.filter(
+                          (_, index) => index !== prev.performer.length - 1
+                        ),
+                      }));
+                    }}
+                    className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
               </div>
 
               {/* producer */}
@@ -603,21 +707,37 @@ const SongForm = () => {
                     </div>
                   </div>
                 ))}
-                <button
-                  onClick={() => addField("producer")}
-                  className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
-                >
-                  <Image
-                    priority={false}
-                    loading="lazy"
-                    src="/add2.svg"
-                    alt="an add icon"
-                    width={0}
-                    height={0}
-                    className="w-4 text-primary"
-                  />
-                  Add Producer
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => addField("producer")}
+                    className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
+                  >
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/add2.svg"
+                      alt="an add icon"
+                      width={0}
+                      height={0}
+                      className="w-4 text-primary"
+                    />
+                    Add Producer
+                  </button>
+                  <button
+                    disabled={songForm.producer.length === 1}
+                    onClick={() => {
+                      setSongForm((prev) => ({
+                        ...prev,
+                        producer: prev.producer.filter(
+                          (_, index) => index !== prev.producer.length - 1
+                        ),
+                      }));
+                    }}
+                    className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
               </div>
               {/* release details */}
               <div>
@@ -627,11 +747,22 @@ const SongForm = () => {
                 <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%] mb-5">
                   Set how and when your song goes live.
                 </p>
-                <div className="w-full flex flex-wrap justify-between gap-y-10 mb-5">
+                <div className="w-full flex flex-wrap justify-between gap-y-5">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className=" capitalize font-medium sm:text-sm text-lg">
-                      Release Date
-                    </p>
+                    <div className="flex">
+                      <p className=" capitalize font-medium sm:text-sm text-lg">
+                        Release Date
+                      </p>
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3 "
+                      />
+                    </div>
                     {/* <Input
                     value={SongForm.release_date}
                     title={"Release Date"}
@@ -651,14 +782,25 @@ const SongForm = () => {
                       toYear={date.toYear}
                       fromYear={date.fromYear}
                     />
-                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mt-1">
                       Release date must be 2 weeks ahead the upload date
                     </p>
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                    <p className=" capitalize font-medium sm:text-sm text-lg">
-                      territories{" "}
-                    </p>
+                    <div className="flex">
+                      <p className=" capitalize font-medium sm:text-sm text-lg">
+                        territories{" "}
+                      </p>
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3 "
+                      />
+                    </div>
 
                     <CheckboxSelect
                       title="Select Territories"
@@ -697,7 +839,7 @@ const SongForm = () => {
                         toYear={date.toYear}
                         fromYear={date.fromYear}
                       />
-                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                         Pre order date must be 3 weeks before the release date
                       </p>
                     </div>
@@ -719,11 +861,22 @@ const SongForm = () => {
               </p>
               <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                 <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                  <p className=" capitalize font-medium sm:text-sm text-lg">
-                    territories{" "}
-                  </p>
+                  <div className="flex">
+                    <p className=" capitalize font-medium sm:text-sm text-lg">
+                      DSPs
+                    </p>
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/required.svg"
+                      alt="a star marking this field as required"
+                      width={0}
+                      height={0}
+                      className="w-2 -mt-3 "
+                    />
+                  </div>
                   <CheckboxSelect
-                    title="Select Territories"
+                    title="Select DSPs"
                     options={territories}
                     selected={songForm.dsp}
                     onChange={(s: string[]) => {
@@ -747,9 +900,20 @@ const SongForm = () => {
               </p>
               <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                 <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                  <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                    Audio Upload
-                  </h4>
+                  <div className="flex gap-1">
+                    <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                      Audio Upload
+                    </h4>
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/required.svg"
+                      alt="a star marking this field as required"
+                      width={0}
+                      height={0}
+                      className="w-2 -mt-3 "
+                    />
+                  </div>
 
                   <div className="flex items-center justify-center w-60">
                     <label
@@ -845,7 +1009,7 @@ const SongForm = () => {
                 support clips.
               </p>
               <div>
-                <div className="w-full flex flex-wrap justify-between gap-y-10 mb-5 mt-10">
+                <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
                       value={songForm.start_clip}
@@ -856,7 +1020,7 @@ const SongForm = () => {
                       updateValue={handleChange}
                       required={true}
                     />
-                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       This determines which part of your song will play in short
                       previews on platforms like Spotify, Instagram, or TikTok.
                     </p>
@@ -879,9 +1043,20 @@ const SongForm = () => {
               <div className="flex items-center justify-center w-60">
                 <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                   <div className="flex flex-col max-sm:w-full gap-2">
-                    <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading w-full">
-                      Artwork File
-                    </h4>
+                    <div className="flex gap-1">
+                      <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                        Artwork File
+                      </h4>
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3 "
+                      />
+                    </div>
                     <div className="flex items-center justify-center w-60">
                       <label
                         htmlFor="song_image"
@@ -951,7 +1126,7 @@ const SongForm = () => {
                 Enter these details only if you are transferring from another
                 distributor
               </p>
-              <div className="flex w-fit gap-2 items-center mb-5">
+              {/* <div className="flex w-fit gap-2 items-center mb-5">
                 <input
                   type="checkbox"
                   className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
@@ -962,7 +1137,7 @@ const SongForm = () => {
                 <p className="leading-6 text-sm font-medium">
                   Pitch to an Editorial Playlist?
                 </p>
-              </div>
+              </div> */}
               <div className="flex w-fit gap-2 items-center mb-5">
                 <input
                   type="checkbox"
@@ -975,7 +1150,7 @@ const SongForm = () => {
                   Transferring from another distributor?
                 </p>
               </div>
-              <div className="w-full flex flex-wrap justify-between gap-y-10 mb-5">
+              <div className="w-full flex flex-wrap justify-between gap-y-10">
                 <div className="flex flex-col w-[40%] max-sm:w-full">
                   <Input
                     value={songForm.isrc}
@@ -988,7 +1163,7 @@ const SongForm = () => {
                     uppercase={true}
                     required={songForm.another_distribution_check}
                   />
-                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                     Unique code for tracking sales/streams.
                   </p>
                 </div>
@@ -1004,9 +1179,48 @@ const SongForm = () => {
                     uppercase={true}
                     required={songForm.another_distribution_check}
                   />
-                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                     Unique code for tracking sales/streams.
                   </p>
+                </div>
+                <div className="flex flex-col w-[40%] max-sm:w-full">
+                  <Input
+                    value={songForm.copyRightHolder}
+                    title={"Copy Right Holder"}
+                    type={"text"}
+                    name={"copyRightHolder"}
+                    placeholder={"Enter Copy Right Holder"}
+                    updateValue={handleChange}
+                    disabled={false}
+                    uppercase={false}
+                    required={true}
+                  />
+                </div>
+                <div className="flex flex-col w-[40%] max-sm:w-full">
+                  <div className="flex">
+                    <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                      Copy Right Year
+                    </p>
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/required.svg"
+                      alt="a star marking this field as required"
+                      width={0}
+                      height={0}
+                      className="w-2 -mt-3 "
+                    />
+                  </div>
+                  <SelectDate
+                    disabled={false}
+                    setDate={(date) =>
+                      setSongForm((prev) => ({
+                        ...prev,
+                        copyRightYear: date,
+                      }))
+                    }
+                    value={songForm.copyRightYear}
+                  />
                 </div>
               </div>
             </div>
@@ -1074,7 +1288,7 @@ const SongForm = () => {
                 <h2>Featured Artists</h2>
                 <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                   {songForm.featured_artist.map(
-                    (item) => item.aritistName + ","
+                    (item) => item.artistName + ","
                   )}
                 </p>
                 {/* border line */}

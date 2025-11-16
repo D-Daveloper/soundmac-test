@@ -156,6 +156,7 @@ a {
 }
 @theme {
   --color-primary: #11456B;
+  --color-primary-red: #D91B1B;
   --color-primary-700:#0E2E44;
   --color-primary-500:#11456B;
   --color-primary-300:#708FA6;

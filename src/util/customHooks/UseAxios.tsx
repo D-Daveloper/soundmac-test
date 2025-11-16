@@ -13,24 +13,24 @@ const UseAxios = () => {
     headers: {
       "Content-Type": "application/json",
     },
-    withCredentials: false, // set to true if you use cookies for auth
+    withCredentials: true, // set to true if you use cookies for auth
   });
 
-  // 🧩 Request Interceptor
-  api.interceptors.request.use(
-    (config) => {
-      // Example: attach auth token from localStorage
-      if (typeof window != 'undefined') {
-        const token = localStorage.getItem("soundmacToken");
-        if (token) {
-          config.headers = config.headers || {};
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+  // // 🧩 Request Interceptor
+  // api.interceptors.request.use(
+  //   (config) => {
+  //     // Example: attach auth token from localStorage
+  //     if (typeof window != 'undefined') {
+  //       const token = localStorage.getItem("soundmacToken");
+  //       if (token) {
+  //         config.headers = config.headers || {};
+  //         config.headers.Authorization = `Bearer ${token}`;
+  //       }
+  //     }
+  //     return config;
+  //   },
+  //   (error) => Promise.reject(error)
+  // );
 
   // 🧩 Response Interceptor
   api.interceptors.response.use(
@@ -49,11 +49,11 @@ const UseAxios = () => {
           const fullUrl = window.location.href;
           const redirect = fullUrl.split(origin)[1];
           console.log(redirect);
+          
           toast.error("Session expired. Please login again.");
           router.push("/login" + (redirect ? `?redirect=${redirect}` : ""));
         }
-      }
-      if (status === 400) {
+      }else if (status === 400) {
         if (data.validationErrors) {
           const modelStateErrors: string[] = [];
           data.validationErrors.forEach((i: string) => {
@@ -67,8 +67,9 @@ const UseAxios = () => {
         toast.error(message);
       } else if (status === 403)
         toast.error("You are not authorized for this action.");
-      else if (status === 500) toast.error("Server error. Try again later.");
-      else toast.error(message);
+        else if (status === 404) toast.error(message || "Not Found.");
+        else if (status === 500) toast.error(message || "Server error. Try again later.");
+        else toast.error(message);
 
       return Promise.reject(error);
     }

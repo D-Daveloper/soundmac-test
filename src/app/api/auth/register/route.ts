@@ -3,17 +3,8 @@ import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { handleMongooseValidationError } from "@/util/customError/error";
-const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
-const otpLength = process.env.OTP_LENGTH as unknown as number;
+import { generateOtp } from "@/util/middleware/functions";
 
-const generateOtp = () => {
-  let otp = "";
-  for (let i = 0; i < otpLength; i++) {
-    const randomIndex = Math.floor(Math.random() * OtpCharacters.length);
-    otp += OtpCharacters.charAt(randomIndex);
-  }
-  return otp;
-};
 export async function POST(req: Request) {
   try {
     const body = await req.json();

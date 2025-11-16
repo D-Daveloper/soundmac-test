@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     console.log("File name:", selectedImage);
     console.log("File type:", file.type);
     console.log("File size:", file.size);
-    const userData = await verifyJWT(req);
+    const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
@@ -91,7 +91,7 @@ export async function GET(req: Request) {
   try {
     let artists: IArtist[] = [];
     await dbConnect();
-    const userData = await verifyJWT(req);
+    const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
 
     if (userJwt.msg) {

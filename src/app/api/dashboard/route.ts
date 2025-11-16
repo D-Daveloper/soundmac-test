@@ -1,7 +1,15 @@
+import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
+    const userData = await verifyJWT();
+
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+    
     const artistData = {
       pendingRelease: {
         artist: "David",

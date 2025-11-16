@@ -2,17 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
-
-const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
-const otpLength = process.env.OTP_LENGTH as unknown as number;
-const generateOtp = () => {
-  let otp = "";
-  for (let i = 0; i < otpLength; i++) {
-    const randomIndex = Math.floor(Math.random() * OtpCharacters.length);
-    otp += OtpCharacters.charAt(randomIndex);
-  }
-  return otp;
-};
+import { generateOtp } from "@/util/middleware/functions";
 
 export async function POST(req: Request) {
   try {
@@ -23,30 +13,30 @@ export async function POST(req: Request) {
     let otp = "";
 
     const { email, password } = await req.json();
-    
+
     if (!email || !password) {
       return NextResponse.json(
         { msg: "Email and password are required" },
         { status: 400 }
       );
-    };
+    }
 
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json({ msg: "User Not Found" }, { status: 404 });
-    };
+    }
 
     const isMatch = await user.comparePassword(password.trim());
     if (!isMatch) {
       return NextResponse.json({ msg: "Invalid credentials" }, { status: 400 });
-    };
+    }
 
     if (!user.confirmed) {
-          try {
-            const mailRes = await sendEmail(
-              `${user.email}`,
-              "Welcome to SOUNDMAC!",
-              `
+      try {
+        const mailRes = await sendEmail(
+          `${user.email}`,
+          "Welcome to SOUNDMAC!",
+          `
               
               <!DOCTYPE html>
       <html lang="en">
@@ -130,98 +120,102 @@ export async function POST(req: Request) {
         </body>
       </html>
                   `
-            );
-            if (!mailRes) {
-              return NextResponse.json(
-                { success: false, msg: "Failed to send verification email" },
-                { status: 500 }
-              );
-            }
-          } catch (error) {
-            console.log(error);
-            return NextResponse.json(
-              { success: false, msg: "Failed to send verification email" },
-              { status: 500 }
-            );
-          }
+        );
+        if (!mailRes) {
+          return NextResponse.json(
+            { success: false, msg: "Failed to send verification email" },
+            { status: 500 }
+          );
+        }
+      } catch (error) {
+        console.log(error);
+        return NextResponse.json(
+          { success: false, msg: "Failed to send verification email" },
+          { status: 500 }
+        );
+      }
       return NextResponse.json(
         { msg: "Please check your mailbox to verify." },
         { status: 403 }
       );
-    };
+    }
+    if (process.env.NODE_ENV === "development") {
+    return NextResponse.json({ msg: "Login successful" }, { status: 200 });
 
-      otp = generateOtp();
+    }
+    otp = generateOtp();
 
-      // update user
-      const updatedUser = await User.findByIdAndUpdate(
-        {
-          _id: user._id.toString(),
-        },
-        {
-          updatedAt: Date.now,
-          otp: otp,
-          otpExpires: new Date(currentDate.getTime() + 10 * 60000), // 30 minutes in milliseconds (1 minute = 60,000 milliseconds)
-        },
-        {
-          new: true,
-          runValidators: true,
-          select:
-            "-password -otp -otpExpires -refreshToken -refreshTokenExpires",
-        }
-      );
+    // update user
+    const updatedUser = await User.findByIdAndUpdate(
+      {
+        _id: user._id.toString(),
+      },
+      {
+        updatedAt: Date.now,
+        otp: otp,
+        otpExpires: new Date(currentDate.getTime() + 10 * 60000), // 30 minutes in milliseconds (1 minute = 60,000 milliseconds)
+      },
+      {
+        new: true,
+        runValidators: true,
+        select:
+          "-password -otp -otpExpires -refreshToken -refreshTokenExpires",
+      }
+    );
 
-      try {
-        const mailRes = await sendEmail(
-          `${updatedUser?.email}`,
-          "OTP!",
-          `
-        
-        <!DOCTYPE html>
+    try {
+      const mailRes = await sendEmail(
+        `${updatedUser?.email}`,
+        "OTP!",
+        `
+  
+  <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Account Verification</title>
-	</head>
-	<body>
-		<div>
-			Here is your otp ${otp}
-			<p>Expires in 10 mins </p>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Account Verification</title>
+</head>
+<body>
+<div>
+Here is your otp ${otp}
+<p>Expires in 10 mins </p>
 
-		</div>
-	</body>
+</div>
+</body>
 </html>
-            `
-        );
-        if (!mailRes) {
-          return NextResponse.json(
-            { msg: "Failed to send OTP. Please try again later." },
-            { status: 500 }
-          );
-        }
-        return NextResponse.json(
-          { msg: "An otp has been sent to your email",otp:true },
-          { status: 200 }
-        );
-      } catch (error) {
-        console.log(error);
+      `
+      );
+      if (!mailRes) {
         return NextResponse.json(
           { msg: "Failed to send OTP. Please try again later." },
           { status: 500 }
         );
       }
-
+      return NextResponse.json(
+        { msg: "An otp has been sent to your email", otp: true },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.log(error);
+      return NextResponse.json(
+        { msg: "Failed to send OTP. Please try again later." },
+        { status: 500 }
+      );
+    }
 
     // //   create token
     // const token = user.createJWT();
-    
-    // return NextResponse.json({ msg: "Login successful" ,token,user});
+
   } catch (error: unknown) {
-    if (error instanceof Error){
+    if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
-    }else{
-      return NextResponse.json({ msg: "An unknown error occurred" }, { status: 500 });
+    } else {
+      return NextResponse.json(
+        { msg: "An unknown error occurred" },
+        { status: 500 }
+      );
     }
   }
 }

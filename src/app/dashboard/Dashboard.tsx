@@ -1,35 +1,9 @@
 "use client";
-import { getDashboard } from "@/util/axios/axiosInstance";
-import UseAxios from "@/util/customHooks/UseAxios";
-import { useQuery } from "@tanstack/react-query";
+import { useDashboard } from "@/util/customHooks/useQueries";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect } from "react";
 
-const Dashboard = ({
-  setHeaderMessage,
-}: {
-  setHeaderMessage: Dispatch<SetStateAction<string>>;
-}) => {
-  const api = UseAxios();
-  useEffect(()=>{
-    setHeaderMessage("Welcome, ");
-
-  },[])
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["dashboard"],
-    queryFn: () => getDashboard(api),
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 15, // 5 minutes: consider data fresh
-  });
-  useEffect(() => {
-    if (isError || data?.lastRelease.artist === undefined)
-    {
-      setHeaderMessage("Welcome, User");
-    }else{
-      setHeaderMessage("Welcome, " + data?.lastRelease.artist);
-    } console.log(isError);
-    
-  }, [data]);
+const Dashboard = () => {
+  const { data, isLoading, isError, error } = useDashboard();
 
   return (
     <div className="flex flex-col gap-5 w-full p-5">
@@ -103,7 +77,7 @@ const Dashboard = ({
                   alt="head phones icon"
                   className="w-auto h-auto"
                 />
-                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end">
+                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
                   {data?.streams || 0}
                 </h2>
               </div>
@@ -133,7 +107,7 @@ const Dashboard = ({
                   alt="music note icon"
                   className="w-auto h-auto"
                 />
-                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end">
+                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
                   {data?.totalSongs || 0}
                 </h2>
               </div>

@@ -33,11 +33,11 @@ const sideBarCom = (props: Props) => {
           className=""
         />
       </button>
-      <div className={props.title === "music" ? "h-20" : props.title === "artists" ? "h-30" : "h-8"}>
+      <div className={""}>
         <div
           className={
-            "transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (open ? " flex h-full pb-5" : "  h-0 pb-1")
+            "justify-around transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
+            (open ? (props.title === 'music'? " flex max-h-[80px]": props.title === "artists"? " max-h-[100px]" : " max-h-[25px]") : "  max-h-[0px]")
           }
         >
           {props.list.map((section, index) => (
@@ -49,7 +49,7 @@ const sideBarCom = (props: Props) => {
               aria-disabled={!open}
               tabIndex={!open ? -1 : 0}
               className={(index === 1 || index === 2? "mt-4 " : "") +
-                " transition-all duration-300 flex gap-5 font-extralight capitalize" +
+                " transition-all duration-300 flex gap-5 font-extralight capitalize h-auto" +
                 (open
                   ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99"
                   : " opacity-0")

@@ -83,7 +83,6 @@ export function useTabQuery(defaultTab = "dashboard") {
     router.push(`?${params.toString()}`, { scroll: false });
 
   };
-  const type = searchParams.get("type") || "upload";
 
   return { tab, section, setTab, setSection,setParam,getParam,deleteParam };
 }

@@ -4,15 +4,7 @@ import React, { Dispatch, SetStateAction, useEffect } from "react";
 import SongForm from "./song/SongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 
-const UploadMusic = ({
-  setHeaderMessage,
-}: {
-  setHeaderMessage: Dispatch<SetStateAction<string>>;
-}) => {
-  useEffect(()=>{
-
-    setHeaderMessage("Upload Music");
-  },[])
+const UploadMusic = () => {
   const {setParam, getParam } = useTabQuery();
   const type = getParam("type");
 
@@ -31,7 +23,7 @@ const UploadMusic = ({
           </p>
         </div>
         <div className="flex w-full justify-between gap-7 mt-20 max-sm:flex-col text-center">
-          <div className="h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
+          <div className="py-5 h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
             <Image
               src={"/uploadsong.svg"}
               alt="upload song icon"
@@ -52,7 +44,7 @@ const UploadMusic = ({
               Upload a Single
             </button>
           </div>
-          <div className="h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
+          <div className="py-5 h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
             <Image
               src={"/uploadalbum.svg"}
               alt="upload song icon"

@@ -7,7 +7,7 @@ export async function GET(req: Request) {
   try {
     await dbConnect();
 
-    const userData = await verifyJWT(req);
+    const userData = await verifyJWT();
     
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
 
     if (!user) {
-      return NextResponse.json({ msg: "User Not Found" }, { status: 401 });
+      return NextResponse.json({ msg: "User Not Found" }, { status: 404 });
     };
     
     return NextResponse.json({ msg: "Successful" ,user});

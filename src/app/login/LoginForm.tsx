@@ -125,7 +125,7 @@ const LoginForm = () => {
           type="submit"
           className={
             "bg-disable px-8 py-3 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
-            (loginForm.password && !loading && "bg-primary hover:bg-primary/90")
+            ((loginForm.password && !loading) && " bg-primary hover:bg-primary/90")
           }
         >
           Sign In

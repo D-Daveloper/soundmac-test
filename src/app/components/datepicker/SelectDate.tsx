@@ -16,8 +16,9 @@ interface Calendar22Props {
   disabled: boolean;
   type?: "first" | "second";
   releaseDate?: Date | undefined;
-  fromYear: Date | undefined;
-  toYear: Date | undefined;
+  fromYear?: Date | undefined;
+  toYear?: Date | undefined;
+  canBePast?: boolean;
 }
 export const SelectDate = React.memo(
   ({
@@ -27,34 +28,37 @@ export const SelectDate = React.memo(
     type,
     releaseDate,
     fromYear,
-    toYear
+    toYear,
   }: Calendar22Props): JSX.Element => {
     console.log(fromYear)
     const [open, setOpen] = useState(false);
   // Calculate disabled days based on type
-  const disabledDays = (date: Date) => {
-    const today = new Date();
-    const minUpload = addWeeks(today, 2); // 2 weeks after upload
-    const minPreSave = addWeeks(today, 3); // 3 weeks after upload
-    const oneWeekBeforeRelease = releaseDate ? addWeeks(releaseDate, -1) : null;
+  // const disabledDays = (date: Date) => {
+  //   const today = new Date();
+  //   const minUpload = addWeeks(today, 2); // 2 weeks after upload
+  //   const minPreSave = addWeeks(today, 3); // 3 weeks after upload
+  //   const oneWeekBeforeRelease = releaseDate ? addWeeks(releaseDate, -1) : null;
 
-    // Common rule: no past dates
-    if (isBefore(date, today)) return true;
+  //   // Common rule: no past dates
+  //   if (canBePast == false){
+  //     if (isBefore(date, today)){
+  //       return true;
+  //     }
+  //   }
+  //   if (type === "first") {
+  //     // Release date must be at least 2 weeks after upload
+  //     return isBefore(date, minUpload);
+  //   }
 
-    if (type === "first") {
-      // Release date must be at least 2 weeks after upload
-      return isBefore(date, minUpload);
-    }
+  //   if (type === "second") {
+  //     // Presave date must be at least 3 weeks after upload
+  //     // AND at least 1 week before release date
+  //     if (!releaseDate) return true; // can’t pick if release not chosen
+  //     return isBefore(date, minPreSave) || isAfter(date, oneWeekBeforeRelease!);
+  //   }
 
-    if (type === "second") {
-      // Presave date must be at least 3 weeks after upload
-      // AND at least 1 week before release date
-      if (!releaseDate) return true; // can’t pick if release not chosen
-      return isBefore(date, minPreSave) || isAfter(date, oneWeekBeforeRelease!);
-    }
-
-    return false;
-  };
+  //   return false;
+  // };
 
     return (
       <div className="flex flex-col gap-3">
@@ -68,7 +72,7 @@ export const SelectDate = React.memo(
                 (disabled ? " bg-disable" : " bg-transparent")
               }
             >
-              {value ? value.toLocaleDateString() : "Select date"}
+              {value != undefined? new Date(value).toLocaleDateString() : "Select date"}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>
@@ -77,7 +81,7 @@ export const SelectDate = React.memo(
             align="start"
           >
             <Calendar
-              disabled={disabledDays}
+              // disabled={disabledDays}
               mode="single"
               selected={value}
               captionLayout="dropdown"
@@ -85,7 +89,7 @@ export const SelectDate = React.memo(
                 setDate(date);
                 setOpen(false);
               }}
-              startMonth={fromYear}
+              // startMonth={fromYear}
               endMonth={toYear}
             />
           </PopoverContent>
