@@ -1,16 +1,16 @@
+// import { Link, useNavigate, useParams } from "react-router-dom";
+// import { home_post } from "../data/index";
+// import Loader from "../../blogComponents/LoaderComponent";
+// import DOMPurify from 'dompurify';
+// import { Helmet } from "react-helmet-async";
+// import logo2 from "../../assets/icons/logo192.png";
 "use client";
 
 import React, { useEffect, useState } from "react";
-// import { Link, useNavigate, useParams } from "react-router-dom";
-// import { home_post } from "../data/index";
 import logo from "../../../assets/images/soundmacsLogo.png";
 import { MoveDown, Share2 } from "lucide-react";
-// import Loader from "../../blogComponents/LoaderComponent";
 import axios from "axios";
-// import DOMPurify from 'dompurify';
 import "../../blog/blog.css";
-// import { Helmet } from "react-helmet-async";
-// import logo2 from "../../assets/icons/logo192.png";
 import { blogContent } from "@/app/constant";
 import { useParams } from "next/navigation";
 import { BLOG_CONTENT } from "@/app/type";
@@ -72,7 +72,7 @@ const BlogPost = () => {
     const allPosts = async () => {
       try {
         console.log(post);
-        
+
         const mainPost = post.find((item) => {
           return item.slug == title;
         });
@@ -87,7 +87,7 @@ const BlogPost = () => {
     allPosts();
     setPost(blogContent);
     setLoading(false);
-  }, [title,post,loading]);
+  }, [title, post, loading]);
 
   if (!article || loading) {
     return <NormalLoadingScreen />;
@@ -117,7 +117,7 @@ const BlogPost = () => {
       </Helmet> */}
       <section className="py-10 max-w-[90%] mx-auto">
         <div className=" pb-6">
-          <p className="text_color font-semibold flex">
+          <div className="text_color font-semibold flex">
             <p className="underline">
               <Link href="/blog" className="inline">
                 Blog
@@ -131,7 +131,7 @@ const BlogPost = () => {
             <p>
               <MoveDown />
             </p>
-          </p>
+          </div>
           <article>
             <h1 className="text-2xl font-bold leading-normal text-text md:text-[2.8vw]">
               {article.title}
@@ -152,6 +152,8 @@ const BlogPost = () => {
             <div>
               <div className="">
                 <Image
+                  width={100}
+                  height={0}
                   src={logo.src}
                   alt="main blog post primary image"
                   className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -170,6 +172,8 @@ const BlogPost = () => {
               <div className="grid gap-8">
                 <div className="grid grid-cols-1 gap-8">
                   <Image
+                  width={100}
+                  height={0}
                     src={logo.src}
                     alt="main blog post secondary image"
                     className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -178,6 +182,8 @@ const BlogPost = () => {
                 </div>
                 <div className="grid grid-cols-1 gap-8">
                   <Image
+                  width={100}
+                  height={0}
                     src={logo.src}
                     alt="main blog post secondary image"
                     className="rounded-[20px] max-h-[650px] w-full object-cover"
@@ -194,51 +200,53 @@ const BlogPost = () => {
             view other related posts
           </h1>
           <div className="flex flex-wrap gap-3">
-            {post.filter((item)=> item.slug != article.slug).slice(0, 3).map((item, index) => (
-              <article
-                key={index}
-                className="rounded-2xl bg-white hover:shadow-lg w-[300px] p-3 max-md:w-full"
-              >
-                <a
-                  key={item.id}
-                  href={`/blog/${item.slug}`}
-                  className="flex gap-3 justify-between flex-col"
+            {post
+              .filter((item) => item.slug != article.slug)
+              .slice(0, 3)
+              .map((item, index) => (
+                <article
+                  key={index}
+                  className="rounded-2xl bg-white hover:shadow-lg w-[300px] p-3 max-md:w-full"
                 >
-                  <div className="mb-4 flex gap-4">
-                    <Image
-                      src={logo.src}
-                      alt="Blog post image"
-                      className=" object-cover "
-                      width={50}
-                      height={40}
-                    />
-                  <h2 className="font-bold leading-normal text-text line-clamp-2">
-                    {item.title}
-                  </h2>
-                  </div>
-
-                  <p className="mb-3 text-sm flex gap-2 justify-between">
-                    12/03/2013
-                    <div className="flex gap-2 items-center">
-
-                    <button
-                      onClick={() => {
-                        handleShare(item);
-                      }}
-                    >
-                      <Share2
-                        stroke="#10414A"
-                        className={"hover:scale-110 focus:scale-110"}
-                        width={10}
-                        height={10}
+                  <a
+                    key={item.id}
+                    href={`/blog/${item.slug}`}
+                    className="flex gap-3 justify-between flex-col"
+                  >
+                    <div className="mb-4 flex gap-4">
+                      <Image
+                        src={logo.src}
+                        alt="Blog post image"
+                        className=" object-cover "
+                        width={50}
+                        height={40}
                       />
-                    </button>
-                    {20}
+                      <h2 className="font-bold leading-normal text-text line-clamp-2">
+                        {item.title}
+                      </h2>
                     </div>
-                  </p>
-                </a>
-              </article>
-            ))}
+
+                    <p className="mb-3 text-sm flex gap-2 justify-between">
+                      12/03/2013
+                      <div className="flex gap-2 items-center">
+                        <button
+                          onClick={() => {
+                            handleShare(item);
+                          }}
+                        >
+                          <Share2
+                            stroke="#10414A"
+                            className={"hover:scale-110 focus:scale-110"}
+                            width={10}
+                            height={10}
+                          />
+                        </button>
+                        {20}
+                      </div>
+                    </p>
+                  </a>
+                </article>
+              ))}
           </div>
         </div>
       </section>

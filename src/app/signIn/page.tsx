@@ -7,7 +7,7 @@ import Image from 'next/image'
 import axios, { AxiosError } from 'axios';
 import { SERVER } from '../constant';
 import Loader from '../components/Loader/loader';
-import OTP_MODAL from '../components/OTPModal/OTPModal';
+// import OTP_MODAL from '../components/OTPModal/OTPModal';
 import { ERROR_PROPS } from '../type';
 import { linkRoutes } from '../utils/constants';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -87,12 +87,12 @@ export default function SignIn() {
 
     return (
         <div className={classes.container}>
-            <OTP_MODAL
+            {/* <OTP_MODAL
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onVerify={handleVerify}
                 email={email}
-            />
+            /> */}
             <Image
                 src={sippingGuy}
                 alt='a guy sipping juice'
