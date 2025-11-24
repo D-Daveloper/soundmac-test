@@ -1,15 +1,18 @@
 "use client";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction, useEffect } from "react";
+import React from "react";
 import SongForm from "./song/SongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
+import AlbumForm from "./album/AlbumForm";
 
 const UploadMusic = () => {
-  const {setParam, getParam } = useTabQuery();
+  const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
 
   if (type == "single") {
     return <SongForm />;
+  } else if (type === "album") {
+    return <AlbumForm />;
   } else {
     return (
       <div className="w-full p-5">
@@ -38,7 +41,7 @@ const UploadMusic = () => {
               Upload one track and get it streaming everywhere.
             </p>
             <button
-              onClick={() => setParam("type","single")}
+              onClick={() => setParam("type", "single")}
               className="font-bold text-sm rounded-lg bg-primary text-main-white px-4 py-2.5 hover:bg-primary/80"
             >
               Upload a Single
@@ -58,7 +61,10 @@ const UploadMusic = () => {
             <p className="max-w-[80%] text-text-disable font-normal leading-[16px] tracking-[-0.5px] text-sm">
               Share a collection of songs as one complete project.
             </p>
-            <button onClick={() => setParam("type","album")} className="font-bold text-sm rounded-lg bg-transparent border-2 border-primary text-text-body px-4 py-2.5 hover:bg-primary/10">
+            <button
+              onClick={() => setParam("type", "album")}
+              className="font-bold text-sm rounded-lg bg-transparent border-2 border-primary text-text-body px-4 py-2.5 hover:bg-primary/10"
+            >
               Upload a Album
             </button>
           </div>

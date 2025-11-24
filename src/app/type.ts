@@ -50,27 +50,43 @@ export interface Producer {
   first_name: string;
   last_name: string;
 }
-export interface SongForm {
-  song_title: string;
-  genre: string;
+
+interface musicFormBase{
+  title:string;
+  genre:string;
   language: string;
   artist: string;
   release_date: undefined | Date;
   preOrderDate:undefined|Date;
+  territories: string[];
+  pre_order_check: boolean;
+  another_distribution_check: boolean;
+  music_image: File | null;
+  upc:string;
+  dsp:string[];
+  copyRightHolder:string;
+  copyRightYear:string;
+
+}
+export interface SongForm extends musicFormBase {
   featured_artist: FeaturedArtist[];
   performer: Performer[];
   song_writer: SongWriter[];
   producer: Producer[];
-  territories: string[];
-  pre_order_check: boolean;
-  another_distribution_check: boolean;
   song_audio: File | null;
-  song_image: File | null;
-  dsp:string[];
   lyrics:string;
   start_clip:string;
-  upc:string;
   isrc:string;
-  copyRightHolder:string;
-  copyRightYear:Date | undefined;
+  explicit_content: boolean;
+}
+
+export interface AlbumForm extends musicFormBase{
+
+}
+
+export type OtpForm = {
+  email:string;
+  otp:string;
+  type: "login" | "register" | "forgotPassword";
+  password?:string;
 }

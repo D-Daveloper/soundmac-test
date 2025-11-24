@@ -3,6 +3,7 @@ import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { generateOtp } from "@/util/middleware/functions";
+import bcrypt from "bcryptjs";
 
 //validate OTP
 export async function POST(req: Request) {
@@ -15,25 +16,40 @@ export async function POST(req: Request) {
     const user = await User.findOne({ email: body.email });
     if (!user) {
       return NextResponse.json(
-        { success: false, msg: "user not found" },
+        { success: false, msg: "Invalid email." },
         { status: 404 }
       );
     }
     if (!user.confirmed) {
       user.confirmed = true;
     }
-    if (process.env.NODE_ENV !== "development"){
-
+    if (process.env.NODE_ENV !== "development") {
       if (!user.otp || !user.otpExpires) {
         return NextResponse.json({ msg: "Please Login" }, { status: 400 });
       }
       if (user.otp !== body.otp || new Date() >= user.otpExpires) {
         return NextResponse.json({ msg: "Invalid OTP" }, { status: 400 });
       }
-      user.otp = null; // Clear the OTP after successful verification
-      user.otpExpires = null; // Reset otpExpires to null
-      user.updatedAt = new Date(); // Update the updatedAt field
-      await user.save();
+      if (body.type === "forgotPassword") {
+        if (!body.password) {
+          return NextResponse.json(
+            { msg: "Password is required" },
+            { status: 400 }
+          );
+        }
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(body.password, salt);
+        user.otp = null; // Clear the OTP after successful verification
+        user.otpExpires = null; // Reset otpExpires to null
+        user.updatedAt = new Date(); // Update the updatedAt field
+        await user.save();
+        return NextResponse.json({ msg: "Please login" }, { status: 200 });
+      } else {
+        user.otp = null; // Clear the OTP after successful verification
+        user.otpExpires = null; // Reset otpExpires to null
+        user.updatedAt = new Date(); // Update the updatedAt field
+        await user.save();
+      }
     }
     //   create token
     const token = user.createJWT();
@@ -106,7 +122,7 @@ export async function PATCH(req: Request) {
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Account Verification</title>
+		<title>User Verification</title>
 	</head>
 	<body>
 		<div>

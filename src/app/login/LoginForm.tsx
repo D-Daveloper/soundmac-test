@@ -116,6 +116,12 @@ const LoginForm = () => {
             </div>
           ))}
         </div>
+        <p className="leading-6 text-[16px] text-p font-light text-center my-10">
+          Forgot password?
+          <span className="text-primary underline font-extrabold">
+            <Link href={"/forgot-password"}>Forgot Password</Link>
+          </span>
+        </p>
         <div className="border-2 border-[#E1E1CF] my-10 w-full"></div>
       </form>
       <div className="flex justify-end flex-col gap-10 items-center pb-9 max-sm:text-2xl">

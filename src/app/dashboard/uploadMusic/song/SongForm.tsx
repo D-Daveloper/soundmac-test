@@ -3,6 +3,7 @@ import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
+import { languagesList } from "@/app/constant";
 import type {
   FeaturedArtist,
   Performer,
@@ -14,7 +15,7 @@ import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
-import { isFormValid } from "@/util/middleware/functions";
+import { isSongFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -28,9 +29,21 @@ const SongForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
+  const futureYears = Array.from({ length: 11 }, (_, i) =>
+    (new Date().getFullYear() + i).toString()
+  );
+  const pastYears = Array.from({ length: 21 }, (_, i) =>
+    (new Date().getFullYear() - i).toString()
+  );
+  const years = [
+    ...pastYears.reverse().filter((_, i) => _ !== "2025"),
+    ...futureYears,
+  ];
+
   const [preview, setPreview] = useState(false);
+
   const [songForm, setSongForm] = useState<SongForm>({
-    song_title: "",
+    title: "",
     genre: "",
     language: "",
     artist: "gggg",
@@ -44,14 +57,15 @@ const SongForm = () => {
     another_distribution_check: false,
     territories: [],
     song_audio: null,
-    song_image: null,
+    music_image: null,
     dsp: [],
     lyrics: "",
     start_clip: "",
     isrc: "",
     upc: "",
     copyRightHolder: "",
-    copyRightYear: undefined,
+    copyRightYear: "",
+    explicit_content: false,
   });
   const { deleteParam } = useTabQuery();
 
@@ -99,16 +113,20 @@ const SongForm = () => {
   // };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
-    if (name === "another_distribution_check" || name === "pre_order_check") {
+    if (
+      name === "another_distribution_check" ||
+      name === "pre_order_check" ||
+      name === "explicit_content"
+    ) {
       setSongForm((prev) => ({ ...prev, [name]: checked }));
     } else if (name === "song_audio") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
       setSongForm((prev) => ({ ...prev, song_audio: file }));
-    } else if (name === "song_image") {
+    } else if (name === "music_image") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setSongForm((prev) => ({ ...prev, song_image: file }));
+      setSongForm((prev) => ({ ...prev, music_image: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -193,7 +211,8 @@ const SongForm = () => {
         formData.append(key, value);
       }
     });
-    if (songForm.song_image) formData.append("song_image", songForm.song_image);
+    if (songForm.music_image)
+      formData.append("music_image", songForm.music_image);
     console.log(...formData);
     try {
       const res = await api.post("song", formData, {
@@ -212,11 +231,10 @@ const SongForm = () => {
 
   const handlePreview = (form: SongForm) => {
     console.log(form);
-   
+
     if (preview === false) {
-      const validForm = isFormValid(form);
-      if (validForm != "true")
-        return toast.warn(validForm);
+      const validForm = isSongFormValid(form);
+      if (validForm != "true") return toast.warn(validForm);
       const string_form = JSON.stringify(form);
       const featured_artist = JSON.stringify(form.featured_artist);
       const song_writer = JSON.stringify(form.song_writer);
@@ -269,13 +287,13 @@ const SongForm = () => {
         release_date: songForm.release_date
           ? new Date(songForm.release_date)
           : undefined,
-        song_image: null,
+        music_image: null,
         song_audio: null,
       });
     }
   }, []);
 
- return (
+  return (
     <div className="bg-main-white h-full w-full flex flex-col">
       <button
         onClick={() => {
@@ -305,10 +323,10 @@ const SongForm = () => {
               <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
                 <div className="flex flex-col w-[40%] max-sm:w-full">
                   <Input
-                    value={songForm.song_title}
+                    value={songForm.title}
                     title={"Song title"}
                     type={"text"}
-                    name={"song_title"}
+                    name={"title"}
                     placeholder={"Enter Song Title"}
                     updateValue={handleChange}
                     required={true}
@@ -364,7 +382,7 @@ const SongForm = () => {
                         setSongForm((prev) => ({ ...prev, language: t }))
                       }
                       placeholder="Select Language..."
-                      options={genreList}
+                      options={languagesList}
                       name="language"
                     />
                   </div>
@@ -430,7 +448,7 @@ const SongForm = () => {
                         name={"artistName"}
                         placeholder={"Enter Artist Name"}
                         updateValue={handleDynamicChange}
-                        required={true}
+                        required={false}
                       />
                     </div>
                     <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -763,15 +781,6 @@ const SongForm = () => {
                         className="w-2 -mt-3 "
                       />
                     </div>
-                    {/* <Input
-                    value={SongForm.release_date}
-                    title={"Release Date"}
-                    type={"text"}
-                    name={"release_date"}
-                    placeholder={"DD/MM/YY"}
-                    updateValue={handleChange}
-                    required={true}
-                  /> */}
                     <SelectDate
                       disabled={false}
                       setDate={(date) =>
@@ -811,6 +820,28 @@ const SongForm = () => {
                       }}
                     />
                   </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full">
+                    <p className=" capitalize font-medium sm:text-sm text-lg">
+                      Pre order date{" "}
+                    </p>
+                    <SelectDate
+                      disabled={!songForm.pre_order_check}
+                      setDate={(date) =>
+                        setSongForm((prev) => ({
+                          ...prev,
+                          preOrderDate: date,
+                        }))
+                      }
+                      value={songForm.preOrderDate}
+                      releaseDate={songForm.release_date}
+                      type="second"
+                      toYear={date.toYear}
+                      fromYear={date.fromYear}
+                    />
+                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                      Pre order date must be 3 weeks before the release date
+                    </p>
+                  </div>
                   <div className="mt-5 justify-between w-full flex max-sm:flex-col">
                     <div className="flex w-fit gap-2 items-center">
                       <input
@@ -822,25 +853,6 @@ const SongForm = () => {
                       />
                       <p className="leading-6 text-sm sm:text-lg font-medium">
                         Pre-Order (optional)
-                      </p>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <SelectDate
-                        disabled={!songForm.pre_order_check}
-                        setDate={(date) =>
-                          setSongForm((prev) => ({
-                            ...prev,
-                            preOrderDate: date,
-                          }))
-                        }
-                        value={songForm.preOrderDate}
-                        releaseDate={songForm.release_date}
-                        type="second"
-                        toYear={date.toYear}
-                        fromYear={date.fromYear}
-                      />
-                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                        Pre order date must be 3 weeks before the release date
                       </p>
                     </div>
                   </div>
@@ -973,16 +985,6 @@ const SongForm = () => {
               <div>
                 <div className="flex gap-1 sm:text-sm text-lg mt-10">
                   <p className=" capitalize font-medium">lyrics </p>
-
-                  <Image
-                    priority={false}
-                    loading="lazy"
-                    src="/required.svg"
-                    alt="a star marking this field as required"
-                    width={0}
-                    height={0}
-                    className="w-2 -mt-3"
-                  />
                 </div>
 
                 <textarea
@@ -1059,13 +1061,13 @@ const SongForm = () => {
                     </div>
                     <div className="flex items-center justify-center w-60">
                       <label
-                        htmlFor="song_image"
+                        htmlFor="music_image"
                         className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                       >
                         <div
                           className={
                             "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                            (!songForm.song_image && " bg-neutral-50 ")
+                            (!songForm.music_image && " bg-neutral-50 ")
                           }
                         >
                           <Image
@@ -1074,14 +1076,14 @@ const SongForm = () => {
                             height={60}
                             alt="music note icon"
                             className={
-                              songForm.song_image
+                              songForm.music_image
                                 ? " w-full object-cover"
                                 : undefined
                             }
                           />
                         </div>
                         <div className="w-[50%]">
-                          {!songForm.song_image ? (
+                          {!songForm.music_image ? (
                             <p className="mb-2 text-sm text-gray-500">
                               <span className="font-semibold">
                                 Click to upload
@@ -1091,14 +1093,14 @@ const SongForm = () => {
                           ) : (
                             <p className="font-bold text-[16px] text-[#494949] truncate">
                               <span className="font-semibold">
-                                {songForm.song_image?.name}
+                                {songForm.music_image?.name}
                               </span>
                             </p>
                           )}
                         </div>
                         <input
-                          id="song_image"
-                          name="song_image"
+                          id="music_image"
+                          name="music_image"
                           type="file"
                           accept="image/*"
                           className="hidden"
@@ -1138,17 +1140,31 @@ const SongForm = () => {
                   Pitch to an Editorial Playlist?
                 </p>
               </div> */}
-              <div className="flex w-fit gap-2 items-center mb-5">
-                <input
-                  type="checkbox"
-                  className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                  name="another_distribution_check"
-                  checked={songForm.another_distribution_check}
-                  onChange={handleChange}
-                />
-                <p className="leading-6 text-sm font-medium">
-                  Transferring from another distributor?
-                </p>
+              <div className="flex justify-between">
+                <div className="flex w-fit gap-2 items-center mb-5">
+                  <input
+                    type="checkbox"
+                    className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
+                    name="another_distribution_check"
+                    checked={songForm.another_distribution_check}
+                    onChange={handleChange}
+                  />
+                  <p className="leading-6 text-sm font-medium">
+                    Transferring from another distributor?
+                  </p>
+                </div>
+                <div className="flex w-fit gap-2 items-center mb-5">
+                  <input
+                    type="checkbox"
+                    className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
+                    name="explicit_content"
+                    checked={songForm.explicit_content}
+                    onChange={handleChange}
+                  />
+                  <p className="leading-6 text-sm font-medium">
+                    Does Your release contain explicit content?
+                  </p>
+                </div>
               </div>
               <div className="w-full flex flex-wrap justify-between gap-y-10">
                 <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -1196,7 +1212,7 @@ const SongForm = () => {
                     required={true}
                   />
                 </div>
-                <div className="flex flex-col w-[40%] max-sm:w-full">
+                <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                   <div className="flex">
                     <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
                       Copy Right Year
@@ -1211,16 +1227,17 @@ const SongForm = () => {
                       className="w-2 -mt-3 "
                     />
                   </div>
-                  <SelectDate
-                    disabled={false}
-                    setDate={(date) =>
-                      setSongForm((prev) => ({
-                        ...prev,
-                        copyRightYear: date,
-                      }))
-                    }
-                    value={songForm.copyRightYear}
-                  />
+                  <div className="w-full">
+                    <Select
+                      selected={songForm.copyRightYear}
+                      setSelected={(t) =>
+                        setSongForm((prev) => ({ ...prev, copyRightYear: t }))
+                      }
+                      placeholder="Select Copy right year..."
+                      options={years}
+                      name="copyRightYear"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1248,7 +1265,7 @@ const SongForm = () => {
                         />
                       </div>
                       <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate min-w-[80%] flex-2">
-                        {songForm.song_image?.name}
+                        {songForm.music_image?.name}
                       </p>
                     </>
                   ) : (
@@ -1363,7 +1380,7 @@ const SongForm = () => {
         )}
         <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
           <div className="w-full h-[80%] flex-2">
-            {songForm.song_image ? (
+            {songForm.music_image ? (
               <Image
                 src={image ? image : ""}
                 width={0}
@@ -1381,7 +1398,7 @@ const SongForm = () => {
           </div>
           <div className="flex-1">
             <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
-              {songForm.song_title || "Title"}
+              {songForm.title || "Title"}
             </p>
             <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-[16px]">
               {songForm.artist || "Artist"}

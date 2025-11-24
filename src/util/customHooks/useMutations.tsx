@@ -5,6 +5,7 @@ import useAxios from "./UseAxios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
+import { OtpForm } from "@/app/type";
 
 export const useOtpMutation = () => {
   const queryClient = useQueryClient();
@@ -12,7 +13,7 @@ export const useOtpMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { email: string; otp: string }) => {
+    mutationFn: async (form: OtpForm) => {
       const res = await api.post("auth/otp", form);
       return res.data;
     },
