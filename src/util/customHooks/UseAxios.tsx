@@ -60,7 +60,7 @@ const UseAxios = () => {
             modelStateErrors.push(i);
             toast.error(i);
           });
-          return;
+          return Promise.reject(error);
         }
         // throw modelStateErrors.flat();
 

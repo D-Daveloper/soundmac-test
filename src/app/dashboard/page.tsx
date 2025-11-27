@@ -2,6 +2,8 @@
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import Dashboard from "./Dashboard";
 import UploadMusic from "./uploadMusic/UploadMusic";
+import CreateArtistForm from "./artist/create/CreateArtistForm";
+import ManageArtist from "./artist/manage/ManageArtist";
 
 const page = () => {
 
@@ -9,7 +11,7 @@ const page = () => {
 
   return (
 
-    <main className="section h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
+    <main className="section h-full relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
 
       <div className="flex h-full">
         <div className="text-[#333333] lg:ml-[250px] w-full h-full">
@@ -28,15 +30,15 @@ const page = () => {
                 )}
               </>
             )}
-            {/* {tab === "Artists" && (
+            {tab === "Artists" && (
               <>
-                {section === "createArtist" && <CreateArtist />}
+                {section === "createArtist" && <CreateArtistForm />}
                 {section === "manageArtist" && <ManageArtist />}
-                {section === "collaboration" && <Collaboration />}
-                {!section && <CreateArtist />}
+                {/* {section === "collaboration" && <Collaboration />} */}
+                {!section && <CreateArtistForm />}
               </>
             )}
-            {tab === "Insight" && section === "songPerformance" && (
+            {/* {tab === "Insight" && section === "songPerformance" && (
               <SongPerformance />
             )} */}
           </div>

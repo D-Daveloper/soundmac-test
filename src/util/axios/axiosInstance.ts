@@ -1,5 +1,6 @@
 // // lib/axiosInstance.ts
 
+import { Artist, CreateArtistForm, PAGINATION } from "@/app/type";
 import { AxiosInstance } from "axios";
 
 // import axios, { AxiosError } from "axios";
@@ -52,8 +53,8 @@ import { AxiosInstance } from "axios";
 
 // export default api;
 
-
-            {/* <div className="capitalize ">
+{
+  /* <div className="capitalize ">
               <button onClick={()=>setMusic(!music)} className="w-full flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 ">
                 Music
                   <Image
@@ -165,13 +166,38 @@ import { AxiosInstance } from "axios";
                 </button>
                 </div>
               </div>
-            </div> */}
+            </div> */
+}
 
-export async function getDashboard(api:AxiosInstance) {
-    const res = await api.get("dashboard");
-    return res.data;
-};
+export async function getDashboard(api: AxiosInstance) {
+  const res = await api.get("dashboard");
+  return res.data;
+}
+
+
 export const getCurrentUser = async (api: AxiosInstance): Promise<any> => {
-  const res = await api.get("/users/user");
+  const res = await api.get("users/user");
+  return res.data;
+};
+
+
+export const getArtists = async (
+  api: AxiosInstance,
+  params:{ page:number,sort:string,artistName:string }
+): Promise<PAGINATION<Artist>> => {
+  const res = await api.get<Promise<PAGINATION<Artist>>>("users/artist", {
+    params:params,
+  });
+  return res.data;
+};
+
+
+export const createArtist = async (
+  api: AxiosInstance,
+  form: CreateArtistForm
+) => {
+  const res = await api.post("users/artist", form, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return res.data;
 };

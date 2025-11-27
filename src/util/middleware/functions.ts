@@ -1,4 +1,4 @@
-import { AlbumForm, SongForm } from "@/app/type";
+import { AlbumForm, CreateArtistForm, SongForm } from "@/app/type";
 import { addWeeks, subWeeks } from "date-fns";
 
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
@@ -22,7 +22,7 @@ export const isSongFormValid = (form: SongForm): string => {
   if (form.title === "") {
     return "Song title is required";
   } else if (form.title.length < 3 || form.title.length > 32) {
-    return "Song title is must be longer than 3 not more than 32";
+    return "Song title must be longer than 3 not more than 32";
   } else if (form.genre === "") {
     return "Genre is required";
   } else if (form.language === "") {
@@ -84,7 +84,7 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
   if (form.title === "") {
     return "Album title is required";
   } else if (form.title.length < 3 || form.title.length > 32) {
-    return "Album title is must be longer than 3 not more than 32";
+    return "Album title must be longer than 3 not more than 32";
   } else if (form.genre === "") {
     return "Genre is required";
   } else if (form.language === "") {
@@ -111,12 +111,34 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
     return "true";
   }
 };
+export const isArtistFormValid = (form: CreateArtistForm): string => {
+  console.log(form);
+
+  if (!form.artist_name) {
+    return "Artist name is required";
+  } else if (form.artist_name.length < 3 || form.artist_name.length > 32) {
+    return "Artist name must be longer than 3 not more than 32";
+  } else if (
+    form.hasPlatformId &&
+    (form.apple_id === "" || form.spotify_id === "")
+  ) {
+    return "Apple ID and or Spotify ID is required";
+  } else if (form.artist_image == null) {
+    return "Image is required";
+  } else {
+    return "true";
+  }
+};
 
 export function formatTime(seconds: number) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
-      2,
-      "0"
-    )}`;
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
+export const buildSort = (sort: string) => {
+  if (sort.startsWith("-")) {
+    return { [sort.substring(1)]: -1 }; // descending
   }
+  return { [sort]: 1 }; // ascending
+};

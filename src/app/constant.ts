@@ -1,3 +1,5 @@
+import { IArtist } from "@/util/models/artistModel";
+import { Artist, CreateArtistForm } from "./type";
 
 export const SERVER = process.env.NEXT_PUBLIC_APP_URL;
 export const AYNCardItems = [
@@ -88,6 +90,59 @@ export const blogContent = [
         "content": "Success as an independent artist requires dedication, creativity, and strategic planning. This article offers practical tips for independent artists to succeed in the competitive music industry.",
         "slug": "tips-for-independent-artists-to-succeed"
     }
+];
+export const artistContent:Artist[] = [
+    {
+        "artistName": "The Midnight Echoes",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    
+    {
+        "artistName": "Kingsley & The Vibe Collective",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    
+    {
+        "artistName": "ohn Doe",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    {
+        "artistName": "ohn Doe",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    {
+        "artistName": "ohn Doe",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    {
+        "artistName": "ohn Doe",
+        "artistImage": "/signinimage.png",
+        "appleId":"",
+        "spotifyId":"",
+        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
+        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
+    },
+    
 ];
 
 export const promotionContent = [
@@ -208,3 +263,13 @@ export const languagesList = [
 ];
 
 export const OTP_EXPIRY_SECONDS = parseInt(process.env.NEXT_PUBLIC_OTP_EXPIRY_SECONDS || "300");
+
+export const filterOptions = [
+  { label: "Newest", value: "-createdAt" },
+  { label: "Oldest", value: "createdAt" },
+  { label: "A-Z", value: "artistName" },
+  { label: "Z-A", value: "-artistName" },
+]
+export const artistOptions = [
+  "Edit"
+]

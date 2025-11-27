@@ -89,6 +89,19 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       case "Music":
         setHeaderMessage("Upload Music");
         break;
+      case "Artists":
+        if (section === "createArtist") {
+          setHeaderMessage("Create Artist");
+          break;
+        }else if (section === "manageArtist") {
+          setHeaderMessage("Manage Artists");
+          break;
+        }else if (section === "collaboration") {
+          setHeaderMessage("Collaborations");
+          break;
+        }
+        setHeaderMessage("Create Artist");
+        break;
 
       default:
         break;
@@ -102,6 +115,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         <div className="sticky top-0 z-20">
           <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
             <div
+            aria-label="side bar nav button"
               role="button"
               className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
               onClick={() => setIsOpen(!isOpen)}

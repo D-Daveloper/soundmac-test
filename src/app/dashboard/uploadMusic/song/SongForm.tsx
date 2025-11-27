@@ -296,6 +296,7 @@ const SongForm = () => {
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
       <button
+        aria-label="go back"
         onClick={() => {
           deleteParam("type");
         }}
@@ -497,6 +498,7 @@ const SongForm = () => {
                     Add featured Artist
                   </button>
                   <button
+                    arelia-label="delete featured artist"
                     disabled={songForm.featured_artist.length === 1}
                     onClick={() => {
                       setSongForm((prev) => ({
@@ -574,6 +576,7 @@ const SongForm = () => {
                     Add Songwriter
                   </button>
                   <button
+                    aria-label="delete song writer"
                     disabled={songForm.song_writer.length === 1}
                     onClick={() => {
                       setSongForm((prev) => ({
@@ -668,6 +671,7 @@ const SongForm = () => {
                     Add Performer
                   </button>
                   <button
+                    aria-label="delete performer"
                     disabled={songForm.performer.length === 1}
                     onClick={() => {
                       setSongForm((prev) => ({
@@ -727,6 +731,7 @@ const SongForm = () => {
                 ))}
                 <div className="flex gap-2">
                   <button
+                    disabled={songForm.producer.length === 5}
                     onClick={() => addField("producer")}
                     className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
                   >
@@ -742,6 +747,7 @@ const SongForm = () => {
                     Add Producer
                   </button>
                   <button
+                    aria-label="delete producer"
                     disabled={songForm.producer.length === 1}
                     onClick={() => {
                       setSongForm((prev) => ({
@@ -1143,6 +1149,7 @@ const SongForm = () => {
               <div className="flex justify-between">
                 <div className="flex w-fit gap-2 items-center mb-5">
                   <input
+                    aria-label="another distribution check box"
                     type="checkbox"
                     className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
                     name="another_distribution_check"

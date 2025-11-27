@@ -2,21 +2,29 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import Artist, { IArtist } from "@/util/models/artistModel";
+import type { SortOrder } from "mongoose";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
+import { handleMongooseValidationError } from "@/util/customError/error";
+import { buildSort } from "@/util/middleware/functions";
 
-const limit = parseInt(process.env.ARTIST_LIMIT || "10", 10);
+const limit = parseInt(process.env.ARTIST_LIMIT || "6", 10);
 
 export async function POST(req: Request) {
   let artist = null;
   let selectedImage = "";
   try {
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
     const formData = await req.formData();
 
     // Get the file
-    const file = formData.get("selectedImage") as File | null;
-    const artistName = formData.get("artistName") as string | null;
-    const appleId = formData.get("appleId") as string | null;
-    const spotifyId = formData.get("spotifyId") as string | null;
+    const file = formData.get("artist_image") as File | null;
+    const artistName = formData.get("artist_name") as string | null;
+    const appleId = formData.get("apple_id") as string | null;
+    const spotifyId = formData.get("spotify_id") as string | null;
 
     if (!file) {
       return NextResponse.json({ msg: "No file uploaded" }, { status: 400 });
@@ -29,18 +37,12 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    
-    selectedImage = "data:image/png;base64,"+buffer.toString("base64");
+    selectedImage = "data:image/png;base64," + buffer.toString("base64");
     await dbConnect();
 
-    console.log("File name:", selectedImage);
-    console.log("File type:", file.type);
-    console.log("File size:", file.size);
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
-    if (userJwt.msg) {
-      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-    }
+    // console.log("File name:", selectedImage);
+    // console.log("File type:", file.type);
+    // console.log("File size:", file.size);
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
@@ -50,14 +52,16 @@ export async function POST(req: Request) {
         { msg: "Please verify your email address" },
         { status: 400 }
       );
-    } else if (user.otp !== null && user.twoFactorAuthentication === "true") {
+    } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else {
-      artist = await Artist.findOne({
-        name: artistName,
+      artist = await Artist.find({
+        artistName: artistName,
       });
+      // .explain("executionStats");
     }
-    if (artist) {
+
+    if (artist.length > 0) {
       return NextResponse.json(
         { msg: "Artist already exists" },
         { status: 400 }
@@ -76,20 +80,14 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      return NextResponse.json({ msg: error.message }, { status: 500 });
-    } else {
-      return NextResponse.json(
-        { msg: "An unknown error occurred" },
-        { status: 500 }
-      );
-    }
+    return handleMongooseValidationError(error);
   }
 }
 
 export async function GET(req: Request) {
   try {
     let artists: IArtist[] = [];
+    let totalCount = 0;
     await dbConnect();
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -103,36 +101,44 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const sort = searchParams.get("sort") || "createdAt";
     const name = searchParams.get("artistName");
+    const sortQuery = buildSort(sort) as {
+      [key: string]: SortOrder | { $meta: any };
+    };//this is use to format the sort query for mongodb.
 
     if (name && name.trim() !== "") {
-      const query = { artistName: { $regex: "^" + name, $options: "i" } };
+      const query = { artistName: { $regex: "^" + name, $options: "i" },user: userJwt.user };
 
-      artists = await Artist.find(query);
-      // return NextResponse.json({artists,msg:artists.length > 0?"Successful":"No artists found" }, { status:artists.length > 0? 200 : 404 });
+      artists = await Artist.find(query)
+      .collation({ locale: "en", strength: 2 })
+        .sort(sortQuery)
+        .skip((page - 1) * limit)
+        .limit(limit);
+        totalCount = await Artist.countDocuments(query);
+      // return NextResponse.json({artists,msg:artists.  > 0?"Successful":"No artists found" }, { status:artists.length > 0? 200 : 404 });
     } else {
       artists = await Artist.find({ user: userJwt.user })
         .collation({ locale: "en", strength: 2 })
-        .sort({ [sort]: 1 })
+        .sort(sortQuery)
         .skip((page - 1) * limit)
         .limit(limit);
+      totalCount = await Artist.countDocuments({ user: userJwt.user });
+      // totalCount = 0;
+      // artists = [];
     }
 
     return NextResponse.json(
       {
-        data: {
-          artists,
-          pagination: {
-            page,
-            skip: (page - 1) * limit,
-            sort,
-            limit,
-            hasNextPage: artists.length === limit,
-            totalCount: await Artist.countDocuments({ user: userJwt.user }),
-          },
-        },
-        msg: artists.length > 0 ? "Successful" : "No artists found",
+        data: artists,
+        page,
+        skip: (page - 1) * limit,
+        sort,
+        limit,
+        hasNextPage: artists.length === limit,
+        totalCount: totalCount,
+        totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
+        msg: totalCount > 0 ? "Successful" : "No artists found",
       },
-      { status: artists.length > 0 ? 200 : 404 }
+      { status: 200}
     );
     // const artists = await Artist.find({ user: userJwt.user }).populate("user", "email").sort({[sort]:1}).skip((page - 1) * limit).limit(limit);
   } catch (error: unknown) {

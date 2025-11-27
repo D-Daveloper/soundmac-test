@@ -49,6 +49,7 @@ export function NormalLoadingScreen() {
         <div className={classes.loadingOverlay}>
             <div className={classes.logoContainer}>
                 <Image
+                priority={true}
                     src={logo}
                     alt="Soundmac's Logo"
                     className={classes.logo}

@@ -5,7 +5,8 @@ import useAxios from "./UseAxios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
-import { OtpForm } from "@/app/type";
+import { CreateArtistForm, OtpForm } from "@/app/type";
+import { createArtist } from "../axios/axiosInstance";
 
 export const useOtpMutation = () => {
   const queryClient = useQueryClient();
@@ -37,6 +38,26 @@ export const useOtpMutation = () => {
         return;
       }
       toast.error("otp verification failed.");
+    },
+  });
+};
+export const useCreatArtistMutation = () => {
+  const queryClient = useQueryClient();
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form: CreateArtistForm) => createArtist(api,form),
+    onSuccess: async (data) => {
+      toast.success(data.msg);
+      queryClient.invalidateQueries({ queryKey: ["artists"] });
+      localStorage.removeItem("artistForm");
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Something went wrong, Please try again.");
     },
   });
 };

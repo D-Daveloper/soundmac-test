@@ -10,12 +10,11 @@ import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const AlbumForm = () => {
-    const router = useRouter();
+  const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
   const [date, setDate] = useState({
@@ -49,7 +48,6 @@ const AlbumForm = () => {
     copyRightHolder: "",
     copyRightYear: "",
   });
-  const { deleteParam } = useTabQuery();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
@@ -127,10 +125,10 @@ const AlbumForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col">
+    <div className="bg-main-white max-h-[70%] w-full flex flex-col">
       <button
         onClick={() => {
-          router.back();
+          deleteParam("type");
         }}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black mb-9"
       >
