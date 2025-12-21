@@ -99,27 +99,19 @@
 export function generatePagination(current: number, total: number) {
   const pages: (number | "...")[] = [];
   const p1 = pages;
-console.log("first",p1);
 // Always show page 1
 if (current > 2) pages.push(1);
 if (current > 3) pages.push("...");
-const p2 = pages;
-console.log("m",p2);
-console.log("s",pages);
 
 // Show middle window (current -1, current, current +1)
 for (let i = current - 1; i <= current + 1; i++) {
     if (i > 0 && i <= total) pages.push(i);
 }
-const p3 = pages;
-console.log("t",p3);
-    console.log("t",pages);
     
     // After window
     if (current < total - 2) pages.push("...");
     if (current < total - 1) pages.push(total);
     
-    console.log("l",pages);
   return pages;
 }
 // export default generatePagination;

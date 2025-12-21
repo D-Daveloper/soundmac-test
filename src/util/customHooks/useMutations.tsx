@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
 import { CreateArtistForm, OtpForm } from "@/app/type";
-import { createArtist } from "../axios/axiosInstance";
+import { createArtist, DeleteArtist } from "../axios/axiosInstance";
 
 export const useOtpMutation = () => {
   const queryClient = useQueryClient();
@@ -51,6 +51,25 @@ export const useCreatArtistMutation = () => {
       toast.success(data.msg);
       queryClient.invalidateQueries({ queryKey: ["artists"] });
       localStorage.removeItem("artistForm");
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Something went wrong, Please try again.");
+    },
+  });
+};
+export const useDeleteArtistMutation = () => {
+  const queryClient = useQueryClient();
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form:{artist_name:string}) => DeleteArtist(api,form),
+    onSuccess: async (data) => {
+      toast.success(data.msg);
+      queryClient.invalidateQueries({ queryKey: ["artists"] });
     },
     onError: (error) => {
       if (isAxiosError(error)) {

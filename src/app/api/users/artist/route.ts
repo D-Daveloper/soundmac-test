@@ -83,6 +83,118 @@ export async function POST(req: Request) {
     return handleMongooseValidationError(error);
   }
 }
+export async function DELETE(req: Request) {
+  let artist = null;
+  try {
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+    const formData = await req.json();
+    if (formData.artist_name.trim() === "" || !formData.artist_name) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 401 });
+    }
+
+    await dbConnect();
+
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 401 }
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else {
+      artist = await Artist.findOneAndDelete({
+        artistName: formData.artist_name.trim(),
+        user: user._id,
+      }).explain("executionStats");
+    }
+
+    if (!artist) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+
+    return NextResponse.json(
+      { msg: "Request submitted successfully" },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    console.log(error);
+    
+    return handleMongooseValidationError(error);
+  }
+}
+// export async function PATCH(req: Request) {
+//   let artist = null;
+//   let selectedImage = "";
+//   try {
+//     const userData = await verifyJWT();
+//     const userJwt = verifyUser(userData);
+//     if (userJwt.msg) {
+//       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+//     }
+//     const formData = await req.formData();
+
+//     // Get the file
+//     const file = formData.get("artist_image") as File | null;
+//     const artistName = formData.get("artist_name") as string;
+//     const old_name = formData.get("old_name") as string;
+
+//     if (!file && !artistName && artistName.trim() === "") {
+//       return NextResponse.json({ msg: "Invalid request" }, { status: 400 });
+//     } else if (!old_name) {
+//       return NextResponse.json(
+//         { msg: "Invalid name is required" },
+//         { status: 400 }
+//       );
+//     }
+//     if(file){
+//       const bytes = await file.arrayBuffer();
+//       const buffer = Buffer.from(bytes);
+
+//       selectedImage = "data:image/png;base64," + buffer.toString("base64");
+//     }
+//     await dbConnect();
+
+//     const user = userJwt.user ? await User.findById(userJwt.user) : null;
+//     if (!user) {
+//       return NextResponse.json({ msg: "Invalid User" }, { status: 404 });
+//     } else if (!user.confirmed) {
+//       return NextResponse.json(
+//         { msg: "Please verify your email address" },
+//         { status: 400 }
+//       );
+//     } else if (user.otp !== null) {
+//       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+//     } else {
+//       artist = await Artist.find({
+//         artistName: old_name,
+//         user:user._id
+//       }).explain("executionStats");
+//     }
+
+//     if (artist.length > 0) {
+//       return NextResponse.json(
+//         { msg: "Artist already exists" },
+//         { status: 400 }
+//       );
+//     }
+//     artist = new Artist({...artist,artistName:artistName,
+//     });
+//     await artist.save();
+//     return NextResponse.json(
+//       { msg: "Artist created successfully", artist },
+//       { status: 201 }
+//     );
+//   } catch (error: unknown) {
+//     return handleMongooseValidationError(error);
+//   }
+// }
 
 export async function GET(req: Request) {
   try {
@@ -103,17 +215,20 @@ export async function GET(req: Request) {
     const name = searchParams.get("artistName");
     const sortQuery = buildSort(sort) as {
       [key: string]: SortOrder | { $meta: any };
-    };//this is use to format the sort query for mongodb.
+    }; //this is use to format the sort query for mongodb.
 
     if (name && name.trim() !== "") {
-      const query = { artistName: { $regex: "^" + name, $options: "i" },user: userJwt.user };
+      const query = {
+        artistName: { $regex: "^" + name, $options: "i" },
+        user: userJwt.user,
+      };
 
       artists = await Artist.find(query)
-      .collation({ locale: "en", strength: 2 })
+        .collation({ locale: "en", strength: 2 })
         .sort(sortQuery)
         .skip((page - 1) * limit)
         .limit(limit);
-        totalCount = await Artist.countDocuments(query);
+      totalCount = await Artist.countDocuments(query);
       // return NextResponse.json({artists,msg:artists.  > 0?"Successful":"No artists found" }, { status:artists.length > 0? 200 : 404 });
     } else {
       artists = await Artist.find({ user: userJwt.user })
@@ -138,7 +253,7 @@ export async function GET(req: Request) {
         totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
         msg: totalCount > 0 ? "Successful" : "No artists found",
       },
-      { status: 200}
+      { status: 200 }
     );
     // const artists = await Artist.find({ user: userJwt.user }).populate("user", "email").sort({[sort]:1}).skip((page - 1) * limit).limit(limit);
   } catch (error: unknown) {

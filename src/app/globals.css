@@ -173,6 +173,7 @@ a {
   --color-neutral-500: #8D8D8D;
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
+  --color-error-500: #D91B1B;
   --breakpoint-mobile: 850px;
   --breakpoint-xs: 500px;
 }
@@ -181,6 +182,9 @@ a {
 } */
 button:hover{
 cursor: pointer;
+}
+body:has(.requires-no-scroll) {
+  overflow: hidden;
 }
 
 @keyframes shimmer {

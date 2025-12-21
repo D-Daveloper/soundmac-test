@@ -29,6 +29,8 @@ const SongForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
+
+  //used to get years like 2006, 2013 etc.
   const futureYears = Array.from({ length: 11 }, (_, i) =>
     (new Date().getFullYear() + i).toString()
   );
@@ -202,7 +204,6 @@ const SongForm = () => {
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
     console.log(form);
 
-    const string_form = { ...form, action: action };
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {

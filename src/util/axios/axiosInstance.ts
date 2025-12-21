@@ -201,3 +201,13 @@ export const createArtist = async (
   });
   return res.data;
 };
+export const DeleteArtist = async (
+  api: AxiosInstance,
+  form: {artist_name:string}
+) => {
+  const res = await api.delete("users/artist", {
+    data: form,
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};

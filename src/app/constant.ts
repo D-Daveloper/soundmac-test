@@ -271,5 +271,5 @@ export const filterOptions = [
   { label: "Z-A", value: "-artistName" },
 ]
 export const artistOptions = [
-  "Edit"
+  "View"
 ]

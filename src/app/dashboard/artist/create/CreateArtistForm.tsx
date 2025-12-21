@@ -89,13 +89,13 @@ const CreateArtistForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col">
       <button
         aria-label="go back"
         onClick={() => {
           router.back();
         }}
-        className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black mb-9"
+        className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black mb-5"
       >
         <Image
           src={"/arrow-left.svg"}
@@ -293,7 +293,7 @@ const CreateArtistForm = () => {
                           width={100}
                           height={150}
                           alt="music note icon"
-                          className="min-w-32 h-32 object-cover rounded-2xl flex-1"
+                          className="min-w-32 h-32 object-contain rounded-2xl flex-1"
                         />
                       </div>
                       <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate min-w-[80%] flex-2">
@@ -345,7 +345,7 @@ const CreateArtistForm = () => {
                 width={0}
                 height={0}
                 alt="preview of the artist song cover"
-                className="rounded-lg w-full h-full object-cover"
+                className="rounded-lg w-full h-full object-contain"
               />
             ) : (
               <div className="w-full h-full bg-neutral-100 relative z-[10]">

@@ -1,5 +1,6 @@
 import { AlbumForm, CreateArtistForm, SongForm } from "@/app/type";
 import { addWeeks, subWeeks } from "date-fns";
+import { toast } from "react-toastify";
 
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
 const otpLength = process.env.OTP_LENGTH as unknown as number;
@@ -142,3 +143,8 @@ export const buildSort = (sort: string) => {
   }
   return { [sort]: 1 }; // ascending
 };
+
+export const handleCopy = async (text:string)=>{
+    await navigator.clipboard.writeText(text)
+    toast.info("copied");
+  }
