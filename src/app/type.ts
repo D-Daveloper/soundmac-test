@@ -134,3 +134,9 @@ export interface ARTIST_TABLE extends Artist {
     totalReleases:number;
 
 }
+
+export type ArtistStat = {
+  artists:string[],
+  totalReleases:string
+  artist:Artist
+}

@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import Input from "../components/input/Input";
 import Link from "next/link";
 import { toast } from "react-toastify";
-import UseAxios from "@/util/customHooks/UseAxios";
+// import UseAxios from "@/util/customHooks/UseAxios";
 import { AxiosError } from "axios";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useLoginMutation } from "@/util/customHooks/useMutations";
 type FormField = {
   name: string; // 👈 key must match form keys
   title: string;
@@ -42,7 +43,6 @@ const formvals: FormField[] = [
 ];
 
 const LoginForm = () => {
-  const api = UseAxios();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
@@ -53,7 +53,7 @@ const LoginForm = () => {
     password: "",
     email: "",
   });
-  const [loading, setLoading] = useState(false);
+  const {mutateAsync, isPending,isSuccess} = useLoginMutation();
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -62,24 +62,18 @@ const LoginForm = () => {
       return;
     }
     try {
-      setLoading(true);
-      const res = await api.post("auth/login", loginForm);
-
-      if (res.status === 200) {
-        localStorage.setItem("soundmacPendingEmail", loginForm.email);
+      const res = await mutateAsync(loginForm);
+      console.log(res);
         localStorage.setItem("soundmacRedirectAfterOtp", safeRedirect);
-        toast.success(res.data.msg);
         console.log(res.data);
         router.push("/otp");
-      }
+      
     } catch (error) {
       if (error instanceof AxiosError) {
         console.log(error);
         return;
       }
       toast.error(error as string);
-    } finally {
-      setLoading(false);
     }
   };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,12 +120,12 @@ const LoginForm = () => {
       </form>
       <div className="flex justify-end flex-col gap-10 items-center pb-9 max-sm:text-2xl">
         <button
-          disabled={!loginForm.password || !loginForm.email || loading}
+          disabled={!loginForm.password || !loginForm.email || isPending||isSuccess}
           form="signup-form"
           type="submit"
           className={
             "bg-disable px-8 py-3 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
-            ((loginForm.password && !loading) && " bg-primary hover:bg-primary/90")
+            ((loginForm.password && !isPending) && " bg-primary hover:bg-primary/90")
           }
         >
           Sign In

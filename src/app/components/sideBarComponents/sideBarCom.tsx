@@ -37,7 +37,7 @@ const sideBarCom = (props: Props) => {
         <div
           className={
             "justify-around transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (open ? (props.title === 'music'? " flex max-h-[80px]": props.title === "artists"? " max-h-[100px]" : " max-h-[25px]") : "  max-h-[0px]")
+            (open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[80px]": props.title === "artists"? " max-h-[100px]" : " max-h-[25px]") : "  max-h-[0px]")
           }
         >
           {props.list.map((section, index) => (

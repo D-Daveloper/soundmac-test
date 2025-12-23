@@ -270,6 +270,3 @@ export const filterOptions = [
   { label: "A-Z", value: "artistName" },
   { label: "Z-A", value: "-artistName" },
 ]
-export const artistOptions = [
-  "View"
-]

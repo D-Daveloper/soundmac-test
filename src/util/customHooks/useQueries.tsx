@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
   getArtists,
+  getArtistStats,
   getCurrentUser,
   getDashboard,
 } from "../axios/axiosInstance";
-import { Artist, PAGINATION } from "@/app/type";
+import { Artist, ArtistStat, PAGINATION } from "@/app/type";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -40,5 +41,15 @@ export function usePaginatedArtists(params:{ page:number,sort:string,artistName:
     placeholderData: (prev) => prev, // avoids UI flicker
     retry:1,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+export function useGetArtistStats(artistName:string) {
+  const api = UseAxios();
+  return useQuery<ArtistStat, Error>({
+    queryKey: ["artistStats",artistName],
+    queryFn: async () => getArtistStats(api, artistName),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry:1,
+    staleTime: 1000 * 60 * 30, // 5 minutes
   });
 }

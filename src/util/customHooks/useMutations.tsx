@@ -41,12 +41,36 @@ export const useOtpMutation = () => {
     },
   });
 };
+
+export const useLoginMutation = () => {
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form: { email: string; password: string }) => {
+      const res = await api.post("auth/login", form);
+      return res.data;
+    },
+    onSuccess: async (data, variables) => {
+      toast.success(data.msg);
+      localStorage.setItem("soundmacPendingEmail", variables.email);
+      console.log(data);
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("otp verification failed.");
+    },
+  });
+};
+
 export const useCreatArtistMutation = () => {
   const queryClient = useQueryClient();
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: CreateArtistForm) => createArtist(api,form),
+    mutationFn: async (form: CreateArtistForm) => createArtist(api, form),
     onSuccess: async (data) => {
       toast.success(data.msg);
       queryClient.invalidateQueries({ queryKey: ["artists"] });
@@ -61,12 +85,14 @@ export const useCreatArtistMutation = () => {
     },
   });
 };
+
 export const useDeleteArtistMutation = () => {
   const queryClient = useQueryClient();
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form:{artist_name:string}) => DeleteArtist(api,form),
+    mutationFn: async (form: { artist_name: string }) =>
+      DeleteArtist(api, form),
     onSuccess: async (data) => {
       toast.success(data.msg);
       queryClient.invalidateQueries({ queryKey: ["artists"] });

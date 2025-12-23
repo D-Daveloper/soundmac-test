@@ -74,18 +74,43 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       isActive: "",
       setIsActive: () => setIsActive("insights"),
     },
+    {
+      title: "finance",
+      list: [
+        {
+          title: "sales report",
+          icon: "/musicplay.svg",
+          setSection: () => setSection("sales_report"),
+          query: "sales_report",
+        },
+      ],
+      isActive: "",
+      setIsActive: () => setIsActive("finance"),
+    },
+    {
+      title: "explore",
+      list: [
+        {
+          title: "promotions",
+          icon: "/musicplay.svg",
+          setSection: () => setSection("sales_report"),
+          query: "sales_report",
+        },
+        {
+          title: "cover license",
+          icon: "/musicplay.svg",
+          setSection: () => setSection("sales_report"),
+          query: "sales_report",
+        },
+      ],
+      isActive: "",
+      setIsActive: () => setIsActive("finance"),
+    },
   ];
   useEffect(() => {
     setIsActive(tab);
     setIsOpen(false);
     switch (tab) {
-      case "dashboard":
-        if (data == undefined || data.user == undefined) {
-          setHeaderMessage("Welcome User");
-          return;
-        }
-        setHeaderMessage("Welcome " + data.user.firstName);
-        break;
       case "Music":
         setHeaderMessage("Upload Music");
         break;
@@ -106,9 +131,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       default:
         break;
     }
-  }, [tab, section, data]);
+  }, [tab, section]);
 
-  if (isLoading) return <NormalLoadingScreen />;
+  if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
   return (
     <UserRoute>
       <div>
@@ -125,7 +150,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               <div className="bg-primary w-5 h-1"></div>
             </div>
             <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
-              {headerMessage}
+              {tab == "dashboard" ? "Welcome, "+data?.firstName : headerMessage}
             </h1>
             <div
               className={
@@ -135,8 +160,8 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                   : " max-lg:-translate-x-full")
               }
             >
-              <div className="bg-primary-700 py-10 w-full text-main-white">
-                <div className="flex flex-col gap-15 ml-6 mr-2">
+              <div className="bg-primary-700 py-10 w-full text-main-white overflow-y-auto">
+                <div className="flex flex-col gap-15 ml-6 mr-2 overflow-y-auto h-full">
                   <div className="flex justify-between items-center">
                     <Link
                       href={"/"}

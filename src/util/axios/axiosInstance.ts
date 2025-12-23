@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { Artist, CreateArtistForm, PAGINATION } from "@/app/type";
+import { Artist, ArtistStat, CreateArtistForm, PAGINATION } from "@/app/type";
 import { AxiosInstance } from "axios";
 
 // import axios, { AxiosError } from "axios";
@@ -177,7 +177,7 @@ export async function getDashboard(api: AxiosInstance) {
 
 export const getCurrentUser = async (api: AxiosInstance): Promise<any> => {
   const res = await api.get("users/user");
-  return res.data;
+  return res.data?.user;
 };
 
 
@@ -188,6 +188,13 @@ export const getArtists = async (
   const res = await api.get<Promise<PAGINATION<Artist>>>("users/artist", {
     params:params,
   });
+  return res.data;
+};
+export const getArtistStats = async (
+  api: AxiosInstance,
+  artistName:string 
+): Promise<ArtistStat> => {
+  const res = await api.get<Promise<ArtistStat>>("users/artist/stats/"+artistName);
   return res.data;
 };
 
