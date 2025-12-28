@@ -27,10 +27,11 @@ export const useOtpMutation = () => {
         process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
       );
       const sessionExpiry = Date.now() + session * 1000;
-      localStorage.clear();
-      localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
       const redirect = localStorage.getItem("soundmacRedirectAfterOtp"); //incase their session ends and they get redirected to login page after  login pick up the redirect link
-      router.push(redirect || "/dashboard?tab=dashboard");
+      localStorage.clear();
+      localStorage.removeItem("soundmacotpExpiry");
+      localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
+      router.push(redirect? redirect : "/dashboard?tab=dashboard");
     },
     onError: (error) => {
       if (isAxiosError(error)) {

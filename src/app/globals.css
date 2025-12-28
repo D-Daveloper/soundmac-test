@@ -158,8 +158,10 @@ a {
   --color-primary: #11456B;
   --color-primary-red: #D91B1B;
   --color-primary-700:#0E2E44;
+  --color-primary-50:#CFDAE1;
   --color-primary-500:#11456B;
   --color-primary-300:#708FA6;
+  --color-main-icon-color:#103958;
   --color-disable: #CFDAE1;
   --color-text-disable: #A4A4A4;
   --color-text-body: #494949;
@@ -167,6 +169,7 @@ a {
   --color-main-heading:#333333;
   --color-warning-50:#FEF6EA;
   --color-warning-700:#966721;
+  --color-warning-600:#C58629;
   --color-p: #494949;
   --color-neutral-50: #F4F4F4;
   --color-neutral-100: #E8E8E8;
@@ -174,8 +177,27 @@ a {
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
   --color-error-500: #D91B1B;
+  --color-error-50: #FBE8E8;
+  --color-btn-disabled: #CFDAE1;
+  --color-btn-hover: #416A89;
+  --color-success-100: #D5ECD7;
+  --color-success-500: #2B9E36;
+  --color-secondary-50: #F0F0E7;
   --breakpoint-mobile: 850px;
   --breakpoint-xs: 500px;
+  --text-body-two-regular:16px;
+  --text-body-two-regular--line-height:20px;
+  --text-body-two-regular--letter-spacing:-0.5px;
+  --text-body-two-regular--font-weight:400;
+  --text-h5-semibold:32px;
+  --text-h5-semibold--line-height:40px;
+  --text-h5-semibold--letter-spacing:-1px;
+  --text-h5-semibold--font-weight:600;
+/* 
+    --text-tiny: 0.625rem;
+  --text-tiny--line-height: 1.5rem; 
+  --text-tiny--letter-spacing: 0.125rem; 
+  --text-tiny--font-weight: 500;  */
 }
 /* .section{
   font-family: var(--font-figtree), sans-serif!important;
@@ -206,4 +228,13 @@ body:has(.requires-no-scroll) {
   );
   background-size: 1000px 100%;
   animation: shimmer 1.5s infinite linear;
+}
+
+.remove-scrollbar::-webkit-scrollbar {
+  display: none;
+
+}
+.remove-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

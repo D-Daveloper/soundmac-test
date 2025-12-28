@@ -91,20 +91,20 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       title: "explore",
       list: [
         {
-          title: "promotions",
-          icon: "/musicplay.svg",
-          setSection: () => setSection("sales_report"),
-          query: "sales_report",
+          title: "promotion",
+          icon: "/add.svg",
+          setSection: () => setSection("promotion"),
+          query: "promotion",
         },
         {
           title: "cover license",
-          icon: "/musicplay.svg",
-          setSection: () => setSection("sales_report"),
-          query: "sales_report",
+          icon: "/musiclibrary2.svg",
+          setSection: () => setSection("manageRelease"),
+          query: "manageRelease",
         },
       ],
       isActive: "",
-      setIsActive: () => setIsActive("finance"),
+      setIsActive: () => setIsActive("explore"),
     },
   ];
   useEffect(() => {
@@ -127,6 +127,16 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         }
         setHeaderMessage("Create Artist");
         break;
+      case "explore":
+        if (section === "promotion") {
+          setHeaderMessage("Explore Promotions");
+          break;
+        }
+          else{
+            setHeaderMessage("Explore Promotions");
+            break;
+
+          }
 
       default:
         break;
@@ -160,8 +170,8 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                   : " max-lg:-translate-x-full")
               }
             >
-              <div className="bg-primary-700 py-10 w-full text-main-white overflow-y-auto">
-                <div className="flex flex-col gap-15 ml-6 mr-2 overflow-y-auto h-full">
+              <div className="bg-primary-700 py-10 w-full text-main-white remove-scrollbar">
+                <div className="flex flex-col gap-12 ml-6 mr-2 overflow-y-auto h-full remove-scrollbar">
                   <div className="flex justify-between items-center">
                     <Link
                       href={"/"}

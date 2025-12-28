@@ -4,30 +4,26 @@ import Dashboard from "./Dashboard";
 import UploadMusic from "./uploadMusic/UploadMusic";
 import CreateArtistForm from "./artist/create/CreateArtistForm";
 import ManageArtist from "./artist/manage/ManageArtist";
+import Promotion from "./promotion/Promotion";
+import RadioPromotionForm from "./promotion/RadioPromotionForm";
+import BoomPlayForm from "./promotion/BoomPlayForm";
+import PitchPlayForm from "./promotion/PitchPlayForm";
+import OnlinePressForm from "./promotion/OnlinePressForm";
 
 const page = () => {
-
-  const { tab, section } = useTabQuery("dashboard");
+  const { tab, section, promotionType } = useTabQuery("dashboard");
 
   return (
-
     <main className="section h-full relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
-
       <div className="flex h-full">
         <div className="text-[#333333] lg:ml-[250px] w-full h-full">
           <div className="h-full">
-            {(tab === "dashboard" || !tab) && (
-              <Dashboard />
-            )}
+            {(tab === "dashboard" || !tab) && <Dashboard />}
             {tab === "Music" && (
               <>
-                {section === "uploadMusic" && (
-                  <UploadMusic />
-                )}
+                {section === "uploadMusic" && <UploadMusic />}
                 {/* {section === "manageReleases" && <ManageRelease />} */}
-                {!section && (
-                  <UploadMusic />
-                )}
+                {!section && <UploadMusic />}
               </>
             )}
             {tab === "Artists" && (
@@ -41,6 +37,21 @@ const page = () => {
             {/* {tab === "Insight" && section === "songPerformance" && (
               <SongPerformance />
             )} */}
+            {tab === "explore" &&
+              section === "promotion" &&
+              promotionType === "boomplay" && <BoomPlayForm />}
+            {tab === "explore" &&
+              section === "promotion" &&
+              promotionType === "radio" && <RadioPromotionForm />}
+            {tab === "explore" &&
+              section === "promotion" &&
+              promotionType === "pitchplay" && <PitchPlayForm />}
+            {tab === "explore" &&
+              section === "promotion" &&
+              promotionType === "onlinepress" && <OnlinePressForm />}
+            {tab === "explore" && section === "promotion" && !promotionType && (
+              <Promotion />
+            )}
           </div>
         </div>
       </div>

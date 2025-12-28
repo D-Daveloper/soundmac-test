@@ -42,107 +42,114 @@ export const categories = [
   "Music Marketing",
 ];
 export const blogContent = [
-    {
-        "id": 1,
-        "title": "Building A Strong Personal Brand as an Independent Artist",
-        "content": "Personal Branding is the deliberate or indeliberate things you that you do that gives the world a perception of you. It is basically what defines you as a person, and in this case, as an artist.",
-        "slug": "building-a-strong-personal-brand-as-an-independent-artist"
-    },
-    {
-        "id": 2,
-        "title": "The Importance of Music Distribution for Independent Artists",
-        "content": "Music distribution is the process of getting your music into the hands of listeners. For independent artists, it is crucial to have a reliable distribution strategy to ensure that your music reaches a wide audience.",
-        "slug": "the-importance-of-music-distribution-for-independent-artists"
-    },
-    {
-        "id": 3,
-        "title": "How to Promote Your Music Effectively",
-        "content": "Promoting your music is essential for gaining visibility and building a fanbase. This article explores various strategies for effectively promoting your music, including social media marketing, collaborations, and live performances.",
-        "slug": "how-to-promote-your-music-effectively"
-    },
-    {
-        "id": 4,
-        "title": "Understanding Music Royalties",
-        "content": "Music royalties are payments made to artists and songwriters for the use of their music. This article explains the different types of royalties, how they are calculated, and why they are important for independent artists.",
-        "slug": "understanding-music-royalties"
-    },
-    {
-        "id": 5,
-        "title": "The Role of Social Media in Music Promotion",
-        "content": "Social media has become a powerful tool for music promotion. This article discusses how independent artists can leverage social media platforms to connect with fans, share their music, and grow their audience.",
-        "slug": "the-role-of-social-media-in-music-promotion"
-    },
-    {
-        "id": 6,
-        "title": "Navigating the Music Industry as an Independent Artist",
-        "content": "The music industry can be challenging for independent artists. This article provides insights into navigating the industry, including building a network, understanding contracts, and finding opportunities for growth.",
-        "slug": "navigating-the-music-industry-as-an-independent-artist"
-    },
-    {
-        "id": 7,
-        "title": "The Future of Music Distribution",
-        "content": "The music distribution landscape is constantly evolving. This article explores the future of music distribution, including emerging technologies, changes in consumer behavior, and the impact of streaming services.",
-        "slug": "the-future-of-music-distribution"
-    },
-    {
-        "id": 8,
-        "title": "Tips for Independent Artists to Succeed",
-        "content": "Success as an independent artist requires dedication, creativity, and strategic planning. This article offers practical tips for independent artists to succeed in the competitive music industry.",
-        "slug": "tips-for-independent-artists-to-succeed"
-    }
+  {
+    id: 1,
+    title: "Building A Strong Personal Brand as an Independent Artist",
+    content:
+      "Personal Branding is the deliberate or indeliberate things you that you do that gives the world a perception of you. It is basically what defines you as a person, and in this case, as an artist.",
+    slug: "building-a-strong-personal-brand-as-an-independent-artist",
+  },
+  {
+    id: 2,
+    title: "The Importance of Music Distribution for Independent Artists",
+    content:
+      "Music distribution is the process of getting your music into the hands of listeners. For independent artists, it is crucial to have a reliable distribution strategy to ensure that your music reaches a wide audience.",
+    slug: "the-importance-of-music-distribution-for-independent-artists",
+  },
+  {
+    id: 3,
+    title: "How to Promote Your Music Effectively",
+    content:
+      "Promoting your music is essential for gaining visibility and building a fanbase. This article explores various strategies for effectively promoting your music, including social media marketing, collaborations, and live performances.",
+    slug: "how-to-promote-your-music-effectively",
+  },
+  {
+    id: 4,
+    title: "Understanding Music Royalties",
+    content:
+      "Music royalties are payments made to artists and songwriters for the use of their music. This article explains the different types of royalties, how they are calculated, and why they are important for independent artists.",
+    slug: "understanding-music-royalties",
+  },
+  {
+    id: 5,
+    title: "The Role of Social Media in Music Promotion",
+    content:
+      "Social media has become a powerful tool for music promotion. This article discusses how independent artists can leverage social media platforms to connect with fans, share their music, and grow their audience.",
+    slug: "the-role-of-social-media-in-music-promotion",
+  },
+  {
+    id: 6,
+    title: "Navigating the Music Industry as an Independent Artist",
+    content:
+      "The music industry can be challenging for independent artists. This article provides insights into navigating the industry, including building a network, understanding contracts, and finding opportunities for growth.",
+    slug: "navigating-the-music-industry-as-an-independent-artist",
+  },
+  {
+    id: 7,
+    title: "The Future of Music Distribution",
+    content:
+      "The music distribution landscape is constantly evolving. This article explores the future of music distribution, including emerging technologies, changes in consumer behavior, and the impact of streaming services.",
+    slug: "the-future-of-music-distribution",
+  },
+  {
+    id: 8,
+    title: "Tips for Independent Artists to Succeed",
+    content:
+      "Success as an independent artist requires dedication, creativity, and strategic planning. This article offers practical tips for independent artists to succeed in the competitive music industry.",
+    slug: "tips-for-independent-artists-to-succeed",
+  },
 ];
-export const artistContent:Artist[] = [
-    {
-        "artistName": "The Midnight Echoes",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    
-    {
-        "artistName": "Kingsley & The Vibe Collective",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    
-    {
-        "artistName": "ohn Doe",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    {
-        "artistName": "ohn Doe",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    {
-        "artistName": "ohn Doe",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    {
-        "artistName": "ohn Doe",
-        "artistImage": "/signinimage.png",
-        "appleId":"",
-        "spotifyId":"",
-        "updatedAt":new Date("2025-08-28T12:30:35.144+00:00"),
-        "createdAt":new Date("2025-08-28T12:30:35.144+00:00")
-    },
-    
+export const artistContent: Artist[] = [
+  {
+    artistName: "The Midnight Echoes",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
+
+  {
+    artistName: "Kingsley & The Vibe Collective",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
+
+  {
+    artistName: "ohn Doe",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
+  {
+    artistName: "ohn Doe",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
+  {
+    artistName: "ohn Doe",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
+  {
+    artistName: "ohn Doe",
+    artistImage: "/signinimage.png",
+    appleId: "",
+    spotifyId: "",
+    updatedAt: new Date("2025-08-28T12:30:35.144+00:00"),
+    createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
+  },
 ];
 
 export const promotionContent = [
@@ -153,7 +160,7 @@ export const promotionContent = [
       "Get featured on Boomplay’s top editorial playlists and amplify your reach to millions of music fans across Africa.",
     image:
       "https://soundmac1.s3.eu-north-1.amazonaws.com/blogImage/WhatsApp%20Image%202025-01-17%20at%2019.15.06_bab69026.jpg",
-      category: "Boomplay",
+    category: "Boomplay",
   },
   {
     id: 2,
@@ -262,11 +269,106 @@ export const languagesList = [
   "Zulu",
 ];
 
-export const OTP_EXPIRY_SECONDS = parseInt(process.env.NEXT_PUBLIC_OTP_EXPIRY_SECONDS || "300");
+export const OTP_EXPIRY_SECONDS = parseInt(
+  process.env.NEXT_PUBLIC_OTP_EXPIRY_SECONDS || "300"
+);
 
 export const filterOptions = [
   { label: "Newest", value: "-createdAt" },
   { label: "Oldest", value: "createdAt" },
   { label: "A-Z", value: "artistName" },
   { label: "Z-A", value: "-artistName" },
-]
+];
+
+export const promotionTestData = [
+  {
+    id: 1,
+    category: "Nigeria Radio Promotion",
+    packageType: "30 Days Airplay",
+    songTitle: "Song Title Here",
+    startDate: "2025-08-13T15:06:33.593",
+    endDate: "2025-09-12T15:06:33.593",
+    status: "In Progress",
+    type: "radioPromotion",
+    isActive: true,
+  },
+  {
+    id: 1,
+    category: "Nigeria Radio Promotion",
+    packageType: "30 Days Airplay",
+    songTitle: "Song Title Here",
+    startDate: "2025-08-13T15:06:33.593",
+    endDate: "2025-09-12T15:06:33.593",
+    status: "In Progress",
+    type: "radioPromotion",
+    isActive: true,
+  },
+  {
+    id: 1,
+    category: "Nigeria Radio Promotion",
+    packageType: "30 Days Airplay",
+    songTitle: "Song Title Here",
+    startDate: "2025-08-13T15:06:33.593",
+    endDate: "2025-09-12T15:06:33.593",
+    status: "In Progress",
+    type: "radioPromotion",
+    isActive: false,
+  },
+];
+
+const packagesList = [
+  [
+    "Bronze package (5 B-tier playlist + Push Notifications 2m+ Impressions) | N300,000",
+    "Silver package (10 A-tier playlist + Push Notifications 5m+ Impressions) | N500,000",
+    "Gold package (15 A-tier playlist + Push Notifications 10m+ Impressions) | N700,000",
+    "Platinum package (20 A-tier playlist + Push Notifications 15m+ Impressions) | N1,000,000",
+  ],
+  [
+    "Deezer Top 100 song chart | N400,000",
+    "Deezer Top 50 song chart | N450,000",
+    "Deezer Top 10 song chart | N500,000",
+    "Deezer Top 1 - 10 song chart | N650,000",
+  ],
+  [
+    "Shazam top 100 songs chart | N700,000",
+    "Shazam top 50 songs chart | N900,000",
+    "Shazam top 20 songs chart | N1,300,000",
+    "Shazam top 10 songs chart | N2,500,000",
+  ],
+  [
+    "Max fm | N150,000",
+    "Mainland Fm | N150,000",
+    "Hot fm | N150,000",
+    "City fm | N180,000",
+    "Rhythm fm | N200,000",
+    "Naija fm | N200,000",
+    "Naija fm | N200,000",
+    "Wazobia fm | N250,000",
+    "Beat Fm | N400,000",
+    "Soundcity Radio | N550,000",
+  ],
+  [
+    "This day | N70,000",
+    "Guardian | N70,000",
+    "Independent | N70,000",
+    "The nation | N70,000",
+    "Daily Trust | N100,000",
+    "Vanguard | N100,000",
+    "Blueprint | N100,000",
+  ],
+];
+
+export const boomplayPackages = packagesList[0];
+export const deezerPackages = packagesList[1];
+export const shazamPackages = packagesList[2];
+export const radioPromotionPackages = packagesList[3];
+export const onlinePressPackages = packagesList[4];
+
+export const enum promotionCategory {
+  boomplay = "Boomplay",
+  deezer = "Deezer",
+  shazam = "Shazam",
+  radioPromotion = "Radio-Promotion",
+  playlistPitch = "Playlist-Pitch",
+  onlinePress = "Online-Press",
+}

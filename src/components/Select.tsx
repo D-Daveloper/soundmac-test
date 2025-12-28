@@ -138,7 +138,7 @@ export default function Select({
           {opt.map((option, index) => (
             <button
               type="button"
-              key={option}
+              key={index}
               onClick={() => handleSelect(option)}
               className={`block w-full text-left px-4 py-3 border-b-2 
                 ${

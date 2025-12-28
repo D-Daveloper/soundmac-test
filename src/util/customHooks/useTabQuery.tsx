@@ -8,6 +8,7 @@ const sections = {
   manageArtist: { tab: "Artists", section: "manageArtist" },
   collaboration: { tab: "Artists", section: "collaboration" },
   song: { tab: "Insights", section: "songPerformance" },
+  promotion: { tab: "explore", section: "promotion" },
   // create:{tab:"Artist",section:"createArtist"},
 };
 
@@ -17,6 +18,7 @@ export function useTabQuery(defaultTab = "dashboard") {
 
   const tab = searchParams.get("tab") || defaultTab;
   const section = searchParams.get("section");
+  const promotionType = searchParams.get("promotionType");
   
   const setTab = (newTab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -60,6 +62,11 @@ export function useTabQuery(defaultTab = "dashboard") {
         params.set("section", sections.song.section);
         router.push(`?${params.toString()}`, { scroll: false });
         break;
+      case "promotion":
+        params.set("tab", sections.promotion.tab);
+        params.set("section", sections.promotion.section);
+        router.push(`?${params.toString()}`, { scroll: false });
+        break;
 
       default:
         params.set("tab", "dashboard");
@@ -84,5 +91,5 @@ export function useTabQuery(defaultTab = "dashboard") {
 
   };
 
-  return { tab, section, setTab, setSection,setParam,getParam,deleteParam };
+  return { tab, section, setTab, setSection,setParam,getParam,deleteParam,promotionType };
 }

@@ -30,14 +30,14 @@ const sideBarCom = (props: Props) => {
           alt="arrow point up"
           width={20}
           height={20}
-          className=""
+          className={""+(open ? " rotate-180 " : " rotate-0 ")}
         />
       </button>
-      <div className={""}>
+      {/* <div className={""}> */}
         <div
           className={
-            "justify-around transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[80px]": props.title === "artists"? " max-h-[100px]" : " max-h-[25px]") : "  max-h-[0px]")
+            " transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
+            (open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[90px] h-[90px]": props.title === "artists"? " max-h-[125px] h-[120px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
           }
         >
           {props.list.map((section, index) => (
@@ -48,7 +48,7 @@ const sideBarCom = (props: Props) => {
               aria-hidden={!open}
               aria-disabled={!open}
               tabIndex={!open ? -1 : 0}
-              className={(index === 1 || index === 2? "mt-4 " : "") +
+              className={(index > 0? "mt-4 " : "") +
                 " transition-all duration-300 flex gap-5 font-extralight capitalize h-auto" +
                 (open
                   ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99"
@@ -86,7 +86,7 @@ const sideBarCom = (props: Props) => {
             />
             manage release
           </button> */}
-        </div>
+        {/* </div> */}
       </div>
     </div>
   );
