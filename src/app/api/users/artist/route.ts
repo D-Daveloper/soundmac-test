@@ -5,13 +5,12 @@ import Artist, { IArtist } from "@/util/models/artistModel";
 import type { SortOrder } from "mongoose";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import { handleMongooseValidationError } from "@/util/customError/error";
-import { buildSort } from "@/util/middleware/functions";
+import { buildSort, uploadImage } from "@/util/middleware/functions";
 
 const limit = parseInt(process.env.ARTIST_LIMIT || "6", 10);
 
 export async function POST(req: Request) {
   let artist = null;
-  let selectedImage = "";
   try {
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -33,23 +32,23 @@ export async function POST(req: Request) {
         { msg: "Artist name is required" },
         { status: 400 }
       );
+    } else if (!["image/jpeg", "image/png"].includes(file.type)) {
+      return NextResponse.json(
+        {
+          msg: "Invalid Image format.",
+        },
+        { status: 400 }
+      );
     }
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
 
-    selectedImage = "data:image/png;base64," + buffer.toString("base64");
     await dbConnect();
-
-    // console.log("File name:", selectedImage);
-    // console.log("File type:", file.type);
-    // console.log("File size:", file.size);
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
-      return NextResponse.json({ msg: "User not found" }, { status: 404 });
+      return NextResponse.json({ msg: "Invalid User." }, { status: 404 });
     } else if (!user.confirmed) {
       return NextResponse.json(
-        { msg: "Please verify your email address" },
+        { msg: "Please verify your email address." },
         { status: 400 }
       );
     } else if (user.otp !== null) {
@@ -67,10 +66,26 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const imageType = file.type.split("/")[1];
+    const imageStorageLocation = `testing/artistImages/${artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+    const selectedImage = await uploadImage(
+      imageType,
+      buffer,
+      imageStorageLocation
+    );
+    if (selectedImage.coverUrl === null) {
+      return NextResponse.json(
+        {
+          msg: selectedImage.error,
+        },
+        { status: 500 }
+      );
+    }
     artist = new Artist({
       user: user._id,
       artistName: artistName,
-      artistImage: selectedImage,
+      artistImage: selectedImage.coverUrl,
       appleId: appleId,
       spotifyId: spotifyId,
     });
@@ -82,52 +97,81 @@ export async function POST(req: Request) {
   } catch (error: unknown) {
     return handleMongooseValidationError(error);
   }
-}
+} 
+
+// under review
 export async function DELETE(req: Request) {
-  let artist = null;
-  try {
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
-    if (userJwt.msg) {
-      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-    }
-    const formData = await req.json();
-    if (formData.artist_name.trim() === "" || !formData.artist_name) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 401 });
-    }
+  return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+  // const session = await mongoose.startSession();
 
-    await dbConnect();
+  // try {
+  //   session.startTransaction();
+  //   const userData = await verifyJWT();
+  //   const userJwt = verifyUser(userData);
+  //   if (userJwt.msg) {
+  //     return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+  //   }
+  //   const formData = await req.json();
+  //   if (formData.artist_name.trim() === "" || !formData.artist_name) {
+  //     return NextResponse.json({ msg: "Invalid Request" }, { status: 401 });
+  //   }
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
-    if (!user) {
-      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
-    } else if (!user.confirmed) {
-      return NextResponse.json(
-        { msg: "Please verify your email address" },
-        { status: 401 }
-      );
-    } else if (user.otp !== null) {
-      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
-    } else {
-      artist = await Artist.findOneAndDelete({
-        artistName: formData.artist_name.trim(),
-        user: user._id,
-      }).explain("executionStats");
-    }
+  //   await dbConnect();
+  //   const user = userJwt.user ? await User.findById(userJwt.user) : null;
+  //   if (!user) {
+  //     return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+  //   } else if (!user.confirmed) {
+  //     return NextResponse.json(
+  //       { msg: "Please verify your email address" },
+  //       { status: 401 }
+  //     );
+  //   } else if (user.otp !== null) {
+  //     return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+  //   } else {
+  //     // Find and verify artist belongs to user before deleting
+  //     const artist = await Artist.findOne({
+  //       artistName: formData.artist_name,
+  //       user: user._id,
+  //     }).session(session);
 
-    if (!artist) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    }
+  //      if (!artist) {
+  //     return NextResponse.json({
+  //       msg:"Invalid Artist"
+  //     },{status:400})}
 
-    return NextResponse.json(
-      { msg: "Request submitted successfully" },
-      { status: 200 }
-    );
-  } catch (error: unknown) {
-    console.log(error);
-    
-    return handleMongooseValidationError(error);
-  }
+  //     const deleteArtistResult = await Artist.deleteOne(
+  //       {
+  //         artistName: formData.artist_name.trim(),
+  //         user: user._id,
+  //       },
+  //       { session }
+  //     )
+  //     // .explain("executionStats");
+
+  //     if (deleteArtistResult.deletedCount < 1) {
+  //       return NextResponse.json({ msg: "Failed to delete." }, { status: 400 });
+  //     }
+
+  //     const deleteSongsResult = await SongModel.deleteMany(
+  //       { artistName: formData.artist_name.trim(), user: user._id },
+  //       { session }
+  //     );
+  //   } //test this one then try deleting the songs from s3 bucket too
+
+  //   // Commit the transaction
+  //   await session.commitTransaction();
+
+  //   return NextResponse.json({ msg: "Artist Deleted" }, { status: 200 });
+  // } catch (error: unknown) {
+  //   await session.abortTransaction();
+
+  //   console.log(error);
+
+  //   return handleMongooseValidationError(error);
+  // } finally {
+  //   // Always end the session
+  //   session.endSession();
+  // }
 }
 // export async function PATCH(req: Request) {
 //   let artist = null;

@@ -65,15 +65,16 @@ const ViewStats = ({
                 >
                   <div
                     className={
-                      " flex items-center justify-center rounded-2xl  text-white border border-neutral-100"
+                      "relative max-w-[100px] max-h-[100px] w-full h-full flex items-center justify-center rounded-2xl text-white border border-neutral-100 "
                     }
                   >
                     <Image
                       src={data.artist.artistImage}
-                      width={60}
-                      height={60}
+                      // width={0}
+                      // height={100}
+                      fill
                       alt="music note icon"
-                      className={" w-40 max-w-40 object-contain rounded-lg"}
+                      className={"  object-cover rounded-lg"}
                     />
                   </div>
                   <div className="">

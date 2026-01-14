@@ -86,7 +86,9 @@ export interface SongForm extends musicFormBase {
   explicit_content: boolean;
 }
 
-export interface AlbumForm extends musicFormBase {}
+export interface AlbumForm extends musicFormBase {
+    number_of_track:string;
+}
 
 export type CreateArtistForm = {
   artist_name: string;
@@ -140,3 +142,40 @@ export type ArtistStat = {
   totalReleases:string
   artist:Artist
 }
+
+
+export interface songFromApi
+  {
+  _id: string
+  songTitle: string
+  genre: string
+  songLanguage: string
+  artistName: string
+  artist: Artist
+  release_date: Date
+  preOrderDate: Date | null
+  featured_artist: FeaturedArtist[]
+  performer: Performer[]
+  song_writer: SongWriter[]
+  producer: Producer[]
+  pre_order_check: boolean
+  another_distribution_check: boolean
+  territories: string[]
+  song_audio: string
+  song_image: string
+  dsp: string[]
+  lyrics: string
+  start_clip: string
+  isrc: string
+  upc: string
+  copyRightHolder: string
+  copyRightYear: string
+  explicit_content: boolean
+  createdAt: Date
+  updatedAt: Date
+  __v: number
+  songStatus: string
+
+}
+// Mock data based on the provided schema for songFromApi
+// Assuming Artist is an object with basic properties (since not fully defined in schema, using a simple structure)

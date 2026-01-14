@@ -8,94 +8,15 @@ import {
   uploadImage,
 } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
+import AlbumDraftModel from "@/util/models/AlbumDraftModel";
+import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import SongDraftModel from "@/util/models/songDraftModel";
-// import { uploadImage } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks, subWeeks } from "date-fns";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
-
-// export async function POST(req: Request) {
-//   let artist = null;
-//   let selectedImage = "";
-//   try {
-//     const formData = await req.formData();
-
-//     // Get the file
-//     const file = formData.get("selectedImage") as File | null;
-//     const artistName = formData.get("artistName") as string | null;
-//     const appleId = formData.get("appleId") as string | null;
-//     const spotifyId = formData.get("spotifyId") as string | null;
-
-//     if (!file) {
-//       return NextResponse.json({ msg: "No file uploaded" }, { status: 400 });
-//     } else if (!artistName || artistName.trim() === "") {
-//       return NextResponse.json(
-//         { msg: "Artist name is required" },
-//         { status: 400 }
-//       );
-//     }
-//     const bytes = await file.arrayBuffer();
-//     const buffer = Buffer.from(bytes);
-
-//     selectedImage = "data:image/png;base64,"+buffer.toString("base64");
-//     await dbConnect();
-
-//     console.log("File name:", selectedImage);
-//     console.log("File type:", file.type);
-//     console.log("File size:", file.size);
-//     const userData = await verifyJWT(req);
-//     const userJwt = verifyUser(userData);
-//     if (userJwt.msg) {
-//       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-//     }
-
-//     const user = userJwt.user ? await User.findById(userJwt.user) : null;
-//     if (!user) {
-//       return NextResponse.json({ msg: "User not found" }, { status: 404 });
-//     } else if (!user.confirmed) {
-//       return NextResponse.json(
-//         { msg: "Please verify your email address" },
-//         { status: 400 }
-//       );
-//     } else if (user.otp !== null && user.twoFactorAuthentication === "true") {
-//       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
-//     } else {
-//       artist = await Artist.findOne({
-//         name: artistName,
-//       });
-//     }
-//     if (artist) {
-//       return NextResponse.json(
-//         { msg: "Artist already exists" },
-//         { status: 400 }
-//       );
-//     }
-//     artist = new Artist({
-//       user: user._id,
-//       artistName: artistName,
-//       artistImage: selectedImage,
-//       appleId: appleId,
-//       spotifyId: spotifyId,
-//     });
-//     await artist.save();
-//     return NextResponse.json(
-//       { msg: "Artist created successfully", artist },
-//       { status: 201 }
-//     );
-//   } catch (msg: unknown) {
-//     if (error instanceof Error) {
-//       return NextResponse.json({ msg: error.message }, { status: 500 });
-//     } else {
-//       return NextResponse.json(
-//         { msg: "An unknown error occurred" },
-//         { status: 500 }
-//       );
-//     }
-//   }
-// }
 
 export async function POST(req: Request) {
   try {
@@ -107,23 +28,11 @@ export async function POST(req: Request) {
     console.log({ ...formData });
 
     const actionType = formData.get("action");
-    const song_title = formData.get("title");
+    const album_title = formData.get("title");
     const genre = formData.get("genre");
     const language = formData.get("language");
     const preOrderDate = formData.get("preOrderDate");
-    const featured_artist = formData
-      .getAll("featured_artist")
-      .map((item) => JSON.parse(item as string));
     const artist = formData.get("artist");
-    const performer = formData
-      .getAll("performer")
-      .map((item) => JSON.parse(item as string));
-    const song_writer = formData
-      .getAll("song_writer")
-      .map((item) => JSON.parse(item as string));
-    const producer = formData
-      .getAll("producer")
-      .map((item) => JSON.parse(item as string));
     const pre_order_check = formData.get("pre_order_check");
     const another_distribution_check = formData.get(
       "another_distribution_check"
@@ -131,20 +40,16 @@ export async function POST(req: Request) {
     const territories = formData
       .getAll("territories")
       .map((item) => JSON.parse(item as string));
-    const song_audio = formData.get("song_audio");
     const dsp = formData
       .getAll("dsp")
       .map((item) => JSON.parse(item as string));
-    const lyrics = formData.get("lyrics");
-    const start_clip = formData.get("start_clip");
-    const isrc = formData.get("isrc");
-    const upc = formData.get("upc2"); // the new upc from the create aws signed url endpoint
+    // const upc = formData.get("upc");
+    const upc = "upc";
     const release_date = formData.get("release_date");
-    const s3KeyAudio = formData.get("s3keyAudio");
     const music_image = formData.get("music_image");
     const copyRightYear = formData.get("copyRightYear");
     const copyRightHolder = formData.get("copyRightHolder");
-    const explicit_content = formData.get("explicit_content");
+    const number_of_track = formData.get("number_of_track");
 
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -174,9 +79,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
     if (
-      !song_title ||
-      typeof song_title !== "string" ||
-      song_title.length <= 3
+      !album_title ||
+      typeof album_title !== "string" ||
+      album_title.length <= 3
     ) {
       return NextResponse.json(
         {
@@ -193,7 +98,7 @@ export async function POST(req: Request) {
       ) {
         oneWeek = subWeeks(new Date(release_date), 1);
       }
-      if (containsEmoji(song_title)) {
+      if (containsEmoji(album_title)) {
         return NextResponse.json(
           {
             msg: "Song title can not contain emojis",
@@ -226,42 +131,6 @@ export async function POST(req: Request) {
         return NextResponse.json(
           {
             msg: "Artist is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        !song_writer ||
-        !(song_writer instanceof Array) ||
-        song_writer.some((artist) => artist.first_name === "") ||
-        song_writer.some((artist) => artist.last_name === "")
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Song Writer is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        !producer ||
-        !(producer instanceof Array) ||
-        producer.some((artist) => artist.first_name === "") ||
-        producer.some((artist) => artist.last_name === "")
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Producer is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        !performer ||
-        !(performer instanceof Array) ||
-        performer.some((artist) => artist.name === "") ||
-        performer.some((artist) => artist.role === "")
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Performer is required.",
           },
           { status: 400 }
         );
@@ -314,21 +183,11 @@ export async function POST(req: Request) {
           },
           { status: 400 }
         );
-      } else if (
-        !start_clip ||
-        typeof start_clip != "string" ||
-        !numRegex.test(start_clip)
-      ) {
+        //   } else if (another_distribution_check === "true" && upc === "") {
+      } else if (another_distribution_check === "true") {
         return NextResponse.json(
           {
-            msg: "Start Clip is required.",
-          },
-          { status: 400 }
-        );
-      } else if (another_distribution_check === "true" && isrc === "") {
-        return NextResponse.json(
-          {
-            msg: "ISRC is required when transferring from another distributor.",
+            msg: "UPC is required when transferring from another distributor.",
           },
           { status: 400 }
         );
@@ -343,13 +202,25 @@ export async function POST(req: Request) {
         return NextResponse.json({
           msg: "Music image is required and must be a file",
         });
-      } else if (!upc || typeof upc !== "string") {
-        return NextResponse.json({
-          msg: "upc is required and must be a string",
-        });
       } else if (!["image/jpeg", "image/png"].includes(music_image.type)) {
         return NextResponse.json({ msg: "Invalid image format" });
+      } else if (
+        !number_of_track ||
+        !numRegex.test(number_of_track as string)
+      ) {
+        return NextResponse.json({
+          msg: "No. of tracks is required and must be a positive number",
+        });
       }
+
+      const num = parseInt(number_of_track as string, 10); // Convert string to number
+      if (isNaN(num) || num < 1) {
+        return NextResponse.json({ msg: "No. of tracks must greater than 1" });
+      }
+      const number_of_track_array = Array.from(
+        { length: num },
+        (_, i) => i + 1
+      );
 
       const buffer = Buffer.from(await (music_image as File).arrayBuffer());
       // ---- Resize to distributor standard ----
@@ -358,7 +229,7 @@ export async function POST(req: Request) {
         .jpeg({ quality: 90 })
         .toBuffer(); //resize the image for dpm
       const imageType = music_image.type.split("/")[1];
-      const imageStorageLocation = `testing/${upc}/${upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const imageStorageLocation = `testing/${upc}/${upc}.${imageType}`;
       const imageUrl = await uploadImage(
         imageType,
         resized as Buffer<ArrayBuffer>,
@@ -369,93 +240,57 @@ export async function POST(req: Request) {
       }
       await dbConnect();
 
-      const savedSong = new SongModel({
-        songTitle: song_title,
+      const album = new AlbumModel({
+        albumTitle: album_title,
         genre: genre,
         songLanguage: language,
-        song_writer: song_writer,
-        producer: producer,
-        performer: performer,
-        featured_artist,
         pre_order_check,
         another_distribution_check,
-        explicit_content,
         release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
-        lyrics,
-        start_clip,
         dsp: dsp,
         upc,
         isrc: "isrc",
         territories: territories,
-        song_audio: s3KeyAudio,
         song_image: imageUrl.coverUrl,
         artistName: userArtist.artistName,
         artist: userArtist._id,
+        NumberOfTracks: number_of_track,
+        UnassignedNumbers: number_of_track_array,
       });
-      await savedSong.save();
+      await album.save();
+      return NextResponse.json({ msg: "success" }, { status: 200 });
     } else {
-      const saveDraft = new SongDraftModel({
-        songTitle: song_title,
+      const saveDraft = new AlbumDraftModel({
+        albumTitle: album_title,
         genre: genre,
         songLanguage: language,
-        song_writer: song_writer,
-        producer: producer,
-        performer: performer,
-        featured_artist,
         pre_order_check,
         another_distribution_check,
-        explicit_content,
-        release_date: release_date == "undefined" ? null : release_date,
+        release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
-        lyrics,
-        start_clip,
         dsp: dsp,
         upc,
         isrc: "isrc",
         territories: territories,
+        // song_image: imageUrl.coverUrl,
         artistName: userArtist.artistName,
         artist: userArtist._id,
+        NumberOfTracks: number_of_track,
+        // UnassignedNumbers:number_of_track_array
       });
       await saveDraft.save();
+      return NextResponse.json({ msg: "Draft saved" }, { status: 200 });
     }
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    // return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 
     return handleMongooseValidationError(error);
   }
 }
-
-// export const uploadImage = async (file: File,upc:string): Promise<{msg:string|null,coverUrl:string|null}> => {
-//   // ---- Validation ----
-//   if (!["image/jpeg", "image/png"].includes(file.type)) {
-//     return { msg: "Invalid image format",coverUrl:null };
-//   }
-
-//   const buffer = Buffer.from(await file.arrayBuffer());
-
-//   // ---- Resize to distributor standard ----
-//   const resized = await sharp(buffer)
-//     .resize(3000, 3000, { fit: "cover" })
-//     .jpeg({ quality: 90 })
-//     .toBuffer();
-
-//   const key = `soundmac4/testing/${upc}.jpg`;
-
-//   await s3.send(
-//     new PutObjectCommand({
-//       Bucket: process.env.AWS_S3_BUCKET!,
-//       Key: key,
-//       Body: resized,
-//       ContentType: "image/jpeg",
-//       ACL: "public-read", // OK for cover art
-//     })
-//   );
-//   return { msg: null, coverUrl: `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}` };
-// }

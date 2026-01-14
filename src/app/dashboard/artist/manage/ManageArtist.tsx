@@ -67,7 +67,7 @@ useEffect(()=>{
     return <ViewStats artistToViewStats={viewStats} setArtistToViewStats={setViewStats}/>;
   }
   return (
-    <div className="bg-main-white  max-sm:min-h-auto h-[90dvh] w-full flex flex-col px-10 ">
+    <div className="bg-main-white  max-sm:min-h-auto min-h-[90dvh] w-full flex flex-col px-10 ">
       {isLoading ? <InlineLoadingScreen/> : !isLoading && (isError || data === undefined) ? (
         <div className="flex flex-col justify-center items-center h-full gap-15">
           <div>
@@ -163,14 +163,13 @@ useEffect(()=>{
                     key={index}
                     className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-5 row-span-1 col-span-1 min-h-[100px] max-h-[110px] relative "
                   >
-                    <div>
+                    <div className="relative max-w-[100px] max-h-[100px] w-full h-full">
                       <Image
                         priority={true}
                         src={artist.artistImage}
                         alt="an image depicting no artist profile"
-                        width={150}
-                        height={50}
-                        className="object-contain rounded-lg shadow-md p-2 "
+                       fill
+                        className="object-contain rounded-lg shadow-md max-h-[80px] "
                       />
                     </div>
                     <h1 className="text-xl font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-2">

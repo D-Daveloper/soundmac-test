@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export const handleMongooseValidationError = (error: unknown) => {
+console.log(error);
 
   if (error instanceof mongoose.Error.ValidationError) {
     const errors = Object.values(error.errors).map((err) => {

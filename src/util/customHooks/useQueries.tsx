@@ -6,6 +6,7 @@ import {
   getArtistStats,
   getCurrentUser,
   getDashboard,
+  getUserArtistsNames,
 } from "../axios/axiosInstance";
 import { Artist, ArtistStat, PAGINATION } from "@/app/type";
 
@@ -48,6 +49,16 @@ export function useGetArtistStats(artistName:string) {
   return useQuery<ArtistStat, Error>({
     queryKey: ["artistStats",artistName],
     queryFn: async () => getArtistStats(api, artistName),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry:1,
+    staleTime: 1000 * 60 * 30, // 5 minutes
+  });
+}
+export function useGetUserArtistsNames() {
+  const api = UseAxios();
+  return useQuery<string[], Error>({
+    queryKey: ["userArtistsNames"],
+    queryFn: async () => getUserArtistsNames(api),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry:1,
     staleTime: 1000 * 60 * 30, // 5 minutes

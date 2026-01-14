@@ -337,7 +337,207 @@ export const producerRoles = [
   ];
 export const country_list = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Cape Verde","Cayman Islands","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cruise Ship","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyz Republic","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Namibia","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Satellite","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","St. Lucia","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Uganda","Ukraine","United Arab Emirates","United Kingdom","Uruguay","Uzbekistan","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
-
+export const mockSongs = [
+  {
+    _id: "song1",
+    songTitle: "Electric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: { name: "Alex Rivera", id: "artist1" }, // Assuming Artist has name and id
+    release_date: "2026-01-23T23:00:00.000+00:00",
+    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: "2026-01-23T23:00:00.000+00:00",
+    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song2",
+    songTitle: "Midnight Serenade",
+    genre: "Jazz",
+    songLanguage: "Spanish",
+    artistName: "Sofia Martinez",
+    artist: { name: "Sofia Martinez", id: "artist2" },
+    release_date: "2026-01-23T23:00:00.000+00:00",
+    preOrderDate: null,
+    featured_artist: [],
+    performer: [
+      { name: "Sofia Martinez", role: "Piano" },
+      { name: "Carlos Ruiz", role: "Saxophone" }
+    ],
+    song_writer: [
+      { first_name: "Sofia", last_name: "Martinez" }
+    ],
+    producer: [
+      { first_name: "Elena", last_name: "Gomez" }
+    ],
+    pre_order_check: false,
+    another_distribution_check: true,
+    territories: ["Spain", "Mexico", "Argentina"],
+    song_audio: "https://example.com/audio/midnight-serenade.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Deezer"],
+    lyrics: "Verso 1: Bajo la luna llena...",
+    start_clip: "https://example.com/clip/midnight-serenade.mp3",
+    isrc: "ES-XYZ-22-67890",
+    upc: "987654321098",
+    copyRightHolder: "Sofia Martinez Productions",
+    copyRightYear: "2022",
+    explicit_content: false,
+    createdAt: "2026-01-23T23:00:00.000+00:00",
+    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    __v: 0,
+    songStatus: "pending"
+  },
+  {
+    _id: "song3",
+    songTitle: "Rock the Night",
+    genre: "Rock",
+    songLanguage: "English",
+    artistName: "The Thunderbolts",
+    artist: { name: "The Thunderbolts", id: "artist3" },
+    release_date: "2026-01-23T23:00:00.000+00:00",
+    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    featured_artist: [
+      { artistName: "Jake Thompson", spotifyId: "spotify_jake", appleId: "apple_jake" },
+      { artistName: "Lisa Wong", spotifyId: "spotify_lisa", appleId: "apple_lisa" }
+    ],
+    performer: [
+      { name: "Mike Harris", role: "Drums" },
+      { name: "Jake Thompson", role: "Vocals" }
+    ],
+    song_writer: [
+      { first_name: "Mike", last_name: "Harris" },
+      { first_name: "Jake", last_name: "Thompson" }
+    ],
+    producer: [
+      { first_name: "Tom", last_name: "Anderson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Australia"],
+    song_audio: "https://example.com/audio/rock-the-night.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "Tidal"],
+    lyrics: "Verse 1: Lights are flashing...",
+    start_clip: "https://example.com/clip/rock-the-night.mp3",
+    isrc: "US-DEF-24-54321",
+    upc: "112233445566",
+    copyRightHolder: "Thunderbolts Records",
+    copyRightYear: "2024",
+    explicit_content: true,
+    createdAt: "2026-01-23T23:00:00.000+00:00",
+    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    __v: 0,
+    songStatus: "approved"
+  },
+  {
+    _id: "song4",
+    songTitle: "Ocean Waves",
+    genre: "Ambient",
+    songLanguage: "Instrumental",
+    artistName: "Nature Sounds Collective",
+    artist: { name: "Nature Sounds Collective", id: "artist4" },
+    release_date: "2026-01-23T23:00:00.000+00:00",
+    preOrderDate: null,
+    featured_artist: [],
+    performer: [
+      { name: "Anna Lee", role: "Synthesizer" }
+    ],
+    song_writer: [
+      { first_name: "Anna", last_name: "Lee" }
+    ],
+    producer: [
+      { first_name: "Ben", last_name: "Clark" }
+    ],
+    pre_order_check: false,
+    another_distribution_check: false,
+    territories: ["Global"],
+    song_audio: "https://example.com/audio/ocean-waves.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "YouTube Music"],
+    lyrics: "", // Instrumental
+    start_clip: "https://example.com/clip/ocean-waves.mp3",
+    isrc: "GB-HIJ-23-98765",
+    upc: "556677889900",
+    copyRightHolder: "Nature Sounds Collective",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: "2026-01-23T23:00:00.000+00:00",
+    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    __v: 0,
+    songStatus: "pending"
+  },
+  {
+    _id: "song5",
+    songTitle: "Dance Fever",
+    genre: "Pop",
+    songLanguage: "English",
+    artistName: "Pop Starz",
+    artist: { name: "Pop Starz", id: "artist5" },
+    release_date: "2026-01-23T23:00:00.000+00:00",
+    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    featured_artist: [
+      { artistName: "Remy Dubois", spotifyId: "spotify_remy", appleId: "apple_remy" }
+    ],
+    performer: [
+      { name: "Taylor Quinn", role: "Vocals" },
+      { name: "Remy Dubois", role: "Backing Vocals" }
+    ],
+    song_writer: [
+      { first_name: "Taylor", last_name: "Quinn" },
+      { first_name: "Remy", last_name: "Dubois" }
+    ],
+    producer: [
+      { first_name: "Sam", last_name: "Lee" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: true,
+    territories: ["US", "France", "Japan"],
+    song_audio: "https://example.com/audio/dance-fever.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "TikTok"],
+    lyrics: "Verse 1: Feel the beat drop...",
+    start_clip: "https://example.com/clip/dance-fever.mp3",
+    isrc: "FR-KLM-24-11223",
+    upc: "778899001122",
+    copyRightHolder: "Pop Starz Entertainment",
+    copyRightYear: "2024",
+    explicit_content: false,
+    createdAt: "2026-01-23T23:00:00.000+00:00",
+    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    __v: 0,
+    songStatus: "rejected"
+  }
+];
  // utils/debounce.ts
 // export function debounce<F extends (...args: any[]) => void>(func: F, delay: number) {
 //   let timer: ReturnType<typeof setTimeout>;

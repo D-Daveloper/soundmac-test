@@ -1,6 +1,12 @@
 import { AlbumForm, CreateArtistForm, SongForm } from "@/app/type";
+import axios from "axios";
 import { addWeeks, subWeeks } from "date-fns";
 import { toast } from "react-toastify";
+import { s3 } from "./aws";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+// import sharp from "sharp";
+// import { s3 } from "./aws";
+// import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
 const otpLength = process.env.OTP_LENGTH as unknown as number;
@@ -24,6 +30,8 @@ export const isSongFormValid = (form: SongForm): string => {
     return "Song title is required";
   } else if (form.title.length < 3 || form.title.length > 32) {
     return "Song title must be longer than 3 not more than 32";
+  } else if (containsEmoji(form.title)) {
+    return "Song title can not contain emojis";
   } else if (form.genre === "") {
     return "Genre is required";
   } else if (form.language === "") {
@@ -144,7 +152,66 @@ export const buildSort = (sort: string) => {
   return { [sort]: 1 }; // ascending
 };
 
-export const handleCopy = async (text:string)=>{
-    await navigator.clipboard.writeText(text)
-    toast.info("copied");
+export const handleCopy = async (text: string) => {
+  await navigator.clipboard.writeText(text);
+  toast.info("copied");
+};
+
+export const uploadTrack = async (file: File, upc: string) => {
+  // 1. Ask for permission
+  const res = await fetch("/api/createawssignedurl", {
+    method: "POST",
+    body: JSON.stringify({
+      fileType: file.type,
+      fileSize: file.size,
+      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+    }),
+  });
+
+  const { uploadUrl, s3Key, upcFromServer } = await res.json();
+
+  // 2. Upload directly to S3
+  await axios.put(uploadUrl, file, {
+    headers: { "Content-Type": file.type },
+  });
+  return { upc: upcFromServer, songS3Key: s3Key };
+};
+
+export const uploadImage = async (
+  fileType:string,
+  buffer:Buffer<ArrayBuffer>,
+  key:string
+): Promise<{ error: string | null; coverUrl: string | null }> => {
+  try {
+    // const buffer = Buffer.from(await file.arrayBuffer());
+
+    // const key = `soundmac4/${folderName}/${fileName}.${
+    //   file.type.split('/')[1]
+    // }`;
+
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET!,
+        Key: key,
+        Body: buffer,
+        ContentType: fileType,
+        ACL: "public-read", // OK for Images
+      })
+    );
+    return {
+      error: null,
+      coverUrl: `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+    };
+  } catch (error) {
+    console.log("upload image error", error);
+
+    return { error: "Internal Server Error", coverUrl: null };
   }
+};
+
+export const numRegex = /^\d+$/;
+
+export function containsEmoji(text:any) {
+  const textToCheck = String(text)
+  return /[\p{Emoji}]/u.test(textToCheck);
+}

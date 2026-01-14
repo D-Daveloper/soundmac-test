@@ -53,7 +53,7 @@ import { AxiosInstance } from "axios";
 
 // export default api;
 
-{
+// {
   /* <div className="capitalize ">
               <button onClick={()=>setMusic(!music)} className="w-full flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 ">
                 Music
@@ -167,19 +167,17 @@ import { AxiosInstance } from "axios";
                 </div>
               </div>
             </div> */
-}
+// }
 
 export async function getDashboard(api: AxiosInstance) {
   const res = await api.get("dashboard");
   return res.data;
 }
 
-
 export const getCurrentUser = async (api: AxiosInstance): Promise<any> => {
   const res = await api.get("users/user");
   return res.data?.user;
 };
-
 
 export const getArtists = async (
   api: AxiosInstance,
@@ -190,6 +188,14 @@ export const getArtists = async (
   });
   return res.data;
 };
+
+export const getUserArtistsNames = async (
+  api: AxiosInstance,
+): Promise<string[]> => {
+  const res = await api.get<Promise<string[]>>("song/artist");
+  return res.data;
+};
+
 export const getArtistStats = async (
   api: AxiosInstance,
   artistName:string 
@@ -197,7 +203,6 @@ export const getArtistStats = async (
   const res = await api.get<Promise<ArtistStat>>("users/artist/stats/"+artistName);
   return res.data;
 };
-
 
 export const createArtist = async (
   api: AxiosInstance,
@@ -208,13 +213,14 @@ export const createArtist = async (
   });
   return res.data;
 };
+
 export const DeleteArtist = async (
   api: AxiosInstance,
   form: {artist_name:string}
 ) => {
   const res = await api.delete("users/artist", {
     data: form,
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { "Content-Type": "application/json" },
   });
   return res.data;
 };

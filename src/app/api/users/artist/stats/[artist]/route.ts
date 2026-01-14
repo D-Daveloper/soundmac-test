@@ -4,8 +4,7 @@ import Artist, { IArtist } from "@/util/models/artistModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 // import { Artist } from "@/app/type";
 
-export async function GET(req: Request,  context: { params: Promise<{ artist: string }> }
-) {
+export async function GET(req: Request,  context: { params: Promise<{ artist: string }> }) {
   try {
     const { artist } = await context.params;
     let artists: IArtist[] = [];
@@ -18,7 +17,7 @@ export async function GET(req: Request,  context: { params: Promise<{ artist: st
     }
 
       artists = await Artist.find({user: userJwt.user});
-      if (!artists) {
+      if (!artists || artists.length === 0) {
         return NextResponse.json({ msg: "No artists found" }, { status: 404 });
       }
       const artistNames = artists.map(artist=>artist.artistName);

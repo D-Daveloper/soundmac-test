@@ -37,7 +37,7 @@ const ViewArtist = ({
   };
 
   return (
-    <div className="bg-main-white  max-sm:min-h-auto h-[90dvh] w-full flex flex-col px-10 ">
+    <div className="bg-main-white  max-sm:min-h-auto minh-[90dvh] w-full flex flex-col px-10 ">
       <div
         className={
           "relative flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-full w-[full] overflow-x-hidden " +
@@ -80,18 +80,17 @@ const ViewArtist = ({
                   >
                     <div
                       className={
-                        "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
+                        "relative max-w-[100px] max-h-[100px] w-full h-full flex items-center justify-center rounded-2xl  text-white border border-neutral-100" +
                         (!artist.artistImage && " bg-neutral-50 ")
                       }
                     >
                       <Image
                         src={artist.artistImage || ""}
-                        width={60}
-                        height={60}
+                        fill
                         alt="music note icon"
                         className={
                           artist?.artistImage
-                            ? " w-full object-cover"
+                            ? " object-cover rounded-md "
                             : undefined
                         }
                       />
@@ -149,7 +148,7 @@ const ViewArtist = ({
         <div className="border border-neutral-100"></div>
         {/* platform id  */}
         <div>
-          <div className="w-full flex flex-wrap justify-between gap-y-10">
+          <div className="w-full flex flex-wrap justify-between gap-y-10 mb-20">
             <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
               <Input
                 value={artist.appleId || ""}
@@ -230,16 +229,19 @@ const ViewArtist = ({
               Delete Artist
             </h3>
             <p className="">
-              Type <strong>Delete [artist name]</strong> to Continue
+              Type <strong>Delete</strong> to Continue
             </p>
             <input
               type="text"
               required={true}
               className="border-2 border-primary rounded-lg outline-none px-2"
               onChange={(e) => {
+                console.log(canDelete);
+                console.log(e.target.value);
+                
                 if (
-                  e.target.value.trim().toLocaleLowerCase() ===
-                  "delete" + " " + artist?.artistName
+                  e.target.value.trim().toLocaleLowerCase() ==
+                  "delete"
                 ) {
                   setCanDelete(true);
                 } else {
@@ -251,8 +253,10 @@ const ViewArtist = ({
           <div>
             <button
               aria-label="confirm delete artist"
-              disabled={isPending || !canDelete}
+              disabled={!canDelete}
               onClick={() => {
+                console.log(artist);
+                
                 handleSubmit(artist);
               }}
               className={

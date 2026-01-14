@@ -9,6 +9,7 @@ import RadioPromotionForm from "./promotion/RadioPromotionForm";
 import BoomPlayForm from "./promotion/BoomPlayForm";
 import PitchPlayForm from "./promotion/PitchPlayForm";
 import OnlinePressForm from "./promotion/OnlinePressForm";
+import ManageRelease from "./manageRelease/ManageRelease";
 
 const page = () => {
   const { tab, section, promotionType } = useTabQuery("dashboard");
@@ -22,7 +23,7 @@ const page = () => {
             {tab === "Music" && (
               <>
                 {section === "uploadMusic" && <UploadMusic />}
-                {/* {section === "manageReleases" && <ManageRelease />} */}
+                {section === "manageReleases" && <ManageRelease />}
                 {!section && <UploadMusic />}
               </>
             )}
