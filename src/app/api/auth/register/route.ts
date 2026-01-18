@@ -96,7 +96,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-    const user = new User({...body,otp, otpExpires });
+    const user = new User({...body,firstName:body.first_name,lastName:body.last_name,otp, otpExpires });
     await user.save();
     return NextResponse.json({
       msg: `Please enter the otp sent to ${user.email}`,email: user.email,
