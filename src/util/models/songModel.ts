@@ -48,14 +48,18 @@ const songWriterSchema = new mongoose.Schema(
 
 const producerSchema = new mongoose.Schema(
   {
-    first_name: {
+    name: {
       type: String,
-      required: [true, "Producer first name is required"],
+      required: [true, "Producer name is required"],
     },
-    last_name: {
-      type: String,
-      required: [true, "Producer last name is required"],
-    },
+    // first_name: {
+    //   type: String,
+    //   required: [true, "Producer first name is required"],
+    // },
+    // last_name: {
+    //   type: String,
+    //   required: [true, "Producer last name is required"],
+    // },
   },
   { _id: false }
 );

@@ -179,8 +179,7 @@ export async function POST(req: Request) {
       } else if (
         !producer ||
         !(producer instanceof Array) ||
-        producer.some((artist) => artist.first_name === "") ||
-        producer.some((artist) => artist.last_name === "")
+        producer.some((artist) => artist.name === "")
       ) {
         Uploaderror = { msg: "Producer is required", status: 400 };
       } else if (

@@ -42,11 +42,11 @@ const SongForm = () => {
     (new Date().getFullYear() + i).toString()
   );
   const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - i).toString()
+    (new Date().getFullYear() - (i+1)).toString()
   );
   const years = [
     ...pastYears.reverse().filter((_, i) => _ !== "2025"),
-    ...futureYears,
+    "2025",...futureYears,
   ];
 
   const [preview, setPreview] = useState(false);
@@ -61,7 +61,7 @@ const SongForm = () => {
     featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
     performer: [{ name: "", role: "" }],
     song_writer: [{ first_name: "", last_name: "" }],
-    producer: [{ first_name: "", last_name: "" }],
+    producer: [{ name: ""}],
     pre_order_check: false,
     another_distribution_check: false,
     territories: [],
@@ -104,7 +104,7 @@ const SongForm = () => {
       case "producer":
         setSongForm((prev) => ({
           ...prev,
-          producer: [...prev.producer, { first_name: "", last_name: "" }],
+          producer: [...prev.producer, { name: ""}],
         }));
         break;
 
@@ -581,10 +581,10 @@ const SongForm = () => {
                       <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
                         Songwriters
                       </h2>
-                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                      {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
                         You can leave blank if there are no songwriters on your
                         release
-                      </p>
+                      </p> */}
                       {songForm.song_writer.map((_, index) => (
                         <div
                           key={index}
@@ -659,10 +659,10 @@ const SongForm = () => {
                       <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
                         Performers
                       </h2>
-                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                      {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
                         You can leave blank if there are no performers on your
                         release
-                      </p>
+                      </p> */}
                       {songForm.performer.map((_, index) => (
                         <div
                           key={index}
@@ -756,10 +756,10 @@ const SongForm = () => {
                       <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
                         Producers
                       </h2>
-                      <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                      {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
                         You can leave blank if there are no performers on your
                         release
-                      </p>
+                      </p> */}
                       {songForm.producer.map((_, index) => (
                         <div
                           key={index}
@@ -769,16 +769,16 @@ const SongForm = () => {
                             <DynamicInput
                               index={index}
                               field="producer"
-                              value={songForm.producer[index].first_name}
-                              title={"First name"}
+                              value={songForm.producer[index].name}
+                              title={"name"}
                               type={"text"}
-                              name={"first_name"}
-                              placeholder={"Enter First name"}
+                              name={"name"}
+                              placeholder={"Enter name"}
                               updateValue={handleDynamicChange}
                               required={true}
                             />
                           </div>
-                          <div className="flex flex-col w-[40%] max-sm:w-full">
+                          {/* <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={index}
                               field="producer"
@@ -790,7 +790,7 @@ const SongForm = () => {
                               updateValue={handleDynamicChange}
                               required={true}
                             />
-                          </div>
+                          </div> */}
                         </div>
                       ))}
                       <div className="flex gap-2">
@@ -1404,7 +1404,7 @@ const SongForm = () => {
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Song Title</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        Pain
+                        {songForm.title}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>
@@ -1456,7 +1456,7 @@ const SongForm = () => {
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Producer</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.producer.map((item) => item.first_name + ",")}
+                        {songForm.producer.map((item) => item.name + ",")}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>
@@ -1555,7 +1555,7 @@ const SongForm = () => {
                   (!preview && " hidden")
                 }
               >
-                Continue
+                Distribute
               </button>
               <button
                 onClick={() => {

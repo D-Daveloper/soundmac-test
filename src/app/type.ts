@@ -53,8 +53,8 @@ export interface Performer {
   role: string;
 }
 export interface Producer {
-  first_name: string;
-  last_name: string;
+  name: string;
+  // last_name: string;
 }
 
 interface musicFormBase {
