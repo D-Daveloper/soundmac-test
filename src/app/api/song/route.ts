@@ -72,6 +72,7 @@ export async function POST(req: Request) {
     const copyRightYear = formData.get("copyRightYear");
     const copyRightHolder = formData.get("copyRightHolder");
     const explicit_content = formData.get("explicit_content");
+      await dbConnect();
 
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -279,7 +280,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
       }
 
-      await dbConnect();
 
       const savedSong = new SongModel({
         songTitle: song_title,
