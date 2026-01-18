@@ -53,8 +53,7 @@ export const isSongFormValid = (form: SongForm): string => {
   ) {
     return "performer is required";
   } else if (
-    form.producer.some((artist) => artist.first_name === "") ||
-    form.producer.some((artist) => artist.last_name === "")
+    form.producer.some((artist) => artist.name === "") 
   ) {
     return "producer is required";
   } else if (form.release_date === undefined) {
