@@ -3,9 +3,7 @@ import { songFromApi } from "@/app/type";
 import { genreList } from "@/app/utils/constants";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
-import {
-  deleteSingleFromS3,
-} from "@/util/middleware/aws";
+import { deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
   containsEmoji,
@@ -309,7 +307,7 @@ export async function POST(req: Request) {
         artistName: userArtist.artistName,
         artist: userArtist._id,
         user: user!._id,
-        catalogNumber:"SM"+Date.now(),
+        catalogNumber: "SM" + Date.now(),
       });
       await savedSong.save();
     } else {
@@ -340,7 +338,15 @@ export async function POST(req: Request) {
       });
       await saveDraft.save();
     }
-
+    await AudioUploadTrackerModel.findOneAndUpdate(
+      {
+        _id: uploadId,
+        s3Key: s3KeyAudio,
+        user: user!._id,
+        status: "PENDING",
+      },
+      { status: "ACTIVE" },
+    );
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);

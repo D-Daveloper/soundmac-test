@@ -7,6 +7,7 @@ import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import Artist from "@/util/models/artistModel";
+import dbConnect from "@/util/db";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -17,6 +18,7 @@ import Artist from "@/util/models/artistModel";
  */
 export async function POST(req: Request) {
   try {
+    await dbConnect();
     const body = await req.json();
   
     const { fileType, fileSize, upcFromClient, artist } = body;
