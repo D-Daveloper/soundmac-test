@@ -57,7 +57,7 @@ export const verifyJWT = async (): Promise<AuthenticatedRequest> => {
 //   }
 // };
 
-export const verifyUser = (userData: AuthenticatedRequest) => {
+export const verifyUser = (userData: AuthenticatedRequest): { msg: string | null; user: string | null | undefined } => {
   if (userData.msg) {
     return { msg: userData.msg, user: null };
   }

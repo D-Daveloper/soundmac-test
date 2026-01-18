@@ -65,11 +65,11 @@ PromotionSchema.pre("findOneAndUpdate", function (next) {
 });
 
 // ✅ Fix Next.js hot reload issue by deleting existing model
-delete mongoose.models.Promotion;
+// delete mongoose.models.Promotion;
 
 // Model creation
 const Promotion: Model<IPromotion> =
-  mongoose.models.Promotion || mongoose.model<IPromotion>("Promotion", PromotionSchema);
+  mongoose.models?.Promotion || mongoose.model<IPromotion>("Promotion", PromotionSchema);
 export default Promotion;
 
 

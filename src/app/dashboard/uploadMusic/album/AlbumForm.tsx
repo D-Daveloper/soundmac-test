@@ -500,10 +500,10 @@ const AlbumForm = () => {
                               <div className="w-[50%]">
                                 {!albumForm.music_image ? (
                                   <p className="mb-2 text-sm text-gray-500">
-                                    <span className="font-semibold">
-                                      Click to upload
+                                   <span className="font-bold text-text-body">
+                                      Supported Files:
                                     </span>{" "}
-                                    or drag and drop
+                                    JPG, PNG<br/>3000 x 3000px minimum
                                   </p>
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
@@ -517,7 +517,7 @@ const AlbumForm = () => {
                                 id="music_image"
                                 name="music_image"
                                 type="file"
-                                accept="image/*"
+                                accept="image/png,image/jpeg"
                                 className="hidden"
                                 onChange={handleChange}
                               />

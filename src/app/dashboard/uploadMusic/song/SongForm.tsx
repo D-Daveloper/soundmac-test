@@ -21,13 +21,14 @@ import {
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
-import { Trash2 } from "lucide-react";
+import { Info, Trash2 } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const SongForm = () => {
   const api = UseAxios();
+  const [isSubmittingForm,setIsSubmittingForm] = useState(false)
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
   const [image, setImage] = useState<string | null>(null);
@@ -209,14 +210,28 @@ const SongForm = () => {
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
+    setIsSubmittingForm(true)
     console.log(form);
     const formData = new FormData();
     if (action === "upload") {
       const validForm = isSongFormValid(form);
-      if (validForm != "true") return toast.warn(validForm);
-      const { upc, songS3Key } = await uploadTrack(form.song_audio!, form.upc);
+      if (validForm != "true") {
+        setIsSubmittingForm(false);
+        return toast.warn(validForm)
+      };
+      const { upc, songS3Key,error,uploadId } = await uploadTrack(form.song_audio!, form.upc,form.artist);
+      if (error != null){
+        setIsSubmittingForm(false)
+        toast.error(error);
+        return;
+      }
       formData.append("s3keyAudio", songS3Key); //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
+
+      formData.append("uploadId", uploadId); //the upload Id from creating the url and uploading the song
+
       formData.append("upc2", upc); //add the updated upc
+      formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
+
     }
 
     Object.entries(form).forEach(([key, value]) => {
@@ -229,7 +244,6 @@ const SongForm = () => {
     if (songForm.music_image) {
       formData.append("music_image", songForm.music_image);
     }
-    formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
     formData.append("action", action);
     try {
       const res = await api.post("song", formData, {
@@ -249,7 +263,10 @@ const SongForm = () => {
         return;
       }
       toast.error("something went wrong.");
+      songForm.music_image = null;
+      songForm.song_audio = null;
     }finally{
+      setIsSubmittingForm(false);
       setPreview(false);
     }
   };
@@ -310,6 +327,9 @@ const SongForm = () => {
         release_date: songForm.release_date
           ? new Date(songForm.release_date)
           : undefined,
+        preOrderDate: songForm.preOrderDate
+          ? new Date(songForm.preOrderDate)
+          : undefined,
         music_image: null,
         song_audio: null,
       });
@@ -318,7 +338,7 @@ const SongForm = () => {
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
-      {isLoading ? (
+      {(isLoading ||isSubmittingForm)? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
@@ -1000,10 +1020,10 @@ const SongForm = () => {
                             <div className="w-[50%]">
                               {!songForm.song_audio ? (
                                 <p className="mb-2 text-sm text-gray-500">
-                                  <span className="font-semibold">
-                                    Click to upload
+                                  <span className="font-bold text-text-body">
+                                    Supported Files:
                                   </span>{" "}
-                                  or drag and drop
+                                  WAV, FLAC, MP3
                                 </p>
                               ) : (
                                 <p className="font-bold text-[16px] text-[#494949] truncate max-w-[50%]">
@@ -1017,7 +1037,7 @@ const SongForm = () => {
                               id="song_audio"
                               name="song_audio"
                               type="file"
-                              accept="audio/*"
+                              accept="audio/wav,audio/flac,audio/mp3"
                               className="hidden"
                               onChange={handleChange}
                             />
@@ -1039,6 +1059,45 @@ const SongForm = () => {
                       Upload or paste your song lyrics to make your music more
                       discoverable across platforms.
                     </p>
+                    <div className="bg-warning-50 sm:max-w-[60%] rounded-2xl p-3 mt-10">
+                        <Info color="#C58629"/>
+                        <ul className="list-disc mt-4 ml-5 text-caption-one flex flex-col gap-1">
+                          <li>
+                            Do not include the vocalist's name
+                          </li>
+                          <li>
+                            Do not include extra text (ex: "intro", "chorus", social media links, etc.)
+                          </li>
+                          <li>
+                            Repeated lines must be written out. Don't write "Chorus 2x" etc.
+                          </li>
+                          <li>
+                            Begin each line with a capital letter
+                          </li>
+                          <li>
+                            Do not use punctuation at the end of a line
+                          </li>
+                          <li>
+                            Do not include blank lines except between verses or chorus
+                          </li>
+                          <li>
+                            Avoid entering excessively long lines. One sentence per line
+                          </li>
+                          <li>
+                            Don't censor explicit words unless the words are dropped/bleeped in the audio recording. For example: Don't enter "F**, unless the word was dropped or bleeped
+                          </li>
+                        </ul>
+                        <p className="text-caption-one text-warning-600 mt-5">
+                          For complete list of store requirements, visit {" "}
+                            <a aria-label="musix match lyrics guidelines" href="https://community.musixmatch.com/guidelines?lng=en" target="_blank" className="!text-primary-500 !underline ">
+                              Musixmatch guidelines {" "}
+                            </a> 
+                            and {" "}
+                            <a aria-label="apple lyrics guidlines" href="https://artists.apple.com/support/1111-lyrics-guidelines" target="_blank" className="!text-primary-500 !underline">
+                            Apple guidelines
+                            </a>
+                        </p>
+                    </div>
                     <div>
                       <div className="flex gap-1 sm:text-sm text-lg mt-10">
                         <p className=" capitalize font-medium">lyrics </p>
@@ -1146,10 +1205,10 @@ const SongForm = () => {
                               <div className="w-[50%]">
                                 {!songForm.music_image ? (
                                   <p className="mb-2 text-sm text-gray-500">
-                                    <span className="font-semibold">
-                                      Click to upload
+                                    <span className="font-bold text-text-body">
+                                      Supported Files:
                                     </span>{" "}
-                                    or drag and drop
+                                    JPG, PNG<br/>3000 x 3000px minimum
                                   </p>
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
@@ -1163,7 +1222,7 @@ const SongForm = () => {
                                 id="music_image"
                                 name="music_image"
                                 type="file"
-                                accept="image/*"
+                                accept="image/png,image/jpeg"
                                 className="hidden"
                                 onChange={handleChange}
                               />
@@ -1437,7 +1496,7 @@ const SongForm = () => {
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Preorder Start date</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.preOrderDate?.toLocaleDateString() || ""}
+                        {songForm.preOrderDate && songForm.preOrderDate.toLocaleDateString()}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>

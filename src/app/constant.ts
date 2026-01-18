@@ -279,6 +279,15 @@ export const filterOptions = [
   { label: "A-Z", value: "artistName" },
   { label: "Z-A", value: "-artistName" },
 ];
+export const songFilterOptions = [
+  { label: "Newest", value: "-createdAt" },
+  { label: "Oldest", value: "createdAt" },
+  { label: "A-Z", value: "songTitle" },
+  { label: "Z-A", value: "-songTitle" },
+];
+export const songStatusFilterArray = [
+"all","approved","pending","rejected","draft"
+];
 
 export const promotionTestData = [
   {

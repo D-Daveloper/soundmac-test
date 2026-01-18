@@ -87,6 +87,11 @@ const SongModelSchema = new mongoose.Schema(
       ref: "Artist",
       required: [true, "Provide an Artist!"],
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Provide a user!"],
+    },
     release_date: {
       type: Date,
       required: [true, "Release date is required"],
@@ -192,6 +197,7 @@ const SongModelSchema = new mongoose.Schema(
       required: [true, "ISRC is required"],
       trim: true,
       uppercase: true,
+      // unique:true
     },
     upc: {
       type: String,
@@ -211,13 +217,16 @@ const SongModelSchema = new mongoose.Schema(
     explicit_content: {
       type: Boolean,
       required: [true, "Explicit content flag is required"],
-      default: false,
     },
     songStatus:{
       type:String,
       enum:["pending","approved","rejected"],
       default:"pending"
-    }
+    },
+    catalogNumber:{
+      type:String,
+      required: [true, "catalog number is required"],
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -229,10 +238,10 @@ SongModelSchema.index({ artistName: 1, release_date: -1 });
 // SongModelSchema.index({ genre: 1 });
 SongModelSchema.index({ isrc: 1 }, { unique: true });
 SongModelSchema.index({ upc: 1 }, { unique: true });
-delete mongoose.models.Song;
+// delete mongoose.models.Song;
 
 const SongModel =
-  mongoose.models.Song || mongoose.model("Song", SongModelSchema);
+  mongoose.models?.Song || mongoose.model("Song", SongModelSchema);
 
 export default SongModel;
 

@@ -1,5 +1,8 @@
 "use client";
-import { InlineLoadingScreen, NormalLoadingScreen } from "@/app/components/Loader/loader";
+import {
+  InlineLoadingScreen,
+  NormalLoadingScreen,
+} from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { filterOptions } from "@/app/constant";
@@ -45,10 +48,10 @@ const ManageArtist = () => {
     }
     setSelectedIndex(index);
   };
-useEffect(()=>{
-  setIsFilterOpen(false);
-  setSelectedIndex(null);
-},[query,page])
+  useEffect(() => {
+    setIsFilterOpen(false);
+    setSelectedIndex(null);
+  }, [query, page]);
   // if (isLoading) {
   //   return <NormalLoadingScreen />;
   // }
@@ -64,11 +67,18 @@ useEffect(()=>{
   if (viewArtist) {
     return <ViewArtist artist={viewArtist} setArtist={setViewArtist} />;
   } else if (viewStats) {
-    return <ViewStats artistToViewStats={viewStats} setArtistToViewStats={setViewStats}/>;
+    return (
+      <ViewStats
+        artistToViewStats={viewStats}
+        setArtistToViewStats={setViewStats}
+      />
+    );
   }
   return (
     <div className="bg-main-white  max-sm:min-h-auto min-h-[90dvh] w-full flex flex-col px-10 ">
-      {isLoading ? <InlineLoadingScreen/> : !isLoading && (isError || data === undefined) ? (
+      {isLoading ? (
+        <InlineLoadingScreen />
+      ) : !isLoading && (isError || data === undefined) ? (
         <div className="flex flex-col justify-center items-center h-full gap-15">
           <div>
             <Image
@@ -123,7 +133,8 @@ useEffect(()=>{
                 "border-2 w-[50px]  h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
                 (isFetching && " hover:!cursor-not-allowed ")
               }
-              onClick={() => {setIsFilterOpen(!isFilterOpen)
+              onClick={() => {
+                setIsFilterOpen(!isFilterOpen);
                 setSelectedIndex(null);
               }}
             >
@@ -168,7 +179,7 @@ useEffect(()=>{
                         priority={true}
                         src={artist.artistImage}
                         alt="an image depicting no artist profile"
-                       fill
+                        fill
                         className="object-contain rounded-lg shadow-md max-h-[80px] "
                       />
                     </div>

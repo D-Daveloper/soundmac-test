@@ -1,9 +1,13 @@
-import { AlbumForm, CreateArtistForm, SongForm } from "@/app/type";
+import { AlbumForm, CreateArtistForm, NonRetryableErrorCode, SongForm } from "@/app/type";
 import axios from "axios";
 import { addWeeks, subWeeks } from "date-fns";
 import { toast } from "react-toastify";
-import { s3 } from "./aws";
+import { deleteSongsFromS3WithRetry, s3 } from "./aws";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { RETRY_CONFIG } from "@/app/utils/constants";
+import mongoose from "mongoose";
+import Artist from "../models/artistModel";
+import SongModel from "../models/songModel";
 // import sharp from "sharp";
 // import { s3 } from "./aws";
 // import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -157,24 +161,32 @@ export const handleCopy = async (text: string) => {
   toast.info("copied");
 };
 
-export const uploadTrack = async (file: File, upc: string) => {
-  // 1. Ask for permission
-  const res = await fetch("/api/createawssignedurl", {
-    method: "POST",
-    body: JSON.stringify({
-      fileType: file.type,
-      fileSize: file.size,
-      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
-    }),
-  });
-
-  const { uploadUrl, s3Key, upcFromServer } = await res.json();
-
-  // 2. Upload directly to S3
-  await axios.put(uploadUrl, file, {
-    headers: { "Content-Type": file.type },
-  });
-  return { upc: upcFromServer, songS3Key: s3Key };
+export const uploadTrack = async (file: File, upc: string,artist:string) => {
+  try {
+    // 1. Ask for permission
+    const res = await fetch("/api/createawssignedurl", {
+      method: "POST",
+      body: JSON.stringify({
+        fileType: file.type,
+        fileSize: file.size,
+        upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+        artist
+      }),
+    });
+  
+    const { uploadUrl, s3Key, upcFromServer,uploadId } = await res.json();
+  
+    // 2. Upload directly to S3
+    await axios.put(uploadUrl, file, {
+      headers: { "Content-Type": file.type },
+    });
+    return { upc: upcFromServer, songS3Key: s3Key ,error:null,uploadId};
+    
+  } catch (error) {
+    console.log("upload track error function line 181",error);
+    
+    return { upc: null, songS3Key: null ,error:"Something went wrong please try again later!"};
+  }
 };
 
 export const uploadImage = async (
@@ -214,4 +226,158 @@ export const numRegex = /^\d+$/;
 export function containsEmoji(text:any) {
   const textToCheck = String(text)
   return /[\p{Emoji}]/u.test(textToCheck);
+}
+/**
+ * Main function to delete artist and associated songs
+ */
+export async function deleteArtistAndSongs(artistId:string, userId:string) {
+  // Validate inputs
+  if (!artistId || !userId) {
+    throw new Error('Artist ID and User ID are required');
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(artistId)) {
+    throw new Error('Invalid artist ID format');
+  }
+
+  try {
+    // 1. Verify artist exists and belongs to user
+    const artist = await Artist.findOne({ 
+      _id: artistId, 
+      user: userId 
+    });
+    
+    if (!artist) {
+      throw new Error('Artist not found or you do not have permission to delete it');
+    }
+    
+    // 2. Get all songs BEFORE deleting (need S3 keys)
+    const songs = await SongModel.find({ artist: artistId });
+    
+    console.log(`Found ${songs.length} songs to delete for artist: ${artist.artistName}`);
+    
+    // 3. Delete from S3 FIRST with retry logic
+    let s3DeletedCount = 0;
+    if (songs.length > 0) {
+      s3DeletedCount = await deleteSongsFromS3WithRetry(songs);
+      console.log(`Successfully deleted ${s3DeletedCount} files from S3`);
+    }
+    
+    // 4. Delete from database (only after S3 success)
+    const deleteArtistResult = await Artist.deleteOne({
+      _id: artistId,
+      user: userId
+    });
+    
+    if (deleteArtistResult.deletedCount === 0) {
+      throw new Error('Failed to delete artist from database');
+    }
+    
+    const deleteSongsResult = await SongModel.deleteMany({ artist: artistId });
+    
+    return {
+      success: true,
+      message: 'Artist, songs, and files deleted successfully',
+      data: {
+        artistId: artist._id,
+        artistName: artist.artistName,
+        songsDeleted: deleteSongsResult.deletedCount,
+        filesDeleted: s3DeletedCount
+      }
+    };
+    
+  } catch (error) {
+    console.error('Error deleting artist and songs:', error);
+    throw error;
+  }
+}
+
+export async function retryWithBackoff(
+  operation: () => Promise<any>,
+  config = RETRY_CONFIG,
+  operationName = 'Operation'
+) {
+  let lastError;
+  let delay = config.initialDelayMs;
+
+  for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
+    try {
+      console.log(`${operationName} - Attempt ${attempt}/${config.maxAttempts}`);
+      
+      const result = await operation();
+      
+      if (attempt > 1) {
+        console.log(`${operationName} succeeded on attempt ${attempt}`);
+      }
+      
+      return result;
+      
+    } catch (error:any) {
+      lastError = error;
+      
+      console.error(
+        `${operationName} - Attempt ${attempt}/${config.maxAttempts} failed:`,
+        error?.message
+      );
+
+      // Don't retry on certain errors
+      if (isNonRetryableError(error)) {
+        console.error(`${operationName} - Non-retryable error, aborting`);
+        throw error;
+      }
+
+      // If this was the last attempt, throw the error
+      if (attempt === config.maxAttempts) {
+        console.error(`${operationName} - All ${config.maxAttempts} attempts failed`);
+        throw new Error(
+          `${operationName} failed after ${config.maxAttempts} attempts. Last error: ${error?.message}`
+        );
+      }
+
+      // Wait before retrying with exponential backoff
+      console.log(`${operationName} - Waiting ${delay}ms before retry...`);
+      await sleep(delay);
+      
+      // Increase delay for next attempt (exponential backoff)
+      delay = Math.min(delay * config.backoffMultiplier, config.maxDelayMs);
+    }
+  }
+
+  throw lastError;
+}
+
+function isNonRetryableError(error: NonRetryableErrorCode): boolean {
+  // Don't retry on these error codes
+  const nonRetryableCodes: string[] = [
+    'NoSuchBucket',
+    'AccessDenied',
+    'InvalidAccessKeyId',
+    'SignatureDoesNotMatch',
+    'NoSuchKey', // File doesn't exist (already deleted is OK)
+  ];
+
+  if (error.name && nonRetryableCodes.includes(error.name)) {
+    return true;
+  }
+
+  if (error.Code && nonRetryableCodes.includes(error.Code)) {
+    return true;
+  }
+
+  // Don't retry on 4xx errors (except 429 - rate limit)
+  if (error.$metadata?.httpStatusCode) {
+    const statusCode: number = error.$metadata.httpStatusCode;
+    if (statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Sleep utility
+ */
+function sleep(ms:number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

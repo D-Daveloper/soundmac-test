@@ -196,6 +196,11 @@ a {
   --text-h5-semibold--line-height:40px;
   --text-h5-semibold--letter-spacing:-1px;
   --text-h5-semibold--font-weight:600;
+  /* --text-h5-semibold:32px; */
+  --text-caption-one:14px;
+  --text-caption-one--line-height:18px;
+  --text-caption-one--letter-spacing:-0.5px;
+  --text-caption-one--font-weight:600;
 /* 
     --text-tiny: 0.625rem;
   --text-tiny--line-height: 1.5rem; 

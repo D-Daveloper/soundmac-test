@@ -70,6 +70,11 @@ const SongDraftModelSchema = new mongoose.Schema({
     // required: [true, 'Artist is required'],
     trim: true
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    // required: [true, "Provide a user!"],
+  },
   release_date: {
     type: Date,
     // required: [true, 'Release date is required']
@@ -200,7 +205,11 @@ const SongDraftModelSchema = new mongoose.Schema({
     type:String,
     // enum:["pending","approved","rejected"],
     default:"draft"
-  }
+  },
+  catalogNumber:{
+    type:String,
+    // required: [true, "catalog number is required"],
+  },
 }, {
   timestamps: true // Adds createdAt and updatedAt fields
 });
@@ -210,8 +219,8 @@ const SongDraftModelSchema = new mongoose.Schema({
 // // SongModelSchema.index({ genre: 1 });
 // SongModelSchema.index({ isrc: 1 }, { unique: true });
 // SongModelSchema.index({ upc: 1 },{unique: true});
-delete mongoose.models.SongDraft;
+// delete mongoose.models.SongDraft;
 
-const SongDraftModel = mongoose.models.SongDraft || mongoose.model('SongDraft', SongDraftModelSchema);
+const SongDraftModel = mongoose.models?.SongDraft || mongoose.model('SongDraft', SongDraftModelSchema);
 
 export default SongDraftModel;

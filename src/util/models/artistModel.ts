@@ -63,11 +63,11 @@ ArtistSchema.pre("findOneAndUpdate", function (next) {
 });
 
 // ✅ Fix Next.js hot reload issue by deleting existing model
-delete mongoose.models.Artist;
+// delete mongoose.models.Artist;
 
 // Model creation
 const Artist: Model<IArtist> =
-  mongoose.models.Artist || mongoose.model<IArtist>("Artist", ArtistSchema);
+  mongoose.models?.Artist || mongoose.model<IArtist>("Artist", ArtistSchema);
 
 export default Artist;
 

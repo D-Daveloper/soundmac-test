@@ -20,7 +20,10 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+    if (process.env.NODE_ENV === "development") {
+    return NextResponse.json({ msg: "Login successful" }, { status: 200 });
 
+    }
     const user = await User.findOne({ email:email.trim() });
     if (!user) {
       return NextResponse.json({ msg: "User Not Found" }, { status: 404 });
@@ -139,10 +142,7 @@ export async function POST(req: Request) {
         { status: 403 }
       );
     }
-    if (process.env.NODE_ENV === "development") {
-    return NextResponse.json({ msg: "Login successful" }, { status: 200 });
 
-    }
     otp = generateOtp();
 
     // update user

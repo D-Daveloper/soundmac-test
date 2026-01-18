@@ -174,8 +174,16 @@ export interface songFromApi
   createdAt: Date
   updatedAt: Date
   __v: number
-  songStatus: string
+  songStatus: "pending"|"approved"|"rejected"|"draft"
 
+}
+
+export interface NonRetryableErrorCode {
+  name?: string;
+  Code?: string;
+  $metadata?: {
+    httpStatusCode: number;
+  };
 }
 // Mock data based on the provided schema for songFromApi
 // Assuming Artist is an object with basic properties (since not fully defined in schema, using a simple structure)

@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { Artist, ArtistStat, CreateArtistForm, PAGINATION } from "@/app/type";
+import { Artist, ArtistStat, CreateArtistForm, PAGINATION, songFromApi } from "@/app/type";
 import { AxiosInstance } from "axios";
 
 // import axios, { AxiosError } from "axios";
@@ -221,6 +221,16 @@ export const DeleteArtist = async (
   const res = await api.delete("users/artist", {
     data: form,
     headers: { "Content-Type": "application/json" },
+  });
+  return res.data;
+};
+
+export const getSongs = async (
+  api: AxiosInstance,
+  params:{ page:number,sort:string,songTitle:string,songStatusFilter:string,artist:string }
+): Promise<PAGINATION<songFromApi>> => {
+  const res = await api.get<Promise<PAGINATION<songFromApi>>>("song", {
+    params:params,
   });
   return res.data;
 };

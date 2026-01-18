@@ -1,4 +1,4 @@
-import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type"
+import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG, songFromApi } from "../type"
 
 
 export const navigationLinks = [
@@ -337,16 +337,16 @@ export const producerRoles = [
   ];
 export const country_list = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Cape Verde","Cayman Islands","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cruise Ship","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyz Republic","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Namibia","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Satellite","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","St. Lucia","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Uganda","Ukraine","United Arab Emirates","United Kingdom","Uruguay","Uzbekistan","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
-export const mockSongs = [
+export const mockSongs:songFromApi[] = [
   {
     _id: "song1",
-    songTitle: "Electric Dreams",
+    songTitle: "Alectric Dreams",
     genre: "Electronic",
     songLanguage: "English",
     artistName: "Alex Rivera",
-    artist: { name: "Alex Rivera", id: "artist1" }, // Assuming Artist has name and id
-    release_date: "2026-01-23T23:00:00.000+00:00",
-    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
     featured_artist: [
       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
     ],
@@ -374,19 +374,224 @@ export const mockSongs = [
     copyRightHolder: "Alex Rivera Music",
     copyRightYear: "2023",
     explicit_content: false,
-    createdAt: "2026-01-23T23:00:00.000+00:00",
-    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song1",
+    songTitle: "Blectric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song1",
+    songTitle: "Clectric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song1",
+    songTitle: "Dlectric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song1",
+    songTitle: "Electric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    __v: 0,
+    songStatus: "draft"
+  },
+  {
+    _id: "song1",
+    songTitle: "Electric Dreams",
+    genre: "Electronic",
+    songLanguage: "English",
+    artistName: "Alex Rivera",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
+    featured_artist: [
+      { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
+    ],
+    performer: [
+      { name: "Alex Rivera", role: "Lead Vocals" },
+      { name: "Jordan Smith", role: "Guitar" }
+    ],
+    song_writer: [
+      { first_name: "Alex", last_name: "Rivera" },
+      { first_name: "Jordan", last_name: "Smith" }
+    ],
+    producer: [
+      { first_name: "Chris", last_name: "Johnson" }
+    ],
+    pre_order_check: true,
+    another_distribution_check: false,
+    territories: ["US", "UK", "Canada"],
+    song_audio: "https://example.com/audio/electric-dreams.mp3",
+    song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
+    dsp: ["Spotify", "Apple Music", "YouTube Music"],
+    lyrics: "Verse 1: In the city lights...",
+    start_clip: "https://example.com/clip/electric-dreams.mp3",
+    isrc: "US-ABC-23-12345",
+    upc: "123456789012",
+    copyRightHolder: "Alex Rivera Music",
+    copyRightYear: "2023",
+    explicit_content: false,
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
     __v: 0,
     songStatus: "draft"
   },
   {
     _id: "song2",
-    songTitle: "Midnight Serenade",
+    songTitle: "Fidnight Serenade",
     genre: "Jazz",
     songLanguage: "Spanish",
     artistName: "Sofia Martinez",
-    artist: { name: "Sofia Martinez", id: "artist2" },
-    release_date: "2026-01-23T23:00:00.000+00:00",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
     preOrderDate: null,
     featured_artist: [],
     performer: [
@@ -412,20 +617,20 @@ export const mockSongs = [
     copyRightHolder: "Sofia Martinez Productions",
     copyRightYear: "2022",
     explicit_content: false,
-    createdAt: "2026-01-23T23:00:00.000+00:00",
-    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
     __v: 0,
     songStatus: "pending"
   },
   {
     _id: "song3",
-    songTitle: "Rock the Night",
+    songTitle: "Gock the Night",
     genre: "Rock",
     songLanguage: "English",
     artistName: "The Thunderbolts",
-    artist: { name: "The Thunderbolts", id: "artist3" },
-    release_date: "2026-01-23T23:00:00.000+00:00",
-    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
     featured_artist: [
       { artistName: "Jake Thompson", spotifyId: "spotify_jake", appleId: "apple_jake" },
       { artistName: "Lisa Wong", spotifyId: "spotify_lisa", appleId: "apple_lisa" }
@@ -454,19 +659,19 @@ export const mockSongs = [
     copyRightHolder: "Thunderbolts Records",
     copyRightYear: "2024",
     explicit_content: true,
-    createdAt: "2026-01-23T23:00:00.000+00:00",
-    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
     __v: 0,
     songStatus: "approved"
   },
   {
     _id: "song4",
-    songTitle: "Ocean Waves",
+    songTitle: "Hcean Waves",
     genre: "Ambient",
     songLanguage: "Instrumental",
     artistName: "Nature Sounds Collective",
-    artist: { name: "Nature Sounds Collective", id: "artist4" },
-    release_date: "2026-01-23T23:00:00.000+00:00",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
     preOrderDate: null,
     featured_artist: [],
     performer: [
@@ -491,20 +696,20 @@ export const mockSongs = [
     copyRightHolder: "Nature Sounds Collective",
     copyRightYear: "2023",
     explicit_content: false,
-    createdAt: "2026-01-23T23:00:00.000+00:00",
-    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
     __v: 0,
     songStatus: "pending"
   },
   {
     _id: "song5",
-    songTitle: "Dance Fever",
+    songTitle: "Iance Fever",
     genre: "Pop",
     songLanguage: "English",
     artistName: "Pop Starz",
-    artist: { name: "Pop Starz", id: "artist5" },
-    release_date: "2026-01-23T23:00:00.000+00:00",
-    preOrderDate: "2026-01-23T23:00:00.000+00:00",
+    artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
+    release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+    preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
     featured_artist: [
       { artistName: "Remy Dubois", spotifyId: "spotify_remy", appleId: "apple_remy" }
     ],
@@ -532,8 +737,8 @@ export const mockSongs = [
     copyRightHolder: "Pop Starz Entertainment",
     copyRightYear: "2024",
     explicit_content: false,
-    createdAt: "2026-01-23T23:00:00.000+00:00",
-    updatedAt: "2026-01-23T23:00:00.000+00:00",
+    createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
+    updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
     __v: 0,
     songStatus: "rejected"
   }
@@ -549,3 +754,10 @@ export const mockSongs = [
 //     }, delay);
 //   };
 // }
+// Retry configuration
+export const RETRY_CONFIG = {
+  maxAttempts: 3,
+  initialDelayMs: 1000, // 1 second
+  maxDelayMs: 10000, // 10 seconds
+  backoffMultiplier: 2, // Exponential backoff
+};

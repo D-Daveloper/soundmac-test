@@ -21,7 +21,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       title: "music",
       list: [
         {
-          title: "upload music",
+          title: "upload release",
           icon: "/add.svg",
           setSection: () => setSection("upload"),
           query: "upload",
@@ -112,7 +112,11 @@ const layout = ({ children }: { children: React.ReactNode }) => {
     setIsOpen(false);
     switch (tab) {
       case "Music":
-        setHeaderMessage("Upload Music");
+         if (section === "manageReleases") {
+          setHeaderMessage("Manage Release");
+          break;
+         }
+        setHeaderMessage("Upload Release");
         break;
       case "Artists":
         if (section === "createArtist") {
