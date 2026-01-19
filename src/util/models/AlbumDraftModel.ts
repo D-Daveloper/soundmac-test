@@ -27,6 +27,11 @@ const AlbumSchema = new mongoose.Schema(
       ref: "Artist",
       
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Provide a user!"],
+    },
     release_date: {
       type: Date,
       

@@ -52,12 +52,20 @@ const CreateArtistForm = () => {
     console.log(...formData);
     try {
       await mutateAsync(form);
-      setPreview(false);
+      setArtistForm({
+        artist_name: "",
+        apple_id: "",
+        spotify_id: "",
+        artist_image: null,
+        hasPlatformId: false,
+      });
     } catch (error) {
       if (isAxiosError(error)) {
         return;
       }
       toast.error("something went wrong");
+    }finally{
+      setPreview(false);
     }
   };
 
@@ -365,6 +373,7 @@ const CreateArtistForm = () => {
 
       <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
         <button
+          disabled={isPending}
           onClick={() => {
             handleSubmit(artistForm);
           }}

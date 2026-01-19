@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { Artist, ArtistStat, CreateArtistForm, PAGINATION, songFromApi } from "@/app/type";
+import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, songFromApi } from "@/app/type";
 import { AxiosInstance } from "axios";
 
 // import axios, { AxiosError } from "axios";
@@ -230,6 +230,15 @@ export const getSongs = async (
   params:{ page:number,sort:string,songTitle:string,songStatusFilter:string,artist:string }
 ): Promise<PAGINATION<songFromApi>> => {
   const res = await api.get<Promise<PAGINATION<songFromApi>>>("song", {
+    params:params,
+  });
+  return res.data;
+};
+export const getAlbums = async (
+  api: AxiosInstance,
+  params:{ page:number,sort:string,songTitle:string,albumStatusFilter:string,artist:string }
+): Promise<PAGINATION<albumFromApi>> => {
+  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
     params:params,
   });
   return res.data;

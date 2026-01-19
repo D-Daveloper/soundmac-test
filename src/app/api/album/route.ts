@@ -1,8 +1,10 @@
 import { languagesList } from "@/app/constant";
+import { albumFromApi } from "@/app/type";
 import { genreList } from "@/app/utils/constants";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import {
+  buildSort,
   containsEmoji,
   numRegex,
   uploadImage,
@@ -15,6 +17,7 @@ import SongDraftModel from "@/util/models/songDraftModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks, subWeeks } from "date-fns";
+import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
 
@@ -215,7 +218,7 @@ export async function POST(req: Request) {
 
       const num = parseInt(number_of_track as string, 10); // Convert string to number
       if (isNaN(num) || num < 1) {
-        return NextResponse.json({ msg: "No. of tracks must greater than 1" });
+        return NextResponse.json({ msg: "No. of tracks must greater than 0" });
       }
       const number_of_track_array = Array.from(
         { length: num },
@@ -241,12 +244,12 @@ export async function POST(req: Request) {
       await dbConnect();
 
       const album = new AlbumModel({
-        albumTitle: album_title,
+        releaseTitle: album_title,
         genre: genre,
-        songLanguage: language,
-        pre_order_check,
-        another_distribution_check,
-        release_date,
+        releaseLanguage: language,
+        preOrderCheck:pre_order_check,
+        anotherDistributionCheck:another_distribution_check,
+        releaseDate:release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
@@ -254,22 +257,23 @@ export async function POST(req: Request) {
         upc,
         isrc: "isrc",
         territories: territories,
-        song_image: imageUrl.coverUrl,
+        releaseImage: imageUrl.coverUrl,
         artistName: userArtist.artistName,
         artist: userArtist._id,
-        NumberOfTracks: number_of_track,
-        UnassignedNumbers: number_of_track_array,
+        numberOfTracks: number_of_track,
+        unassignedNumbers: number_of_track_array,
+        user:user._id
       });
       await album.save();
       return NextResponse.json({ msg: "success" }, { status: 200 });
     } else {
       const saveDraft = new AlbumDraftModel({
-        albumTitle: album_title,
+        releaseTitle: album_title,
         genre: genre,
         songLanguage: language,
-        pre_order_check,
-        another_distribution_check,
-        release_date,
+        preOrderCheck:pre_order_check,
+        anotherDistributionCheck:another_distribution_check,
+        releaseDate:release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
@@ -280,7 +284,8 @@ export async function POST(req: Request) {
         // song_image: imageUrl.coverUrl,
         artistName: userArtist.artistName,
         artist: userArtist._id,
-        NumberOfTracks: number_of_track,
+        numberOfTracks: number_of_track,
+        user:user._id
         // UnassignedNumbers:number_of_track_array
       });
       await saveDraft.save();
@@ -292,5 +297,79 @@ export async function POST(req: Request) {
     console.log(error);
 
     return handleMongooseValidationError(error);
+  }
+}
+const limit = parseInt(process.env.SONG_LIMIT || "6", 10);
+
+export async function GET(req: Request) {
+  try {
+    let albums: albumFromApi[] = [];
+    let totalCount = 0;
+    await dbConnect();
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+    const { searchParams } = new URL(req.url);
+    console.log(searchParams);
+
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const sort = searchParams.get("sort") || "createdAt";
+    const albumTitle = searchParams.get("albumTitle");
+    const artist = searchParams.get("artist");
+    const albumStatusFilter = searchParams.get("albumStatusFilter");
+    const sortQuery = buildSort(sort) as {
+      [key: string]: SortOrder | { $meta: any };
+    }; //this is use to format the sort query for mongodb.
+    let query = {};
+    if (albumTitle && albumTitle.trim() !== "") {
+      query = {
+        releaseTitle: { $regex: "^" + albumTitle, $options: "i" },
+        user: userJwt.user,
+        artistName: artist,
+      };
+    } else {
+      query = { user: userJwt.user, artistName: artist };
+    }
+
+    albums = await AlbumModel.find(query)
+      .collation({ locale: "en", strength: 2 })
+      .sort(sortQuery)
+      .skip((page - 1) * limit)
+      .limit(limit);
+    totalCount = await AlbumModel.countDocuments(query);
+
+    console.log("album filters", typeof albumStatusFilter);
+    if (albumStatusFilter && albumStatusFilter !== "all") {
+      albums = albums.filter((item) => item.releaseStatus === albumStatusFilter);
+      totalCount = albums.length;
+    }
+    console.log("the updated albums", albums);
+
+    return NextResponse.json(
+      {
+        data: albums,
+        page,
+        skip: (page - 1) * limit,
+        sort,
+        limit,
+        hasNextPage: albums.length === limit,
+        totalCount: totalCount,
+        totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
+        msg: totalCount > 0 ? "Successful" : "No albums found",
+      },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ msg: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json(
+        { msg: "An unknown error occurred" },
+        { status: 500 },
+      );
+    }
   }
 }

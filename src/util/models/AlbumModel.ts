@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 const AlbumSchema = new mongoose.Schema(
   {
-    albumTitle: {
+    releaseTitle: {
       type: String,
       required: [true, "Title is required"],
       trim: true,
@@ -12,7 +12,12 @@ const AlbumSchema = new mongoose.Schema(
       required: [true, "Genre is required"],
       trim: true,
     },
-    songLanguage: {
+    releaseLanguage: {
+      type: String,
+      required: [true, "Language is required"],
+      trim: true,
+    },
+    releaseImage: {
       type: String,
       required: [true, "Language is required"],
       trim: true,
@@ -27,7 +32,12 @@ const AlbumSchema = new mongoose.Schema(
       ref: "Artist",
       required: [true, "Provide an Artist!"],
     },
-    release_date: {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Provide a user!"],
+    },
+    releaseDate: {
       type: Date,
       required: [true, "Release date is required"],
     },
@@ -36,12 +46,12 @@ const AlbumSchema = new mongoose.Schema(
       // required: [true, 'Pre-order date is required']
       default: null,
     },
-    pre_order_check: {
+    preOrderCheck: {
       type: Boolean,
       required: [true, "Pre-order check is required"],
       default: false,
     },
-    another_distribution_check: {
+    anotherDistributionCheck: {
       type: Boolean,
       required: [true, "Another distribution check is required"],
       default: false,
@@ -81,13 +91,18 @@ const AlbumSchema = new mongoose.Schema(
       required: [true, "Copyright year is required"],
       trim: true,
     },
-    NumberOfTracks: {
+    numberOfTracks: {
       type: String,
       required: [true, "Add the number of tracks"],
     },
-    UnassignedNumbers: {
+    unassignedNumbers: {
       type: [String],
       required: [true, "Add the array of unassigned numbers"],
+    },
+    releaseStatus:{
+      type:String,
+      enum:["pending","approved","rejected"],
+      default:"pending"
     },
   },
   {

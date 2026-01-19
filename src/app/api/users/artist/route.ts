@@ -84,7 +84,7 @@ export async function POST(req: Request) {
     }
     artist = new Artist({
       user: user._id,
-      artistName: artistName,
+      artistName: artistName.toLocaleLowerCase(),
       artistImage: selectedImage.coverUrl,
       appleId: appleId,
       spotifyId: spotifyId,

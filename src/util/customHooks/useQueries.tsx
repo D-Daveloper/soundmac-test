@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
+  getAlbums,
   getArtists,
   getArtistStats,
   getCurrentUser,
@@ -9,7 +10,7 @@ import {
   getSongs,
   getUserArtistsNames,
 } from "../axios/axiosInstance";
-import { Artist, ArtistStat, PAGINATION, songFromApi } from "@/app/type";
+import { albumFromApi, Artist, ArtistStat, PAGINATION, songFromApi } from "@/app/type";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -71,6 +72,16 @@ export function usePaginatedSongs(params:{ page:number,sort:string,songTitle:str
   return useQuery<PAGINATION<songFromApi>, Error>({
     queryKey: ["mangeSongs", params.page,params.sort,params.songTitle,params.songStatusFilter,params.artist],
     queryFn: async () => getSongs(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry:1,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+export function usePaginatedAlbums(params:{ page:number,sort:string,songTitle:string,albumStatusFilter:string,artist:string}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<albumFromApi>, Error>({
+    queryKey: ["mangeAlbums", params.page,params.sort,params.songTitle,params.albumStatusFilter,params.artist],
+    queryFn: async () => getAlbums(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry:1,
     staleTime: 1000 * 60 * 5, // 5 minutes

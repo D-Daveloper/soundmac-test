@@ -75,15 +75,15 @@ const ManageArtist = () => {
     );
   }
   return (
-    <div className="bg-main-white  max-sm:min-h-auto min-h-[90dvh] w-full flex flex-col px-10 ">
+    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-10 ">
       {isLoading ? (
         <InlineLoadingScreen />
-      ) : !isLoading && (isError || data === undefined) ? (
-        <div className="flex flex-col justify-center items-center h-full gap-15">
+      ) : !isLoading && (isError || data === undefined ||data.data.length === 0) ? (
+        <div className="flex flex-col justify-center items-center min-h-[90dvh] gap-15">
           <div>
             <Image
               priority={true}
-              src={"/manage_artistImage.png"}
+              src={"/manage_artist_image.png"}
               alt="an image depicting no artist profile"
               width={200}
               height={200}

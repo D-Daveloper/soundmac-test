@@ -143,38 +143,46 @@ export type ArtistStat = {
   artist:Artist
 }
 
-
-export interface songFromApi
-  {
+interface BaseApiResponseForRelease{
   _id: string
-  songTitle: string
+  releaseTitle: string
   genre: string
-  songLanguage: string
+  releaseLanguage: string
   artistName: string
   artist: Artist
-  release_date: Date
+  releaseDate: Date
   preOrderDate: Date | null
-  featured_artist: FeaturedArtist[]
-  performer: Performer[]
-  song_writer: SongWriter[]
-  producer: Producer[]
-  pre_order_check: boolean
-  another_distribution_check: boolean
+  preOrderCheck: boolean
+  anotherDistributionCheck: boolean
   territories: string[]
-  song_audio: string
-  song_image: string
+  releaseImage: string
   dsp: string[]
-  lyrics: string
-  start_clip: string
-  isrc: string
   upc: string
+  releaseStatus: "pending"|"approved"|"rejected"|"draft"
   copyRightHolder: string
   copyRightYear: string
-  explicit_content: boolean
   createdAt: Date
   updatedAt: Date
   __v: number
-  songStatus: "pending"|"approved"|"rejected"|"draft"
+}
+
+export interface songFromApi extends BaseApiResponseForRelease
+  {
+  featuredArtist: FeaturedArtist[]
+  performer: Performer[]
+  songWriter: SongWriter[]
+  producer: Producer[]
+  releaseAudio: string
+  lyrics: string
+  startClip: string
+  isrc: string
+  explicitContent: boolean
+
+}
+export interface albumFromApi extends BaseApiResponseForRelease
+  {
+  numberOfTracks:string;
+  unassignedNumber:string[];
 
 }
 

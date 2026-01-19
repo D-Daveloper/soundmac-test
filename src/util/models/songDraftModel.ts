@@ -38,16 +38,23 @@ const songWriterSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-const producerSchema = new mongoose.Schema({
-  first_name: {
-    type: String,
-    // required: [true, 'Producer first name is required']
+const producerSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: [true, "Producer name is required"],
+    },
+    // first_name: {
+    //   type: String,
+    //   required: [true, "Producer first name is required"],
+    // },
+    // last_name: {
+    //   type: String,
+    //   required: [true, "Producer last name is required"],
+    // },
   },
-  last_name: {
-    type: String,
-    // required: [true, 'Producer last name is required']
-  }
-}, { _id: false });
+  { _id: false }
+);
 
 const SongDraftModelSchema = new mongoose.Schema({
   songTitle: {
@@ -75,7 +82,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     ref: "User",
     // required: [true, "Provide a user!"],
   },
-  release_date: {
+  releaseDate: {
     type: Date,
     // required: [true, 'Release date is required']
   },
@@ -84,7 +91,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     // required: [true, 'Pre-order date is required']
     default:null
   },
-  featured_artist: {
+  featuredArtist: {
     type: [featuredArtistSchema],
     required: [true, 'Featured artist is required'],
     // validate: {
@@ -105,7 +112,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     //   message: 'At least one performer is required'
     // }
   },
-  song_writer: {
+  songWriter: {
     type: [songWriterSchema],
     // required: [true, 'Song writer is required'],
     // validate: {
@@ -125,12 +132,12 @@ const SongDraftModelSchema = new mongoose.Schema({
     //   message: 'At least one producer is required'
     // }
   },
-  pre_order_check: {
+  preOrderCheck: {
     type: Boolean,
     // required: [true, 'Pre-order check is required'],
     default: false
   },
-  another_distribution_check: {
+  anotherDistributionCheck: {
     type: Boolean,
     // required: [true, 'Another distribution check is required'],
     default: false
@@ -145,12 +152,12 @@ const SongDraftModelSchema = new mongoose.Schema({
     //   message: 'At least one territory is required'
     // }
   },
-  song_audio: {
+  songAudio: {
     type: String,
     // required: [true, 'Song audio URL is required'],
     trim: true
   },
-  song_image: {
+  releaseImage: {
     type: String,
     // required: [true, 'Music image URL is required'],
     trim: true
@@ -170,7 +177,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     // required: [true, 'Lyrics are required'],
     trim: true
   },
-  start_clip: {
+  startClip: {
     type: String,
     // required: [true, 'Start clip is required'],
     trim: true
@@ -196,12 +203,12 @@ const SongDraftModelSchema = new mongoose.Schema({
     // required: [true, 'Copyright year is required'],
     trim: true
   },
-  explicit_content: {
+  explicitContent: {
     type: Boolean,
     // required: [true, 'Explicit content flag is required'],
     default: false
   },
-  songStatus:{
+  releaseStatus:{
     type:String,
     // enum:["pending","approved","rejected"],
     default:"draft"

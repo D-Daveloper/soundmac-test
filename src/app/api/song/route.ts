@@ -281,52 +281,52 @@ export async function POST(req: Request) {
 
 
       const savedSong = new SongModel({
-        songTitle: song_title,
+        releaseTitle: song_title,
         genre: genre,
-        songLanguage: language,
-        song_writer: song_writer,
+        releaseLanguage: language,
+        songWriter: song_writer,
         producer: producer,
         performer: performer,
-        featured_artist,
-        pre_order_check,
-        another_distribution_check,
-        explicit_content,
-        release_date,
+        featuredArtist:featured_artist,
+        preOrderCheck:pre_order_check,
+        anotherDistributionCheck:another_distribution_check,
+        explicitContent:explicit_content,
+        releaseDate:release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
         lyrics,
-        start_clip,
+        startClip:start_clip,
         dsp: dsp,
         upc,
         isrc: "isrc" + Date.now(),
         territories: territories,
-        song_audio: s3KeyAudio,
-        song_image: imageUrl.coverUrl,
+        releaseAudio: s3KeyAudio,
+        releaseImage: imageUrl.coverUrl,
         artistName: userArtist.artistName,
         artist: userArtist._id,
         user: user!._id,
-        catalogNumber: "SM" + Date.now(),
+        catalogNumber: "SM" + Date.now(), 
       });
       await savedSong.save();
     } else {
       const saveDraft = new SongDraftModel({
-        songTitle: song_title,
+        releaseTitle: song_title,
         genre: genre,
-        songLanguage: language,
-        song_writer: song_writer,
+        releaseLanguage: language,
+        songWriter: song_writer,
         producer: producer,
         performer: performer,
-        featured_artist,
-        pre_order_check,
-        another_distribution_check,
-        explicit_content,
-        release_date: release_date == "undefined" ? null : release_date,
+        featuredArtist:featured_artist,
+        preOrderCheck:pre_order_check,
+        anotherDistributionCheck:another_distribution_check,
+        explicitContent:explicit_content,
+        releaseDate: release_date == "undefined" ? null : release_date,
         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
         copyRightHolder,
         copyRightYear,
         lyrics,
-        start_clip,
+        startClip:start_clip,
         dsp: dsp,
         upc,
         isrc: "isrc",
@@ -404,7 +404,7 @@ export async function POST(req: Request) {
 //     const music_image = formData.get("music_image");
 //     const copyRightYear = formData.get("copyRightYear");
 //     const copyRightHolder = formData.get("copyRightHolder");
-//     const explicit_content = formData.get("explicit_content");
+//     const explicitContent = formData.get("explicitContent");
 
 //     const userData = await verifyJWT();
 //     const userJwt = verifyUser(userData);
@@ -728,7 +728,7 @@ export async function POST(req: Request) {
 //         featured_artist,
 //         pre_order_check,
 //         another_distribution_check,
-//         explicit_content,
+//         explicitContent,
 //         release_date,
 //         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
 //         copyRightHolder,
@@ -757,7 +757,7 @@ export async function POST(req: Request) {
 //         featured_artist,
 //         pre_order_check,
 //         another_distribution_check,
-//         explicit_content,
+//         explicitContent,
 //         release_date: release_date == "undefined" ? null : release_date,
 //         preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
 //         copyRightHolder,
@@ -810,7 +810,7 @@ export async function GET(req: Request) {
     let query = {};
     if (songTitle && songTitle.trim() !== "") {
       query = {
-        songTitle: { $regex: "^" + songTitle, $options: "i" },
+        releaseTitle: { $regex: "^" + songTitle, $options: "i" },
         user: userJwt.user,
         artistName: artist,
       };
@@ -827,7 +827,7 @@ export async function GET(req: Request) {
 
     console.log("song filters", typeof songStatusFilter);
     if (songStatusFilter && songStatusFilter !== "all") {
-      songs = songs.filter((item) => item.songStatus === songStatusFilter);
+      songs = songs.filter((item) => item.releaseStatus === songStatusFilter);
       totalCount = songs.length;
     }
     console.log("the updated songs", songs);
