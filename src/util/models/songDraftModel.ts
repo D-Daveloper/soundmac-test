@@ -42,7 +42,7 @@ const producerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Producer name is required"],
+      // required: [true, "Producer name is required"],
     },
     // first_name: {
     //   type: String,
@@ -57,7 +57,7 @@ const producerSchema = new mongoose.Schema(
 );
 
 const SongDraftModelSchema = new mongoose.Schema({
-  songTitle: {
+  releaseTitle: {
     type: String,
     // required: [true, 'Title is required'],
     trim: true
@@ -67,9 +67,14 @@ const SongDraftModelSchema = new mongoose.Schema({
     // required: [true, 'Genre is required'],
     trim: true
   },
-  songLanguage: {
+  releaseLanguage: {
     type: String,
     // required: [true, 'Language is required'],
+    trim: true
+  },
+  artistName: {
+    type: String,
+    // required: [true, 'Artist is required'],
     trim: true
   },
   artist: {
@@ -112,7 +117,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     //   message: 'At least one performer is required'
     // }
   },
-  songWriter: {
+  releaseWriter: {
     type: [songWriterSchema],
     // required: [true, 'Song writer is required'],
     // validate: {
@@ -152,7 +157,7 @@ const SongDraftModelSchema = new mongoose.Schema({
     //   message: 'At least one territory is required'
     // }
   },
-  songAudio: {
+  releaseAudio: {
     type: String,
     // required: [true, 'Song audio URL is required'],
     trim: true

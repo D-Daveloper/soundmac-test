@@ -234,12 +234,33 @@ export const getSongs = async (
   });
   return res.data;
 };
+export const DeleteSong = async (
+  api: AxiosInstance,
+  form: {artist_name:string,releaseTitle:string}
+) => {
+  const res = await api.delete("song", {
+    data: form,
+    headers: { "Content-Type": "application/json" },
+  });
+  return res.data;
+};
+
 export const getAlbums = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,songTitle:string,albumStatusFilter:string,artist:string }
+  params:{ page:number,sort:string,albumTitle:string,albumStatusFilter:string,artist:string }
 ): Promise<PAGINATION<albumFromApi>> => {
   const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
     params:params,
+  });
+  return res.data;
+};
+export const DeleteAlbum = async (
+  api: AxiosInstance,
+  form: {artist_name:string,releaseTitle:string,status:string}
+) => {
+  const res = await api.delete("album", {
+    data: form,
+    headers: { "Content-Type": "application/json" },
   });
   return res.data;
 };

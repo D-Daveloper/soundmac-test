@@ -30,7 +30,6 @@ export const SelectDate = React.memo(
     fromYear,
     toYear,
   }: Calendar22Props): JSX.Element => {
-    console.log(fromYear)
     const [open, setOpen] = useState(false);
   // Calculate disabled days based on type
   // const disabledDays = (date: Date) => {

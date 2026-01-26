@@ -9,17 +9,32 @@ const AlbumSchema = new mongoose.Schema(
     },
     genre: {
       type: String,
-      required: [true, "Genre is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Genre is required",
+      ],
       trim: true,
     },
     releaseLanguage: {
       type: String,
-      required: [true, "Language is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Language is required",
+      ],
       trim: true,
     },
     releaseImage: {
       type: String,
-      required: [true, "Language is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Image is required",
+      ],
       trim: true,
     },
     artistName: {
@@ -39,28 +54,43 @@ const AlbumSchema = new mongoose.Schema(
     },
     releaseDate: {
       type: Date,
-      required: [true, "Release date is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Release date is required",
+      ],
     },
     preOrderDate: {
       type: Date,
-      // required: [true, 'Pre-order date is required']
-      default: null,
+      required: [
+        function (this: any) {
+          return this.get("preOrderCheck") === true;
+        },
+        "Pre-order date is required",
+      ],
     },
     preOrderCheck: {
       type: Boolean,
       required: [true, "Pre-order check is required"],
-      default: false,
     },
     anotherDistributionCheck: {
       type: Boolean,
       required: [true, "Another distribution check is required"],
-      default: false,
     },
     territories: {
       type: [String],
-      required: [true, "Territories are required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Territories are required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one territory is required",
@@ -68,9 +98,17 @@ const AlbumSchema = new mongoose.Schema(
     },
     dsp: {
       type: [String],
-      required: [true, "DSP (Digital Service Providers) are required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "DSP (Digital Service Providers) are required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one DSP is required",
@@ -78,43 +116,73 @@ const AlbumSchema = new mongoose.Schema(
     },
     upc: {
       type: String,
-      required: [true, "UPC is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "UPC is required",
+      ],
       trim: true,
     },
     copyRightHolder: {
       type: String,
-      required: [true, "Copyright holder is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Copyright holder is required",
+      ],
       trim: true,
     },
     copyRightYear: {
       type: String,
-      required: [true, "Copyright year is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Copyright year is required",
+      ],
       trim: true,
     },
     numberOfTracks: {
       type: String,
-      required: [true, "Add the number of tracks"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Add the number of tracks",
+      ],
     },
     unassignedNumbers: {
       type: [String],
       required: [true, "Add the array of unassigned numbers"],
     },
-    releaseStatus:{
-      type:String,
-      enum:["pending","approved","rejected"],
-      default:"pending"
+    releaseStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected", "draft"],
+      default: "pending",
+    },
+    catalogNumber: {
+      type: String,
+      required: [true, "catalog number is required"],
     },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
-  }
+  },
 );
 
-// Indexes for better query performance
-AlbumSchema.index({ artistName: 1, release_date: -1 });
+// artist page (newest first)
+AlbumSchema.index({ artistName: 1, releaseDate: -1 });
+
+// user dashboard
+AlbumSchema.index({ user: 1, createdAt: -1 });
+
+// search
+AlbumSchema.index({ releaseTitle: 1, user: 1 });
 // AlbumSchema.index({ genre: 1 });
 // AlbumSchema.index({ isrc: 1 }, { unique: true });
-AlbumSchema.index({ upc: 1 }, { unique: true });
+AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
 delete mongoose.models.Album;
 
 const AlbumModel =

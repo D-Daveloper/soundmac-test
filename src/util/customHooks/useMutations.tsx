@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
 import { CreateArtistForm, OtpForm } from "@/app/type";
-import { createArtist, DeleteArtist } from "../axios/axiosInstance";
+import { createArtist, DeleteAlbum, DeleteArtist, DeleteSong } from "../axios/axiosInstance";
 
 export const useOtpMutation = () => {
   const queryClient = useQueryClient();
@@ -104,6 +104,43 @@ export const useDeleteArtistMutation = () => {
         return;
       }
       toast.error("Something went wrong, Please try again.");
+    },
+  });
+};
+export const useDeleteSongMutation = () => {
+  const queryClient = useQueryClient();
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form: { artist_name: string,releaseTitle:string }) =>
+      DeleteSong(api, form),
+    onSuccess: async (data,variables) => {
+      toast.success(data.msg);
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error(error.message||"Something went wrong, Please try again.");
+    },
+  });
+};
+export const useDeleteAlbumMutation = () => {
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form: { artist_name: string,releaseTitle:string,status:string }) =>
+      DeleteAlbum(api, form),
+    onSuccess: async (data,variables) => {
+      toast.success(data.msg);
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error(error.message||"Something went wrong, Please try again.");
     },
   });
 };

@@ -1,10 +1,14 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose from "mongoose";
 
 const featuredArtistSchema = new mongoose.Schema(
   {
     artistName: {
       type: String,
-      // required: [true, 'Artist name is required']
+      // required: [true, "Artist name is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "artistName must be a string",
+      },
     },
     spotifyId: {
       type: String,
@@ -15,7 +19,7 @@ const featuredArtistSchema = new mongoose.Schema(
       // // required: [true, 'Apple ID is required']
     },
   },
-  { _id: false }
+  { _id: false, strict: "throw" },
 );
 
 const performerSchema = new mongoose.Schema(
@@ -23,13 +27,21 @@ const performerSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Performer name is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "Performer name must be a string",
+      },
     },
     role: {
       type: String,
       required: [true, "Performer role is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "Performer role must be a string",
+      },
     },
   },
-  { _id: false }
+  { _id: false, strict: "throw" },
 );
 
 const songWriterSchema = new mongoose.Schema(
@@ -37,13 +49,21 @@ const songWriterSchema = new mongoose.Schema(
     first_name: {
       type: String,
       required: [true, "Song writer first name is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "Song writer first name must be a string",
+      },
     },
     last_name: {
       type: String,
       required: [true, "Song writer last name is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "Song writer last name must be a string",
+      },
     },
   },
-  { _id: false }
+  { _id: false, strict: "throw" },
 );
 
 const producerSchema = new mongoose.Schema(
@@ -51,6 +71,10 @@ const producerSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Producer name is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "Producer name must be a string",
+      },
     },
     // first_name: {
     //   type: String,
@@ -61,7 +85,7 @@ const producerSchema = new mongoose.Schema(
     //   required: [true, "Producer last name is required"],
     // },
   },
-  { _id: false }
+  { _id: false, strict: "throw" },
 );
 
 const SongModelSchema = new mongoose.Schema(
@@ -73,12 +97,22 @@ const SongModelSchema = new mongoose.Schema(
     },
     genre: {
       type: String,
-      required: [true, "Genre is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Genre is required",
+      ],
       trim: true,
     },
     releaseLanguage: {
       type: String,
-      required: [true, "Language is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Language is required",
+      ],
       trim: true,
     },
     artistName: {
@@ -98,29 +132,50 @@ const SongModelSchema = new mongoose.Schema(
     },
     releaseDate: {
       type: Date,
-      required: [true, "Release date is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Release date is required",
+      ],
     },
     preOrderDate: {
       type: Date,
-      // required: [true, 'Pre-order date is required']
+      required: [
+        function (this: any) {
+          return this.get("preOrderCheck") === true;
+        },
+        "Pre-order date is required",
+      ],
       default: null,
     },
     featuredArtist: {
       type: [featuredArtistSchema],
       // required: [true, 'Featured artist is required'],
-      // validate: {
-      //   validator: function(v: any[]) {
-      //     return v && v.length > 0;
-      //   },
-      //   message: 'At least one featured artist is required'
-      // },
-      default: [{ artistName: "", spotifyId: "", appleId: "" }],
+      validate: {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
+          return Array.isArray(v) && v.length > 0;
+        },
+        message: "At least one featured artist is required",
+      },
+      default: undefined,
     },
     performer: {
       type: [performerSchema],
-      required: [true, "Performer is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Performer is required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one performer is required",
@@ -128,9 +183,17 @@ const SongModelSchema = new mongoose.Schema(
     },
     songWriter: {
       type: [songWriterSchema],
-      required: [true, "Song writer is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Song writer is required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one song writer is required",
@@ -138,9 +201,17 @@ const SongModelSchema = new mongoose.Schema(
     },
     producer: {
       type: [producerSchema],
-      required: [true, "Producer is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Producer is required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one producer is required",
@@ -148,19 +219,37 @@ const SongModelSchema = new mongoose.Schema(
     },
     preOrderCheck: {
       type: Boolean,
-      required: [true, "Pre-order check is required"],
-      default: false,
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Pre-order check is required",
+      ],
+      // default: false,
     },
     anotherDistributionCheck: {
       type: Boolean,
-      required: [true, "Another distribution check is required"],
-      default: false,
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Another distribution check is required",
+      ],
+      // default: false,
     },
     territories: {
       type: [String],
-      required: [true, "Territories are required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Territories are required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one territory is required",
@@ -168,19 +257,37 @@ const SongModelSchema = new mongoose.Schema(
     },
     releaseAudio: {
       type: String,
-      required: [true, "Song audio URL is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Song audio URL is required",
+      ],
       trim: true,
     },
     releaseImage: {
       type: String,
-      required: [true, "Music image URL is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Music image URL is required",
+      ],
       trim: true,
     },
     dsp: {
       type: [String],
-      required: [true, "DSP (Digital Service Providers) are required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "DSP (Digital Service Providers) are required",
+      ],
       validate: {
-        validator: function (v: any[]) {
+        validator: function (this: any, v: any[]) {
+          if (this.get("releaseStatus") === "draft") {
+            return true; // Skip validation for draft songs
+          }
           return Array.isArray(v) && v.length > 0;
         },
         message: "At least one DSP is required",
@@ -193,63 +300,117 @@ const SongModelSchema = new mongoose.Schema(
     },
     startClip: {
       type: String,
-      required: [true, "Start clip is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Start clip is required",
+      ],
       trim: true,
     },
     isrc: {
       type: String,
-      required: [true, "ISRC is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "ISRC is required",
+      ],
       trim: true,
       uppercase: true,
       // unique:true
     },
     upc: {
       type: String,
-      required: [true, "UPC is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "UPC is required",
+      ],
       trim: true,
     },
     copyRightHolder: {
       type: String,
-      required: [true, "Copyright holder is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Copyright holder is required",
+      ],
       trim: true,
     },
     copyRightYear: {
       type: String,
-      required: [true, "Copyright year is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Copyright year is required",
+      ],
       trim: true,
     },
     explicitContent: {
       type: Boolean,
-      required: [true, "Explicit content flag is required"],
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft";
+        },
+        "Explicit content flag is required",
+      ],
     },
-    releaseStatus:{
-      type:String,
-      enum:["pending","approved","rejected"],
-      default:"pending"
+    releaseStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected", "draft"],
+      default: "pending",
     },
-    catalogNumber:{
-      type:String,
+    catalogNumber: {
+      type: String,
       required: [true, "catalog number is required"],
     },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
-  }
+  },
 );
 
 // Indexes for better query performance
-// SongModelSchema.index({ artistName: 1 });
-SongModelSchema.index({ releaseTitle: 1 });
-SongModelSchema.index({ user:1,releaseTitle: 1 });
+SongModelSchema.index({ artistName: 1 ,releaseDate: -1});
+SongModelSchema.index({ releaseTitle: 1,user:1 });
 // SongModelSchema.index({ genre: 1 });
-SongModelSchema.index({ isrc: 1 }, { unique: true });
-SongModelSchema.index({ upc: 1 }, { unique: true });
+SongModelSchema.index(
+  { isrc: 1 },
+  { unique: true, sparse: true },
+);
+SongModelSchema.index(
+  { upc: 1 },
+  { unique: true, sparse: true },
+);
 // delete mongoose.models.Song;
 
 const SongModel =
   mongoose.models?.Song || mongoose.model("Song", SongModelSchema);
 
 export default SongModel;
+// Pre-validation hook to enforce required fields based on releaseStatus
+SongModelSchema.pre("validate", function (next) {
+  if (this.releaseStatus !== "draft") {
+    const requiredFields = [
+      "releaseTitle",
+      "releaseAudio",
+      "releaseImage",
+      "isrc",
+      "upc",
+    ];
+
+    for (const field of requiredFields) {
+      if (!(this as any)[field]) {
+        this.invalidate(field, `${field} is required before publishing`);
+      }
+    }
+  }
+  next();
+});
 
 // const SongSchema = new mongoose.Schema(
 //   {

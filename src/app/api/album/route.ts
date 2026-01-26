@@ -1,64 +1,48 @@
-import { languagesList } from "@/app/constant";
 import { albumFromApi } from "@/app/type";
-import { genreList } from "@/app/utils/constants";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
+import { deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
-  containsEmoji,
   numRegex,
+  parseAlbumFormData,
   uploadImage,
+  validateNonDraftAlbums,
 } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import AlbumDraftModel from "@/util/models/AlbumDraftModel";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
+import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import SongDraftModel from "@/util/models/songDraftModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
-import { addWeeks, subWeeks } from "date-fns";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+const bucketName = process.env.AWS_S3_BUCKET!;
 
 export async function POST(req: Request) {
   try {
     let userArtist = null;
 
-    const twoWeeks = addWeeks(new Date(), 2); //to check if the upload date is two or more
-    let oneWeek = null; //variable to check for the pre order date
     const formData = await req.formData();
     console.log({ ...formData });
-
-    const actionType = formData.get("action");
-    const album_title = formData.get("title");
-    const genre = formData.get("genre");
-    const language = formData.get("language");
-    const preOrderDate = formData.get("preOrderDate");
-    const artist = formData.get("artist");
-    const pre_order_check = formData.get("pre_order_check");
-    const another_distribution_check = formData.get(
-      "another_distribution_check"
-    );
-    const territories = formData
-      .getAll("territories")
-      .map((item) => JSON.parse(item as string));
-    const dsp = formData
-      .getAll("dsp")
-      .map((item) => JSON.parse(item as string));
-    // const upc = formData.get("upc");
-    const upc = "upc";
-    const release_date = formData.get("release_date");
-    const music_image = formData.get("music_image");
-    const copyRightYear = formData.get("copyRightYear");
-    const copyRightHolder = formData.get("copyRightHolder");
     const number_of_track = formData.get("number_of_track");
+    const payload = parseAlbumFormData(formData);
 
+    if (
+      !payload.artist ||
+      payload.artist.trim() === "" ||
+      typeof payload.artist !== "string"
+    ) {
+      return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
+    }
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
+    await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
@@ -66,239 +50,111 @@ export async function POST(req: Request) {
     } else if (!user.confirmed) {
       return NextResponse.json(
         { msg: "Please verify your email address" },
-        { status: 400 }
+        { status: 400 },
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
-        artistName: (artist as string).trim(),
+        artistName: (payload.artist as string).trim(),
       });
     }
-    console.log("eet", userArtist, artist);
+    console.log("eet", userArtist, payload.artist);
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
     if (
-      !album_title ||
-      typeof album_title !== "string" ||
-      album_title.length <= 3
+      !payload.title ||
+      typeof payload.title !== "string" ||
+      payload.title.length <= 3
     ) {
       return NextResponse.json(
         {
-          msg: "Song title is required and must be longer than 3 letters.",
+          msg: "Album title is required and must be longer than 3 letters.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    if (actionType === "upload") {
-      //pre order date is derived from release date
-      if (
-        (release_date != undefined && typeof release_date == "string") ||
-        typeof release_date == "number"
-      ) {
-        oneWeek = subWeeks(new Date(release_date), 1);
-      }
-      if (containsEmoji(album_title)) {
-        return NextResponse.json(
-          {
-            msg: "Song title can not contain emojis",
-          },
-          { status: 400 }
-        );
-      } else if (
-        !genre ||
-        typeof genre != "string" ||
-        !genreList.includes(genre)
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Genre is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        !language ||
-        typeof language != "string" ||
-        !languagesList.includes(language)
-      ) {
-        return NextResponse.json(
-          {
-            msg: "language is required.",
-          },
-          { status: 400 }
-        );
-      } else if (!artist || typeof artist != "string") {
-        return NextResponse.json(
-          {
-            msg: "Artist is required.",
-          },
-          { status: 400 }
-        );
-      } else if (!release_date) {
-        return NextResponse.json(
-          {
-            msg: "Release Date is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        typeof release_date != "string" ||
-        new Date(release_date) < twoWeeks
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Release Date must be plus 2 weeks ahead of upload date. ",
-          },
-          { status: 400 }
-        );
-      } else if (!(territories instanceof Array) || territories.length <= 0) {
-        return NextResponse.json(
-          {
-            msg: "Please select territories.",
-          },
-          { status: 400 }
-        );
-      } else if (pre_order_check && preOrderDate === undefined) {
-        return NextResponse.json(
-          {
-            msg: "Pre order Date is required.",
-          },
-          { status: 400 }
-        );
-      } else if (
-        pre_order_check === "true" &&
-        (!(preOrderDate instanceof Date) ||
-          (oneWeek && preOrderDate! > oneWeek))
-      ) {
-        return NextResponse.json(
-          {
-            msg: "Pre Order Date must be 1 week from release date.",
-          },
-          { status: 400 }
-        );
-      } else if (!(dsp instanceof Array) || dsp.length <= 0) {
-        return NextResponse.json(
-          {
-            msg: "Please select a Dsp.",
-          },
-          { status: 400 }
-        );
-        //   } else if (another_distribution_check === "true" && upc === "") {
-      } else if (another_distribution_check === "true") {
-        return NextResponse.json(
-          {
-            msg: "UPC is required when transferring from another distributor.",
-          },
-          { status: 400 }
-        );
-      } else if (copyRightHolder === "" || copyRightYear === "") {
-        return NextResponse.json(
-          {
-            msg: "Copy Right Holder and Copy Right Year is required.",
-          },
-          { status: 400 }
-        );
-      } else if (!music_image || !(music_image instanceof File)) {
-        return NextResponse.json({
-          msg: "Music image is required and must be a file",
-        });
-      } else if (!["image/jpeg", "image/png"].includes(music_image.type)) {
-        return NextResponse.json({ msg: "Invalid image format" });
-      } else if (
-        !number_of_track ||
-        !numRegex.test(number_of_track as string)
-      ) {
-        return NextResponse.json({
+
+    const isAlbumForValid = validateNonDraftAlbums(payload);
+
+    
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
+    
+    if (!number_of_track || !numRegex.test(number_of_track as string)) {
+      return NextResponse.json(
+        {
           msg: "No. of tracks is required and must be a positive number",
-        });
-      }
-
-      const num = parseInt(number_of_track as string, 10); // Convert string to number
-      if (isNaN(num) || num < 1) {
-        return NextResponse.json({ msg: "No. of tracks must greater than 0" });
-      }
-      const number_of_track_array = Array.from(
-        { length: num },
-        (_, i) => i + 1
+        },
+        { status: 400 },
       );
-
-      const buffer = Buffer.from(await (music_image as File).arrayBuffer());
-      // ---- Resize to distributor standard ----
-      const resized = await sharp(buffer)
-        .resize(3000, 3000, { fit: "cover" })
-        .jpeg({ quality: 90 })
-        .toBuffer(); //resize the image for dpm
-      const imageType = music_image.type.split("/")[1];
-      const imageStorageLocation = `testing/${upc}/${upc}.${imageType}`;
-      const imageUrl = await uploadImage(
-        imageType,
-        resized as Buffer<ArrayBuffer>,
-        imageStorageLocation
+    }
+    
+    const num = parseInt(number_of_track as string, 10); // Convert string to number
+    if (isNaN(num) || num < 1) {
+      return NextResponse.json(
+        { msg: "No. of tracks must greater than 0" },
+        { status: 400 },
       );
-      if (imageUrl.coverUrl == null) {
-        return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
-      }
-      await dbConnect();
+    }
+    payload.upc = payload.upc || "upc" + Date.now();//incase they dont have a upc, generate one for them
+    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
-      const album = new AlbumModel({
-        releaseTitle: album_title,
-        genre: genre,
-        releaseLanguage: language,
-        preOrderCheck:pre_order_check,
-        anotherDistributionCheck:another_distribution_check,
-        releaseDate:release_date,
-        preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
-        copyRightHolder,
-        copyRightYear,
-        dsp: dsp,
-        upc,
-        isrc: "isrc",
-        territories: territories,
-        releaseImage: imageUrl.coverUrl,
-        artistName: userArtist.artistName,
-        artist: userArtist._id,
-        numberOfTracks: number_of_track,
-        unassignedNumbers: number_of_track_array,
-        user:user._id
-      });
-      await album.save();
-      return NextResponse.json({ msg: "success" }, { status: 200 });
-    } else {
-      const saveDraft = new AlbumDraftModel({
-        releaseTitle: album_title,
-        genre: genre,
-        songLanguage: language,
-        preOrderCheck:pre_order_check,
-        anotherDistributionCheck:another_distribution_check,
-        releaseDate:release_date,
-        preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
-        copyRightHolder,
-        copyRightYear,
-        dsp: dsp,
-        upc,
-        isrc: "isrc",
-        territories: territories,
-        // song_image: imageUrl.coverUrl,
-        artistName: userArtist.artistName,
-        artist: userArtist._id,
-        numberOfTracks: number_of_track,
-        user:user._id
-        // UnassignedNumbers:number_of_track_array
-      });
-      await saveDraft.save();
-      return NextResponse.json({ msg: "Draft saved" }, { status: 200 });
+    const buffer = Buffer.from(
+      await (payload.musicImage as File).arrayBuffer(),
+    );
+    // ---- Resize to distributor standard ----
+    const resized = await sharp(buffer)
+      .resize(3000, 3000, { fit: "cover" })
+      .jpeg({ quality: 90 })
+      .toBuffer(); //resize the image for dpm
+    const imageType = payload.musicImage!.type.split("/")[1];
+    const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`;
+    const imageUrl = await uploadImage(
+      imageType,
+      resized as Buffer<ArrayBuffer>,
+      imageStorageLocation,
+    );
+    if (imageUrl.coverUrl == null) {
+      return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
     }
 
-    // return NextResponse.json({ msg: "success" }, { status: 200 });
+    const album = new AlbumModel({
+      releaseTitle: payload.title,
+      genre: payload.genre,
+      releaseLanguage: payload.language,
+      preOrderCheck: payload.preOrderCheck,
+      anotherDistributionCheck: payload.anotherDistributionCheck,
+      releaseDate: payload.releaseDate,
+      preOrderDate:
+        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+      copyRightHolder: payload.copyRightHolder,
+      copyRightYear: payload.copyRightYear,
+      dsp: payload.dsp,
+      upc: payload.upc || "upc" + Date.now(),
+      territories: payload.territories,
+      releaseImage: imageUrl.coverUrl,
+      artistName: userArtist.artistName,
+      artist: userArtist._id,
+      numberOfTracks: number_of_track,
+      unassignedNumbers: number_of_track_array,
+      user: user._id,
+      catalogNumber: "SM" + Date.now(),
+    });
+    await album.save();
+
+    return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 
     return handleMongooseValidationError(error);
   }
 }
+
 const limit = parseInt(process.env.SONG_LIMIT || "6", 10);
 
 export async function GET(req: Request) {
@@ -343,7 +199,9 @@ export async function GET(req: Request) {
 
     console.log("album filters", typeof albumStatusFilter);
     if (albumStatusFilter && albumStatusFilter !== "all") {
-      albums = albums.filter((item) => item.releaseStatus === albumStatusFilter);
+      albums = albums.filter(
+        (item) => item.releaseStatus === albumStatusFilter,
+      );
       totalCount = albums.length;
     }
     console.log("the updated albums", albums);
@@ -371,5 +229,110 @@ export async function GET(req: Request) {
         { status: 500 },
       );
     }
+  }
+}
+
+export async function DELETE(req: Request) {
+  // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+
+  try {
+    let release: any = null;
+    const formData = await req.json();
+    if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    } else if (formData.artist_name.trim() === "" || !formData.artist_name) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    } else if (formData.status.trim() === "" || !formData.status) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+
+    await dbConnect();
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 401 },
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else {
+      if (formData.status === "draft") {
+        release = await SongDraftModel.findOne({
+          releaseTitle: formData.releaseTitle,
+          artistName: formData.artist_name.trim(),
+          user: user._id,
+        });
+      } else {
+        // Find and verify release belongs to user before deleting
+        release = await SongModel.findOne({
+          releaseTitle: formData.releaseTitle,
+          artistName: formData.artist_name.trim(),
+          user: user._id,
+        });
+      }
+
+      if (!release) {
+        return NextResponse.json(
+          {
+            msg: "Invalid Release",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (release.releaseStatus === "pending") {
+        const isSongDeleted = await deleteSingleFromS3(
+          bucketName,
+          release.releaseAudio,
+        );
+        if (isSongDeleted) {
+          const deleteSongsResult = await SongModel.findByIdAndDelete({
+            _id: release._id,
+          });
+          await AudioUploadTrackerModel.findOneAndDelete({
+            upc: release.upc,
+          });
+          if (deleteSongsResult.deletedCount < 1) {
+            return NextResponse.json(
+              { msg: "Failed to delete." },
+              { status: 400 },
+            );
+          }
+          return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
+        } else {
+          return NextResponse.json(
+            { msg: "failed to delete album" },
+            { status: 200 },
+          );
+        }
+      } else if (release.releaseStatus === "draft") {
+        const deleteSongsResult = await SongDraftModel.findByIdAndDelete({
+          _id: release._id,
+        });
+
+        if (deleteSongsResult.deletedCount < 1) {
+          return NextResponse.json(
+            { msg: "Failed to delete." },
+            { status: 400 },
+          );
+        }
+        return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
+      }
+      return NextResponse.json(
+        { msg: "Only pending songs or drafts can be deleted!" },
+        { status: 400 },
+      );
+    }
+  } catch (error: unknown) {
+    console.log("song delete error", error);
+
+    return handleMongooseValidationError(error);
   }
 }

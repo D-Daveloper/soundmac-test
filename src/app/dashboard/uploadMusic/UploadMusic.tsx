@@ -65,7 +65,7 @@ const UploadMusic = () => {
               onClick={() => setParam("type", "album")}
               className="font-bold text-sm rounded-lg bg-transparent border-2 border-primary text-text-body px-4 py-2.5 hover:bg-primary/10"
             >
-              Upload a Album
+              Upload an Album
             </button>
           </div>
         </div>

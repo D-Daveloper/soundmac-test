@@ -1,14 +1,12 @@
-import { languagesList } from "@/app/constant";
 import { songFromApi } from "@/app/type";
-import { genreList } from "@/app/utils/constants";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
-  containsEmoji,
-  numRegex,
+  parseSongFormData,
   uploadImage,
+  validateNonDraftSongs,
 } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import Artist from "@/util/models/artistModel";
@@ -16,7 +14,6 @@ import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import SongDraftModel from "@/util/models/songDraftModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
-import { addWeeks, subWeeks } from "date-fns";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
@@ -27,57 +24,30 @@ export async function POST(req: Request) {
     let userArtist = null;
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
     let audioTracker = null;
-    const twoWeeks = addWeeks(new Date(), 2); //to check if the upload date is two or more
-    let oneWeek = null; //variable to check for the pre order date
     const formData = await req.formData();
     console.log({ ...formData });
 
-    const uploadId = formData.get("uploadId");
-    const actionType = formData.get("action");
-    const song_title = formData.get("title");
-    const genre = formData.get("genre");
-    const language = formData.get("language");
-    const preOrderDate = formData.get("preOrderDate");
-    const featured_artist = formData
-      .getAll("featured_artist")
-      .map((item) => JSON.parse(item as string));
-    const artist = formData.get("artist");
-    const performer = formData
-      .getAll("performer")
-      .map((item) => JSON.parse(item as string));
-    const song_writer = formData
-      .getAll("song_writer")
-      .map((item) => JSON.parse(item as string));
-    const producer = formData
-      .getAll("producer")
-      .map((item) => JSON.parse(item as string));
-    const pre_order_check = formData.get("pre_order_check");
-    const another_distribution_check = formData.get(
-      "another_distribution_check",
-    );
-    const territories = formData
-      .getAll("territories")
-      .map((item) => JSON.parse(item as string));
-    // const song_audio = formData.get("song_audio");
-    const dsp = formData
-      .getAll("dsp")
-      .map((item) => JSON.parse(item as string));
-    const lyrics = formData.get("lyrics");
-    const start_clip = formData.get("start_clip");
-    const isrc = formData.get("isrc");
-    const upc = formData.get("upc2"); // the new upc from the create aws signed url endpoint
-    const release_date = formData.get("release_date");
-    const s3KeyAudio = formData.get("s3keyAudio");
-    const music_image = formData.get("music_image");
-    const copyRightYear = formData.get("copyRightYear");
-    const copyRightHolder = formData.get("copyRightHolder");
-    const explicit_content = formData.get("explicit_content");
-      await dbConnect();
+    const payload = parseSongFormData(formData);
+
+    if (!payload) {
+      return NextResponse.json({ msg: "Invalid form data" }, { status: 400 });
+    }
+
+    if (
+      !payload.artist ||
+      payload.artist.trim() === "" ||
+      typeof payload.artist !== "string"
+    ) {
+      return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
+    }
+
+    //  const payload = {uploadId,actionType,title,genre,language,preOrderDate,featured_artist,artist,performer,song_writer,producer,pre_order_check,another_distribution_check,territories,dsp,lyrics,start_clip,isrc,upc,release_date,s3KeyAudio,music_image,copyRightYear,copyRightHolder,explicit_content} = parseSongFormData(formData);
+    await dbConnect();
 
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
-      await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
+      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
@@ -91,14 +61,13 @@ export async function POST(req: Request) {
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
-        artistName: (artist as string)?.trim(),
+        artistName: (payload.artist as string)?.trim(),
       });
     }
 
-    console.log("the user artist ", userArtist?.artistName, artist);
-
+    // console.log("the user artist ", userArtist?.artistName, payload.artist);
     if (Uploaderror != null) {
-      await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || "");
+      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || "");
       return NextResponse.json(
         { msg: Uploaderror.msg },
         { status: Uploaderror.status },
@@ -106,241 +75,89 @@ export async function POST(req: Request) {
     } // return any errors up to this point and delete the song
 
     if (!userArtist) {
-      await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
+      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
 
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
-    if (
-      !song_title ||
-      typeof song_title !== "string" ||
-      song_title.length <= 3
-    ) {
-      await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
 
+    const isSongValid = validateNonDraftSongs(payload);
+    if (isSongValid != null) {
+      return NextResponse.json({ msg: isSongValid }, { status: 400 });
+    }
+
+    audioTracker = await AudioUploadTrackerModel.findOne({
+      _id: payload.uploadId,
+      s3Key: payload.s3KeyAudio,
+      user: user!._id,
+      status: "PENDING",
+    });
+
+    if (audioTracker == null) {
+      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
       return NextResponse.json(
-        {
-          msg: "Song title is required and must be longer than 3 letters.",
-        },
+        { msg: "Invaild Request,please upload audio" },
         { status: 400 },
       );
     }
-    if (actionType === "upload") {
-      if (!uploadId || typeof uploadId != "string") {
-        await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
-        return NextResponse.json(
-          { msg: "uploadId is required." },
-          { status: 400 },
-        );
-      } else {
-        audioTracker = AudioUploadTrackerModel.findOne({
-          _id: uploadId,
-          s3Key: s3KeyAudio,
-          user: user!._id,
-          status: "PENDING",
-        });
-      }
-      if (audioTracker == null) {
-        await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
-        return NextResponse.json(
-          { msg: "Invaild Request,please upload audio" },
-          { status: 400 },
-        );
-      }
-      //pre order date is derived from release date
-      if (
-        (release_date != undefined && typeof release_date == "string") ||
-        typeof release_date == "number"
-      ) {
-        oneWeek = subWeeks(new Date(release_date), 1);
-      }
-      if (containsEmoji(song_title)) {
-        Uploaderror = { msg: "Song title can not contain emojis", status: 400 };
-      } else if (
-        !genre ||
-        typeof genre != "string" ||
-        !genreList.includes(genre)
-      ) {
-        Uploaderror = { msg: "Genre is required.", status: 400 };
-      } else if (
-        !language ||
-        typeof language != "string" ||
-        !languagesList.includes(language)
-      ) {
-        Uploaderror = { msg: "Language is required", status: 400 };
-      } else if (!artist || typeof artist != "string") {
-        Uploaderror = { msg: "Artist is required", status: 400 };
-      } else if (
-        !song_writer ||
-        !(song_writer instanceof Array) ||
-        song_writer.some((artist) => artist.first_name === "") ||
-        song_writer.some((artist) => artist.last_name === "")
-      ) {
-        Uploaderror = { msg: "Song writer is required", status: 400 };
-      } else if (
-        !producer ||
-        !(producer instanceof Array) ||
-        producer.some((artist) => artist.name === "")
-      ) {
-        Uploaderror = { msg: "Producer is required", status: 400 };
-      } else if (
-        !performer ||
-        !(performer instanceof Array) ||
-        performer.some((artist) => artist.name === "") ||
-        performer.some((artist) => artist.role === "")
-      ) {
-        Uploaderror = { msg: "Performer is required", status: 400 };
-      } else if (!release_date) {
-        Uploaderror = { msg: "Release Date is required", status: 400 };
-      } else if (
-        typeof release_date != "string" ||
-        new Date(release_date) < twoWeeks
-      ) {
-        Uploaderror = {
-          msg: "Release Date must be plus 2 weeks ahead of upload date.",
-          status: 400,
-        };
-      } else if (!(territories instanceof Array) || territories.length <= 0) {
-        Uploaderror = { msg: "Please Select Territories.", status: 400 };
-      } else if (pre_order_check && preOrderDate === undefined) {
-        Uploaderror = { msg: "Pre order Date is required", status: 400 };
-        return NextResponse.json(
-          {
-            msg: "Pre order Date is required.",
-          },
-          { status: 400 },
-        );
-      } else if (
-        pre_order_check === "true" &&
-        (!(preOrderDate instanceof Date) ||
-          (oneWeek && preOrderDate! >= oneWeek))
-      ) {
-        Uploaderror = {
-          msg: "Pre order Date must be 1 week from the release date.",
-          status: 400,
-        };
-      } else if (!(dsp instanceof Array) || dsp.length <= 0) {
-        Uploaderror = { msg: "Please Select a Dsp.", status: 400 };
-      } else if (
-        !start_clip ||
-        typeof start_clip != "string" ||
-        !numRegex.test(start_clip)
-      ) {
-        Uploaderror = { msg: "Start Clip is required.", status: 400 };
-      } else if (another_distribution_check === "true" && isrc === "") {
-        Uploaderror = {
-          msg: "ISRC is required when transferring from another distributor.",
-          status: 400,
-        };
-      } else if (copyRightHolder === "" || copyRightYear === "") {
-        Uploaderror = {
-          msg: "Copy write year and Copy write holder is required",
-          status: 400,
-        };
-      } else if (!music_image || !(music_image instanceof File)) {
-        Uploaderror = {
-          msg: "Release Image is required and must be a file.",
-          status: 400,
-        };
-      } else if (!upc || typeof upc !== "string") {
-        Uploaderror = { msg: "UPC is required", status: 400 };
-      } else if (!s3KeyAudio || typeof s3KeyAudio !== "string") {
-        Uploaderror = { msg: "Uploaded Song is required", status: 400 };
-      } else if (!["image/jpeg", "image/png"].includes(music_image.type)) {
-        Uploaderror = { msg: "Invalid image format", status: 400 };
-      }
-
-      if (Uploaderror != null) {
-        await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || "");
-        return NextResponse.json(
-          { msg: Uploaderror.msg },
-          { status: Uploaderror.status },
-        );
-      } // return any errors up to this point and delete the song
-
-      const buffer = Buffer.from(await (music_image as File).arrayBuffer());
-      // ---- Resize to distributor standard ----
-      const resized = await sharp(buffer)
-        .resize(3000, 3000, { fit: "cover" })
-        .jpeg({ quality: 90 })
-        .toBuffer(); //resize the image for dpm
-
-      const imageType = (music_image! as File).type.split("/")[1]; //get the image extension
-
-      const imageStorageLocation = `testing/${upc}/${upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
-
-      const imageUrl = await uploadImage(
-        imageType,
-        resized as Buffer<ArrayBuffer>,
-        imageStorageLocation,
-      ); //send image to aws
-
-      if (imageUrl.coverUrl == null) {
-        await deleteSingleFromS3(bucketName, s3KeyAudio! as string); // delete uploaded song if image upload fails
-        return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
-      }
 
 
-      const savedSong = new SongModel({
-        releaseTitle: song_title,
-        genre: genre,
-        releaseLanguage: language,
-        songWriter: song_writer,
-        producer: producer,
-        performer: performer,
-        featuredArtist:featured_artist,
-        preOrderCheck:pre_order_check,
-        anotherDistributionCheck:another_distribution_check,
-        explicitContent:explicit_content,
-        releaseDate:release_date,
-        preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
-        copyRightHolder,
-        copyRightYear,
-        lyrics,
-        startClip:start_clip,
-        dsp: dsp,
-        upc,
-        isrc: "isrc" + Date.now(),
-        territories: territories,
-        releaseAudio: s3KeyAudio,
-        releaseImage: imageUrl.coverUrl,
-        artistName: userArtist.artistName,
-        artist: userArtist._id,
-        user: user!._id,
-        catalogNumber: "SM" + Date.now(), 
-      });
-      await savedSong.save();
-    } else {
-      const saveDraft = new SongDraftModel({
-        releaseTitle: song_title,
-        genre: genre,
-        releaseLanguage: language,
-        songWriter: song_writer,
-        producer: producer,
-        performer: performer,
-        featuredArtist:featured_artist,
-        preOrderCheck:pre_order_check,
-        anotherDistributionCheck:another_distribution_check,
-        explicitContent:explicit_content,
-        releaseDate: release_date == "undefined" ? null : release_date,
-        preOrderDate: preOrderDate == "undefined" ? null : preOrderDate,
-        copyRightHolder,
-        copyRightYear,
-        lyrics,
-        startClip:start_clip,
-        dsp: dsp,
-        upc,
-        isrc: "isrc",
-        territories: territories,
-        artistName: userArtist.artistName,
-        artist: userArtist._id,
-        user: user!._id,
-      });
-      await saveDraft.save();
+    const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
+    // ---- Resize to distributor standard ----
+    const resized = await sharp(buffer)
+      .resize(3000, 3000, { fit: "cover" })
+      .jpeg({ quality: 90 })
+      .toBuffer(); //resize the image for dpm
+
+    const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+
+    const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+
+    const imageUrl = await uploadImage(
+      imageType,
+      resized as Buffer<ArrayBuffer>,
+      imageStorageLocation,
+    ); //send image to aws
+
+    if (imageUrl.coverUrl == null) {
+      await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+      return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
     }
+
+    const savedSong = new SongModel({
+      releaseTitle: payload.title,
+      releaseImage: imageUrl.coverUrl,
+      releaseAudio: payload.s3KeyAudio,
+      genre: payload.genre,
+      releaseLanguage: payload.language,
+      songWriter: payload.song_writer,
+      producer: payload.producer,
+      performer: payload.performer,
+      featuredArtist: payload.featured_artist,
+      preOrderCheck: payload.preOrderCheck,
+      anotherDistributionCheck: payload.anotherDistributionCheck,
+      explicitContent: payload.explicitContent,
+      releaseDate:
+        payload.releaseDate == "undefined" ? null : payload.releaseDate,
+      preOrderDate:
+        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+      copyRightHolder: payload.copyRightHolder,
+      copyRightYear: payload.copyRightYear,
+      lyrics: payload.lyrics,
+      startClip: payload.startClip,
+      dsp: payload.dsp,
+      upc: payload.upc,
+      isrc: payload.isrc || "isrc" + Date.now(),
+      territories: payload.territories,
+      artistName: userArtist.artistName,
+      artist: userArtist._id,
+      user: user!._id,
+      catalogNumber: "SM" + Date.now(),
+    });
+    await savedSong.save();
     await AudioUploadTrackerModel.findOneAndUpdate(
       {
-        _id: uploadId,
-        s3Key: s3KeyAudio,
+        _id: payload.uploadId,
+        s3Key: payload.s3KeyAudio,
         user: user!._id,
         status: "PENDING",
       },
@@ -824,7 +641,12 @@ export async function GET(req: Request) {
       .skip((page - 1) * limit)
       .limit(limit);
     totalCount = await SongModel.countDocuments(query);
-
+    const draftSongs = await SongDraftModel.find(query)
+      .collation({ locale: "en", strength: 2 })
+      .sort(sortQuery);
+    console.log("draft songs", draftSongs);
+    songs = songs.concat(draftSongs);
+    totalCount += draftSongs.length;
     console.log("song filters", typeof songStatusFilter);
     if (songStatusFilter && songStatusFilter !== "all") {
       songs = songs.filter((item) => item.releaseStatus === songStatusFilter);
@@ -836,10 +658,10 @@ export async function GET(req: Request) {
       {
         data: songs,
         page,
-        skip: (page - 1) * limit,
-        sort,
-        limit,
-        hasNextPage: songs.length === limit,
+        // skip: (page - 1) * limit,
+        // sort,
+        // limit,
+        // hasNextPage: songs.length === limit,
         totalCount: totalCount,
         totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
         msg: totalCount > 0 ? "Successful" : "No songs found",
@@ -855,6 +677,111 @@ export async function GET(req: Request) {
         { status: 500 },
       );
     }
+  }
+}
+
+export async function DELETE(req: Request) {
+  // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+
+  try {
+    let release: any = null;
+    const formData = await req.json();
+    if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
+    if (formData.artist_name.trim() === "" || !formData.artist_name) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+
+    await dbConnect();
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 401 },
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else {
+      if (formData.type === "draft") {
+        release = await SongDraftModel.findOne({
+          releaseTitle: formData.releaseTitle,
+          artistName: formData.artist_name.trim(),
+          user: user._id,
+        });
+      } else {
+        // Find and verify release belongs to user before deleting
+        release = await SongModel.findOne({
+          releaseTitle: formData.releaseTitle,
+          artistName: formData.artist_name.trim(),
+          user: user._id,
+        });
+      }
+
+      if (!release) {
+        return NextResponse.json(
+          {
+            msg: "Invalid Release",
+          },
+          { status: 400 },
+        );
+      }
+
+      if (release.releaseStatus === "pending") {
+        const isSongDeleted = await deleteSingleFromS3(
+          bucketName,
+          release.releaseAudio,
+        );
+        if (isSongDeleted) {
+          const deleteSongsResult = await SongModel.findByIdAndDelete({
+            _id: release._id,
+          });
+          await AudioUploadTrackerModel.findOneAndDelete({
+            upc: release.upc,
+          });
+
+          if (deleteSongsResult.deletedCount < 1) {
+            return NextResponse.json(
+              { msg: "Failed to delete." },
+              { status: 400 },
+            );
+          }
+          return NextResponse.json({ msg: "Song Deleted" }, { status: 200 });
+        } else {
+          return NextResponse.json(
+            { msg: "failed to delete song" },
+            { status: 400 },
+          );
+        }
+      } else if (release.releaseStatus === "draft") {
+        const deleteSongsResult = await SongDraftModel.findByIdAndDelete({
+          _id: release._id,
+        });
+
+        if (deleteSongsResult.deletedCount < 1) {
+          return NextResponse.json(
+            { msg: "Failed to delete." },
+            { status: 400 },
+          );
+        }
+        return NextResponse.json({ msg: "Song Deleted" }, { status: 200 });
+      }
+      return NextResponse.json(
+        { msg: "Only pending songs or drafts can be deleted!" },
+        { status: 400 },
+      );
+    }
+  } catch (error: unknown) {
+    console.log("song delete error", error);
+
+    return handleMongooseValidationError(error);
   }
 }
 

@@ -11,6 +11,9 @@ import {
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
+import { useDeleteSongMutation } from "@/util/customHooks/useMutations";
+import { songFromApi } from "@/app/type";
+import { toast } from "react-toastify";
 
 const Song = () => {
   const router = useRouter();
@@ -23,6 +26,7 @@ const Song = () => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const songTitle = useDebounce<string>(query, 500);
+  const {mutateAsync,isPending:isDeletePending}=useDeleteSongMutation()
   const {
     data,
     isLoading,
@@ -31,6 +35,7 @@ const Song = () => {
     isFetching,
     isPending: isPendingSongs,
     isRefetching: isRefetchingSongs,
+    refetch,
   } = usePaginatedSongs({
     page,
     sort: filter,
@@ -54,7 +59,9 @@ const Song = () => {
     {
       name: "Delete",
       icon: <Trash2 strokeWidth={1} />,
-      iconFunction: () => handleShowDeletePopup(),
+      iconFunction: () => {
+        // setSongToDelete(data && data.data[selectedIndex]);
+        handleShowDeletePopup()},
     },
   ];
 
@@ -87,6 +94,25 @@ const Song = () => {
     setShowDeletePopUp(true);
   };
 
+  const handleDeleteSong = async (form:{artist:string,release:songFromApi}) => {
+    // try {
+      
+    // } catch (error) {
+      
+    // }
+    if(form.release.releaseStatus !!== "pending")
+    {
+      return toast.info("Only pending Songs can be deleted")
+    }
+
+    await mutateAsync({artist_name:artist,releaseTitle:form.release.releaseTitle});
+    setShowDeletePopUp(false);
+    setSelectedIndex(null);
+    refetch();
+  };
+
+  
+
   return (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
       {isLoadingArtistNames ? (
@@ -106,8 +132,8 @@ const Song = () => {
                 height={20}
               />
               <input
-                disabled
                 name="search"
+                value={query}
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
                 onChange={(e) => handleSearchQueryChange(e.target.value)}
@@ -169,7 +195,7 @@ const Song = () => {
             </div>
           </div>
           {/* buttons e.g all, pending */}
-          <div className="mt-5 flex gap-3">
+          <div className="mt-5 flex gap-3 flex-wrap">
             {songStatusFilterArray.map((item, index) => (
               <button
                 key={index}
@@ -227,6 +253,7 @@ const Song = () => {
                 height={20}
               />
               <input
+                value={query}
                 name="search"
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
@@ -289,7 +316,7 @@ const Song = () => {
             </div>
           </div>
           {/* buttons e.g all, pending */}
-          <div className="mt-5 flex gap-3">
+          <div className="mt-5 flex gap-3 flex-wrap">
             {songStatusFilterArray.map((item, index) => (
               <button
                 key={index}
@@ -328,7 +355,7 @@ const Song = () => {
                   <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
                     <Image
                       priority={true}
-                      src={song.releaseImage}
+                      src={song?.releaseImage || "/signinimage.png"}
                       alt="an image depicting the song image"
                       fill
                       className="object-cover rounded-lg shadow-md max-h-[80px] "
@@ -348,7 +375,7 @@ const Song = () => {
                       <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
                         Release Date:{" "}
                       </span>
-                      {new Date(song.releaseDate).toLocaleDateString()}
+                      {song.releaseDate ?new Date(song.releaseDate).toLocaleDateString():"N/A"}
                     </p>
                     <p
                       className={
@@ -377,7 +404,7 @@ const Song = () => {
                   {/* this is for the viewArtist button options */}
                   <div
                     className={
-                      "divide-y divide-zinc-200 absolute w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col" +
+                      "divide-y divide-zinc-200 absolute w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col " +
                       (selectedIndex === index ? " flex" : " hidden")
                     }
                   >
@@ -412,12 +439,12 @@ const Song = () => {
           {/* pop up */}
           <div
             className={
-              showDeletePopUp
+              (showDeletePopUp && data && data.data.length > 0)
                 ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
                 : " hidden"
             }
           >
-            <div className="max-w-[400px] h-[400px]">
+            <div className="max-w-[400px] h-[400px] w-full">
               <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
                 <div className="flex flex-col gap-2 mb-2">
                   <div className="flex justify-center my-5">
@@ -430,6 +457,9 @@ const Song = () => {
                     Your release will be queued for removal and may take a few
                     days to fully process across all platforms. Are you sure you
                     want to continue?
+                  </p>
+                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                    Note: Only pending and draft releases can be deleted.
                   </p>
                 </div>
                 <div className="flex gap-5 mt-5">
@@ -448,7 +478,12 @@ const Song = () => {
                   <button
                     aria-label="confirm delete song"
                     disabled={false}
-                    onClick={() => {}}
+                    onClick={() => {
+                      console.log(data?.data[selectedIndex!])
+                      if(data && data.data.length >0 ){
+                        handleDeleteSong({artist, release: data.data[selectedIndex!]})
+                      }
+                    }}
                     className={
                       "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-error-500/80 flex text-white bg-error-500 "
                     }

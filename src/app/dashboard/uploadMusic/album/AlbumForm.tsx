@@ -27,10 +27,10 @@ const AlbumForm = () => {
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
   const futureYears = Array.from({ length: 11 }, (_, i) =>
-    (new Date().getFullYear() + i).toString()
+    (new Date().getFullYear() + i).toString(),
   );
   const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - i).toString()
+    (new Date().getFullYear() - i).toString(),
   );
   const years = [
     ...pastYears.reverse().filter((_, i) => _ !== "2025"),
@@ -74,8 +74,6 @@ const AlbumForm = () => {
 
   const handleSubmit = async (form: AlbumForm, action: "draft" | "upload") => {
     console.log(form);
-
-    const string_form = { ...form, action: action };
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
@@ -88,11 +86,20 @@ const AlbumForm = () => {
       formData.append("music_image", albumForm.music_image);
     formData.append("action", action);
     console.log(...formData);
-    try {
-      const res = await api.post("album", formData, {
+    let res;
+    if (action === "upload") {
+      const validForm = isAlbumFormValid(form);
+      if (validForm != "true") return toast.warn(validForm);
+      res = await api.post("album", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success(res.data.msg);
+    } else {
+      res = await api.post("album/draft", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
+    try {
+      toast.success(res?.data?.msg);
       localStorage.removeItem("albumForm");
       setAlbumForm({
         title: "",
@@ -111,6 +118,7 @@ const AlbumForm = () => {
         copyRightYear: "",
         number_of_track: "",
       });
+      setImage(null);
       setPreview(false);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -123,10 +131,7 @@ const AlbumForm = () => {
 
   const handlePreview = (form: AlbumForm) => {
     console.log(form);
-
     if (preview === false) {
-      const validForm = isAlbumFormValid(form);
-      if (validForm != "true") return toast.warn(validForm);
       const string_form = JSON.stringify(form);
       localStorage.setItem("albumForm", string_form);
     }
@@ -143,6 +148,9 @@ const AlbumForm = () => {
         ...albumForm,
         release_date: albumForm.release_date
           ? new Date(albumForm.release_date)
+          : undefined,
+        preOrderDate: albumForm.preOrderDate
+          ? new Date(albumForm.preOrderDate)
           : undefined,
         music_image: null,
       });
@@ -161,7 +169,7 @@ const AlbumForm = () => {
               onClick={() => {
                 deleteParam("type");
               }}
-              className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black mb-9"
+              className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
             >
               <Image
                 src={"/arrow-left.svg"}
@@ -492,7 +500,7 @@ const AlbumForm = () => {
                                   alt="music note icon"
                                   className={
                                     albumForm.music_image
-                                      ? " w-full object-cover"
+                                      ? " w-full object-cover min-w-15 h-15"
                                       : undefined
                                   }
                                 />
@@ -500,10 +508,12 @@ const AlbumForm = () => {
                               <div className="w-[50%]">
                                 {!albumForm.music_image ? (
                                   <p className="mb-2 text-sm text-gray-500">
-                                   <span className="font-bold text-text-body">
+                                    <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
-                                    JPG, PNG<br/>3000 x 3000px minimum
+                                    JPG, PNG
+                                    <br />
+                                    3000 x 3000px minimum
                                   </p>
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">

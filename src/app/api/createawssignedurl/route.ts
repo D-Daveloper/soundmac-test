@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     await dbConnect();
     const body = await req.json();
   
-    const { fileType, fileSize, upcFromClient, artist } = body;
+    const { fileType, fileSize, upcFromClient, artist, isFromAnotherDistributor } = body;
 
     if (!fileType || typeof fileType != "string"){
       return NextResponse.json({msg:"file type is required."},{status:400})
@@ -58,6 +58,11 @@ export async function POST(req: Request) {
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
+
+    if(isFromAnotherDistributor && !upcFromClient)
+    {
+      return NextResponse.json({ msg: "UPC is required when uploading from another distributor." }, { status: 400 });
+    }
   
     let upc = upcFromClient;
   
@@ -75,6 +80,7 @@ export async function POST(req: Request) {
     if (fileSize > MAX_SIZE) {
       return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
+
     if (!upc) {
       upc = await getUPCs();
     }

@@ -12,6 +12,9 @@ import {
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
+import { albumFromApi } from "@/app/type";
+import { toast } from "react-toastify";
+import { useDeleteAlbumMutation } from "@/util/customHooks/useMutations";
 
 const Album = () => {
   const router = useRouter();
@@ -23,14 +26,25 @@ const Album = () => {
   const [albumStatusFilter, setAlbumStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
-  const songTitle = useDebounce<string>(query, 500);
-  const { data, isLoading, isError, error, isFetching,isPending:isPendingAlbums,isRefetching:isRefetchingAlbums } = usePaginatedAlbums({
+  const albumTitle = useDebounce<string>(query, 500);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetching,
+    isPending: isPendingAlbums,
+    isRefetching: isRefetchingAlbums,
+    refetch,
+  } = usePaginatedAlbums({
     page,
     sort: filter,
-    songTitle: songTitle,
+    albumTitle: albumTitle,
     albumStatusFilter,
     artist,
   });
+  const { mutateAsync, isPending: isDeletePending } = useDeleteAlbumMutation();
+
   const {
     isLoading: isLoadingArtistNames,
     data: artistNames,
@@ -80,6 +94,28 @@ const Album = () => {
   const handleShowDeletePopup = () => {
     setShowDeletePopUp(true);
   };
+  const handleDeleteSong = async (form: {
+    artist: string;
+    release: albumFromApi;
+  }) => {
+    // try {
+
+    // } catch (error) {
+
+    // }
+    if (form.release.releaseStatus! !== "pending" && form.release.releaseStatus! !== "draft") {
+      return toast.info("Only pending Albums can be deleted");
+    }
+
+    await mutateAsync({
+      artist_name: artist,
+      releaseTitle: form.release.releaseTitle,
+      status: "",
+    });
+    setShowDeletePopUp(false);
+    setSelectedIndex(null);
+    refetch();
+  };
 
   return (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
@@ -88,7 +124,7 @@ const Album = () => {
       ) : !isLoading &&
         (isError || data === undefined || data.data.length === 0) ? (
         <>
-        {/* you might see that the first two divs are duplicated the reason is a ui issue if theres no songs or albums if this condition above is true it should still show them search bar, select artist and also all the filter buttons like all ,pending,etc. */}
+          {/* you might see that the first two divs are duplicated the reason is a ui issue if theres no songs or albums if this condition above is true it should still show them search bar, select artist and also all the filter buttons like all ,pending,etc. */}
           <div className="flex justify-between w-full mt-10 gap-2 max-[450px]:flex-col items-end">
             <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
               <Image
@@ -99,7 +135,7 @@ const Album = () => {
                 height={20}
               />
               <input
-                disabled
+                value={query}
                 name="search"
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
@@ -161,7 +197,7 @@ const Album = () => {
               )}
             </div>
           </div>
-          <div className="mt-5 flex gap-3">
+          <div className="mt-5 flex gap-3 flex-wrap">
             {songStatusFilterArray.map((item, index) => (
               <button
                 key={index}
@@ -219,6 +255,7 @@ const Album = () => {
                 height={20}
               />
               <input
+                value={query}
                 name="search"
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
@@ -281,7 +318,7 @@ const Album = () => {
             </div>
           </div>
           {/* buttons e.g all, pending */}
-          <div className="mt-5 flex gap-3">
+          <div className="mt-5 flex gap-3 flex-wrap">
             {songStatusFilterArray.map((item, index) => (
               <button
                 key={index}
@@ -302,12 +339,15 @@ const Album = () => {
           {/* main body */}
           <div
             className={
-             ( isFetching|| isLoading||isPendingAlbums||isRefetchingAlbums)
+              isFetching || isLoading || isPendingAlbums || isRefetchingAlbums
                 ? "flex justify-center items-center md:max-h-[400px]"
                 : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[600px] "
             }
           >
-            {(isFetching || isLoading||isPendingAlbums||isRefetchingAlbums) ? (
+            {isFetching ||
+            isLoading ||
+            isPendingAlbums ||
+            isRefetchingAlbums ? (
               <InlineLoadingScreen />
             ) : (
               // song card
@@ -422,6 +462,9 @@ const Album = () => {
                     Your release will be queued for removal and may take a few
                     days to fully process across all platforms. Are you sure you
                     want to continue?
+                  </p>
+                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                    Note: Only pending and draft releases can be deleted.
                   </p>
                 </div>
                 <div className="flex gap-5 mt-5">

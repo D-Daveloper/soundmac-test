@@ -15,9 +15,7 @@ import type {
 import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import {
-  useGetUserArtistsNames,
-} from "@/util/customHooks/useQueries";
+import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
@@ -28,25 +26,26 @@ import { toast } from "react-toastify";
 
 const SongForm = () => {
   const api = UseAxios();
-  const [isSubmittingForm,setIsSubmittingForm] = useState(false)
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
   const [image, setImage] = useState<string | null>(null);
-  const [date, setDate] = useState({
-    fromYear: new Date(),
-    toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
-  });
+  // const [date, setDate] = useState({
+   const fromYear= new Date()
+    const toYear= new Date(new Date().setFullYear(new Date().getFullYear() + 5))
+  // });
 
   //used to get years like 2006, 2013 etc.
   const futureYears = Array.from({ length: 11 }, (_, i) =>
-    (new Date().getFullYear() + i).toString()
+    (new Date().getFullYear() + i).toString(),
   );
   const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - (i+1)).toString()
+    (new Date().getFullYear() - (i + 1)).toString(),
   );
   const years = [
     ...pastYears.reverse().filter((_, i) => _ !== "2025"),
-    "2025",...futureYears,
+    "2025",
+    ...futureYears,
   ];
 
   const [preview, setPreview] = useState(false);
@@ -61,7 +60,7 @@ const SongForm = () => {
     featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
     performer: [{ name: "", role: "" }],
     song_writer: [{ first_name: "", last_name: "" }],
-    producer: [{ name: ""}],
+    producer: [{ name: "" }],
     pre_order_check: false,
     another_distribution_check: false,
     territories: [],
@@ -104,7 +103,7 @@ const SongForm = () => {
       case "producer":
         setSongForm((prev) => ({
           ...prev,
-          producer: [...prev.producer, { name: ""}],
+          producer: [...prev.producer, { name: "" }],
         }));
         break;
 
@@ -148,7 +147,7 @@ const SongForm = () => {
   const handleDynamicChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     index: number,
-    field: keyof SongForm // 'performers' or 'producers'
+    field: keyof SongForm, // 'performers' or 'producers'
   ) => {
     const { name, value } = e.target;
     // console.log(name,value);
@@ -210,18 +209,23 @@ const SongForm = () => {
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
-    setIsSubmittingForm(true)
+    setIsSubmittingForm(true);
     console.log(form);
     const formData = new FormData();
     if (action === "upload") {
       const validForm = isSongFormValid(form);
       if (validForm != "true") {
         setIsSubmittingForm(false);
-        return toast.warn(validForm)
-      };
-      const { upc, songS3Key,error,uploadId } = await uploadTrack(form.song_audio!, form.upc,form.artist);
-      if (error != null){
-        setIsSubmittingForm(false)
+        return toast.warn(validForm);
+      }
+      const { upc, songS3Key, error, uploadId } = await uploadTrack(
+        form.song_audio!,
+        form.upc,
+        form.artist,
+        form.another_distribution_check,
+      );
+      if (error != null) {
+        setIsSubmittingForm(false);
         toast.error(error);
         return;
       }
@@ -231,9 +235,15 @@ const SongForm = () => {
 
       formData.append("upc2", upc); //add the updated upc
       formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
-
+      form.upc = upc; //update the form upc too
     }
-
+    if (form.title == "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Song title is required");
+    } else if (form.artist === "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Main artist is required");
+    }
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
@@ -245,18 +255,53 @@ const SongForm = () => {
       formData.append("music_image", songForm.music_image);
     }
     formData.append("action", action);
+    let res;
     try {
-      const res = await api.post("song", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      toast.success(res.data.msg);
+      if (action === "upload") {
+        toast.info(
+          "Uploading song. This may take a while depending on your internet speed.",
+        );
+        res = await api.post("song", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        res = await api.post("song/draft", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      }
+      toast.success(res?.data?.msg);
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
       localStorage.removeItem("songForm");
       localStorage.removeItem("featured_artist");
       localStorage.removeItem("performer");
       localStorage.removeItem("producer");
-      
+      setSongForm({
+        title: "",
+        genre: "",
+        language: "",
+        artist: "",
+        release_date: undefined,
+        preOrderDate: undefined,
+        featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+        performer: [{ name: "", role: "" }],
+        song_writer: [{ first_name: "", last_name: "" }],
+        producer: [{ name: "" }],
+        pre_order_check: false,
+        another_distribution_check: false,
+        territories: [],
+        song_audio: null,
+        music_image: null,
+        dsp: [],
+        lyrics: "",
+        start_clip: "",
+        isrc: "",
+        upc: "",
+        copyRightHolder: "",
+        copyRightYear: "",
+        explicit_content: false,
+      });
+      setImage(null);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
@@ -265,7 +310,7 @@ const SongForm = () => {
       toast.error("something went wrong.");
       songForm.music_image = null;
       songForm.song_audio = null;
-    }finally{
+    } finally {
       setIsSubmittingForm(false);
       setPreview(false);
     }
@@ -338,7 +383,7 @@ const SongForm = () => {
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
-      {(isLoading ||isSubmittingForm)? (
+      {isLoading || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
@@ -349,7 +394,7 @@ const SongForm = () => {
               onClick={() => {
                 deleteParam("type");
               }}
-              className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black mb-9"
+              className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
             >
               <Image
                 src={"/arrow-left.svg"}
@@ -477,9 +522,9 @@ const SongForm = () => {
                             setSelected={(t) =>
                               setSongForm((prev) => ({ ...prev, artist: t }))
                             }
-                            placeholder="Select Genre..."
+                            placeholder="Select Artist..."
                             options={data || []}
-                            name="genre"
+                            name="artist"
                           />
                         </div>
                       </div>
@@ -565,7 +610,7 @@ const SongForm = () => {
                               ...prev,
                               featured_artist: prev.featured_artist.filter(
                                 (_, index) =>
-                                  index !== prev.featured_artist.length - 1
+                                  index !== prev.featured_artist.length - 1,
                               ),
                             }));
                           }}
@@ -643,7 +688,7 @@ const SongForm = () => {
                               ...prev,
                               song_writer: prev.song_writer.filter(
                                 (_, index) =>
-                                  index !== prev.song_writer.length - 1
+                                  index !== prev.song_writer.length - 1,
                               ),
                             }));
                           }}
@@ -740,7 +785,7 @@ const SongForm = () => {
                               ...prev,
                               performer: prev.performer.filter(
                                 (_, index) =>
-                                  index !== prev.performer.length - 1
+                                  index !== prev.performer.length - 1,
                               ),
                             }));
                           }}
@@ -817,7 +862,8 @@ const SongForm = () => {
                             setSongForm((prev) => ({
                               ...prev,
                               producer: prev.producer.filter(
-                                (_, index) => index !== prev.producer.length - 1
+                                (_, index) =>
+                                  index !== prev.producer.length - 1,
                               ),
                             }));
                           }}
@@ -861,8 +907,8 @@ const SongForm = () => {
                             }
                             value={songForm.release_date}
                             type="first"
-                            toYear={date.toYear}
-                            fromYear={date.fromYear}
+                            toYear={toYear}
+                            fromYear={fromYear}
                           />
                           <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mt-1">
                             Release date must be 2 weeks ahead the upload date
@@ -911,8 +957,8 @@ const SongForm = () => {
                             value={songForm.preOrderDate}
                             releaseDate={songForm.release_date}
                             type="second"
-                            toYear={date.toYear}
-                            fromYear={date.fromYear}
+                            toYear={toYear}
+                            fromYear={fromYear}
                           />
                           <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                             Pre order date must be 3 weeks before the release
@@ -1060,43 +1106,54 @@ const SongForm = () => {
                       discoverable across platforms.
                     </p>
                     <div className="bg-warning-50 sm:max-w-[60%] rounded-2xl p-3 mt-10">
-                        <Info color="#C58629"/>
-                        <ul className="list-disc mt-4 ml-5 text-caption-one flex flex-col gap-1">
-                          <li>
-                            Do not include the vocalist's name
-                          </li>
-                          <li>
-                            Do not include extra text (ex: "intro", "chorus", social media links, etc.)
-                          </li>
-                          <li>
-                            Repeated lines must be written out. Don't write "Chorus 2x" etc.
-                          </li>
-                          <li>
-                            Begin each line with a capital letter
-                          </li>
-                          <li>
-                            Do not use punctuation at the end of a line
-                          </li>
-                          <li>
-                            Do not include blank lines except between verses or chorus
-                          </li>
-                          <li>
-                            Avoid entering excessively long lines. One sentence per line
-                          </li>
-                          <li>
-                            Don't censor explicit words unless the words are dropped/bleeped in the audio recording. For example: Don't enter "F**, unless the word was dropped or bleeped
-                          </li>
-                        </ul>
-                        <p className="text-caption-one text-warning-600 mt-5">
-                          For complete list of store requirements, visit {" "}
-                            <a aria-label="musix match lyrics guidelines" href="https://community.musixmatch.com/guidelines?lng=en" target="_blank" className="!text-primary-500 !underline ">
-                              Musixmatch guidelines {" "}
-                            </a> 
-                            and {" "}
-                            <a aria-label="apple lyrics guidlines" href="https://artists.apple.com/support/1111-lyrics-guidelines" target="_blank" className="!text-primary-500 !underline">
-                            Apple guidelines
-                            </a>
-                        </p>
+                      <Info color="#C58629" />
+                      <ul className="list-disc mt-4 ml-5 text-caption-one flex flex-col gap-1">
+                        <li>Do not include the vocalist's name</li>
+                        <li>
+                          Do not include extra text (ex: "intro", "chorus",
+                          social media links, etc.)
+                        </li>
+                        <li>
+                          Repeated lines must be written out. Don't write
+                          "Chorus 2x" etc.
+                        </li>
+                        <li>Begin each line with a capital letter</li>
+                        <li>Do not use punctuation at the end of a line</li>
+                        <li>
+                          Do not include blank lines except between verses or
+                          chorus
+                        </li>
+                        <li>
+                          Avoid entering excessively long lines. One sentence
+                          per line
+                        </li>
+                        <li>
+                          Don't censor explicit words unless the words are
+                          dropped/bleeped in the audio recording. For example:
+                          Don't enter "F**, unless the word was dropped or
+                          bleeped
+                        </li>
+                      </ul>
+                      <p className="text-caption-one text-warning-600 mt-5">
+                        For complete list of store requirements, visit{" "}
+                        <a
+                          aria-label="musix match lyrics guidelines"
+                          href="https://community.musixmatch.com/guidelines?lng=en"
+                          target="_blank"
+                          className="!text-primary-500 !underline "
+                        >
+                          Musixmatch guidelines{" "}
+                        </a>
+                        and{" "}
+                        <a
+                          aria-label="apple lyrics guidlines"
+                          href="https://artists.apple.com/support/1111-lyrics-guidelines"
+                          target="_blank"
+                          className="!text-primary-500 !underline"
+                        >
+                          Apple guidelines
+                        </a>
+                      </p>
                     </div>
                     <div>
                       <div className="flex gap-1 sm:text-sm text-lg mt-10">
@@ -1197,7 +1254,7 @@ const SongForm = () => {
                                   alt="music note icon"
                                   className={
                                     songForm.music_image
-                                      ? " w-full object-cover"
+                                      ? " w-full object-cover min-w-15 h-15"
                                       : undefined
                                   }
                                 />
@@ -1208,7 +1265,9 @@ const SongForm = () => {
                                     <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
-                                    JPG, PNG<br/>3000 x 3000px minimum
+                                    JPG, PNG
+                                    <br />
+                                    3000 x 3000px minimum
                                   </p>
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
@@ -1429,7 +1488,7 @@ const SongForm = () => {
                       <h2>Featured Artists</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                         {songForm.featured_artist.map(
-                          (item) => item.artistName + ","
+                          (item) => item.artistName + ",",
                         )}
                       </p>
                       {/* border line */}
@@ -1447,7 +1506,7 @@ const SongForm = () => {
                       <h2>Songwriter</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                         {songForm.song_writer.map(
-                          (item) => item.first_name + ","
+                          (item) => item.first_name + ",",
                         )}
                       </p>
                       {/* border line */}
@@ -1496,7 +1555,8 @@ const SongForm = () => {
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Preorder Start date</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.preOrderDate && songForm.preOrderDate.toLocaleDateString()}
+                        {songForm.preOrderDate &&
+                          songForm.preOrderDate.toLocaleDateString()}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>
