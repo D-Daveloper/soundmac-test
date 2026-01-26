@@ -1,7 +1,7 @@
 import { songFromApi } from "@/app/type";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
-import { deleteSingleFromS3 } from "@/util/middleware/aws";
+import { deleteMultipleFromS3, deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
   parseSongFormData,
@@ -99,7 +99,6 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-
 
     const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
     // ---- Resize to distributor standard ----
@@ -624,15 +623,16 @@ export async function GET(req: Request) {
     const sortQuery = buildSort(sort) as {
       [key: string]: SortOrder | { $meta: any };
     }; //this is use to format the sort query for mongodb.
-    let query = {};
-    if (songTitle && songTitle.trim() !== "") {
-      query = {
-        releaseTitle: { $regex: "^" + songTitle, $options: "i" },
-        user: userJwt.user,
-        artistName: artist,
-      };
-    } else {
-      query = { user: userJwt.user, artistName: artist };
+
+    const query: any = {
+      user: userJwt.user,
+    };
+    if (songStatusFilter && songStatusFilter !== "all") {
+      query.releaseStatus = songStatusFilter;
+    }
+    if (artist) query.artistName = artist;
+    if (songTitle?.trim()) {
+      query.releaseTitle = { $regex: `^${songTitle}`, $options: "i" };
     }
 
     songs = await SongModel.find(query)
@@ -641,18 +641,7 @@ export async function GET(req: Request) {
       .skip((page - 1) * limit)
       .limit(limit);
     totalCount = await SongModel.countDocuments(query);
-    const draftSongs = await SongDraftModel.find(query)
-      .collation({ locale: "en", strength: 2 })
-      .sort(sortQuery);
-    console.log("draft songs", draftSongs);
-    songs = songs.concat(draftSongs);
-    totalCount += draftSongs.length;
-    console.log("song filters", typeof songStatusFilter);
-    if (songStatusFilter && songStatusFilter !== "all") {
-      songs = songs.filter((item) => item.releaseStatus === songStatusFilter);
-      totalCount = songs.length;
-    }
-    console.log("the updated songs", songs);
+    console.log("song filters", songStatusFilter);
 
     return NextResponse.json(
       {
@@ -710,20 +699,12 @@ export async function DELETE(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
-      if (formData.type === "draft") {
-        release = await SongDraftModel.findOne({
-          releaseTitle: formData.releaseTitle,
-          artistName: formData.artist_name.trim(),
-          user: user._id,
-        });
-      } else {
         // Find and verify release belongs to user before deleting
         release = await SongModel.findOne({
           releaseTitle: formData.releaseTitle,
           artistName: formData.artist_name.trim(),
           user: user._id,
         });
-      }
 
       if (!release) {
         return NextResponse.json(
@@ -735,9 +716,9 @@ export async function DELETE(req: Request) {
       }
 
       if (release.releaseStatus === "pending") {
-        const isSongDeleted = await deleteSingleFromS3(
+        const isSongDeleted = await deleteMultipleFromS3(
           bucketName,
-          release.releaseAudio,
+          [release.releaseAudio,release.releaseImage],
         );
         if (isSongDeleted) {
           const deleteSongsResult = await SongModel.findByIdAndDelete({
@@ -761,7 +742,7 @@ export async function DELETE(req: Request) {
           );
         }
       } else if (release.releaseStatus === "draft") {
-        const deleteSongsResult = await SongDraftModel.findByIdAndDelete({
+        const deleteSongsResult = await SongModel.findByIdAndDelete({
           _id: release._id,
         });
 

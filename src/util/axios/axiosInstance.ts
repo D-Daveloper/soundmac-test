@@ -256,7 +256,7 @@ export const getAlbums = async (
 };
 export const DeleteAlbum = async (
   api: AxiosInstance,
-  form: {artist_name:string,releaseTitle:string,status:string}
+  form: {artist_name:string,releaseTitle:string}
 ) => {
   const res = await api.delete("album", {
     data: form,

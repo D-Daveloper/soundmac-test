@@ -94,23 +94,20 @@ const Album = () => {
   const handleShowDeletePopup = () => {
     setShowDeletePopUp(true);
   };
-  const handleDeleteSong = async (form: {
-    artist: string;
-    release: albumFromApi;
-  }) => {
+  const handleDeleteSong = async (
+    release: albumFromApi) => {
     // try {
 
     // } catch (error) {
 
     // }
-    if (form.release.releaseStatus! !== "pending" && form.release.releaseStatus! !== "draft") {
+    if (release.releaseStatus! !== "pending" && release.releaseStatus! !== "draft") {
       return toast.info("Only pending Albums can be deleted");
     }
 
     await mutateAsync({
-      artist_name: artist,
-      releaseTitle: form.release.releaseTitle,
-      status: "",
+      artist_name: release.artistName,
+      releaseTitle: release.releaseTitle
     });
     setShowDeletePopUp(false);
     setSelectedIndex(null);
@@ -459,8 +456,7 @@ const Album = () => {
                     Delete This Release?
                   </h3>
                   <p className="text-body-two-regular text-text-body">
-                    Your release will be queued for removal and may take a few
-                    days to fully process across all platforms. Are you sure you
+                    Your release will be removed, this is not reversable. Are you sure you
                     want to continue?
                   </p>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -470,7 +466,7 @@ const Album = () => {
                 <div className="flex gap-5 mt-5">
                   <button
                     aria-label="cancle delete song"
-                    disabled={false}
+                    disabled={isDeletePending}
                     onClick={() => {
                       setShowDeletePopUp(false);
                     }}
@@ -482,8 +478,8 @@ const Album = () => {
                   </button>
                   <button
                     aria-label="confirm delete song"
-                    disabled={false}
-                    onClick={() => {}}
+                    disabled={isDeletePending}
+                    onClick={() => {handleDeleteSong(data!.data[selectedIndex!]);}}
                     className={
                       "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-error-500/80 flex text-white bg-error-500 "
                     }

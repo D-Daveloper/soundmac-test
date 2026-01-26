@@ -94,18 +94,18 @@ const Song = () => {
     setShowDeletePopUp(true);
   };
 
-  const handleDeleteSong = async (form:{artist:string,release:songFromApi}) => {
+  const handleDeleteSong = async (release:songFromApi) => {
     // try {
       
     // } catch (error) {
       
     // }
-    if(form.release.releaseStatus !!== "pending")
+    if(release.releaseStatus !== "pending" && release.releaseStatus !== "draft")
     {
-      return toast.info("Only pending Songs can be deleted")
+      return toast.info("Only pending/draft Songs can be deleted")
     }
 
-    await mutateAsync({artist_name:artist,releaseTitle:form.release.releaseTitle});
+    await mutateAsync({artist_name:release.artistName,releaseTitle:release.releaseTitle});
     setShowDeletePopUp(false);
     setSelectedIndex(null);
     refetch();
@@ -454,8 +454,7 @@ const Song = () => {
                     Delete This Release?
                   </h3>
                   <p className="text-body-two-regular text-text-body">
-                    Your release will be queued for removal and may take a few
-                    days to fully process across all platforms. Are you sure you
+                    Your release will be removed, this is not reversable. Are you sure you
                     want to continue?
                   </p>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -481,7 +480,7 @@ const Song = () => {
                     onClick={() => {
                       console.log(data?.data[selectedIndex!])
                       if(data && data.data.length >0 ){
-                        handleDeleteSong({artist, release: data.data[selectedIndex!]})
+                        handleDeleteSong(data.data[selectedIndex!])
                       }
                     }}
                     className={

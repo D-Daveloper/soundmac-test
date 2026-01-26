@@ -130,7 +130,7 @@ export const useDeleteAlbumMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { artist_name: string,releaseTitle:string,status:string }) =>
+    mutationFn: async (form: { artist_name: string,releaseTitle:string }) =>
       DeleteAlbum(api, form),
     onSuccess: async (data,variables) => {
       toast.success(data.msg);

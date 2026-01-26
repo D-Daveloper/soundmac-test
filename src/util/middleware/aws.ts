@@ -53,7 +53,7 @@ export async function deleteSongsFromS3WithRetry(s3KeyAudio:string[]) {
 /**
  * Delete multiple objects from S3 (up to 1000 at a time)
  */
-async function deleteMultipleFromS3(bucketName:string, s3Keys:string[]) {
+export async function deleteMultipleFromS3(bucketName:string, s3Keys:string[]) {
   // S3 allows max 1000 objects per batch
   const batchSize = 1000;
   let totalDeleted = 0;

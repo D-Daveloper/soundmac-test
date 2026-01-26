@@ -80,11 +80,10 @@ export async function POST(req: Request) {
 
     const isAlbumForValid = validateNonDraftAlbums(payload);
 
-    
     if (isAlbumForValid != null) {
       return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
-    
+
     if (!number_of_track || !numRegex.test(number_of_track as string)) {
       return NextResponse.json(
         {
@@ -93,7 +92,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    
+
     const num = parseInt(number_of_track as string, 10); // Convert string to number
     if (isNaN(num) || num < 1) {
       return NextResponse.json(
@@ -101,7 +100,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    payload.upc = payload.upc || "upc" + Date.now();//incase they dont have a upc, generate one for them
+    payload.upc = payload.upc || "upc" + Date.now(); //incase they dont have a upc, generate one for them
     const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
     const buffer = Buffer.from(
@@ -179,15 +178,15 @@ export async function GET(req: Request) {
     const sortQuery = buildSort(sort) as {
       [key: string]: SortOrder | { $meta: any };
     }; //this is use to format the sort query for mongodb.
-    let query = {};
-    if (albumTitle && albumTitle.trim() !== "") {
-      query = {
-        releaseTitle: { $regex: "^" + albumTitle, $options: "i" },
-        user: userJwt.user,
-        artistName: artist,
-      };
-    } else {
-      query = { user: userJwt.user, artistName: artist };
+    const query: any = {
+      user: userJwt.user,
+    };
+    if (albumStatusFilter && albumStatusFilter !== "all") {
+      query.releaseStatus = albumStatusFilter;
+    }
+    if (artist) query.artistName = artist;
+    if (albumTitle?.trim()) {
+      query.releaseTitle = { $regex: `^${albumTitle}`, $options: "i" };
     }
 
     albums = await AlbumModel.find(query)
@@ -196,14 +195,6 @@ export async function GET(req: Request) {
       .skip((page - 1) * limit)
       .limit(limit);
     totalCount = await AlbumModel.countDocuments(query);
-
-    console.log("album filters", typeof albumStatusFilter);
-    if (albumStatusFilter && albumStatusFilter !== "all") {
-      albums = albums.filter(
-        (item) => item.releaseStatus === albumStatusFilter,
-      );
-      totalCount = albums.length;
-    }
     console.log("the updated albums", albums);
 
     return NextResponse.json(
@@ -242,8 +233,6 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     } else if (formData.artist_name.trim() === "" || !formData.artist_name) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
-    } else if (formData.status.trim() === "" || !formData.status) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -263,20 +252,12 @@ export async function DELETE(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
-      if (formData.status === "draft") {
-        release = await SongDraftModel.findOne({
-          releaseTitle: formData.releaseTitle,
-          artistName: formData.artist_name.trim(),
-          user: user._id,
-        });
-      } else {
         // Find and verify release belongs to user before deleting
-        release = await SongModel.findOne({
+        release = await AlbumModel.findOne({
           releaseTitle: formData.releaseTitle,
           artistName: formData.artist_name.trim(),
           user: user._id,
         });
-      }
 
       if (!release) {
         return NextResponse.json(
@@ -288,12 +269,12 @@ export async function DELETE(req: Request) {
       }
 
       if (release.releaseStatus === "pending") {
-        const isSongDeleted = await deleteSingleFromS3(
+        const isImageDeleted = await deleteSingleFromS3(
           bucketName,
-          release.releaseAudio,
+          release.releaseImage,
         );
-        if (isSongDeleted) {
-          const deleteSongsResult = await SongModel.findByIdAndDelete({
+        if (isImageDeleted) {
+          const deleteSongsResult = await AlbumModel.findByIdAndDelete({
             _id: release._id,
           });
           await AudioUploadTrackerModel.findOneAndDelete({
@@ -313,7 +294,7 @@ export async function DELETE(req: Request) {
           );
         }
       } else if (release.releaseStatus === "draft") {
-        const deleteSongsResult = await SongDraftModel.findByIdAndDelete({
+        const deleteSongsResult = await AlbumModel.findByIdAndDelete({
           _id: release._id,
         });
 
@@ -326,12 +307,12 @@ export async function DELETE(req: Request) {
         return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
       }
       return NextResponse.json(
-        { msg: "Only pending songs or drafts can be deleted!" },
+        { msg: "Only pending albums or drafts can be deleted!" },
         { status: 400 },
       );
     }
   } catch (error: unknown) {
-    console.log("song delete error", error);
+    console.log("album delete error", error);
 
     return handleMongooseValidationError(error);
   }
