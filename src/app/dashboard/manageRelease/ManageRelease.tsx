@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Song from "./Song";
+import Song from "./song/Song";
 import Album from "./Album";
 
 const ManageRelease = () => {

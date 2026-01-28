@@ -7,7 +7,6 @@ import { Trash2, Music } from "lucide-react";
 import {
   useGetUserArtistsNames,
   usePaginatedAlbums,
-  usePaginatedSongs,
 } from "@/util/customHooks/useQueries";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
@@ -96,11 +95,6 @@ const Album = () => {
   };
   const handleDeleteSong = async (
     release: albumFromApi) => {
-    // try {
-
-    // } catch (error) {
-
-    // }
     if (release.releaseStatus! !== "pending" && release.releaseStatus! !== "draft") {
       return toast.info("Only pending Albums can be deleted");
     }

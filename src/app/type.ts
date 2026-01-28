@@ -72,6 +72,7 @@ interface musicFormBase {
   dsp: string[];
   copyRightHolder: string;
   copyRightYear: string;
+  old_image?: string | null;
 }
 
 export interface SongForm extends musicFormBase {

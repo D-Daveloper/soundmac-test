@@ -455,6 +455,7 @@ export function parseSongFormData(formData: FormData) {
 
     s3KeyAudio: formData.get("s3keyAudio") as string | null,
     musicImage: formData.get("music_image") as File | null,
+    oldImage: formData.get("old_image") as string | null,
 
     copyRightYear: formData.get("copyRightYear") as string | null,
     copyRightHolder: formData.get("copyRightHolder") as string | null,
@@ -592,11 +593,11 @@ export function validateNonDraftSongs(
     return "Copy write year and Copy write holder is required";
   }
 
-  if (!payload.musicImage) {
+  if (!payload.musicImage && !payload.oldImage) {
     return "Release image is required";
   }
 
-  if (!["image/jpeg", "image/png"].includes(payload.musicImage.type)) {
+  if (payload.musicImage && !["image/jpeg", "image/png"].includes(payload.musicImage.type)) {
     return "Invalid image format";
   }
 

@@ -14,6 +14,7 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { useDeleteSongMutation } from "@/util/customHooks/useMutations";
 import { songFromApi } from "@/app/type";
 import { toast } from "react-toastify";
+import SongForm from "./SongForm";
 
 const Song = () => {
   const router = useRouter();
@@ -26,7 +27,9 @@ const Song = () => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const songTitle = useDebounce<string>(query, 500);
-  const {mutateAsync,isPending:isDeletePending}=useDeleteSongMutation()
+  const { mutateAsync, isPending: isDeletePending } = useDeleteSongMutation();
+  const [wantsToEdit, setWantsToEdit] = useState(false);
+
   const {
     data,
     isLoading,
@@ -54,14 +57,17 @@ const Song = () => {
     {
       name: "View Single",
       icon: <Music strokeWidth={1} />,
-      iconFunction: () => {},
+      iconFunction: () => {
+        setWantsToEdit(true);
+      },
     },
     {
       name: "Delete",
       icon: <Trash2 strokeWidth={1} />,
       iconFunction: () => {
         // setSongToDelete(data && data.data[selectedIndex]);
-        handleShowDeletePopup()},
+        handleShowDeletePopup();
+      },
     },
   ];
 
@@ -94,26 +100,30 @@ const Song = () => {
     setShowDeletePopUp(true);
   };
 
-  const handleDeleteSong = async (release:songFromApi) => {
+  const handleDeleteSong = async (release: songFromApi) => {
     // try {
-      
+
     // } catch (error) {
-      
+
     // }
-    if(release.releaseStatus !== "pending" && release.releaseStatus !== "draft")
-    {
-      return toast.info("Only pending/draft Songs can be deleted")
+    if (
+      release.releaseStatus !== "pending" &&
+      release.releaseStatus !== "draft"
+    ) {
+      return toast.info("Only pending/draft Songs can be deleted");
     }
 
-    await mutateAsync({artist_name:release.artistName,releaseTitle:release.releaseTitle});
+    await mutateAsync({
+      artist_name: release.artistName,
+      releaseTitle: release.releaseTitle,
+    });
     setShowDeletePopUp(false);
     setSelectedIndex(null);
     refetch();
   };
 
-  
-
   return (
+    !wantsToEdit? (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
       {isLoadingArtistNames ? (
         <InlineLoadingScreen />
@@ -375,7 +385,9 @@ const Song = () => {
                       <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
                         Release Date:{" "}
                       </span>
-                      {song.releaseDate ?new Date(song.releaseDate).toLocaleDateString():"N/A"}
+                      {song.releaseDate
+                        ? new Date(song.releaseDate).toLocaleDateString()
+                        : "N/A"}
                     </p>
                     <p
                       className={
@@ -439,7 +451,7 @@ const Song = () => {
           {/* pop up */}
           <div
             className={
-              (showDeletePopUp && data && data.data.length > 0)
+              showDeletePopUp && data && data.data.length > 0
                 ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
                 : " hidden"
             }
@@ -454,8 +466,8 @@ const Song = () => {
                     Delete This Release?
                   </h3>
                   <p className="text-body-two-regular text-text-body">
-                    Your release will be removed, this is not reversable. Are you sure you
-                    want to continue?
+                    Your release will be removed, this is not reversable. Are
+                    you sure you want to continue?
                   </p>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
                     Note: Only pending and draft releases can be deleted.
@@ -478,9 +490,9 @@ const Song = () => {
                     aria-label="confirm delete song"
                     disabled={false}
                     onClick={() => {
-                      console.log(data?.data[selectedIndex!])
-                      if(data && data.data.length >0 ){
-                        handleDeleteSong(data.data[selectedIndex!])
+                      console.log(data?.data[selectedIndex!]);
+                      if (data && data.data.length > 0) {
+                        handleDeleteSong(data.data[selectedIndex!]);
                       }
                     }}
                     className={
@@ -495,7 +507,11 @@ const Song = () => {
           </div>
         </div>
       )}
-    </div>
+    </div>)
+    :
+    (
+      data?.data[selectedIndex!] && <SongForm songFormFromApi={data.data[selectedIndex!]} goBack={()=>{setWantsToEdit(false);}} refetch={refetch}/>
+    )
   );
 };
 

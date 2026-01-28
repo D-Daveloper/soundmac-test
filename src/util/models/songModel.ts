@@ -157,7 +157,7 @@ const SongModelSchema = new mongoose.Schema(
           if (this.get("releaseStatus") === "draft") {
             return true; // Skip validation for draft songs
           }
-          return Array.isArray(v) && v.length > 0;
+          return Array.isArray(v);
         },
         message: "At least one featured artist is required",
       },
@@ -377,6 +377,11 @@ const SongModelSchema = new mongoose.Schema(
 // Indexes for better query performance
 SongModelSchema.index({ artistName: 1 ,releaseDate: -1});
 SongModelSchema.index({ releaseTitle: 1,user:1 });
+// enforce uniqueness
+SongModelSchema.index(
+  { artist: 1, releaseTitle: 1 },
+  { unique: true }
+);
 // SongModelSchema.index({ genre: 1 });
 SongModelSchema.index(
   { isrc: 1 },

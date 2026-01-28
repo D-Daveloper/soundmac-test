@@ -176,14 +176,18 @@ const AlbumSchema = new mongoose.Schema(
 AlbumSchema.index({ artistName: 1, releaseDate: -1 });
 
 // user dashboard
-AlbumSchema.index({ user: 1, createdAt: -1 });
+// AlbumSchema.index({ user: 1, createdAt: -1 });
 
 // search
 AlbumSchema.index({ releaseTitle: 1, user: 1 });
 // AlbumSchema.index({ genre: 1 });
 // AlbumSchema.index({ isrc: 1 }, { unique: true });
 AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
-delete mongoose.models.Album;
+// enforce uniqueness
+AlbumSchema.index(
+  { artist: 1, releaseTitle: 1 },
+  { unique: true }
+);
 
 const AlbumModel =
   mongoose.models.Album || mongoose.model("Album", AlbumSchema);
