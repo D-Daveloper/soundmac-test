@@ -236,6 +236,53 @@ export const uploadImage = async (
     return { error: "Internal Server Error", coverUrl: null };
   }
 };
+// import { S3Client } from "@aws-sdk/client-s3";
+// import { Upload } from "@aws-sdk/lib-storage"; // Recommended for multipart uploads
+
+// // Your existing S3 client configuration
+// const s3Client = new S3Client({
+//   region: "eu-north-1",
+//   // Add your credentials/config as necessary
+// });
+
+// async function uploadTrack(file: File) { // Assuming 'file' is a File object from an input
+//   const bucketName = "soundmac1";
+//   const key = `testing/test_${Date.now()}/${file.name}`; // Generate a unique key
+
+//   try {
+//     const parallelUploads3 = new Upload({
+//       client: s3Client,
+//       params: {
+//         Bucket: bucketName,
+//         Key: key,
+//         Body: file, // The file itself, or a ReadableStream
+//         ContentType: file.type, // e.g., "audio/wav"
+//         // ACL: 'public-read', // Uncomment if you need public access
+//       },
+//       queueSize: 4, // optional total of 4 concurrent uploads
+//       partSize: 1024 * 1024 * 5, // optional size of each part, in bytes, at least 5MB
+//       leavePartsOnError: false, // optional manually handle dropped parts
+//     });
+
+//     parallelUploads3.on("httpUploadProgress", (progress) => {
+//       console.log(`Upload progress: ${Math.round((progress.loaded / progress.total) * 100)}%`);
+//       // You can update a UI progress bar here
+//     });
+
+//     await parallelUploads3.done();
+//     console.log("Upload successful!");
+//     // Return the URL or other relevant information
+//     return `https://${bucketName}.s3.${s3Client.config.region}.amazonaws.com/${key}`;
+//   } catch (error) {
+//     console.error("Error during multipart upload:", error);
+//     throw error;
+//   }
+// }
+
+// In your handleSubmit function or wherever you call uploadTrack:
+// ...
+// const uploadedFileUrl = await uploadTrack(selectedFile);
+// ...
 
 export const numRegex = /^\d+$/;
 

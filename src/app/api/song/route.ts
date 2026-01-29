@@ -102,26 +102,55 @@ export async function POST(req: Request) {
       );
     }
 
-    const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
-    // ---- Resize to distributor standard ----
-    const resized = await sharp(buffer)
-      .resize(3000, 3000, { fit: "cover" })
-      .jpeg({ quality: 90 })
-      .toBuffer(); //resize the image for dpm
+    // const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
+    // // ---- Resize to distributor standard ----
+    // const resized = await sharp(buffer)
+    //   .resize(3000, 3000, { fit: "cover" })
+    //   .jpeg({ quality: 90 })
+    //   .toBuffer(); //resize the image for dpm
 
-    const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+    // const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
 
-    const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+    // const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
-    const imageUrl = await uploadImage(
-      imageType,
-      resized as Buffer<ArrayBuffer>,
-      imageStorageLocation,
-    ); //send image to aws
+    // const imageUrl = await uploadImage(
+    //   imageType,
+    //   resized as Buffer<ArrayBuffer>,
+    //   imageStorageLocation,
+    // ); //send image to aws
 
-    if (imageUrl.coverUrl == null) {
-      await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
-      return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+    // if (imageUrl.coverUrl == null) {
+    //   await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+    //   return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+    // }
+    let imageUrl:{ error: string | null; coverUrl: string | null; } = { coverUrl: null, error: "Failed to upload image" };
+    try {
+      const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
+      // ---- Resize to distributor standard ----
+      const resized = await sharp(buffer)
+        .resize(3000, 3000, { fit: "cover" })
+        .jpeg({ quality: 90 })
+        .toBuffer(); //resize the image for dpm
+      console.log("buffer", resized);
+
+      const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+
+      const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+
+      imageUrl = await uploadImage(
+        imageType,
+        resized as Buffer<ArrayBuffer>,
+        imageStorageLocation,
+      ); //send image to aws
+      console.log(imageUrl);
+
+      if (imageUrl.coverUrl == null) {
+        await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+        return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+      }
+
+    } catch (error) {
+      console.log("upload image error", error);
     }
 
     const savedSong = new SongModel({
@@ -847,34 +876,40 @@ export async function PUT(req: Request) {
         { status: 400 },
       );
     }
-    const imageUrl: {
+    let imageUrl: {
       error: string | null;
       coverUrl: string | null;
     } = {
       error: null,
       coverUrl: null,
     };
+
     if (payload.musicImage) {
-      const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
-      // ---- Resize to distributor standard ----
-      const resized = await sharp(buffer)
-        .resize(3000, 3000, { fit: "cover" })
-        .jpeg({ quality: 90 })
-        .toBuffer(); //resize the image for dpm
+      try {
+        const buffer = Buffer.from(await payload.musicImage.arrayBuffer());
+        // ---- Resize to distributor standard ----
+        const resized = await sharp(buffer)
+          .resize(3000, 3000, { fit: "cover" })
+          .jpeg({ quality: 90 })
+          .toBuffer(); //resize the image for dpm
+        console.log("buffer", resized);
 
-      const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+        const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
 
-      const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
-      const imageUrl = await uploadImage(
-        imageType,
-        resized as Buffer<ArrayBuffer>,
-        imageStorageLocation,
-      ); //send image to aws
+        imageUrl = await uploadImage(
+          imageType,
+          resized as Buffer<ArrayBuffer>,
+          imageStorageLocation,
+        ); //send image to aws
 
-      if (imageUrl.coverUrl == null) {
-        await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
-        return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+        if (imageUrl.coverUrl == null) {
+          await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+          return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+        }
+      } catch (error) {
+        console.log("upload image error", error);
       }
     }
 

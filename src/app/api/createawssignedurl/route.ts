@@ -96,7 +96,7 @@ export async function POST(req: Request) {
     });
   
     const uploadUrl = await getSignedUrl(s3, command, {
-      expiresIn: 60,
+      expiresIn: 180,
     });
     const query = {
       user: user._id,

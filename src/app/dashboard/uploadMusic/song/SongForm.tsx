@@ -236,6 +236,7 @@ const SongForm = () => {
       formData.append("upc2", upc); //add the updated upc
       formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
       form.upc = upc; //update the form upc too
+      form.song_audio = null; //remove the song audio from the form so it is not sent to the server again
     }
     if (form.title == "") {
       setIsSubmittingForm(false);
