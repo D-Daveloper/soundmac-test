@@ -13,8 +13,6 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
-import SongDraftModel from "@/util/models/songDraftModel";
-import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
@@ -195,7 +193,6 @@ export async function GET(req: Request) {
       .skip((page - 1) * limit)
       .limit(limit);
     totalCount = await AlbumModel.countDocuments(query);
-    console.log("the updated albums", albums);
 
     return NextResponse.json(
       {
@@ -223,6 +220,155 @@ export async function GET(req: Request) {
   }
 }
 
+export async function PUT(req: Request) {
+  try {
+    let userArtist = null;
+
+    const formData = await req.formData();
+    console.log({ ...formData });
+    const payload = parseAlbumFormData(formData);
+    let release: albumFromApi | null = null;
+    
+    if (
+      !payload.artist ||
+      payload.artist.trim() === "" ||
+      typeof payload.artist !== "string"
+    ) {
+      return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
+    }
+
+    const userData = await verifyJWT();
+
+    const userJwt = verifyUser(userData);
+
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+
+    await dbConnect();
+
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 400 },
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+    } else {
+      userArtist = await Artist.findOne({
+        user: userJwt.user,
+        artistName: (payload.artist as string).trim(),
+      });
+      release = await AlbumModel.findOne({
+        upc: payload.upc,
+        user: user._id,
+      }).lean<albumFromApi>();
+    }
+
+    if (!release) {
+      return NextResponse.json({ msg: "Invalid Release" }, { status: 400 });
+    } else if (release.releaseStatus === "approved") {
+      return NextResponse.json(
+        { msg: "Approved albums cannot be edited" },
+        { status: 400 },
+      );
+    }
+
+    if (!userArtist) {
+      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }
+
+    const isAlbumForValid = validateNonDraftAlbums(payload);
+
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
+
+    const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
+    if (isNaN(num) || num < 1) {
+      return NextResponse.json(
+        { msg: "No. of tracks must greater than 0" },
+        { status: 400 },
+      );
+    }
+    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
+
+    let imageUrl: {
+      error: string | null;
+      coverUrl: string | null;
+    } = {
+      error: null,
+      coverUrl: null,
+    };
+
+    if (payload.musicImage && payload.musicImage instanceof File) {
+      try {
+        const buffer = Buffer.from(await payload.musicImage.arrayBuffer());
+        // ---- Resize to distributor standard ----
+        const resized = await sharp(buffer)
+          .resize(3000, 3000, { fit: "cover" })
+          .jpeg({ quality: 90 })
+          .toBuffer(); //resize the image for dpm
+        console.log("buffer", resized);
+
+        const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+
+        const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+
+        imageUrl = await uploadImage(
+          imageType,
+          resized as Buffer<ArrayBuffer>,
+          imageStorageLocation,
+        ); //send image to aws
+
+        if (imageUrl.coverUrl == null) {
+          return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+        }
+      } catch (error) {
+        console.log("upload image error", error);
+        return NextResponse.json(
+          { msg: "Failed to upload image" },
+          { status: 400 },
+        );
+      }
+    }
+
+    await AlbumModel.findByIdAndUpdate(
+      { _id: release._id },
+      {
+        releaseTitle: payload.title,
+        genre: payload.genre,
+        releaseLanguage: payload.language,
+        preOrderCheck: payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        releaseDate: payload.releaseDate,
+        preOrderDate:
+          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        copyRightHolder: payload.copyRightHolder,
+        copyRightYear: payload.copyRightYear,
+        dsp: payload.dsp,
+        upc: payload.upc,
+        territories: payload.territories,
+        releaseImage: imageUrl.coverUrl || payload.oldImage,
+        artistName: userArtist.artistName,
+        artist: userArtist._id,
+        numberOfTracks: payload.numberOfTracks,
+        unassignedNumbers: number_of_track_array,
+        user: user._id,
+        releaseStatus: "pending",
+      },{runValidators:true}
+    );
+
+    return NextResponse.json({ msg: "success" }, { status: 200 });
+  } catch (error: unknown) {
+    console.log(error);
+
+    return handleMongooseValidationError(error);
+  }
+}
 export async function DELETE(req: Request) {
   // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
 
@@ -252,12 +398,12 @@ export async function DELETE(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
-        // Find and verify release belongs to user before deleting
-        release = await AlbumModel.findOne({
-          releaseTitle: formData.releaseTitle,
-          artistName: formData.artist_name.trim(),
-          user: user._id,
-        });
+      // Find and verify release belongs to user before deleting
+      release = await AlbumModel.findOne({
+        releaseTitle: formData.releaseTitle,
+        artistName: formData.artist_name.trim(),
+        user: user._id,
+      });
 
       if (!release) {
         return NextResponse.json(

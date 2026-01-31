@@ -31,8 +31,8 @@ const SongForm = () => {
     useGetUserArtistsNames();
   const [image, setImage] = useState<string | null>(null);
   // const [date, setDate] = useState({
-   const fromYear= new Date()
-    const toYear= new Date(new Date().setFullYear(new Date().getFullYear() + 5))
+  const fromYear = new Date();
+  const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
   // });
 
   //used to get years like 2006, 2013 etc.
@@ -211,6 +211,13 @@ const SongForm = () => {
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
     setIsSubmittingForm(true);
     const formData = new FormData();
+    if (form.title == "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Song title is required");
+    } else if (form.artist === "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Main artist is required");
+    }
     if (action === "upload") {
       const validForm = isSongFormValid(form);
       if (validForm != "true") {
@@ -236,13 +243,7 @@ const SongForm = () => {
       form.upc = upc; //update the form upc too
       form.song_audio = null; //remove the song audio from the form so it is not sent to the server again
     }
-    if (form.title == "") {
-      setIsSubmittingForm(false);
-      return toast.warn("Song title is required");
-    } else if (form.artist === "") {
-      setIsSubmittingForm(false);
-      return toast.warn("Main artist is required");
-    }
+
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));

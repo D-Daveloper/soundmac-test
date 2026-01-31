@@ -40,9 +40,7 @@ export const isSongFormValid = (form: SongForm): string => {
 
   if (form.release_date != undefined)
     oneWeek = subWeeks(new Date(form.release_date), 1);
-  if (form.title === "") {
-    return "Song title is required";
-  } else if (form.title.length < 3 || form.title.length > 32) {
+  if (form.title.length < 3 || form.title.length > 32) {
     return "Song title must be longer than 3 not more than 32";
   } else if (containsEmoji(form.title)) {
     return "Song title can not contain emojis";
@@ -50,8 +48,6 @@ export const isSongFormValid = (form: SongForm): string => {
     return "Genre is required";
   } else if (form.language === "") {
     return "language is required";
-  } else if (form.artist === "") {
-    return "artist is required";
   } else if (
     form.song_writer.some((artist) => artist.first_name === "") ||
     form.song_writer.some((artist) => artist.last_name === "")
@@ -76,11 +72,17 @@ export const isSongFormValid = (form: SongForm): string => {
     return "Pre order date must be at least one week before the release date";
   } else if (form.dsp.length <= 0) {
     return "DSP is required";
-  } else if (form.song_audio == null || !(form.song_audio instanceof File)) {
+  } else if (
+    form.old_audio === null &&
+    (form.song_audio == null || !(form.song_audio instanceof File))
+  ) {
     return "Audio is required";
   } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
     return "Starting Clip is required and must be a valid number";
-  } else if (form.music_image == null || !(form.music_image instanceof File)) {
+  } else if (
+    form.old_image === null &&
+    (form.music_image == null || !(form.music_image instanceof File))
+  ) {
     return "Image is required";
   } else if (
     form.another_distribution_check &&
@@ -94,7 +96,7 @@ export const isSongFormValid = (form: SongForm): string => {
   }
 };
 
-export const isAlbumFormValid = (form: AlbumForm): string => {
+export const  isAlbumFormValid = (form: AlbumForm): string => {
   console.log(form);
   const twoWeeks = addWeeks(new Date(), 2);
   let oneWeek = null;
@@ -123,10 +125,13 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
     return "Pre order date must be at least one week before the release date";
   } else if (form.dsp.length <= 0) {
     return "DSP is required";
-  } else if (form.music_image == null) {
-    return "Image is required";
   } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
     return "Copy right holder and year is required";
+   } else if (
+    (form.old_image === null || form.old_image === undefined) &&
+    (form.music_image == null || !(form.music_image instanceof File))
+  ) {
+    return "Image is required";
   } else {
     return "true";
   }
@@ -173,7 +178,7 @@ export const uploadTrack = async (
   upc: string,
   artist: string,
   isFromAnotherDistributor: boolean,
-  api:AxiosInstance,
+  api: AxiosInstance,
 ) => {
   try {
     // 1. Ask for permission
@@ -181,9 +186,9 @@ export const uploadTrack = async (
       fileType: file.type,
       fileSize: file.size,
       upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
-        artist,
-        isFromAnotherDistributor,
-      });
+      artist,
+      isFromAnotherDistributor,
+    });
 
     const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.data;
 
@@ -501,6 +506,7 @@ export function parseSongFormData(formData: FormData) {
     s3KeyAudio: formData.get("s3keyAudio") as string | null,
     musicImage: formData.get("music_image") as File | null,
     oldImage: formData.get("old_image") as string | null,
+    oldAudio: formData.get("old_audio") as string | null,
 
     copyRightYear: formData.get("copyRightYear") as string | null,
     copyRightHolder: formData.get("copyRightHolder") as string | null,
@@ -531,6 +537,7 @@ export function parseAlbumFormData(formData: FormData) {
       formData.get("another_distribution_check") === "true",
 
     musicImage: formData.get("music_image") as File | null,
+    oldImage: formData.get("old_image") as string | null,
 
     copyRightYear: formData.get("copyRightYear") as string | null,
     copyRightHolder: formData.get("copyRightHolder") as string | null,
@@ -544,7 +551,11 @@ export function validateNonDraftSongs(
   const twoWeeksFromNow = addWeeks(new Date(), 2);
   let oneWeek = null;
 
-  if (!payload.uploadId || typeof payload.uploadId != "string") {
+  if (!payload.oldAudio && !payload.uploadId) {
+    return "uploadId is required when old audio is not present.";
+  }
+
+  if (payload.uploadId && typeof payload.uploadId != "string") {
     return "uploadId is required.";
   }
 
@@ -642,14 +653,15 @@ export function validateNonDraftSongs(
     return "Release image is required";
   }
 
-  if (
-    payload.musicImage &&
-    !["image/jpeg", "image/png"].includes(payload.musicImage.type)
-  ) {
-    return "Invalid image format";
+  if (payload.musicImage != null && payload.musicImage instanceof File) {
+    const allowed = new Set(["image/jpeg", "image/png"]);
+    if (!allowed.has(payload.musicImage.type)) {
+      console.log("music image", payload.musicImage);
+      return "Invalid image format";
+    }
   }
 
-  if (!payload.s3KeyAudio) {
+  if (!payload.oldAudio && !payload.s3KeyAudio) {
     return "Audio upload is required";
   }
 
@@ -719,12 +731,23 @@ export function validateNonDraftAlbums(
     return "Copy write year and Copy write holder is required";
   }
 
-  if (!payload.musicImage) {
+  if (!payload.musicImage && !payload.oldImage) {
     return "Release image is required";
   }
 
-  if (!["image/jpeg", "image/png"].includes(payload.musicImage.type)) {
-    return "Invalid image format";
+  if (payload.musicImage != null && payload.musicImage instanceof File) {
+    const allowed = new Set(["image/jpeg", "image/png"]);
+    if (!allowed.has(payload.musicImage.type)) {
+      console.log("music image", payload.musicImage);
+      return "Invalid image format";
+    }
+  }
+
+  if (
+    !payload.numberOfTracks ||
+    !numRegex.test(payload.numberOfTracks as string)
+  ) {
+    return "No. of tracks is required and must be a positive number";
   }
 
   return null;
@@ -906,25 +929,6 @@ export function validateDraftAlbums(
   ) {
     return "Number of tracks must be a valid number greater than 0.";
   }
-
-  // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
-  //   return "Copy write year and Copy write holder is required";
-  // }
-
-  // if (!payload.musicImage) {
-  //   return "Release image is required";
-  // }
-
-  // if (
-  //   payload.musicImage &&
-  //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
-  // ) {
-  //   return "Invalid image format";
-  // }
-
-  // if (!payload.s3KeyAudio) {
-  //   return "Audio upload is required";
-  // }
 
   return null;
 }

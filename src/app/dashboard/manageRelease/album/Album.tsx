@@ -14,6 +14,7 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { albumFromApi } from "@/app/type";
 import { toast } from "react-toastify";
 import { useDeleteAlbumMutation } from "@/util/customHooks/useMutations";
+import ManageAlbumForm from "./ManageAlbumForm";
 
 const Album = () => {
   const router = useRouter();
@@ -26,6 +27,7 @@ const Album = () => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const albumTitle = useDebounce<string>(query, 500);
+  const [wantsToEdit, setWantsToEdit] = useState(false);
   const {
     data,
     isLoading,
@@ -53,9 +55,11 @@ const Album = () => {
 
   const albumOptions = [
     {
-      name: "View Single",
+      name: "View Album",
       icon: <Music strokeWidth={1} />,
-      iconFunction: () => {},
+      iconFunction: () => {
+        setWantsToEdit(true);
+      },
     },
     {
       name: "Delete",
@@ -93,22 +97,28 @@ const Album = () => {
   const handleShowDeletePopup = () => {
     setShowDeletePopUp(true);
   };
-  const handleDeleteSong = async (
+  const handleDeleteAlbum = async (
     release: albumFromApi) => {
-    if (release.releaseStatus! !== "pending" && release.releaseStatus! !== "draft") {
-      return toast.info("Only pending Albums can be deleted");
-    }
-
-    await mutateAsync({
-      artist_name: release.artistName,
-      releaseTitle: release.releaseTitle
-    });
-    setShowDeletePopUp(false);
-    setSelectedIndex(null);
-    refetch();
+      try {
+        if (release.releaseStatus! !== "draft") {
+          return toast.info("Only draft Albums can be deleted");
+        }
+        await mutateAsync({
+          artist_name: release.artistName,
+          releaseTitle: release.releaseTitle
+        });
+        setShowDeletePopUp(false);
+        setSelectedIndex(null);
+        refetch();
+        
+      } catch (error) {
+        console.log("error deleting album",error);
+        
+      }
   };
 
   return (
+    !wantsToEdit?(
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
       {isLoadingArtistNames ? (
         <InlineLoadingScreen />
@@ -351,7 +361,7 @@ const Album = () => {
                   <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
                     <Image
                       priority={true}
-                      src={song.releaseImage}
+                      src={song.releaseImage && song.releaseImage != "undefined"? song.releaseImage : "/signinimage.png"}
                       alt="an image depicting the song image"
                       fill
                       className="object-cover rounded-lg shadow-md max-h-[80px] "
@@ -436,12 +446,6 @@ const Album = () => {
           >
             <div className="max-w-[400px] h-[400px]">
               <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
-                {/* <button
-                onClick={() => setShowDeletePopUp(false)}
-                className="ml-auto bg-primary p-1 rounded-sm text-white flex justify-center items-center mb-5"
-              >
-                <X width={20} height={20} />
-              </button> */}
                 <div className="flex flex-col gap-2 mb-2">
                   <div className="flex justify-center my-5">
                     <Trash2 size={50} color="#103958" strokeWidth={1} />
@@ -459,7 +463,7 @@ const Album = () => {
                 </div>
                 <div className="flex gap-5 mt-5">
                   <button
-                    aria-label="cancle delete song"
+                    aria-label="cancel delete album"
                     disabled={isDeletePending}
                     onClick={() => {
                       setShowDeletePopUp(false);
@@ -471,9 +475,9 @@ const Album = () => {
                     Cancel
                   </button>
                   <button
-                    aria-label="confirm delete song"
+                    aria-label="confirm delete album"
                     disabled={isDeletePending}
-                    onClick={() => {handleDeleteSong(data!.data[selectedIndex!]);}}
+                    onClick={() => {handleDeleteAlbum(data!.data[selectedIndex!]);}}
                     className={
                       "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-error-500/80 flex text-white bg-error-500 "
                     }
@@ -487,6 +491,9 @@ const Album = () => {
         </div>
       )}
     </div>
+    ):(
+      data?.data[selectedIndex!] && <ManageAlbumForm albumFromApi={data.data[selectedIndex!]} goBack={()=>{setWantsToEdit(false);}} refetch={refetch}/>
+  )
   );
 };
 

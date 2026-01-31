@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Song from "./song/Song";
-import Album from "./Album";
+import Album from "./album/Album";
 
 const ManageRelease = () => {
   const [isViewingSong, setIsViewingSong] = useState(true);

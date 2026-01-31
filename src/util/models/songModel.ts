@@ -367,6 +367,7 @@ const SongModelSchema = new mongoose.Schema(
     catalogNumber: {
       type: String,
       required: [true, "catalog number is required"],
+      unique:true
     },
   },
   {

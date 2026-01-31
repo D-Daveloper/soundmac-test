@@ -109,6 +109,7 @@ export async function POST(req: Request) {
       artist: userArtist._id,
       s3Key,
       upc,
+      status: "PENDING",
     }
     const audioTracker = await AudioUploadTrackerModel.findOneAndUpdate(query, update,   { 
     upsert: true, 

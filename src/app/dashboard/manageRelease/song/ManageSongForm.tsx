@@ -29,11 +29,13 @@ import { toast } from "react-toastify";
 const SongForm = ({
   songFormFromApi,
   goBack,
-  refetch
+  refetch,
 }: {
   songFormFromApi: songFromApi;
   goBack: () => void;
-  refetch:(options?: RefetchOptions | undefined) => Promise<QueryObserverResult<PAGINATION<songFromApi>, Error>>
+  refetch: (
+    options?: RefetchOptions | undefined,
+  ) => Promise<QueryObserverResult<PAGINATION<songFromApi>, Error>>;
 }) => {
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
@@ -211,18 +213,23 @@ const SongForm = ({
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
-    if (
-      songFormFromApi.releaseStatus === "pending" ||
-      songFormFromApi.releaseStatus === "approved" 
-    ) {
-      return toast.warn (
-        `You can only edit a draft or rejected songs. Current status is ${songFormFromApi.releaseStatus}`,
+    if (songFormFromApi.releaseStatus === "approved") {
+      return toast.warn(
+        `Approved songs can not be edited. Current status is ${songFormFromApi.releaseStatus}`,
       );
     }
     setIsSubmittingForm(true);
-    form = { ...form, old_image: image };
     console.log(form);
     const formData = new FormData();
+
+    if (form.title == "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Song title is required");
+    } else if (form.artist === "") {
+      setIsSubmittingForm(false);
+      return toast.warn("Main artist is required");
+    }
+
     if (action === "upload") {
       const validForm = isSongFormValid(form);
       if (validForm != "true") {
@@ -249,13 +256,6 @@ const SongForm = ({
         form.upc = upc; //update the form upc too
       }
     }
-    if (form.title == "") {
-      setIsSubmittingForm(false);
-      return toast.warn("Song title is required");
-    } else if (form.artist === "") {
-      setIsSubmittingForm(false);
-      return toast.warn("Main artist is required");
-    }
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
@@ -273,7 +273,10 @@ const SongForm = ({
         res = await api.put("song", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      } else if (action === "draft" && songFormFromApi.releaseStatus === "draft") {
+      } else if (
+        action === "draft" &&
+        songFormFromApi.releaseStatus === "draft"
+      ) {
         res = await api.put("song/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
@@ -308,6 +311,8 @@ const SongForm = ({
         copyRightHolder: "",
         copyRightYear: "",
         explicit_content: false,
+        old_audio: null,
+        old_image: null,
       });
       setImage(null);
       refetch();
@@ -415,10 +420,11 @@ const SongForm = ({
       copyRightHolder: songFormFromApi.copyRightHolder || "",
       copyRightYear: songFormFromApi.copyRightYear || "",
       explicit_content: songFormFromApi.explicitContent,
+      old_audio: songFormFromApi.releaseAudio || null,
+      old_image: songFormFromApi.releaseImage || null,
     }));
     setImage(songFormFromApi.releaseImage);
   }, []);
-  console.log(songFormFromApi);
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
@@ -1599,7 +1605,7 @@ const SongForm = ({
                       <Image
                         priority={true}
                         src={image}
-                        alt="Artist profile"
+                        alt="song cover preview"
                         fill
                         className="object-cover rounded-lg"
                       />

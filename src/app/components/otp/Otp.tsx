@@ -57,6 +57,8 @@ export default function OtpInput() {
 
     return () => clearInterval(interval);
   }, [canResend, timer]);
+
+  
   const handleResend = async () => {
     try {
       setLoading(true);

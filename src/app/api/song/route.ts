@@ -842,7 +842,6 @@ export async function PUT(req: Request) {
       });
     }
 
-    // console.log("the user artist ", userArtist?.artistName, payload.artist);
     if (Uploaderror != null) {
       // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || "");
       return NextResponse.json(
@@ -858,24 +857,28 @@ export async function PUT(req: Request) {
     }
 
     const isSongValid = validateNonDraftSongs(payload);
+
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
 
-    audioTracker = await AudioUploadTrackerModel.findOne({
-      _id: payload.uploadId,
-      s3Key: payload.s3KeyAudio,
-      user: user!._id,
-      status: "PENDING",
-    });
-
-    if (audioTracker == null) {
-      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
-      return NextResponse.json(
-        { msg: "Invaild Request,please upload audio" },
-        { status: 400 },
-      );
+    if(payload.uploadId){
+      audioTracker = await AudioUploadTrackerModel.findOne({
+        _id: payload.uploadId,
+        s3Key: payload.s3KeyAudio,
+        user: user!._id,
+        status: "PENDING",
+      });
+  
+      if (audioTracker == null) {
+        // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
+        return NextResponse.json(
+          { msg: "Invaild Request,please upload audio" },
+          { status: 400 },
+        );
+      }
     }
+
     let imageUrl: {
       error: string | null;
       coverUrl: string | null;
@@ -894,7 +897,7 @@ export async function PUT(req: Request) {
           .toBuffer(); //resize the image for dpm
         console.log("buffer", resized);
 
-        const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+        const imageType = payload.musicImage.type.split("/")[1]; //get the image extension
 
         const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
@@ -913,15 +916,15 @@ export async function PUT(req: Request) {
       }
     }
 
-    const savedSong = await SongModel.findOneAndUpdate(
+    await SongModel.findOneAndUpdate(
       {
         user: userJwt.user,
         upc: payload.upc,
       },
       {
-        releaseTitle: payload.title,
+      releaseTitle: payload.title,
       releaseImage: imageUrl.coverUrl || payload.oldImage,
-      releaseAudio: payload.s3KeyAudio,
+      releaseAudio: payload.s3KeyAudio || payload.oldAudio,
       genre: payload.genre,
       releaseLanguage: payload.language,
       songWriter: payload.song_writer,
@@ -946,9 +949,9 @@ export async function PUT(req: Request) {
       artistName: userArtist.artistName,
       artist: userArtist._id,
       user: user!._id,
-      catalogNumber: "SM" + Date.now(),
       releaseStatus: "pending",
     },{runValidators: true,});
+
     await AudioUploadTrackerModel.findOneAndUpdate(
       {
         _id: payload.uploadId,

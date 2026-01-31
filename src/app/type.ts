@@ -85,6 +85,7 @@ export interface SongForm extends musicFormBase {
   start_clip: string;
   isrc: string;
   explicit_content: boolean;
+  old_audio?: string | null;
 }
 
 export interface AlbumForm extends musicFormBase {

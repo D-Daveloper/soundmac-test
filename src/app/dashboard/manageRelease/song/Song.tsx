@@ -101,25 +101,25 @@ const Song = () => {
   };
 
   const handleDeleteSong = async (release: songFromApi) => {
-    // try {
+    try {
+      if (
+        release.releaseStatus !== "draft"
+      ) {
+        return toast.info("Only draft Songs can be deleted");
+      }
+  
+      await mutateAsync({
+        artist_name: release.artistName,
+        releaseTitle: release.releaseTitle,
+      });
+      setShowDeletePopUp(false);
+      setSelectedIndex(null);
+      refetch();
 
-    // } catch (error) {
-
-    // }
-    if (
-      release.releaseStatus !== "pending" &&
-      release.releaseStatus !== "draft"
-    ) {
-      return toast.info("Only pending/draft Songs can be deleted");
+    } catch (error) {
+      console.log("error deleting song", error);
+      
     }
-
-    await mutateAsync({
-      artist_name: release.artistName,
-      releaseTitle: release.releaseTitle,
-    });
-    setShowDeletePopUp(false);
-    setSelectedIndex(null);
-    refetch();
   };
 
   return (
@@ -475,7 +475,7 @@ const Song = () => {
                 </div>
                 <div className="flex gap-5 mt-5">
                   <button
-                    aria-label="cancle delete song"
+                    aria-label="cancel delete song"
                     disabled={false}
                     onClick={() => {
                       setShowDeletePopUp(false);
