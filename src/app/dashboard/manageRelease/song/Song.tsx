@@ -14,7 +14,7 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { useDeleteSongMutation } from "@/util/customHooks/useMutations";
 import { songFromApi } from "@/app/type";
 import { toast } from "react-toastify";
-import SongForm from "./SongForm";
+import SongForm from "./ManageSongForm";
 
 const Song = () => {
   const router = useRouter();

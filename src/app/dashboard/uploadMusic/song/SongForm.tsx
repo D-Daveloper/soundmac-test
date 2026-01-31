@@ -210,7 +210,6 @@ const SongForm = () => {
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
     setIsSubmittingForm(true);
-    console.log(form);
     const formData = new FormData();
     if (action === "upload") {
       const validForm = isSongFormValid(form);
@@ -223,6 +222,7 @@ const SongForm = () => {
         form.upc,
         form.artist,
         form.another_distribution_check,
+        api,
       );
       if (error != null) {
         setIsSubmittingForm(false);
@@ -233,8 +233,6 @@ const SongForm = () => {
 
       formData.append("uploadId", uploadId); //the upload Id from creating the url and uploading the song
 
-      formData.append("upc2", upc); //add the updated upc
-      formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
       form.upc = upc; //update the form upc too
       form.song_audio = null; //remove the song audio from the form so it is not sent to the server again
     }
@@ -252,9 +250,7 @@ const SongForm = () => {
         formData.append(key, value);
       }
     });
-    if (songForm.music_image) {
-      formData.append("music_image", songForm.music_image);
-    }
+
     formData.append("action", action);
     let res;
     try {
@@ -273,7 +269,6 @@ const SongForm = () => {
       toast.success(res?.data?.msg);
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
-      localStorage.removeItem("songForm");
       localStorage.removeItem("featured_artist");
       localStorage.removeItem("performer");
       localStorage.removeItem("producer");

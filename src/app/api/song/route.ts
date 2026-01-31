@@ -913,8 +913,13 @@ export async function PUT(req: Request) {
       }
     }
 
-    const savedSong = new SongModel({
-      releaseTitle: payload.title,
+    const savedSong = await SongModel.findOneAndUpdate(
+      {
+        user: userJwt.user,
+        upc: payload.upc,
+      },
+      {
+        releaseTitle: payload.title,
       releaseImage: imageUrl.coverUrl || payload.oldImage,
       releaseAudio: payload.s3KeyAudio,
       genre: payload.genre,
@@ -936,15 +941,14 @@ export async function PUT(req: Request) {
       startClip: payload.startClip,
       dsp: payload.dsp,
       upc: payload.upc,
-      isrc: payload.isrc || "isrc" + Date.now(),
+      isrc: payload.isrc,
       territories: payload.territories,
       artistName: userArtist.artistName,
       artist: userArtist._id,
       user: user!._id,
       catalogNumber: "SM" + Date.now(),
       releaseStatus: "pending",
-    });
-    await savedSong.save();
+    },{runValidators: true,});
     await AudioUploadTrackerModel.findOneAndUpdate(
       {
         _id: payload.uploadId,

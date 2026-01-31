@@ -235,6 +235,7 @@ const SongForm = ({
           form.upc,
           form.artist,
           form.another_distribution_check,
+          api,
         );
 
         if (error != null) {
@@ -245,9 +246,6 @@ const SongForm = ({
         formData.append("s3keyAudio", songS3Key); //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
 
         formData.append("uploadId", uploadId); //the upload Id from creating the url and uploading the song
-
-        formData.append("upc2", upc); //add the updated upc
-        formData.delete("upc"); //delete the old upc from the form and pick up the upc from the server
         form.upc = upc; //update the form upc too
       }
     }
@@ -265,9 +263,6 @@ const SongForm = ({
         formData.append(key, value);
       }
     });
-    if (songForm.music_image) {
-      formData.append("music_image", songForm.music_image);
-    }
     formData.append("action", action);
     let res;
     try {
@@ -286,7 +281,6 @@ const SongForm = ({
       toast.success(res?.data?.msg);
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
-      localStorage.removeItem("songForm");
       localStorage.removeItem("featured_artist");
       localStorage.removeItem("performer");
       localStorage.removeItem("producer");

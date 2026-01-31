@@ -8,7 +8,7 @@ import {
   SongForm,
   SongWriter,
 } from "@/app/type";
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { addWeeks, subWeeks } from "date-fns";
 import { toast } from "react-toastify";
 import { deleteSongsFromS3WithRetry, s3 } from "./aws";
@@ -76,11 +76,11 @@ export const isSongFormValid = (form: SongForm): string => {
     return "Pre order date must be at least one week before the release date";
   } else if (form.dsp.length <= 0) {
     return "DSP is required";
-  } else if (form.song_audio == null) {
+  } else if (form.song_audio == null || !(form.song_audio instanceof File)) {
     return "Audio is required";
   } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
     return "Starting Clip is required and must be a valid number";
-  } else if (form.music_image == null) {
+  } else if (form.music_image == null || !(form.music_image instanceof File)) {
     return "Image is required";
   } else if (
     form.another_distribution_check &&
@@ -173,21 +173,19 @@ export const uploadTrack = async (
   upc: string,
   artist: string,
   isFromAnotherDistributor: boolean,
+  api:AxiosInstance,
 ) => {
   try {
     // 1. Ask for permission
-    const res = await fetch("/api/createawssignedurl", {
-      method: "POST",
-      body: JSON.stringify({
-        fileType: file.type,
-        fileSize: file.size,
-        upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+    const res = await api.post("/createawssignedurl", {
+      fileType: file.type,
+      fileSize: file.size,
+      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
         artist,
         isFromAnotherDistributor,
-      }),
-    });
+      });
 
-    const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.json();
+    const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.data;
 
     // 2. Upload directly to S3
     await axios.put(uploadUrl, file, {
@@ -489,7 +487,7 @@ export function parseSongFormData(formData: FormData) {
     startClip: formData.get("start_clip") as string | null,
 
     isrc: formData.get("isrc") as string | null,
-    upc: formData.get("upc2") as string | null,
+    upc: formData.get("upc") as string | null,
 
     releaseDate: formData.get("release_date") as string | null,
     preOrderDate: formData.get("preOrderDate") as string | null,
@@ -644,7 +642,10 @@ export function validateNonDraftSongs(
     return "Release image is required";
   }
 
-  if (payload.musicImage && !["image/jpeg", "image/png"].includes(payload.musicImage.type)) {
+  if (
+    payload.musicImage &&
+    !["image/jpeg", "image/png"].includes(payload.musicImage.type)
+  ) {
     return "Invalid image format";
   }
 
@@ -898,7 +899,11 @@ export function validateDraftAlbums(
     return "UPC is required when transferring from another distributor.";
   }
 
-  if (payload.numberOfTracks && (!numRegex.test(payload.numberOfTracks) || parseInt(payload.numberOfTracks,10) <= 0)) {
+  if (
+    payload.numberOfTracks &&
+    (!numRegex.test(payload.numberOfTracks) ||
+      parseInt(payload.numberOfTracks, 10) <= 0)
+  ) {
     return "Number of tracks must be a valid number greater than 0.";
   }
 
