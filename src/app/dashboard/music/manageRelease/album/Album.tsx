@@ -1,34 +1,43 @@
+"use client";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { songFilterOptions, songStatusFilterArray } from "@/app/constant";
 import Select from "@/components/Select";
-import { Trash2, Music } from "lucide-react";
+import { Trash2, Music, BadgeAlert, FileSearchIcon } from "lucide-react";
 import {
   useGetUserArtistsNames,
-  usePaginatedSongs,
+  usePaginatedAlbums,
 } from "@/util/customHooks/useQueries";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
-import { useDeleteSongMutation } from "@/util/customHooks/useMutations";
-import { songFromApi } from "@/app/type";
+import { albumFromApi } from "@/app/type";
 import { toast } from "react-toastify";
-import SongForm from "./ManageSongForm";
+import { useDeleteAlbumMutation } from "@/util/customHooks/useMutations";
+import ManageAlbumForm from "./ManageAlbumForm";
+import { useTabQuery } from "@/util/customHooks/useTabQuery";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
-const Song = () => {
+const Album = () => {
+  const { setParam, getParam } = useTabQuery();
+  const type = getParam("type");
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Manage Albums");
+  }, [type]);
   const router = useRouter();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showDeletePopUp, setShowDeletePopUp] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("createdAt");
-  const [songStatusFilter, setSongStatusFilter] = useState("all");
+  const [albumStatusFilter, setAlbumStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
-  const songTitle = useDebounce<string>(query, 500);
-  const { mutateAsync, isPending: isDeletePending } = useDeleteSongMutation();
+  const albumTitle = useDebounce<string>(query, 500);
   const [wantsToEdit, setWantsToEdit] = useState(false);
+  const [showCannotAddTracks, setShowCannotAddTracks] = useState(false);
 
   const {
     data,
@@ -36,16 +45,18 @@ const Song = () => {
     isError,
     error,
     isFetching,
-    isPending: isPendingSongs,
-    isRefetching: isRefetchingSongs,
+    isPending: isPendingAlbums,
+    isRefetching: isRefetchingAlbums,
     refetch,
-  } = usePaginatedSongs({
+  } = usePaginatedAlbums({
     page,
     sort: filter,
-    songTitle: songTitle,
-    songStatusFilter,
+    albumTitle: albumTitle,
+    albumStatusFilter,
     artist,
   });
+  const { mutateAsync, isPending: isDeletePending } = useDeleteAlbumMutation();
+
   const {
     isLoading: isLoadingArtistNames,
     data: artistNames,
@@ -53,21 +64,28 @@ const Song = () => {
     isRefetching,
   } = useGetUserArtistsNames();
 
-  const songOptions = [
+  const albumOptions = [
     {
-      name: "View Single",
-      icon: <Music strokeWidth={1} />,
+      name: "View Album",
+      icon: <FileSearchIcon strokeWidth={1} />,
       iconFunction: () => {
         setWantsToEdit(true);
       },
     },
     {
+      name: "Upload Track",
+      icon: <Music strokeWidth={1} />,
+      iconFunction: () => {},
+    },
+    {
+      name: "View Track",
+      icon: <Music strokeWidth={1} />,
+      iconFunction: () => {},
+    },
+    {
       name: "Delete",
       icon: <Trash2 strokeWidth={1} />,
-      iconFunction: () => {
-        // setSongToDelete(data && data.data[selectedIndex]);
-        handleShowDeletePopup();
-      },
+      iconFunction: () => handleShowDeletePopup(),
     },
   ];
 
@@ -87,27 +105,24 @@ const Song = () => {
   };
 
   const handleReleaseStatusFilterChange = (filter: string) => {
-    setSongStatusFilter(filter);
+    setAlbumStatusFilter(filter);
     setPage(1);
+    // setIsFilterOpen(false);
   };
 
   const handleSearchQueryChange = (filter: string) => {
     setQuery(filter);
     setPage(1);
-    setSongStatusFilter("all");
+    setAlbumStatusFilter("all");
   };
   const handleShowDeletePopup = () => {
     setShowDeletePopUp(true);
   };
-
-  const handleDeleteSong = async (release: songFromApi) => {
+  const handleDeleteAlbum = async (release: albumFromApi) => {
     try {
-      if (
-        release.releaseStatus !== "draft"
-      ) {
-        return toast.info("Only draft Songs can be deleted");
+      if (release.releaseStatus! !== "draft") {
+        return toast.info("Only draft Albums can be deleted");
       }
-  
       await mutateAsync({
         artist_name: release.artistName,
         releaseTitle: release.releaseTitle,
@@ -115,23 +130,45 @@ const Song = () => {
       setShowDeletePopUp(false);
       setSelectedIndex(null);
       refetch();
-
     } catch (error) {
-      console.log("error deleting song", error);
-      
+      console.log("error deleting album", error);
     }
   };
 
-  return (
-    !wantsToEdit? (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
+  return !wantsToEdit ? (
+    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[260px] px-5">
+      <div className="flex gap-3 mt-5">
+        <button
+          type="button"
+          onClick={() => setParam("type", "single")}
+          className={
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
+            (type === "single"
+              ? " bg-primary hover:bg-primary/90 text-white"
+              : " bg-transparent border-2 border-text-disable text-text-disable")
+          }
+        >
+          Songs
+        </button>
+        <button
+          type="button"
+          onClick={() => setParam("type", "album")}
+          className={
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm  " +
+            (type === "album"
+              ? " bg-primary hover:bg-primary/90 text-white"
+              : " bg-transparent border-2 border-text-disable text-text-disable")
+          }
+        >
+          Albums
+        </button>
+      </div>
       {isLoadingArtistNames ? (
         <InlineLoadingScreen />
       ) : !isLoading &&
         (isError || data === undefined || data.data.length === 0) ? (
         <>
           {/* you might see that the first two divs are duplicated the reason is a ui issue if theres no songs or albums if this condition above is true it should still show them search bar, select artist and also all the filter buttons like all ,pending,etc. */}
-
           <div className="flex justify-between w-full mt-10 gap-2 max-[450px]:flex-col items-end">
             <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
               <Image
@@ -142,8 +179,8 @@ const Song = () => {
                 height={20}
               />
               <input
-                name="search"
                 value={query}
+                name="search"
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
                 onChange={(e) => handleSearchQueryChange(e.target.value)}
@@ -204,7 +241,6 @@ const Song = () => {
               )}
             </div>
           </div>
-          {/* buttons e.g all, pending */}
           <div className="mt-5 flex gap-3 flex-wrap">
             {songStatusFilterArray.map((item, index) => (
               <button
@@ -214,7 +250,7 @@ const Song = () => {
                 }}
                 className={
                   " capitalize px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
-                  (songStatusFilter === item
+                  (albumStatusFilter === item
                     ? " bg-primary hover:bg-primary/90 text-white"
                     : " bg-transparent border-2 border-text-disable text-text-disable")
                 }
@@ -227,27 +263,27 @@ const Song = () => {
             <div>
               <Image
                 priority={true}
-                src={"/manage_song_image.png"}
+                src={"/manage_album_image.png"}
                 alt="an image depicting no artist profile"
                 width={100}
                 height={100}
               />
             </div>
             <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-              You haven’t released any singles. Upload your first track to get
-              started.
+              You haven’t released any albums. Create and share a collection of
+              songs with your fans.
             </p>
             <button
               onClick={() => {
                 router.push(
-                  "/dashboard?tab=Music&section=uploadMusic&type=single",
+                  "/dashboard?tab=Music&section=uploadMusic&type=album",
                 );
               }}
               className={
                 "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "
               }
             >
-              Upload a Single
+              Upload a Album
             </button>
           </div>
         </>
@@ -335,7 +371,7 @@ const Song = () => {
                 }}
                 className={
                   " capitalize px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
-                  (songStatusFilter === item
+                  (albumStatusFilter === item
                     ? " bg-primary hover:bg-primary/90 text-white"
                     : " bg-transparent border-2 border-text-disable text-text-disable")
                 }
@@ -347,12 +383,15 @@ const Song = () => {
           {/* main body */}
           <div
             className={
-              isFetching || isLoading || isPendingSongs || isRefetchingSongs
+              isFetching || isLoading || isPendingAlbums || isRefetchingAlbums
                 ? "flex justify-center items-center md:max-h-[400px]"
                 : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[600px] "
             }
           >
-            {isFetching || isLoading || isPendingSongs || isRefetchingSongs ? (
+            {isFetching ||
+            isLoading ||
+            isPendingAlbums ||
+            isRefetchingAlbums ? (
               <InlineLoadingScreen />
             ) : (
               // song card
@@ -365,7 +404,11 @@ const Song = () => {
                   <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
                     <Image
                       priority={true}
-                      src={song?.releaseImage || "/signinimage.png"}
+                      src={
+                        song.releaseImage && song.releaseImage != "undefined"
+                          ? song.releaseImage
+                          : "/signinimage.png"
+                      }
                       alt="an image depicting the song image"
                       fill
                       className="object-cover rounded-lg shadow-md max-h-[80px] "
@@ -375,19 +418,11 @@ const Song = () => {
                     <h1 className="text-lg font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-1">
                       {song.releaseTitle}
                     </h1>
-                    <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
-                      feat.{" "}
-                      {song.featuredArtist.map(
-                        (item) => item.artistName.split(" ")[0] + ",",
-                      )}
-                    </p>
                     <p className="my-2">
                       <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
                         Release Date:{" "}
                       </span>
-                      {song.releaseDate
-                        ? new Date(song.releaseDate).toLocaleDateString()
-                        : "N/A"}
+                      {new Date(song.releaseDate).toLocaleDateString()}
                     </p>
                     <p
                       className={
@@ -416,14 +451,31 @@ const Song = () => {
                   {/* this is for the viewArtist button options */}
                   <div
                     className={
-                      "divide-y divide-zinc-200 absolute w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col " +
+                      "divide-y divide-zinc-200 absolute w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col" +
                       (selectedIndex === index ? " flex" : " hidden")
                     }
                   >
-                    {songOptions.map((options, index) => (
+                    {albumOptions.map((options, index) => (
                       <button
                         key={index}
                         onClick={() => {
+                          if (options.name == "Upload Track"){
+                            if (song.releaseStatus === "draft"){
+                              setShowCannotAddTracks(true);
+                              return
+                            }
+                            router.push(`/dashboard/music/manageRelease/${song.releaseTitle}`)
+                            // options.iconFunction(song.releaseTitle);
+                            return;
+                          }else if (options.name == "View Track"){
+                            if (song.releaseStatus === "draft"){
+                              setShowCannotAddTracks(true);
+                              return
+                            }
+                            router.push(`/dashboard/music/manageRelease/${song.releaseTitle}/edit`)
+                            // options.iconFunction(song.releaseTitle);
+                            return;
+                          }
                           options.iconFunction();
                         }}
                         name={options.name}
@@ -451,12 +503,12 @@ const Song = () => {
           {/* pop up */}
           <div
             className={
-              showDeletePopUp && data && data.data.length > 0
+              showDeletePopUp
                 ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
                 : " hidden"
             }
           >
-            <div className="max-w-[400px] h-[400px] w-full">
+            <div className="max-w-[400px] h-[400px]">
               <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
                 <div className="flex flex-col gap-2 mb-2">
                   <div className="flex justify-center my-5">
@@ -475,8 +527,8 @@ const Song = () => {
                 </div>
                 <div className="flex gap-5 mt-5">
                   <button
-                    aria-label="cancel delete song"
-                    disabled={false}
+                    aria-label="cancel delete album"
+                    disabled={isDeletePending}
                     onClick={() => {
                       setShowDeletePopUp(false);
                     }}
@@ -487,13 +539,10 @@ const Song = () => {
                     Cancel
                   </button>
                   <button
-                    aria-label="confirm delete song"
-                    disabled={false}
+                    aria-label="confirm delete album"
+                    disabled={isDeletePending}
                     onClick={() => {
-                      console.log(data?.data[selectedIndex!]);
-                      if (data && data.data.length > 0) {
-                        handleDeleteSong(data.data[selectedIndex!]);
-                      }
+                      handleDeleteAlbum(data!.data[selectedIndex!]);
                     }}
                     className={
                       "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-error-500/80 flex text-white bg-error-500 "
@@ -505,14 +554,62 @@ const Song = () => {
               </div>
             </div>
           </div>
+          {/*info pop up */}
+          <div
+            className={
+              showCannotAddTracks
+                ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
+                : " hidden"
+            }
+          >
+            <div className="max-w-[400px] h-[400px]">
+              <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
+                <div className="flex flex-col gap-2 mb-2">
+                  <div className="flex justify-center my-5">
+                    <BadgeAlert size={50} color="#103958" strokeWidth={1} />
+                  </div>
+                  <h3 className="text-xl font-normal leading-[30px] tracking-[-1px] text-main-heading text-center">
+                    Unavaliable
+                  </h3>
+                  <p className="text-body-two-regular text-text-body">
+                    Draft Albums can not add tracks, please complete your album
+                    to be able to add tracks.
+                  </p>
+                  {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                    Note: Only pending and draft releases can be deleted.
+                  </p> */}
+                </div>
+                <div className="flex gap-5 mt-5">
+                  <button
+                    aria-label="okay"
+                    disabled={false}
+                    onClick={() => {
+                      setShowCannotAddTracks(false);
+                    }}
+                    className={
+                      "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/20 flex text-primary-500 outline-2 outline-primary-500 "
+                    }
+                  >
+                    Ok
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
-    </div>)
-    :
-    (
-      data?.data[selectedIndex!] && <SongForm songFormFromApi={data.data[selectedIndex!]} goBack={()=>{setWantsToEdit(false);}} refetch={refetch}/>
+    </div>
+  ) : (
+    data?.data[selectedIndex!] && (
+      <ManageAlbumForm
+        albumFromApi={data.data[selectedIndex!]}
+        goBack={() => {
+          setWantsToEdit(false);
+        }}
+        refetch={refetch}
+      />
     )
   );
 };
 
-export default Song;
+export default Album;

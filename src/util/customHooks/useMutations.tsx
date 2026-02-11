@@ -31,7 +31,7 @@ export const useOtpMutation = () => {
       localStorage.clear();
       localStorage.removeItem("soundmacotpExpiry");
       localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
-      router.push(redirect? redirect : "/dashboard?tab=dashboard");
+      router.push(redirect? redirect : "/dashboard");
     },
     onError: (error) => {
       if (isAxiosError(error)) {

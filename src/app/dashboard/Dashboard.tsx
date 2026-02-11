@@ -1,9 +1,17 @@
 "use client";
-import { useDashboard } from "@/util/customHooks/useQueries";
+import { useAuthUser, useDashboard } from "@/util/customHooks/useQueries";
 import Image from "next/image";
+import { useContext, useEffect } from "react";
+import DashboardContext from "../context/dashboardContext/dashboardContext";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useDashboard();
+  const {data:user} = useAuthUser();
+    const dashboardContext = useContext(DashboardContext);
+    
+    useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Welcome " +user?.firstName);
+  }, [dashboardContext,data]);
 
   return (
     <div className="flex flex-col gap-5 w-full p-5">

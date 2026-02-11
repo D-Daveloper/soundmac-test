@@ -184,7 +184,7 @@ export interface songFromApi extends BaseApiResponseForRelease
 export interface albumFromApi extends BaseApiResponseForRelease
   {
   numberOfTracks:string;
-  unassignedNumber:string[];
+  unassignedNumbers:string[];
 
 }
 
@@ -197,3 +197,15 @@ export interface NonRetryableErrorCode {
 }
 // Mock data based on the provided schema for songFromApi
 // Assuming Artist is an object with basic properties (since not fully defined in schema, using a simple structure)
+export interface TrackForm extends SongForm {
+  id: string; // frontend-only (uuid)
+  track_number:string;
+  validationError:string|null;
+  uploadStatus?: "idle" | "uploading" | "done" | "error";
+  s3key:string;
+};
+export interface TrackFromApi extends songFromApi {
+  track_number:string;
+  validationError:string|null;
+  uploadStatus?: "idle" | "uploading" | "done" | "error";
+};

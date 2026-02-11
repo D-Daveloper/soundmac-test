@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const featuredArtistSchema = new mongoose.Schema(
+export const featuredArtistSchema = new mongoose.Schema(
   {
     artistName: {
       type: String,
@@ -22,7 +22,7 @@ const featuredArtistSchema = new mongoose.Schema(
   { _id: false, strict: "throw" },
 );
 
-const performerSchema = new mongoose.Schema(
+export const performerSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -44,7 +44,7 @@ const performerSchema = new mongoose.Schema(
   { _id: false, strict: "throw" },
 );
 
-const songWriterSchema = new mongoose.Schema(
+export const songWriterSchema = new mongoose.Schema(
   {
     first_name: {
       type: String,
@@ -66,7 +66,7 @@ const songWriterSchema = new mongoose.Schema(
   { _id: false, strict: "throw" },
 );
 
-const producerSchema = new mongoose.Schema(
+export const producerSchema = new mongoose.Schema(
   {
     name: {
       type: String,

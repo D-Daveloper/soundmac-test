@@ -254,6 +254,27 @@ export const getAlbums = async (
   });
   return res.data;
 };
+
+export const getAlbum = async (
+  api: AxiosInstance,
+  params:{ albumTitle:string }
+): Promise<PAGINATION<albumFromApi>> => {
+  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
+    params:params,
+  });
+  return res.data;
+};
+
+export const getAlbumTracks = async (
+  api: AxiosInstance,
+  params:{ albumTitle:string }
+): Promise<any> => {
+  const res = await api.get<Promise<any>>("album/track", {
+    params:params,
+  });
+  return res.data;
+};
+
 export const DeleteAlbum = async (
   api: AxiosInstance,
   form: {artist_name:string,releaseTitle:string}

@@ -75,7 +75,7 @@ const ManageArtist = () => {
     );
   }
   return (
-    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-10 ">
+    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-10 lg:pl-[260px] ">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : !isLoading && (isError || data === undefined ||data.data.length === 0) ? (

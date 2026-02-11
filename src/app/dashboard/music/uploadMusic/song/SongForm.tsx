@@ -5,47 +5,35 @@ import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { languagesList } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
   FeaturedArtist,
-  PAGINATION,
   Performer,
   Producer,
   SongForm,
-  songFromApi,
   SongWriter,
 } from "@/app/type";
 import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
-import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { Info, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const SongForm = ({
-  songFormFromApi,
-  goBack,
-  refetch,
-}: {
-  songFormFromApi: songFromApi;
-  goBack: () => void;
-  refetch: (
-    options?: RefetchOptions | undefined,
-  ) => Promise<QueryObserverResult<PAGINATION<songFromApi>, Error>>;
-}) => {
+const SongForm = () => {
   const api = UseAxios();
+  const dashboardContext = useContext(DashboardContext);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
   const [image, setImage] = useState<string | null>(null);
-  // const [date, setDate] = useState({
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
-  // });
 
   //used to get years like 2006, 2013 etc.
   const futureYears = Array.from({ length: 11 }, (_, i) =>
@@ -87,6 +75,7 @@ const SongForm = ({
     copyRightYear: "",
     explicit_content: false,
   });
+  const { deleteParam } = useTabQuery();
 
   const addField = (field: keyof SongForm) => {
     switch (field) {
@@ -123,6 +112,13 @@ const SongForm = ({
     }
   };
 
+  // const removeField = (field: keyof SongForm, index: number) => {
+  //   setSongForm((prev) => {
+  //     const updatedList = [...prev[field]];
+  //     updatedList.splice(index, 1);
+  //     return { ...prev, [field]: updatedList };
+  //   });
+  // };
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
     if (
@@ -213,15 +209,8 @@ const SongForm = ({
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
-    if (songFormFromApi.releaseStatus === "approved") {
-      return toast.warn(
-        `Approved songs can not be edited. Current status is ${songFormFromApi.releaseStatus}`,
-      );
-    }
     setIsSubmittingForm(true);
-    console.log(form);
     const formData = new FormData();
-
     if (form.title == "") {
       setIsSubmittingForm(false);
       return toast.warn("Song title is required");
@@ -229,33 +218,32 @@ const SongForm = ({
       setIsSubmittingForm(false);
       return toast.warn("Main artist is required");
     }
-
     if (action === "upload") {
       const validForm = isSongFormValid(form);
       if (validForm != "true") {
         setIsSubmittingForm(false);
         return toast.warn(validForm);
       }
-      if (songForm.song_audio) {
-        const { upc, songS3Key, error, uploadId } = await uploadTrack(
-          form.song_audio!,
-          form.upc,
-          form.artist,
-          form.another_distribution_check,
-          api,
-        );
-
-        if (error != null) {
-          setIsSubmittingForm(false);
-          toast.error(error);
-          return;
-        }
-        formData.append("s3keyAudio", songS3Key); //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
-
-        formData.append("uploadId", uploadId); //the upload Id from creating the url and uploading the song
-        form.upc = upc; //update the form upc too
+      const { upc, songS3Key, error, uploadId } = await uploadTrack(
+        form.song_audio!,
+        form.upc,
+        form.artist,
+        form.another_distribution_check,
+        api,
+      );
+      if (error != null) {
+        setIsSubmittingForm(false);
+        toast.error(error);
+        return;
       }
+      formData.append("s3keyAudio", songS3Key); //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
+
+      formData.append("uploadId", uploadId); //the upload Id from creating the url and uploading the song
+
+      form.upc = upc; //update the form upc too
+      form.song_audio = null; //remove the song audio from the form so it is not sent to the server again
     }
+
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
@@ -263,6 +251,7 @@ const SongForm = ({
         formData.append(key, value);
       }
     });
+
     formData.append("action", action);
     let res;
     try {
@@ -270,14 +259,11 @@ const SongForm = ({
         toast.info(
           "Uploading song. This may take a while depending on your internet speed.",
         );
-        res = await api.put("song", formData, {
+        res = await api.post("song", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      } else if (
-        action === "draft" &&
-        songFormFromApi.releaseStatus === "draft"
-      ) {
-        res = await api.put("song/draft", formData, {
+      } else {
+        res = await api.post("song/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -311,11 +297,8 @@ const SongForm = ({
         copyRightHolder: "",
         copyRightYear: "",
         explicit_content: false,
-        old_audio: null,
-        old_image: null,
       });
       setImage(null);
-      refetch();
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
@@ -395,39 +378,11 @@ const SongForm = ({
     }
   }, []);
 
-  useEffect(() => {
-    setSongForm((prev) => ({
-      title: songFormFromApi.releaseTitle,
-      genre: songFormFromApi.genre,
-      language: songFormFromApi.releaseLanguage,
-      artist: songFormFromApi.artistName,
-      release_date: songFormFromApi.releaseDate,
-      preOrderDate: songFormFromApi.preOrderDate || undefined,
-      featured_artist: songFormFromApi.featuredArtist,
-      performer: songFormFromApi.performer,
-      song_writer: songFormFromApi.songWriter,
-      producer: songFormFromApi.producer,
-      pre_order_check: songFormFromApi.preOrderCheck,
-      another_distribution_check: songFormFromApi.anotherDistributionCheck,
-      territories: songFormFromApi.territories,
-      song_audio: null,
-      music_image: null,
-      dsp: songFormFromApi.dsp,
-      lyrics: songFormFromApi.lyrics,
-      start_clip: songFormFromApi.startClip,
-      isrc: songFormFromApi.isrc || "",
-      upc: songFormFromApi.upc || "",
-      copyRightHolder: songFormFromApi.copyRightHolder || "",
-      copyRightYear: songFormFromApi.copyRightYear || "",
-      explicit_content: songFormFromApi.explicitContent,
-      old_audio: songFormFromApi.releaseAudio || null,
-      old_image: songFormFromApi.releaseImage || null,
-    }));
-    setImage(songFormFromApi.releaseImage);
-  }, []);
-
+    useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Upload Single");
+  }, [dashboardContext]);
   return (
-    <div className="bg-main-white h-full w-full flex flex-col">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
       {isLoading || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
@@ -437,7 +392,7 @@ const SongForm = ({
             <button
               aria-label="go back"
               onClick={() => {
-                goBack();
+                deleteParam("type");
               }}
               className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
             >
@@ -450,7 +405,7 @@ const SongForm = ({
             </button>
             <div className="flex gap-8 px-5 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-10 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -1289,7 +1244,7 @@ const SongForm = ({
                               <div
                                 className={
                                   "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                                  (!image && " bg-neutral-50 ")
+                                  (!songForm.music_image && " bg-neutral-50 ")
                                 }
                               >
                                 <Image
@@ -1298,14 +1253,14 @@ const SongForm = ({
                                   height={60}
                                   alt="music note icon"
                                   className={
-                                    image
+                                    songForm.music_image
                                       ? " w-full object-cover min-w-15 h-15"
                                       : undefined
                                   }
                                 />
                               </div>
                               <div className="w-[50%]">
-                                {!image ? (
+                                {!songForm.music_image ? (
                                   <p className="mb-2 text-sm text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
@@ -1352,6 +1307,18 @@ const SongForm = ({
                       Enter these details only if you are transferring from
                       another distributor
                     </p>
+                    {/* <div className="flex w-fit gap-2 items-center mb-5">
+                <input
+                  type="checkbox"
+                  className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
+                  name="another_distribution_check"
+                  checked={songForm.another_distribution_check}
+                  onChange={handleChange}
+                />
+                <p className="leading-6 text-sm font-medium">
+                  Pitch to an Editorial Playlist?
+                </p>
+              </div> */}
                     <div className="flex justify-between">
                       <div className="flex w-fit gap-2 items-center mb-5">
                         <input
@@ -1388,7 +1355,7 @@ const SongForm = ({
                           name={"isrc"}
                           placeholder={"Enter Isrc"}
                           updateValue={handleChange}
-                          disabled={true}
+                          disabled={!songForm.another_distribution_check}
                           uppercase={true}
                           required={songForm.another_distribution_check}
                         />
@@ -1404,7 +1371,7 @@ const SongForm = ({
                           name={"upc"}
                           placeholder={"Enter upc"}
                           updateValue={handleChange}
-                          disabled={true}
+                          disabled={!songForm.another_distribution_check}
                           uppercase={true}
                           required={songForm.another_distribution_check}
                         />
@@ -1580,8 +1547,7 @@ const SongForm = ({
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Release date</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.release_date != undefined &&
-                          new Date(songForm.release_date).toLocaleDateString()}
+                        {songForm.release_date?.toLocaleDateString() || ""}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>
@@ -1600,16 +1566,14 @@ const SongForm = ({
               )}
               <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                 <div className="w-full h-[80%] flex-2">
-                  {image ? (
-                    <div className="relative min-h-full w-full h-full">
-                      <Image
-                        priority={true}
-                        src={image}
-                        alt="song cover preview"
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
+                  {songForm.music_image ? (
+                    <Image
+                      src={image ? image : ""}
+                      width={0}
+                      height={0}
+                      alt="preview of the artist song cover"
+                      className="rounded-lg w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full bg-neutral-100 relative z-[10]">
                       <p className="font-bold text-[16px] leading-[20px] text-text-disable tracking-[0.5px] absolute top-1/2 text-center w-full">
@@ -1628,7 +1592,7 @@ const SongForm = ({
                 </div>
               </div>
             </div>
-            {/* buttons */}
+
             <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
               <button
                 onClick={() => {

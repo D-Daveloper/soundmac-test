@@ -8,7 +8,9 @@ export default function Select({
   selected,
   setSelected,
   name,
+  isDisabled
 }: {
+  isDisabled?:boolean;
   name:string
   options: string[];
   placeholder?: string;
@@ -88,6 +90,7 @@ export default function Select({
     <div ref={ref} className="relative w-full text-[16px] sm:text-sm">
       {/* Trigger button */}
       <button
+      disabled={isDisabled}
         type="button"
         onClick={() => setOpen(!open)}
         onKeyDown={handleKeyDown}
@@ -95,7 +98,7 @@ export default function Select({
           " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +
           (selected
             ? ""
-            : "text-gray-400 font-extralight font-(family-name:--font-figtree)")
+            : "text-gray-400 font-extralight font-(family-name:--font-figtree) ") + (isDisabled && " text-text-disable bg-neutral-50")
         }
       >
         {selected || placeholder}

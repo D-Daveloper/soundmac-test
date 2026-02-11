@@ -1,13 +1,18 @@
 "use client";
 import Image from "next/image";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import SongForm from "./song/SongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import AlbumForm from "./album/AlbumForm";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const UploadMusic = () => {
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
+    const dashboardContext = useContext(DashboardContext);
+    useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Upload Release");
+  }, [type]);
 
   if (type == "single") {
     return <SongForm />;
@@ -15,7 +20,7 @@ const UploadMusic = () => {
     return <AlbumForm />;
   } else {
     return (
-      <div className="w-full p-5">
+    <main className="lg:pl-[260px] px-5 w-full h-full bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
             Choose Your Release Type
@@ -69,7 +74,7 @@ const UploadMusic = () => {
             </button>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 };

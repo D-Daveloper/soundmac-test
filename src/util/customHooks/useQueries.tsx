@@ -2,7 +2,9 @@
 import { useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
+  getAlbum,
   getAlbums,
+  getAlbumTracks,
   getArtists,
   getArtistStats,
   getCurrentUser,
@@ -17,6 +19,7 @@ import {
   PAGINATION,
   songFromApi,
 } from "@/app/type";
+import { handleReactQueryApiCallError } from "../middleware/functions";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -24,7 +27,7 @@ export const useAuthUser = () => {
     queryKey: ["authUser"],
     queryFn: () => getCurrentUser(api),
     staleTime: 1000 * 60 * 60, // 60 mins
-    retry: false,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -38,7 +41,7 @@ export const useDashboard = () => {
     queryFn: () => getDashboard(api),
     refetchOnWindowFocus: true,
     staleTime: 1000 * 60 * 15, // 15 minutes: consider data fresh
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
   });
 };
 
@@ -52,27 +55,29 @@ export function usePaginatedArtists(params: {
     queryKey: ["artists", params.page, params.sort, params.artistName],
     queryFn: async () => getArtists(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
 export function useGetArtistStats(artistName: string) {
   const api = UseAxios();
   return useQuery<ArtistStat, Error>({
     queryKey: ["artistStats", artistName],
     queryFn: async () => getArtistStats(api, artistName),
     placeholderData: (prev) => prev, // avoids UI flicker
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
     staleTime: 1000 * 60 * 30, // 5 minutes
   });
 }
+
 export function useGetUserArtistsNames() {
   const api = UseAxios();
   return useQuery<string[], Error>({
     queryKey: ["userArtistsNames"],
     queryFn: async () => getUserArtistsNames(api),
     placeholderData: (prev) => prev, // avoids UI flicker
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
     staleTime: 1000 * 60 * 30, // 5 minutes
   });
 }
@@ -96,10 +101,11 @@ export function usePaginatedSongs(params: {
     ],
     queryFn: async () => getSongs(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
 export function usePaginatedAlbums(params: {
   page: number;
   sort: string;
@@ -119,7 +125,41 @@ export function usePaginatedAlbums(params: {
     ],
     queryFn: async () => getAlbums(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
-    retry: 1,
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAlbums(params: {
+
+  albumTitle: string;
+
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<albumFromApi>, Error>({
+    queryKey: [
+      "getAlbum",
+      params.albumTitle,
+    ],
+    queryFn: async () => getAlbum(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAlbumTracks(params: {
+  albumTitle: string;
+}) {
+  const api = UseAxios();
+  return useQuery<any, Error>({
+    queryKey: [
+      "edit tracks",
+      params.albumTitle,
+    ],
+    queryFn: async () => getAlbumTracks(api, params),
+    // placeholderData: (prev) => prev, // avoids UI flicker
+    retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

@@ -4,30 +4,22 @@ import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { languagesList } from "@/app/constant";
-import type { AlbumForm, albumFromApi, PAGINATION, SongForm } from "@/app/type";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import type { AlbumForm, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
-import { RefetchOptions, QueryObserverResult } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const ManageAlbumForm = ({
-  albumFromApi,
-  goBack,
-  refetch,
-}: {
-  albumFromApi: albumFromApi;
-  goBack: () => void;
-  refetch: (
-    options?: RefetchOptions | undefined,
-  ) => Promise<QueryObserverResult<PAGINATION<albumFromApi>, Error>>;
-}) => {
+const AlbumForm = () => {
+  const dashboardContext = useContext(DashboardContext);
+
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
   const { deleteParam } = useTabQuery();
@@ -101,15 +93,13 @@ const ManageAlbumForm = ({
       if (action === "upload") {
         const validForm = isAlbumFormValid(form);
         if (validForm != "true") return toast.warn(validForm);
-        res = await api.put("album", formData, {
+        res = await api.post("album", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      } else if (action === "draft" && albumFromApi.releaseStatus === "draft") {
-        res = await api.put("album/draft", formData, {
+      } else {
+        res = await api.post("album/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      }else {
-        return toast.warn("Only drafts can be saved as draft.");
       }
       toast.success(res?.data?.msg);
       localStorage.removeItem("albumForm");
@@ -131,7 +121,6 @@ const ManageAlbumForm = ({
         number_of_track: "",
       });
       setImage(null);
-      refetch();
       setPreview(false);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -171,29 +160,10 @@ const ManageAlbumForm = ({
   }, []);
 
   useEffect(() => {
-    setAlbumForm((prev) => ({
-      title: albumFromApi.releaseTitle,
-      genre: albumFromApi.genre,
-      language: albumFromApi.releaseLanguage,
-      artist: albumFromApi.artistName,
-      release_date: albumFromApi.releaseDate,
-      preOrderDate: albumFromApi.preOrderDate || undefined,
-      pre_order_check: albumFromApi.preOrderCheck,
-      another_distribution_check: albumFromApi.anotherDistributionCheck,
-      territories: albumFromApi.territories,
-      music_image: null,
-      dsp: albumFromApi.dsp,
-      upc: albumFromApi.upc,
-      copyRightHolder: albumFromApi.copyRightHolder,
-      copyRightYear: albumFromApi.copyRightYear,
-      number_of_track: albumFromApi.numberOfTracks,
-      old_image: albumFromApi.releaseImage,
-    }));
-    setImage(albumFromApi?.releaseImage || null);
-  }, []);
-
+    dashboardContext?.setLayoutHeaderMessage("Upload Album");
+  }, [dashboardContext]);
   return (
-    <div className="bg-main-white h-full w-full flex flex-col">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px] px-5">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : (
@@ -202,7 +172,7 @@ const ManageAlbumForm = ({
           <>
             <button
               onClick={() => {
-                goBack();
+                deleteParam("type");
               }}
               className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
             >
@@ -216,7 +186,7 @@ const ManageAlbumForm = ({
             <div className="flex gap-8 px-5 py-5">
               {!preview ? (
                 <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
-                  {/* album info */}
+                  {/* Song info */}
                   <div>
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Album Information
@@ -524,7 +494,7 @@ const ManageAlbumForm = ({
                             >
                               <div
                                 className={
-                                  "w-[50%] flex items-center justify-center p-2 rounded-2xl  text-white border border-neutral-100" +
+                                  "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
                                   (!albumForm.music_image && " bg-neutral-50 ")
                                 }
                               >
@@ -588,12 +558,24 @@ const ManageAlbumForm = ({
                       Enter these details only if you are transferring from
                       another distributor
                     </p>
+                    {/* <div className="flex w-fit gap-2 items-center mb-5">
+                <input
+                  type="checkbox"
+                  className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
+                  name="another_distribution_check"
+                  checked={albumForm.another_distribution_check}
+                  onChange={handleChange}
+                />
+                <p className="leading-6 text-sm font-medium">
+                  Pitch to an Editorial Playlist?
+                </p>
+              </div> */}
                     <div className="flex w-fit gap-2 items-center mb-5">
                       <input
                         type="checkbox"
                         className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
                         name="another_distribution_check"
-                        checked={false}
+                        checked={albumForm.another_distribution_check}
                         onChange={handleChange}
                       />
                       <p className="leading-6 text-sm font-medium">
@@ -609,9 +591,9 @@ const ManageAlbumForm = ({
                           name={"upc"}
                           placeholder={"Enter upc"}
                           updateValue={handleChange}
-                          disabled={!false}
+                          disabled={!albumForm.another_distribution_check}
                           uppercase={true}
-                          required={false}
+                          required={albumForm.another_distribution_check}
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           Unique code for tracking sales/streams.
@@ -679,7 +661,7 @@ const ManageAlbumForm = ({
                           <>
                             <div className="flex-1 w-full">
                               <Image
-                                src={image}
+                                src={image ? image : ""}
                                 width={100}
                                 height={150}
                                 alt="music note icon"
@@ -752,8 +734,7 @@ const ManageAlbumForm = ({
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <h2>Release date</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.release_date != undefined &&
-                          new Date(albumForm.release_date).toLocaleDateString()}
+                        {albumForm.release_date?.toLocaleDateString() || ""}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>
@@ -788,16 +769,14 @@ const ManageAlbumForm = ({
               {/* the image side bar */}
               <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                 <div className="w-full h-[80%] flex-2">
-                  {image ? (
-                    <div className="relative min-h-full w-full h-full">
-                      <Image
-                        priority={true}
-                        src={image}
-                        alt="album cover preview"
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
+                  {albumForm.music_image ? (
+                    <Image
+                      src={image ? image : ""}
+                      width={0}
+                      height={0}
+                      alt="preview of the artist album cover"
+                      className="rounded-lg w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full bg-neutral-100 relative z-[10]">
                       <p className="font-bold text-[16px] leading-[20px] text-text-disable tracking-[0.5px] absolute top-1/2 text-center w-full">
@@ -859,4 +838,4 @@ const ManageAlbumForm = ({
   );
 };
 
-export default ManageAlbumForm;
+export default AlbumForm;

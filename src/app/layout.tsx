@@ -5,6 +5,7 @@ import Root from "./root";
 import InformationState from "./context/informationContext/informationState";
 import UserState from "./context/userContext/userState";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
+import DashboardState from "./context/dashboardContext/dashboardState";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -15,7 +16,7 @@ const figtree = Figtree({
 export const metadata: Metadata = {
   title: "SOUNDMAC",
   description: "the best!",
-    icons: {
+  icons: {
     icon: "/logo.svg",
   },
 };
@@ -26,12 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-scroll-behavior="smooth">
       <body className={`parentBody antialiased`}>
         <ReactQueryProvider>
           <InformationState>
             <UserState>
-              <Root>{children}</Root>
+              <DashboardState>
+                <Root>{children}</Root>
+              </DashboardState>
             </UserState>
           </InformationState>
         </ReactQueryProvider>

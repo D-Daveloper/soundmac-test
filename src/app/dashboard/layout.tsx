@@ -2,20 +2,21 @@
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import UserRoute from "../protectedRoute/protectedRoute";
+import DashboardContext from "../context/dashboardContext/dashboardContext";
+import { usePathname } from "next/navigation";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
-  const { data, isLoading, isError, error } = useAuthUser();
-
-  const { setTab, tab, section, setSection } = useTabQuery("dashboard");
-
+  const { data, isLoading } = useAuthUser();
+  const { tab } = useTabQuery("dashboard");
+  const dashboardContext = useContext(DashboardContext);
+ const pathname = usePathname();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
-  const [headerMessage, setHeaderMessage] = useState("");
   const sidebarComponents = [
     {
       title: "music",
@@ -23,13 +24,13 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "upload release",
           icon: "/add.svg",
-          setSection: () => setSection("upload"),
+          href: "/dashboard/music/uploadMusic",
           query: "upload",
         },
         {
           title: "manage release",
           icon: "/musiclibrary2.svg",
-          setSection: () => setSection("manageRelease"),
+          href: "/dashboard/music/manageRelease?type=single",
           query: "manageRelease",
         },
       ],
@@ -37,24 +38,24 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       setIsActive: () => setIsActive("music"),
     },
     {
-      title: "artists",
+      title: "artist",
       list: [
         {
           title: "create artist",
           icon: "/add.svg",
-          setSection: () => setSection("create"),
+          href:"/dashboard/artist/createArtist",
           query: "create",
         },
         {
           title: "manage artist",
           icon: "/profile2user.svg",
-          setSection: () => setSection("manageArtist"),
+          href:"/dashboard/artist/manageArtist",
           query: "manageArtist",
         },
         {
           title: "collaborations",
           icon: "/likeshapes.svg",
-          setSection: () => setSection("collaboration"),
+          href:"",
           query: "collaboration",
         },
       ],
@@ -67,7 +68,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "song performance",
           icon: "/musicplay.svg",
-          setSection: () => setSection("song"),
+          href:"",
           query: "song",
         },
       ],
@@ -80,7 +81,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "sales report",
           icon: "/musicplay.svg",
-          setSection: () => setSection("sales_report"),
+          href:"",
           query: "sales_report",
         },
       ],
@@ -93,13 +94,13 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "promotion",
           icon: "/add.svg",
-          setSection: () => setSection("promotion"),
+          href:"",
           query: "promotion",
         },
         {
           title: "cover license",
           icon: "/musiclibrary2.svg",
-          setSection: () => setSection("manageRelease"),
+          href:"",
           query: "manageRelease",
         },
       ],
@@ -107,45 +108,6 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       setIsActive: () => setIsActive("explore"),
     },
   ];
-  useEffect(() => {
-    setIsActive(tab);
-    setIsOpen(false);
-    switch (tab) {
-      case "Music":
-         if (section === "manageReleases") {
-          setHeaderMessage("Manage Release");
-          break;
-         }
-        setHeaderMessage("Upload Release");
-        break;
-      case "Artists":
-        if (section === "createArtist") {
-          setHeaderMessage("Create Artist");
-          break;
-        }else if (section === "manageArtist") {
-          setHeaderMessage("Manage Artists");
-          break;
-        }else if (section === "collaboration") {
-          setHeaderMessage("Collaborations");
-          break;
-        }
-        setHeaderMessage("Create Artist");
-        break;
-      case "explore":
-        if (section === "promotion") {
-          setHeaderMessage("Explore Promotions");
-          break;
-        }
-          else{
-            setHeaderMessage("Explore Promotions");
-            break;
-
-          }
-
-      default:
-        break;
-    }
-  }, [tab, section]);
 
   if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
   return (
@@ -164,7 +126,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               <div className="bg-primary w-5 h-1"></div>
             </div>
             <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
-              {tab == "dashboard" ? "Welcome, "+data?.firstName : headerMessage}
+              {dashboardContext?.layoutHeaderMessage}
             </h1>
             <div
               className={
@@ -200,16 +162,18 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                     </button>
                   </div>
                   <div className="flex flex-col gap-5">
-                    <button
+                    <Link
                       className={
                         "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" +
-                        (tab === "dashboard" && " bg-primary-500")
+                        (pathname.endsWith("dashboard") && " bg-primary-500")
                       }
-                      onClick={() => {
-                        setIsOpen(false);
-                        setIsActive("dashboard");
-                        setTab("dashboard");
-                      }}
+                      href={"/dashboard"}
+
+                      // onClick={() => {
+                      //   setIsOpen(false);
+                      //   setIsActive("dashboard");
+                      //   setTab("dashboard");
+                      // }}
                     >
                       <Image
                         src="/home.svg"
@@ -218,7 +182,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                         height={20}
                       />
                       Dashboard
-                    </button>
+                    </Link>
                   </div>
                   {sidebarComponents.map((component, index) => (
                     <SideBarCom

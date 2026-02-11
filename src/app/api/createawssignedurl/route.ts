@@ -8,6 +8,7 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import Artist from "@/util/models/artistModel";
 import dbConnect from "@/util/db";
+import AlbumModel from "@/util/models/AlbumModel";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -20,15 +21,27 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const body = await req.json();
-  
-    const { fileType, fileSize, upcFromClient, artist, isFromAnotherDistributor } = body;
 
-    if (!fileType || typeof fileType != "string"){
-      return NextResponse.json({msg:"file type is required."},{status:400})
-    }else if(!fileSize || typeof fileSize != "number"){
-      return NextResponse.json({msg:"file size is required."},{status:400}) 
-    }else if(!artist || typeof artist != "string"){
-      return NextResponse.json({msg:"artist is required."},{status:400}) 
+    const {
+      fileType,
+      fileSize,
+      upcFromClient,
+      artist,
+      isFromAnotherDistributor,
+    } = body;
+
+    if (!fileType || typeof fileType != "string") {
+      return NextResponse.json(
+        { msg: "file type is required." },
+        { status: 400 },
+      );
+    } else if (!fileSize || typeof fileSize != "number") {
+      return NextResponse.json(
+        { msg: "file size is required." },
+        { status: 400 },
+      );
+    } else if (!artist || typeof artist != "string") {
+      return NextResponse.json({ msg: "artist is required." }, { status: 400 });
     }
     let userArtist = null;
     const userData = await verifyJWT();
@@ -36,7 +49,7 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-  
+
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
@@ -54,28 +67,29 @@ export async function POST(req: Request) {
       });
     }
 
-  
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
 
-    if(isFromAnotherDistributor && !upcFromClient)
-    {
-      return NextResponse.json({ msg: "UPC is required when uploading from another distributor." }, { status: 400 });
+    if (isFromAnotherDistributor && !upcFromClient) {
+      return NextResponse.json(
+        { msg: "UPC is required when uploading from another distributor." },
+        { status: 400 },
+      );
     }
-  
+
     let upc = upcFromClient;
-  
+
     // ---- 1. Validate file ----
     const allowedAudioTypes = ["audio/wav", "audio/flac", "audio/mpeg"];
-  
+
     if (!allowedAudioTypes.includes(fileType)) {
       return NextResponse.json(
         { error: "Unsupported audio format" },
         { status: 400 },
       );
     }
-  
+
     const MAX_SIZE = 200 * 1024 * 1024; // 200MB
     if (fileSize > MAX_SIZE) {
       return NextResponse.json({ error: "File too large" }, { status: 400 });
@@ -84,17 +98,17 @@ export async function POST(req: Request) {
     if (!upc) {
       upc = await getUPCs();
     }
-  
+
     // ---- 2. Generate S3 key ----
     const s3Key = `testing/${upc}/${upc}.${fileType.split("/")[1]}`;
-  
+
     // ---- 3. Create signed URL ----
     const command = new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET!,
       Key: s3Key,
       ContentType: fileType,
     });
-  
+
     const uploadUrl = await getSignedUrl(s3, command, {
       expiresIn: 180,
     });
@@ -102,72 +116,166 @@ export async function POST(req: Request) {
       user: user._id,
       s3Key,
       upc,
-    }
-    const update ={
+    };
+    const update = {
       user: user._id,
       artistName: userArtist.artistName,
       artist: userArtist._id,
       s3Key,
       upc,
       status: "PENDING",
-    }
-    const audioTracker = await AudioUploadTrackerModel.findOneAndUpdate(query, update,   { 
-    upsert: true, 
-    returnDocument: 'after'  // Returns the document after the update
-  });//saved the document so you can track whether or not the upload succeeds to prevent orphaned uploaded songs in the s3 bucket
+    };
+    const audioTracker = await AudioUploadTrackerModel.findOneAndUpdate(
+      query,
+      update,
+      {
+        upsert: true,
+        returnDocument: "after", // Returns the document after the update
+      },
+    ); //saved the document so you can track whether or not the upload succeeds to prevent orphaned uploaded songs in the s3 bucket
 
     // ---- 4. Return ONLY what client needs ----
     return NextResponse.json({
       uploadUrl,
       s3Key,
       upcFromServer: upc,
-      uploadId: audioTracker._id,//id of the new created docment
+      uploadId: audioTracker._id, //id of the new created docment
     });
-    
   } catch (error) {
-    console.log("getting signed url error:",error);
-    
-    return NextResponse.json({msg:"Error getting signed url."},{status:500})
+    console.log("getting signed url error:", error);
+
+    return NextResponse.json(
+      { msg: "Error getting signed url." },
+      { status: 500 },
+    );
   }
 }
 
+//for track
 export async function PUT(req: Request) {
-  const body = await req.json();
+  try {
+    await dbConnect();
+    const body = await req.json();
 
-  const { fileType, fileSize } = body;
+    const { fileType, fileSize, upcFromClient, track_number } = body;
+    // console.log(body);
+    
+    if (!fileType || typeof fileType != "string") {
+      return NextResponse.json(
+        { msg: "file type is required." },
+        { status: 400 },
+      );
+    } else if (!fileSize || typeof fileSize != "number") {
+      return NextResponse.json(
+        { msg: "file size is required." },
+        { status: 400 },
+      );
+    }
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
 
-  // ---- 1. Validate file ----
-  const allowedAudioTypes = ["audio/wav", "audio/flac", "audio/mpeg"];
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 400 },
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+    }
 
-  if (!allowedAudioTypes.includes(fileType)) {
+    if (!upcFromClient) {
+      return NextResponse.json({ msg: "UPC is required." }, { status: 400 });
+    }
+
+    const userAlbum = await AlbumModel.findOne({upc:upcFromClient});
+
+    if(!userAlbum){
+      return NextResponse.json({msg:"Invalid upc"},{status:400});
+    }
+
+    if(userAlbum.user != userJwt.user){
+      return NextResponse.json({msg:"Invalid Album"},{status:400})
+    }
+
+    let upc = userAlbum.upc;
+
+    // ---- 1. Validate file ----
+    const allowedAudioTypes = ["audio/wav", "audio/flac", "audio/mpeg"];
+
+    if (!allowedAudioTypes.includes(fileType)) {
+      return NextResponse.json(
+        { error: "Unsupported audio format" },
+        { status: 400 },
+      );
+    }
+
+    const MAX_SIZE = 200 * 1024 * 1024; // 200MB
+    if (fileSize > MAX_SIZE) {
+      return NextResponse.json({ msg: "File too large" }, { status: 400 });
+    }
+
+    if (!track_number || !userAlbum.unassignedNumbers.includes(track_number)) {
+      return NextResponse.json(
+        { msg: "track_number required." },
+        { status: 400 },
+      );
+    }
+    const s3key = `testing/${upc}/${upc}_01_${track_number}.${fileType.split("/")[1]}`;
+
+    // ---- 3. Create signed URL ----
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET!,
+      Key: s3key,
+      ContentType: fileType,
+    });
+
+    const uploadUrl = await getSignedUrl(s3, command, {
+      expiresIn: 180,
+    });
+
+    const query = {
+      user: user._id,
+      s3Key:s3key,
+      upc,
+    };
+
+    const update = {
+      user: user._id,
+      artistName: userAlbum.artistName,
+      artist: userAlbum.artist,
+      s3Key:s3key,
+      upc,
+      status: "PENDING",
+    };
+
+    const audioTracker = await AudioUploadTrackerModel.findOneAndUpdate(
+      query,
+      update,
+      {
+        upsert: true,
+        returnDocument: "after", // Returns the document after the update
+      },
+    ); //saved the document so you can track whether or not the upload succeeds to prevent orphaned uploaded songs in the s3 bucket
+
+    // ---- 4. Return ONLY what client needs ----
+    return NextResponse.json({
+      uploadUrl,
+      s3key,
+      upcFromServer: upc,
+      uploadId: audioTracker._id, //id of the new created docment
+    });
+  } catch (error) {
+    console.log("getting signed url error:", error);
+
     return NextResponse.json(
-      { error: "Unsupported audio format" },
-      { status: 400 },
+      { msg: "Error getting signed url." },
+      { status: 500 },
     );
   }
-
-  const MAX_SIZE = 200 * 1024 * 1024; // 200MB
-  if (fileSize > MAX_SIZE) {
-    return NextResponse.json({ error: "File too large" }, { status: 400 });
-  }
-
-  // ---- 2. Generate S3 key ----
-  const s3Key = `uploads/tracks/${"uuid()"}`;
-
-  // ---- 3. Create signed URL ----
-  const command = new PutObjectCommand({
-    Bucket: process.env.AWS_S3_BUCKET!,
-    Key: s3Key,
-    ContentType: fileType,
-  });
-
-  const uploadUrl = await getSignedUrl(s3, command, {
-    expiresIn: 60,
-  });
-
-  // ---- 4. Return ONLY what client needs ----
-  return NextResponse.json({
-    uploadUrl,
-    s3Key,
-  });
 }

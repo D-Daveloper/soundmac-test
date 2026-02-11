@@ -36,7 +36,7 @@ const ViewStats = ({
   //   );
   // }
   return (
-    <div className="bg-main-white max-sm:min-h-auto min-h-[90dvh] w-full flex flex-col px-10 max-w-[2400px] mx-auto">
+    <div className="bg-main-white max-sm:min-h-auto min-h-[90dvh] w-full flex flex-col px-10 max-w-[2400px] mx-auto lg:pl-[260px] ">
       {isLoading || !data || isFetching || isPending || isRefetching ? (
         <InlineLoadingScreen />
       ) : (

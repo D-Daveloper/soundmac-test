@@ -14,8 +14,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-      artists = await Artist.distinct('artistName',{user: userJwt.user});
-    //   if (!artists || artists.length <= 0) {
+      artists = await Artist.distinct('artistName',{user: userJwt.user}).sort({createdAt:-1});
     //     return NextResponse.json({ msg: "No artists found" }, { status: 404 });
     //   }
     console.log(artists);

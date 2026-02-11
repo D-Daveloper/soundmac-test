@@ -7,8 +7,9 @@ import {
   Producer,
   SongForm,
   SongWriter,
+  TrackForm,
 } from "@/app/type";
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, isAxiosError } from "axios";
 import { addWeeks, subWeeks } from "date-fns";
 import { toast } from "react-toastify";
 import { deleteSongsFromS3WithRetry, s3 } from "./aws";
@@ -96,7 +97,7 @@ export const isSongFormValid = (form: SongForm): string => {
   }
 };
 
-export const  isAlbumFormValid = (form: AlbumForm): string => {
+export const isAlbumFormValid = (form: AlbumForm): string => {
   console.log(form);
   const twoWeeks = addWeeks(new Date(), 2);
   let oneWeek = null;
@@ -127,7 +128,7 @@ export const  isAlbumFormValid = (form: AlbumForm): string => {
     return "DSP is required";
   } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
     return "Copy right holder and year is required";
-   } else if (
+  } else if (
     (form.old_image === null || form.old_image === undefined) &&
     (form.music_image == null || !(form.music_image instanceof File))
   ) {
@@ -136,6 +137,7 @@ export const  isAlbumFormValid = (form: AlbumForm): string => {
     return "true";
   }
 };
+
 export const isArtistFormValid = (form: CreateArtistForm): string => {
   console.log(form);
 
@@ -150,6 +152,41 @@ export const isArtistFormValid = (form: CreateArtistForm): string => {
     return "Apple ID and or Spotify ID is required";
   } else if (form.artist_image == null) {
     return "Image is required";
+  } else {
+    return "true";
+  }
+};
+
+export const isTrackFormValid = (form: TrackForm): string => {
+  console.log(form);
+
+ if (form.artist === "") {
+    return "Artist is is required";
+  } else if (form.genre === "") {
+    return "Genre is required";
+  } else if (form.language === "") {
+    return "language is required";
+  } else if (
+    form.song_writer.some((artist) => artist.first_name === "") ||
+    form.song_writer.some((artist) => artist.last_name === "")
+  ) {
+    return "song writer is required";
+  } else if (
+    form.performer.some((artist) => artist.name === "") ||
+    form.performer.some((artist) => artist.role === "")
+  ) {
+    return "performer is required";
+  } else if (form.producer.some((artist) => artist.name === "")) {
+    return "producer is required";
+  } else if (form.old_audio === null && !form.s3key) {
+    return "Audio is required";
+  } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+    return "Starting Clip is required and must be a valid number";
+  } else if (
+    form.another_distribution_check &&
+    (form.isrc === "" || form.upc === "")
+  ) {
+    return "ISRC and UPC is required";
   } else {
     return "true";
   }
@@ -200,6 +237,50 @@ export const uploadTrack = async (
   } catch (error) {
     console.log("upload track error function line 181", error);
 
+    return {
+      upc: null,
+      songS3Key: null,
+      error: "Something went wrong please try again later!",
+    };
+  }
+};
+
+export const uploadAlbumTrack = async (
+  file: File,
+  upc: string,
+  artist: string,
+  api: AxiosInstance,
+  track_number: string,
+) => {
+  try {
+    // 1. Ask for permission
+    const res = await api.put("/createawssignedurl", {
+      fileType: file.type,
+      fileSize: file.size,
+      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+      artist,
+      track_number,
+    });
+
+    const { uploadUrl, s3key, upcFromServer, uploadId } = await res.data;
+
+    // 2. Upload directly to S3
+    await axios.put(uploadUrl, file, {
+      headers: { "Content-Type": file.type },
+    });
+    console.log("ressss",res);
+    
+    return { upc: upcFromServer, songS3Key: s3key, error: null, uploadId };
+  } catch (error) {
+    if (isAxiosError(error)) {
+      return {
+        upc: null,
+        songS3Key: null,
+        error: "Something went wrong please try again later!",
+      };
+    }
+    console.log("upload track error function line 181", error);
+    toast.error("Something went wrong please try again later!");
     return {
       upc: null,
       songS3Key: null,
@@ -542,6 +623,39 @@ export function parseAlbumFormData(formData: FormData) {
     copyRightYear: formData.get("copyRightYear") as string | null,
     copyRightHolder: formData.get("copyRightHolder") as string | null,
     numberOfTracks: formData.get("number_of_track") as string | null,
+  };
+}
+export function parseTrackFormData(formData: FormData) {
+  return {
+    title: formData.get("title") as string | null,
+    genre: formData.get("genre") as string | null,
+    language: formData.get("language") as string | null,
+
+    artist: formData.get("artist") as string | null,
+
+    isrc: formData.get("isrc") as string | null,
+    upc: formData.get("upc") as string | null,
+
+    anotherDistributionCheck:
+      formData.get("another_distribution_check") === "true",
+
+    trackNumber: formData.get("trackNumber") as string | null,
+    uploadId: formData.get("uploadId") as string | null,
+    actionType: formData.get("action") as "upload" | "draft" | null,
+
+    featured_artist: getArray<FeaturedArtist>(formData, "featured_artist"),
+    performer: getArray<Performer>(formData, "performer"),
+    song_writer: getArray<SongWriter>(formData, "song_writer"),
+    producer: getArray<Producer>(formData, "producer"),
+
+    lyrics: formData.get("lyrics") as string | null,
+    startClip: formData.get("start_clip") as string | null,
+
+    explicitContent: formData.get("explicit_content") === "true",
+
+    s3KeyAudio: formData.get("s3keyAudio") as string | null,
+
+    oldAudio: formData.get("old_audio") as string | null,
   };
 }
 
@@ -932,3 +1046,189 @@ export function validateDraftAlbums(
 
   return null;
 }
+
+export function validateDraftTracks(payload: TrackForm) {
+  if (
+    !payload.title ||
+    typeof payload.title !== "string" ||
+    payload.title.length <= 3 ||
+    containsEmoji(payload.title)
+  ) {
+    return "Song title is required and must be longer than 3 letters.";
+  }
+
+  if (
+    payload.song_writer &&
+    (!(payload.song_writer instanceof Array) ||
+      payload.song_writer.some((artist) => artist.first_name === "") ||
+      payload.song_writer.some((artist) => artist.last_name === ""))
+  ) {
+    return "Song writer is required";
+  }
+
+  if (
+    payload.producer &&
+    (!(payload.producer instanceof Array) ||
+      payload.producer.some((artist) => artist.name === ""))
+  ) {
+    return "Producer is required";
+  }
+
+  if (
+    payload.performer &&
+    (!(payload.performer instanceof Array) ||
+      payload.performer.some(
+        (artist) => artist.name === "" || artist.role === "",
+      ))
+  ) {
+    return "Performer is required";
+  }
+
+  if (
+    (payload.start_clip && typeof payload.start_clip != "string") ||
+    (payload.start_clip &&
+      payload.start_clip.length > 0 &&
+      !numRegex.test(payload.start_clip))
+  ) {
+    return "Start Clip is required.";
+  }
+
+  if (payload.another_distribution_check && payload.isrc === "") {
+    return "ISRC is required when transferring from another distributor.";
+  }
+  if (payload.upc === "") {
+    return "UPC is required when transferring from another distributor.";
+  }
+
+  // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
+  //   return "Copy write year and Copy write holder is required";
+  // }
+
+  // if (!payload.musicImage) {
+  //   return "Release image is required";
+  // }
+
+  // if (
+  //   payload.musicImage &&
+  //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
+  // ) {
+  //   return "Invalid image format";
+  // }
+
+  // if (!payload.s3KeyAudio) {
+  //   return "Audio upload is required";
+  // }
+
+  return null;
+}
+
+export function validateNonDraftTracks(payload: TrackForm) {
+  if (
+    !payload.title ||
+    typeof payload.title !== "string" ||
+    payload.title.length <= 3 ||
+    containsEmoji(payload.title)
+  ) {
+    return "Song title is required and must be longer than 3 letters.";
+  }
+
+  if (!payload.genre || !genreList.includes(payload.genre)) {
+    return "Invalid genre";
+  }
+
+  if (!payload.language || !languagesList.includes(payload.language)) {
+    return "Invalid language";
+  }
+
+  if (
+    !payload.song_writer ||
+    !(payload.song_writer instanceof Array) ||
+    payload.song_writer.some((artist) => artist.first_name === "") ||
+    payload.song_writer.some((artist) => artist.last_name === "")
+  ) {
+    return "Song writer is required";
+  }
+
+  if (
+    !payload.producer ||
+    !(payload.producer instanceof Array) ||
+    payload.producer.some((artist) => artist.name === "")
+  ) {
+    return "Producer is required";
+  }
+
+  if (
+    !payload.performer ||
+    !(payload.performer instanceof Array) ||
+    payload.performer.some((artist) => artist.name === "" || artist.role === "")
+  ) {
+    return "Performer is required";
+  }
+
+  if (
+    !payload.start_clip ||
+    typeof payload.start_clip != "string" ||
+    !numRegex.test(payload.start_clip)
+  ) {
+    return "Start Clip is required.";
+  }
+
+  if (payload.another_distribution_check && payload.isrc === "") {
+    return "ISRC is required when transferring from another distributor.";
+  }
+
+  if (!payload.track_number || !numRegex.test(payload.track_number)) {
+    return "Track number is required.";
+  }
+
+  if (!payload.old_audio && !payload.s3key) {
+    return "Audio upload is required";
+  }
+
+  return null;
+}
+
+export const handleReactQueryApiCallError = (
+  errorCount: number,
+  error: Error,
+): boolean => {
+  if (isAxiosError(error) && error.status === 401) {
+    return false;
+  } else if (errorCount < 2) {
+    return true;
+  }
+  return false;
+};
+
+export const createEmptyTrack = (): TrackForm => ({
+  id: crypto.randomUUID(),
+  title: "",
+  genre: "",
+  track_number: "",
+  uploadStatus: "idle",
+  language: "",
+  artist: "",
+  release_date: undefined,
+  preOrderDate: undefined,
+  featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+  performer: [{ name: "", role: "" }],
+  song_writer: [{ first_name: "", last_name: "" }],
+  producer: [{ name: "" }],
+  pre_order_check: false,
+  another_distribution_check: false,
+  territories: [],
+  song_audio: null,
+  music_image: null,
+  dsp: [],
+  lyrics: "",
+  start_clip: "",
+  isrc: "",
+  upc: "",
+  copyRightHolder: "",
+  copyRightYear: "",
+  explicit_content: false,
+  old_audio: null,
+  old_image: null,
+  validationError: null,
+  s3key: "",
+});
