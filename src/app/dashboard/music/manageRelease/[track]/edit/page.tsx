@@ -1,12 +1,12 @@
 "use client";
-import { albumFromApi, songFromApi, TrackForm } from "@/app/type";
+import { TrackForm, TrackFromApi } from "@/app/type";
 import {
   containsEmoji,
   createEmptyTrack,
   isTrackFormValid,
 } from "@/util/middleware/functions";
 import Image from "next/image";
-import React, { use, useEffect, useMemo, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
@@ -15,64 +15,73 @@ import EditTrackForm from "./EditTrackForm";
 import { useGetAlbums, useGetAlbumTracks } from "@/util/customHooks/useQueries";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
+    const queryClient = useQueryClient();
+    const dashboardContext = useContext(DashboardContext);
+    useEffect(() => {
+      dashboardContext?.setLayoutHeaderMessage("Edit Tracks");
+    }, []);
   const router = useRouter();
   const { track } = use(params);
 
   const api = UseAxios();
 
   const { data: album, isLoading: isAlbumLoading } = useGetAlbums({
-    albumTitle: track,
+    albumTitle: track.replaceAll("%20"," "),
   });
-  const { data, isLoading, isError, error } = useGetAlbumTracks({
-    albumTitle: track,
+  const { data, isLoading, isError, error,refetch } = useGetAlbumTracks({
+    albumTitle: track.replaceAll("%20"," "),
   });
 
-const [tracks, setTracks] = useState<TrackForm[]>([]);
-const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
+  const [tracks, setTracks] = useState<TrackForm[]>([]);
+  const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
 
   if (isError) {
     router.push("/dashboard/music/manageRelease?type=album");
   }
 
-useEffect(() => {
-  if (!data?.data?.length) return;
+  useEffect(() => {
+    if (!data?.data?.length) return;
 
-  const mappedTracks: TrackForm[] = data.data.map((item: songFromApi) => ({
-    id: item._id, // must exist
-    title: item.releaseTitle || "",
-    genre: item.genre || "",
-    language: item.releaseLanguage || "",
-    artist: item.artistName || "",
-    release_date: item.releaseDate || null,
-    preOrderDate: item.preOrderDate || null,
+    const mappedTracks: TrackForm[] = data.data.map((item: TrackFromApi) => ({
+      id: item._id, // must exist
+      title: item.releaseTitle || "",
+      genre: item.genre || "",
+      language: item.releaseLanguage || "",
+      artist: item.artistName || "",
+      release_date: item.releaseDate || null,
+      preOrderDate: item.preOrderDate || null,
 
-    featured_artist: item.featuredArtist || [],
-    performer: item.performer || [],
-    song_writer: item.songWriter || [],
-    producer: item.producer || [],
+      featured_artist: item.featuredArtist.length > 0 ? item.featuredArtist : [
+        { artistName: "", spotifyId: "", appleId: "" },
+      ],
+      performer: item.performer.length > 0 ? item.performer : [{ name: "", role: "" }],
+      song_writer: item.songWriter.length > 0 ? item.songWriter : [{ first_name: "", last_name: "" }],
+      producer: item.producer.length > 0 ? item.producer : [{ name: "" }],
 
-    pre_order_check: item.preOrderCheck || false,
-    another_distribution_check: item.anotherDistributionCheck || false,
+      pre_order_check: item.preOrderCheck || false,
+      another_distribution_check: item.anotherDistributionCheck || false,
 
-    song_audio: null,           // new upload
-    old_audio: item.releaseAudio || null, // existing file
+      song_audio: null, // new upload
+      old_audio: item.releaseAudio || null, // existing file
 
-    lyrics: item.lyrics || "",
-    start_clip: item.startClip || "",
+      lyrics: item.lyrics || "",
+      start_clip: item.startClip || "",
 
-    isrc: item.isrc || "",
-    upc: item.upc || "",
+      isrc: item.isrc || "",
+      upc: item.upc || "",
+      track_number: item.trackNumber,
 
-    explicit_content: item.explicitContent || false,
-  }));
+      explicit_content: item.explicitContent || false,
+    }));
 
-  setTracks(mappedTracks);
-  setActiveTrackId(mappedTracks[0].id);
-}, [data]);
-
+    setTracks(mappedTracks);
+    setActiveTrackId(mappedTracks[0].id);
+  }, [data]);
 
   console.log(tracks);
 
@@ -82,7 +91,7 @@ useEffect(() => {
 
   const maxTracks = parseInt(album.data[0].numberOfTracks, 10);
   const activeTrack = tracks.find((t) => t.id === activeTrackId)!;
-console.log("dss",activeTrack);
+  // console.log("dss", activeTrack);
 
   function addTrack() {
     if (tracks.length >= maxTracks) return;
@@ -137,9 +146,9 @@ console.log("dss",activeTrack);
             return toast.warn("track" + " " + (i + 1) + " " + validForm);
           }
         }
-        // else if(action === "draft"){
-        //   if (tracks[i].)
-        // }
+        else if(action === "draft"){
+          
+        }
       }
 
       let res;
@@ -148,7 +157,7 @@ console.log("dss",activeTrack);
         toast.info(
           "Uploading song. This may take a while depending on your internet speed.",
         );
-        res = await api.post(
+        res = await api.put(
           "album/track",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
@@ -156,7 +165,7 @@ console.log("dss",activeTrack);
           },
         );
       } else {
-        res = await api.post(
+        res = await api.put(
           "album/track/draft",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
@@ -165,6 +174,7 @@ console.log("dss",activeTrack);
         );
       }
       toast.success(res?.data?.msg);
+      queryClient.invalidateQueries({queryKey:["edit tracks",album.data[0].releaseTitle],exact:true})
       router.push("/dashboard/music/manageRelease?type=album");
     } catch (error) {
       if (isAxiosError(error)) {
@@ -177,20 +187,20 @@ console.log("dss",activeTrack);
     }
   };
 
-  const saveToLocalStorage = () => {
-    localStorage.setItem(
-      "albumTracks",
-      JSON.stringify(tracks.map((track) => JSON.stringify(track))),
-    );
-  };
+  // const saveToLocalStorage = () => {
+  //   localStorage.setItem(
+  //     "albumTracks",
+  //     JSON.stringify(tracks.map((track) => JSON.stringify(track))),
+  //   );
+  // };
 
-  return isLoading || !activeTrack || !activeTrackId? (
+  return isLoading || !activeTrack || !activeTrackId || isSubmittingForm? (
     <InlineLoadingScreen />
   ) : (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[260px]">
       <button
         onClick={() => {
-          saveToLocalStorage();
+          // saveToLocalStorage();
           router.push("/dashboard/music/manageRelease?type=album");
         }}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"

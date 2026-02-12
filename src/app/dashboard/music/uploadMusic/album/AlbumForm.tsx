@@ -185,7 +185,7 @@ const AlbumForm = () => {
             </button>
             <div className="flex gap-8 px-5 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-30 min-h-[64dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -279,6 +279,9 @@ const AlbumForm = () => {
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           The Number of tracks expected to be in the album.
+                        </p>
+                        <p className="font-light italic text-error-500 text-xs leading-[18px] tracking-[0.5px]">
+                          This can&apos;t be changed, except drafts
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">

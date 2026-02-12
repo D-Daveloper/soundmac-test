@@ -205,7 +205,7 @@ export interface TrackForm extends SongForm {
   s3key:string;
 };
 export interface TrackFromApi extends songFromApi {
-  track_number:string;
+  trackNumber:string;
   validationError:string|null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
 };

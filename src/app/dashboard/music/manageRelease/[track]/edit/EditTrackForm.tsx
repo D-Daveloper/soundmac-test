@@ -184,49 +184,49 @@ const EditTrackForm = ({
     }
   };
 
-  useEffect(() => {
-    const string_form = localStorage.getItem("songForm");
-    const featured_artist = localStorage.getItem("featured_artist");
-    const song_writer = localStorage.getItem("song_writer");
-    const performer = localStorage.getItem("performer");
-    const producer = localStorage.getItem("producer");
+  // useEffect(() => {
+  //   const string_form = localStorage.getItem("songForm");
+  //   const featured_artist = localStorage.getItem("featured_artist");
+  //   const song_writer = localStorage.getItem("song_writer");
+  //   const performer = localStorage.getItem("performer");
+  //   const producer = localStorage.getItem("producer");
 
-    if (string_form) {
-      const songForm = JSON.parse(string_form);
+  //   if (string_form) {
+  //     const songForm = JSON.parse(string_form);
 
-      // Parse with fallback to default value
-      const featured_artist1 = featured_artist
-        ? JSON.parse(featured_artist)
-        : [{ artistName: "", spotifyId: "", appleId: "" }];
+  //     // Parse with fallback to default value
+  //     const featured_artist1 = featured_artist
+  //       ? JSON.parse(featured_artist)
+  //       : [{ artistName: "", spotifyId: "", appleId: "" }];
 
-      const song_writer1 = song_writer
-        ? JSON.parse(song_writer)
-        : [{ first_name: "", last_name: "" }];
+  //     const song_writer1 = song_writer
+  //       ? JSON.parse(song_writer)
+  //       : [{ first_name: "", last_name: "" }];
 
-      const performer1 = performer
-        ? JSON.parse(performer)
-        : [{ name: "", role: "" }];
+  //     const performer1 = performer
+  //       ? JSON.parse(performer)
+  //       : [{ name: "", role: "" }];
 
-      const producer1 = producer
-        ? JSON.parse(producer)
-        : [{ first_name: "", last_name: "" }];
+  //     const producer1 = producer
+  //       ? JSON.parse(producer)
+  //       : [{ first_name: "", last_name: "" }];
 
-      console.log(featured_artist1);
+  //     console.log(featured_artist1);
 
-      onChange({
-        ...songForm,
-        featured_artist: featured_artist1,
-        song_writer: song_writer1,
-        performer: performer1,
-        producer: producer1,
-        release_date: undefined,
-        preOrderDate: undefined,
-        music_image: null,
-        song_audio: null,
-      });
-    }
-  }, []);
-console.log(album);
+  //     onChange({
+  //       ...songForm,
+  //       featured_artist: featured_artist1,
+  //       song_writer: song_writer1,
+  //       performer: performer1,
+  //       producer: producer1,
+  //       release_date: undefined,
+  //       preOrderDate: undefined,
+  //       music_image: null,
+  //       song_audio: null,
+  //     });
+  //   }
+  // }, []);
+// console.log(album);
 
   // useEffect(() => {
   //   album.unassignedNumbers = album.unassignedNumbers.filter((num,index)=> num != track.track_number )
@@ -926,7 +926,8 @@ console.log(album);
                     </div>
                     <div className="w-full">
                       <Select
-                      isDisabled={track.s3key && track.s3key.length > 0 || false}
+                      isDisabled={true}
+                      // isDisabled={track.s3key && track.s3key.length > 0 || false}
                         selected={track.track_number}
                         setSelected={(t) =>{ 
                           onChange({ track_number: t });
@@ -937,9 +938,9 @@ console.log(album);
                         
                       />
                     </div>
-                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                    {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       This can&apos;t be changed, except drafts
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>

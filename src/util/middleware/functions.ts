@@ -1047,7 +1047,7 @@ export function validateDraftAlbums(
   return null;
 }
 
-export function validateDraftTracks(payload: TrackForm) {
+export function validateDraftTracks(payload: TrackForm,listOfTrackNumbers:string[]) {
   if (
     !payload.title ||
     typeof payload.title !== "string" ||
@@ -1099,7 +1099,12 @@ export function validateDraftTracks(payload: TrackForm) {
   if (payload.upc === "") {
     return "UPC is required when transferring from another distributor.";
   }
-
+  if (!payload.track_number || !numRegex.test(payload.track_number)) {
+    return "Track number is required.";
+  }
+  if (!listOfTrackNumbers.includes(payload.track_number)) {
+    return "Invalid Track number or Track number already used.";
+  }
   // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
   //   return "Copy write year and Copy write holder is required";
   // }
@@ -1122,7 +1127,7 @@ export function validateDraftTracks(payload: TrackForm) {
   return null;
 }
 
-export function validateNonDraftTracks(payload: TrackForm) {
+export function validateNonDraftTracks(payload: TrackForm,listOfTrackNumbers:string[]) {
   if (
     !payload.title ||
     typeof payload.title !== "string" ||
@@ -1179,6 +1184,9 @@ export function validateNonDraftTracks(payload: TrackForm) {
 
   if (!payload.track_number || !numRegex.test(payload.track_number)) {
     return "Track number is required.";
+  }
+  if (!listOfTrackNumbers.includes(payload.track_number)) {
+    return "Invalid Track number or Track number already used.";
   }
 
   if (!payload.old_audio && !payload.s3key) {

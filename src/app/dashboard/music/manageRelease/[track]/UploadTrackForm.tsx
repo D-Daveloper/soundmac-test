@@ -680,7 +680,7 @@ console.log(album);
                       />
                     </div>
 
-                    <div className="flex items-center justify-between w-full ">
+                    <div className="flex items-center justify-between w-full flex-wrap gap-2">
                       <label
                         htmlFor="song_audio"
                         className="flex w-60 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
@@ -923,7 +923,8 @@ console.log(album);
                     </div>
                     <div className="w-full">
                       <Select
-                      isDisabled={track.s3key.length > 0}
+                      isDisabled={false}
+                      // isDisabled={track.s3key.length > 0}
                         selected={track.track_number}
                         setSelected={(t) =>{ 
                           onChange({ track_number: t });
@@ -934,9 +935,9 @@ console.log(album);
                         
                       />
                     </div>
-                    <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                    {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       This can&apos;t be changed, except drafts
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>

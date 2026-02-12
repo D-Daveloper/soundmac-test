@@ -13,6 +13,7 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
+import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
@@ -176,9 +177,7 @@ export async function GET(req: Request) {
     const sortQuery = buildSort(sort) as {
       [key: string]: SortOrder | { $meta: any };
     }; //this is use to format the sort query for mongodb.
-    const query: any = {
-      user: userJwt.user,
-    };
+    const query: any = {};
     if (albumStatusFilter && albumStatusFilter !== "all") {
       query.releaseStatus = albumStatusFilter;
     }
@@ -186,7 +185,7 @@ export async function GET(req: Request) {
     if (albumTitle?.trim()) {
       query.releaseTitle = { $regex: `^${albumTitle}`, $options: "i" };
     }
-
+    query.user = userJwt.user
     albums = await AlbumModel.find(query)
       .collation({ locale: "en", strength: 2 })
       .sort(sortQuery)
@@ -361,6 +360,7 @@ export async function PUT(req: Request) {
         releaseStatus: "pending",
       },{runValidators:true}
     );
+    await TrackModel.updateMany({upc:payload.upc},{$set:{albumName:payload.title}})
 
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
@@ -432,6 +432,7 @@ export async function DELETE(req: Request) {
               { status: 400 },
             );
           }
+          await TrackModel.deleteMany({upc:release.upc});
           return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
         } else {
           return NextResponse.json(

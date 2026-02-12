@@ -11,7 +11,11 @@ import UseAxios from "@/util/customHooks/UseAxios";
 import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
-import { RefetchOptions, QueryObserverResult } from "@tanstack/react-query";
+import {
+  RefetchOptions,
+  QueryObserverResult,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -30,7 +34,8 @@ const ManageAlbumForm = ({
 }) => {
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
-  const { deleteParam } = useTabQuery();
+  const queryClient = useQueryClient();
+
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
   const [date, setDate] = useState({
@@ -108,7 +113,7 @@ const ManageAlbumForm = ({
         res = await api.put("album/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
-      }else {
+      } else {
         return toast.warn("Only drafts can be saved as draft.");
       }
       toast.success(res?.data?.msg);
@@ -131,6 +136,11 @@ const ManageAlbumForm = ({
         number_of_track: "",
       });
       setImage(null);
+      queryClient.invalidateQueries({
+        queryKey: ["getAlbum", albumFromApi.releaseTitle],
+        exact: true,
+      });
+
       refetch();
       setPreview(false);
     } catch (error) {

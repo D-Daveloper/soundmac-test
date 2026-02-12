@@ -2,7 +2,7 @@
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import { NormalLoadingScreen } from "../components/Loader/loader";
@@ -108,7 +108,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       setIsActive: () => setIsActive("explore"),
     },
   ];
-
+useEffect(()=>{
+  setIsOpen(false);
+},[pathname])
   if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
   return (
     <UserRoute>
