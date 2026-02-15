@@ -19,5 +19,5 @@ const AudioUploadTrackerSchema = new mongoose.Schema({
     timestamps: true, // Adds createdAt and updatedAt fields
   });
 
-export default mongoose.models.AudioUploadTracker ||
+export default mongoose.models?.AudioUploadTracker ||
   mongoose.model("AudioUploadTracker", AudioUploadTrackerSchema);

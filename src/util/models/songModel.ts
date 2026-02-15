@@ -378,6 +378,8 @@ const SongModelSchema = new mongoose.Schema(
 // Indexes for better query performance
 SongModelSchema.index({ artistName: 1 ,releaseDate: -1});
 SongModelSchema.index({ releaseTitle: 1,user:1 });
+SongModelSchema.index({ user: 1,artistName:1 });
+SongModelSchema.index({ user: 1,createdAt:1 });
 // enforce uniqueness
 SongModelSchema.index(
   { artist: 1, releaseTitle: 1 },

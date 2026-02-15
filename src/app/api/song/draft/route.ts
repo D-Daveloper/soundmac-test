@@ -2,6 +2,7 @@ import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { getUPCs } from "@/util/middleware/dpm";
 import {
+  getYearRange,
   parseSongFormData,
   validateDraftSongs,
 } from "@/util/middleware/functions";
@@ -9,6 +10,7 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import Artist from "@/util/models/artistModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
+import { addWeeks } from "date-fns";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -49,6 +51,13 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 400 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 400 };
+    } else if (user.premium !== true) {
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
@@ -65,12 +74,30 @@ export async function POST(req: Request) {
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    } 
+    }
+
+    const { startOfYear, endOfYear } = getYearRange();
+
+    const releasesThisYear = await SongModel.countDocuments({
+      user: user!._id,
+      createdAt: {
+        $gte: startOfYear,
+        $lt: endOfYear,
+      },
+    });
+
+    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
+      return NextResponse.json(
+        { msg: "Emerging artists can only upload 2 releases per year" },
+        { status: 403 },
+      );
+    }
+
     releaseTitleAlreadyExist = await SongModel.find({
-        artist: userArtist._id,
-        releaseTitle: payload.title,
-      });
-    
+      artist: userArtist._id,
+      releaseTitle: payload.title,
+    });
+
     if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 0) {
       return NextResponse.json(
         { msg: "Release title already exists" },
@@ -131,10 +158,15 @@ export async function POST(req: Request) {
       anotherDistributionCheck: payload.anotherDistributionCheck,
       explicitContent: payload.explicitContent,
       releaseDate:
-        payload.releaseDate == "undefined" ? null : payload.releaseDate,
+        user!.type === "EMERGING_ARTIST"
+          ? addWeeks(new Date(), 2)
+          : payload.releaseDate,
       preOrderDate:
         payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-      copyRightHolder: payload.copyRightHolder,
+      copyRightHolder:
+        user!.type === "EMERGING_ARTIST"
+          ? "Distributed by SoundMac"
+          : payload.copyRightHolder,
       copyRightYear: payload.copyRightYear,
       lyrics: payload.lyrics,
       startClip: payload.startClip,
@@ -214,12 +246,12 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
     let releaseTitleAlreadyExist = null;
-    
-        releaseTitleAlreadyExist = await SongModel.find({
-        artist: userArtist._id,
-        releaseTitle: payload.title,
-      });
-    
+
+    releaseTitleAlreadyExist = await SongModel.find({
+      artist: userArtist._id,
+      releaseTitle: payload.title,
+    });
+
     if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 1) {
       return NextResponse.json(
         { msg: "Release title already exists" },
@@ -287,10 +319,15 @@ export async function PUT(req: Request) {
         anotherDistributionCheck: payload.anotherDistributionCheck,
         explicitContent: payload.explicitContent,
         releaseDate:
-          payload.releaseDate == "undefined" ? null : payload.releaseDate,
+          user!.type === "EMERGING_ARTIST"
+            ? addWeeks(new Date(), 2)
+            : payload.releaseDate,
         preOrderDate:
           payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-        copyRightHolder: payload.copyRightHolder,
+        copyRightHolder:
+          user!.type === "EMERGING_ARTIST"
+            ? "Distributed by SoundMac"
+            : payload.copyRightHolder,
         copyRightYear: payload.copyRightYear,
         lyrics: payload.lyrics,
         startClip: payload.startClip,

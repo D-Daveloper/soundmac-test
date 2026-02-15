@@ -1,0 +1,83 @@
+import { PaymentEmailData } from "@/app/type";
+import dbConnect from "@/util/db";
+import {
+  handleChargeSuccess,
+  handleFailedPayment,
+  handleSubscriptionCreate,
+  subSuccessEmail,
+} from "@/util/middleware/functions";
+import User from "@/util/models/userModel";
+import sendEmail from "@/util/sendMail/sendEmail";
+import crypto from "crypto";
+import { headers } from "next/headers";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  const body = await req.text();
+  const header = await headers();
+  const signature = header.get("x-paystack-signature");
+
+  const hash = crypto
+    .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!)
+    .update(body)
+    .digest("hex");
+
+  if (hash !== signature)
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+
+  const event = JSON.parse(body);
+  console.log("hhiukj", event);
+
+  await dbConnect();
+
+  try {
+    if (event.event === "charge.success") {
+
+      const user = await User.findOne({ email: event.data.customer.email });
+
+      if (!user) return;
+
+      await handleChargeSuccess(event.data, user);
+
+
+      const support_email = process.env.SUPPORT_EMAIL!;
+      const company_name = process.env.COMPANY_NAME!;
+      const company_address = process.env.COMPANY_ADDRESS!;
+      const frontendUrl = process.env.FRONTEND_URL;
+
+
+      const paymentData: PaymentEmailData = {
+        customerName: user.firstName,
+        customerEmail: user.email,
+        planName: event.data.plan.name,
+        amount: (event.data.amount / 100).toString(),
+        currency: "NGN",
+        billingCycle: event.data.plan.interval,
+        nextBillingDate: new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000,
+        ).toDateString(),
+        transactionId: event.data.reference,
+        support_email,
+        company_address,
+        company_name,
+        dashboardUrl: frontendUrl + "/dashboard",
+      };
+      const html = subSuccessEmail(paymentData)
+
+      await sendEmail(user.email, "subscription payment", html);
+    }
+
+    if (event.event === "invoice.payment_failed") {
+      await handleFailedPayment(event.data);
+    }
+
+    if (event.event === "subscription.create") {
+      await handleSubscriptionCreate(event.data);
+    }
+
+    return NextResponse.json({ received: true });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Webhook error" }, { status: 500 });
+  }
+}

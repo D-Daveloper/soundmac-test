@@ -30,14 +30,14 @@ export async function POST(req: Request) {
     } else if (!artistName || artistName.trim() === "") {
       return NextResponse.json(
         { msg: "Artist name is required" },
-        { status: 400 }
+        { status: 400 },
       );
     } else if (!["image/jpeg", "image/png"].includes(file.type)) {
       return NextResponse.json(
         {
           msg: "Invalid Image format.",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,12 +49,26 @@ export async function POST(req: Request) {
     } else if (!user.confirmed) {
       return NextResponse.json(
         { msg: "Please verify your email address." },
-        { status: 400 }
+        { status: 400 },
       );
     } else if (user.otp !== null) {
-      return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
     } else {
       artist = await Artist.find({
+        user: user._id,
         artistName: artistName,
       });
       // .explain("executionStats");
@@ -63,23 +77,48 @@ export async function POST(req: Request) {
     if (artist.length > 0) {
       return NextResponse.json(
         { msg: "Artist already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
+    const total_artists = await Artist.countDocuments({ user: user._id });
+    let total_artists_allowed = 1;
+    switch (user.type) {
+      case "EMERGING_ARTIST":
+        total_artists_allowed = 1;
+        break;
+      case "INDEPENDENT_ARTISTE":
+        total_artists_allowed = 1;
+        break;
+      case "INDIE_LABEL":
+        total_artists_allowed = 10;
+        break;
+      case "MAJOR_LABEL":
+        total_artists_allowed = 100;
+        break;
+
+      default:
+        total_artists_allowed = 1;
+        break;
+    }
+    
+    if(total_artists >= total_artists_allowed){
+      NextResponse.json({msg:"Artist creation limit reached, please upgrade your account."},{status:402})
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
     const imageType = file.type.split("/")[1];
     const imageStorageLocation = `testing/artistImages/${artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
     const selectedImage = await uploadImage(
       imageType,
       buffer,
-      imageStorageLocation
+      imageStorageLocation,
     );
     if (selectedImage.coverUrl === null) {
       return NextResponse.json(
         {
           msg: selectedImage.error,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
     artist = new Artist({
@@ -92,16 +131,19 @@ export async function POST(req: Request) {
     await artist.save();
     return NextResponse.json(
       { msg: "Artist created successfully", artist },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error: unknown) {
     return handleMongooseValidationError(error);
   }
-} 
+}
 
 // under review
 export async function DELETE(req: Request) {
-  return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+  return NextResponse.json(
+    { msg: "Not Available at this time, please try again later" },
+    { status: 400 },
+  );
   // const session = await mongoose.startSession();
 
   // try {
@@ -297,7 +339,7 @@ export async function GET(req: Request) {
         totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
         msg: totalCount > 0 ? "Successful" : "No artists found",
       },
-      { status: 200 }
+      { status: 200 },
     );
     // const artists = await Artist.find({ user: userJwt.user }).populate("user", "email").sort({[sort]:1}).skip((page - 1) * limit).limit(limit);
   } catch (error: unknown) {
@@ -306,7 +348,7 @@ export async function GET(req: Request) {
     } else {
       return NextResponse.json(
         { msg: "An unknown error occurred" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

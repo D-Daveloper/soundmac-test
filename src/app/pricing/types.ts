@@ -8,4 +8,5 @@ export interface PricingObjects{
     price: string;
     prompt: string;
     features: string[]
+    plan:string
 }

@@ -3,6 +3,9 @@
 export interface DASHBOARD_CONTEXT {
     layoutHeaderMessage: string;
     setLayoutHeaderMessage: React.Dispatch<React.SetStateAction<string>>
+    openUpgradePopUp: boolean;
+    setOpenUpgradePopUp: React.Dispatch<React.SetStateAction<boolean>>;
+    isPremium:boolean
     // getUser: (setLoading: GET_USER, onSuccess: ON_SUCCESS, onError: ON_ERROR) => void
     // hamburgerOpen: boolean
     // logOut: () => void

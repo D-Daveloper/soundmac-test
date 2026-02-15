@@ -53,17 +53,37 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
       });
     }
-    console.log("eet", userArtist, payload.artist);
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
+
+    if (user!.type === "EMERGING_ARTIST") {
+      return NextResponse.json(
+        { msg: "Emerging artists can not upload Album" },
+        { status: 403 },
+      );
+    }
+
     if (
       !payload.title ||
       typeof payload.title !== "string" ||
@@ -185,7 +205,7 @@ export async function GET(req: Request) {
     if (albumTitle?.trim()) {
       query.releaseTitle = { $regex: `^${albumTitle}`, $options: "i" };
     }
-    query.user = userJwt.user
+    query.user = userJwt.user;
     albums = await AlbumModel.find(query)
       .collation({ locale: "en", strength: 2 })
       .sort(sortQuery)
@@ -227,7 +247,7 @@ export async function PUT(req: Request) {
     console.log({ ...formData });
     const payload = parseAlbumFormData(formData);
     let release: albumFromApi | null = null;
-    
+
     if (
       !payload.artist ||
       payload.artist.trim() === "" ||
@@ -358,9 +378,13 @@ export async function PUT(req: Request) {
         unassignedNumbers: number_of_track_array,
         user: user._id,
         releaseStatus: "pending",
-      },{runValidators:true}
+      },
+      { runValidators: true },
     );
-    await TrackModel.updateMany({upc:payload.upc},{$set:{albumName:payload.title}})
+    await TrackModel.updateMany(
+      { upc: payload.upc },
+      { $set: { albumName: payload.title } },
+    );
 
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
@@ -432,7 +456,7 @@ export async function DELETE(req: Request) {
               { status: 400 },
             );
           }
-          await TrackModel.deleteMany({upc:release.upc});
+          await TrackModel.deleteMany({ upc: release.upc });
           return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
         } else {
           return NextResponse.json(

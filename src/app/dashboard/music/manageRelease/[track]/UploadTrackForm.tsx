@@ -3,6 +3,7 @@ import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { languagesList } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
   albumFromApi,
   FeaturedArtist,
@@ -19,7 +20,7 @@ import { uploadAlbumTrack, uploadTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import { Info, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 type TrackFormProps = {
@@ -38,6 +39,7 @@ const UploadTrackForm = ({
   setIsUploadingTrack,
 }: TrackFormProps) => {
   const api = UseAxios();
+  const dashboardContext = useContext(DashboardContext);
   const [uploading, setUploading] = useState(false);
 
   const addField = (field: keyof SongForm) => {
@@ -143,6 +145,10 @@ const UploadTrackForm = ({
 
   const uploadSong = async () => {
     try {
+      if (!dashboardContext?.isPremium) {
+        dashboardContext?.setOpenUpgradePopUp(true);
+        return;
+      }
       setUploading(true);
 
       setIsUploadingTrack(true);
@@ -162,16 +168,16 @@ const UploadTrackForm = ({
         api,
         track.track_number,
       );
-      console.log("nnnjjj",songS3Key);
+      console.log("nnnjjj", songS3Key);
       if (error != null) {
         return;
       }
-      
+
       track.s3key = songS3Key; //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
       track.song_audio = null;
       toast.success("Uploaded, please continue with the form.");
     } catch (error) {
-      if (isAxiosError(error)) { 
+      if (isAxiosError(error)) {
         return;
       }
       toast.error("Something went wrong!.");
@@ -223,7 +229,7 @@ const UploadTrackForm = ({
       });
     }
   }, []);
-console.log(album);
+  console.log(album);
 
   // useEffect(() => {
   //   album.unassignedNumbers = album.unassignedNumbers.filter((num,index)=> num != track.track_number )
@@ -923,16 +929,15 @@ console.log(album);
                     </div>
                     <div className="w-full">
                       <Select
-                      isDisabled={false}
-                      // isDisabled={track.s3key.length > 0}
+                        isDisabled={false}
+                        // isDisabled={track.s3key.length > 0}
                         selected={track.track_number}
-                        setSelected={(t) =>{ 
+                        setSelected={(t) => {
                           onChange({ track_number: t });
-                      }}
+                        }}
                         placeholder="Select track number..."
                         options={album.unassignedNumbers}
                         name="track_number"
-                        
                       />
                     </div>
                     {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">

@@ -7,6 +7,7 @@ import {
 } from "@/util/middleware/aws";
 import {
   buildSort,
+  getYearRange,
   parseSongFormData,
   uploadImage,
   validateNonDraftSongs,
@@ -16,6 +17,7 @@ import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
+import { addWeeks } from "date-fns";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
@@ -49,17 +51,23 @@ export async function POST(req: Request) {
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
-      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
-      Uploaderror = { msg: "Invalid Request", status: 404 };
+      Uploaderror = { msg: "Invalid Request", status: 401 };
     } else if (!user.confirmed) {
       Uploaderror = { msg: "Please verify your email address", status: 400 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 400 };
+    } else if (user.premium !== true) {
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
@@ -67,9 +75,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // console.log("the user artist ", userArtist?.artistName, payload.artist);
     if (Uploaderror != null) {
-      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || "");
       return NextResponse.json(
         { msg: Uploaderror.msg },
         { status: Uploaderror.status },
@@ -77,9 +83,23 @@ export async function POST(req: Request) {
     } // return any errors up to this point and delete the song
 
     if (!userArtist) {
-      // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
-
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }
+    const { startOfYear, endOfYear } = getYearRange();
+
+    const releasesThisYear = await SongModel.countDocuments({
+      user: user!._id,
+      createdAt: {
+        $gte: startOfYear,
+        $lt: endOfYear,
+      },
+    });
+
+    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
+      return NextResponse.json(
+        { msg: "Emerging artists can only upload 2 releases per year" },
+        { status: 403 },
+      );
     }
 
     const isSongValid = validateNonDraftSongs(payload);
@@ -102,28 +122,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
-    // // ---- Resize to distributor standard ----
-    // const resized = await sharp(buffer)
-    //   .resize(3000, 3000, { fit: "cover" })
-    //   .jpeg({ quality: 90 })
-    //   .toBuffer(); //resize the image for dpm
-
-    // const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
-
-    // const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
-
-    // const imageUrl = await uploadImage(
-    //   imageType,
-    //   resized as Buffer<ArrayBuffer>,
-    //   imageStorageLocation,
-    // ); //send image to aws
-
-    // if (imageUrl.coverUrl == null) {
-    //   await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
-    //   return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
-    // }
-    let imageUrl:{ error: string | null; coverUrl: string | null; } = { coverUrl: null, error: "Failed to upload image" };
+    let imageUrl: { error: string | null; coverUrl: string | null } = {
+      coverUrl: null,
+      error: "Failed to upload image",
+    };
     try {
       const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
       // ---- Resize to distributor standard ----
@@ -148,7 +150,6 @@ export async function POST(req: Request) {
         await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
         return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
       }
-
     } catch (error) {
       console.log("upload image error", error);
     }
@@ -167,10 +168,15 @@ export async function POST(req: Request) {
       anotherDistributionCheck: payload.anotherDistributionCheck,
       explicitContent: payload.explicitContent,
       releaseDate:
-        payload.releaseDate == "undefined" ? null : payload.releaseDate,
+        user!.type === "EMERGING_ARTIST"
+          ? addWeeks(new Date(), 2)
+          : payload.releaseDate,
       preOrderDate:
         payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-      copyRightHolder: payload.copyRightHolder,
+      copyRightHolder:
+        user!.type === "EMERGING_ARTIST"
+          ? "Distributed by SoundMac"
+          : payload.copyRightHolder,
       copyRightYear: payload.copyRightYear,
       lyrics: payload.lyrics,
       startClip: payload.startClip,
@@ -862,16 +868,15 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
 
-    if(payload.uploadId){
+    if (payload.uploadId) {
       audioTracker = await AudioUploadTrackerModel.findOne({
         _id: payload.uploadId,
         s3Key: payload.s3KeyAudio,
         user: user!._id,
         status: "PENDING",
       });
-  
+
       if (audioTracker == null) {
-        // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
         return NextResponse.json(
           { msg: "Invaild Request,please upload audio" },
           { status: 400 },
@@ -922,35 +927,42 @@ export async function PUT(req: Request) {
         upc: payload.upc,
       },
       {
-      releaseTitle: payload.title,
-      releaseImage: imageUrl.coverUrl || payload.oldImage,
-      releaseAudio: payload.s3KeyAudio || payload.oldAudio,
-      genre: payload.genre,
-      releaseLanguage: payload.language,
-      songWriter: payload.song_writer,
-      producer: payload.producer,
-      performer: payload.performer,
-      featuredArtist: payload.featured_artist,
-      preOrderCheck: payload.preOrderCheck,
-      anotherDistributionCheck: payload.anotherDistributionCheck,
-      explicitContent: payload.explicitContent,
-      releaseDate:
-        payload.releaseDate == "undefined" ? null : payload.releaseDate,
-      preOrderDate:
-        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-      copyRightHolder: payload.copyRightHolder,
-      copyRightYear: payload.copyRightYear,
-      lyrics: payload.lyrics,
-      startClip: payload.startClip,
-      dsp: payload.dsp,
-      upc: payload.upc,
-      isrc: payload.isrc,
-      territories: payload.territories,
-      artistName: userArtist.artistName,
-      artist: userArtist._id,
-      user: user!._id,
-      releaseStatus: "pending",
-    },{runValidators: true,});
+        releaseTitle: payload.title,
+        releaseImage: imageUrl.coverUrl || payload.oldImage,
+        releaseAudio: payload.s3KeyAudio || payload.oldAudio,
+        genre: payload.genre,
+        releaseLanguage: payload.language,
+        songWriter: payload.song_writer,
+        producer: payload.producer,
+        performer: payload.performer,
+        featuredArtist: payload.featured_artist,
+        preOrderCheck: payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        explicitContent: payload.explicitContent,
+        releaseDate:
+          user!.type === "EMERGING_ARTIST"
+            ? addWeeks(new Date(), 2)
+            : payload.releaseDate,
+        preOrderDate:
+          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        copyRightHolder:
+          user!.type === "EMERGING_ARTIST"
+            ? "Distributed by SoundMac"
+            : payload.copyRightHolder,
+        copyRightYear: payload.copyRightYear,
+        lyrics: payload.lyrics,
+        startClip: payload.startClip,
+        dsp: payload.dsp,
+        upc: payload.upc,
+        isrc: payload.isrc,
+        territories: payload.territories,
+        artistName: userArtist.artistName,
+        artist: userArtist._id,
+        user: user!._id,
+        releaseStatus: "pending",
+      },
+      { runValidators: true },
+    );
 
     await AudioUploadTrackerModel.findOneAndUpdate(
       {

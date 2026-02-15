@@ -9,6 +9,8 @@ import User from "@/util/models/userModel";
 import Artist from "@/util/models/artistModel";
 import dbConnect from "@/util/db";
 import AlbumModel from "@/util/models/AlbumModel";
+import { getYearRange } from "@/util/middleware/functions";
+import SongModel from "@/util/models/songModel";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -60,6 +62,19 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
     } else {
       userArtist = await Artist.findOne({
         user: userJwt.user,
@@ -69,6 +84,22 @@ export async function POST(req: Request) {
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }
+    const { startOfYear, endOfYear } = getYearRange();
+
+    const releasesThisYear = await SongModel.countDocuments({
+      user: user!._id,
+      createdAt: {
+        $gte: startOfYear,
+        $lt: endOfYear,
+      },
+    });
+
+    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
+      return NextResponse.json(
+        { msg: "Emerging artists can only upload 2 releases per year" },
+        { status: 403 },
+      );
     }
 
     if (isFromAnotherDistributor && !upcFromClient) {
@@ -159,7 +190,7 @@ export async function PUT(req: Request) {
 
     const { fileType, fileSize, upcFromClient, track_number } = body;
     // console.log(body);
-    
+
     if (!fileType || typeof fileType != "string") {
       return NextResponse.json(
         { msg: "file type is required." },
@@ -187,20 +218,39 @@ export async function PUT(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    }
+    if (user!.type === "EMERGING_ARTIST") {
+      return NextResponse.json(
+        { msg: "Emerging artists can not upload track" },
+        { status: 403 },
+      );
     }
 
     if (!upcFromClient) {
       return NextResponse.json({ msg: "UPC is required." }, { status: 400 });
     }
 
-    const userAlbum = await AlbumModel.findOne({upc:upcFromClient});
+    const userAlbum = await AlbumModel.findOne({ upc: upcFromClient });
 
-    if(!userAlbum){
-      return NextResponse.json({msg:"Invalid upc"},{status:400});
+    if (!userAlbum) {
+      return NextResponse.json({ msg: "Invalid upc" }, { status: 400 });
     }
 
-    if(userAlbum.user != userJwt.user){
-      return NextResponse.json({msg:"Invalid Album"},{status:400})
+    if (userAlbum.user != userJwt.user) {
+      return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
     }
 
     let upc = userAlbum.upc;
@@ -241,7 +291,7 @@ export async function PUT(req: Request) {
 
     const query = {
       user: user._id,
-      s3Key:s3key,
+      s3Key: s3key,
       upc,
     };
 
@@ -249,7 +299,7 @@ export async function PUT(req: Request) {
       user: user._id,
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
-      s3Key:s3key,
+      s3Key: s3key,
       upc,
       status: "PENDING",
     };

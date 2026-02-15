@@ -44,12 +44,18 @@ export async function GET(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     }
-    tracks = await TrackModel.find({ albumName: albumTitle.replaceAll("%20"," "), user: userJwt.user });
+    tracks = await TrackModel.find({
+      albumName: albumTitle.replaceAll("%20", " "),
+      user: userJwt.user,
+    });
 
     if (tracks && tracks.length <= 0) {
-      return NextResponse.json({ msg: "Please Add Tracks",data: tracks, }, { status: 400 });
+      return NextResponse.json(
+        { msg: "Please Add Tracks", data: tracks },
+        { status: 400 },
+      );
     }
-    
+
     return NextResponse.json(
       {
         data: tracks,
@@ -90,6 +96,26 @@ export async function POST(req: Request) {
     const user = await User.findById(userJwt.user);
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    }
+    
+    if (user!.type === "EMERGING_ARTIST") {
+      return NextResponse.json(
+        { msg: "Emerging artists can not upload tracks" },
+        { status: 403 },
+      );
     }
 
     const userAlbum = await AlbumModel.findOne<albumFromApi>({
@@ -111,11 +137,15 @@ export async function POST(req: Request) {
       );
     }
     // console.log("first",userAlbum.unassignedNumbers);
-    
-    
+
     for (let i = 0; i < tracks.length; i++) {
-      const err = validateNonDraftTracks(tracks[i],userAlbum.unassignedNumbers);
-      userAlbum.unassignedNumbers = userAlbum.unassignedNumbers.filter((item,index)=> item != tracks[i].track_number);
+      const err = validateNonDraftTracks(
+        tracks[i],
+        userAlbum.unassignedNumbers,
+      );
+      userAlbum.unassignedNumbers = userAlbum.unassignedNumbers.filter(
+        (item, index) => item != tracks[i].track_number,
+      );
       if (err) {
         return NextResponse.json(
           { msg: "Track " + (i + 1) + " " + err },
@@ -151,13 +181,15 @@ export async function POST(req: Request) {
 
     await AudioUploadTrackerModel.updateMany(
       {
-        upc:userAlbum.upc,
+        upc: userAlbum.upc,
         status: "PENDING",
       },
-      {$set:{ status: "ACTIVE" }},
+      { $set: { status: "ACTIVE" } },
     );
     await TrackModel.insertMany(docs);
-    await AlbumModel.findByIdAndUpdate(userAlbum._id,{unassignedNumbers:userAlbum.unassignedNumbers});
+    await AlbumModel.findByIdAndUpdate(userAlbum._id, {
+      unassignedNumbers: userAlbum.unassignedNumbers,
+    });
 
     return NextResponse.json({ msg: "Tracks saved" }, { status: 200 });
   } catch (error) {
@@ -198,7 +230,10 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
     }
     for (let i = 0; i < tracks.length; i++) {
-      const err = validateNonDraftTracks(tracks[i],userAlbum.unassignedNumbers);
+      const err = validateNonDraftTracks(
+        tracks[i],
+        userAlbum.unassignedNumbers,
+      );
       if (err) {
         return NextResponse.json(
           { msg: "Track " + (i + 1) + " " + err },
@@ -234,12 +269,12 @@ export async function PUT(req: Request) {
 
     await AudioUploadTrackerModel.updateMany(
       {
-        upc:userAlbum.upc,
+        upc: userAlbum.upc,
         status: "PENDING",
       },
-      {$set:{ status: "ACTIVE" }},
+      { $set: { status: "ACTIVE" } },
     );
-    await TrackModel.updateMany({upc:userAlbum.upc},docs);
+    await TrackModel.updateMany({ upc: userAlbum.upc }, docs);
 
     return NextResponse.json({ msg: "Tracks saved" }, { status: 200 });
   } catch (error) {

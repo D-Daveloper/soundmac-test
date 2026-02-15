@@ -209,6 +209,10 @@ const SongForm = () => {
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
+    if(!dashboardContext?.isPremium){
+      dashboardContext?.setOpenUpgradePopUp(true);
+      return;
+    }
     setIsSubmittingForm(true);
     const formData = new FormData();
     if (form.title == "") {

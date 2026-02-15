@@ -191,6 +191,6 @@ AlbumSchema.index(
 );
 
 const AlbumModel =
-  mongoose.models.Album || mongoose.model("Album", AlbumSchema);
+  mongoose.models?.Album || mongoose.model("Album", AlbumSchema);
 
 export default AlbumModel;

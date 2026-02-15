@@ -4,17 +4,16 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
-import { useAuthUser } from "@/util/customHooks/useQueries";
-import { NormalLoadingScreen } from "../components/Loader/loader";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
-  const { data, isLoading } = useAuthUser();
+  // const { data, isLoading } = useAuthUser();
   const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
- const pathname = usePathname();
+  const pathname = usePathname();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
   const sidebarComponents = [
@@ -43,19 +42,19 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "create artist",
           icon: "/add.svg",
-          href:"/dashboard/artist/createArtist",
+          href: "/dashboard/artist/createArtist",
           query: "create",
         },
         {
           title: "manage artist",
           icon: "/profile2user.svg",
-          href:"/dashboard/artist/manageArtist",
+          href: "/dashboard/artist/manageArtist",
           query: "manageArtist",
         },
         {
           title: "collaborations",
           icon: "/likeshapes.svg",
-          href:"",
+          href: "",
           query: "collaboration",
         },
       ],
@@ -68,7 +67,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "song performance",
           icon: "/musicplay.svg",
-          href:"",
+          href: "",
           query: "song",
         },
       ],
@@ -81,7 +80,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "sales report",
           icon: "/musicplay.svg",
-          href:"",
+          href: "",
           query: "sales_report",
         },
       ],
@@ -94,13 +93,13 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         {
           title: "promotion",
           icon: "/add.svg",
-          href:"",
+          href: "",
           query: "promotion",
         },
         {
           title: "cover license",
           icon: "/musiclibrary2.svg",
-          href:"",
+          href: "",
           query: "manageRelease",
         },
       ],
@@ -108,17 +107,17 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       setIsActive: () => setIsActive("explore"),
     },
   ];
-useEffect(()=>{
-  setIsOpen(false);
-},[pathname])
-  if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
+  // if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
   return (
     <UserRoute>
       <div>
         <div className="sticky top-0 z-20">
           <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
             <div
-            aria-label="side bar nav button"
+              aria-label="side bar nav button"
               role="button"
               className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
               onClick={() => setIsOpen(!isOpen)}
@@ -197,6 +196,37 @@ useEffect(()=>{
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className={
+            dashboardContext?.openUpgradePopUp
+              ? " fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-sm  "
+              : " hidden"
+          }
+        >
+          <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
+            <button
+              onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
+              className="ml-auto bg-error-500 p-1 rounded-sm text-white flex justify-center items-center mb-5"
+            >
+              <X width={20} height={20} />
+            </button>
+            <div className="flex flex-col gap-2 mb-2">
+              <h3 className="text-xl font-semibold tracking-[-0.5px] text-main-heading">
+                Subscription needed to continue
+              </h3>
+            </div>
+            <div>
+              <Link href={"/pricing"}
+                aria-label="go to pricing page"
+                className={
+                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 flex text-white! bg-primary-500"
+                }
+              >
+                Proceed to pricing
+              </Link>
             </div>
           </div>
         </div>

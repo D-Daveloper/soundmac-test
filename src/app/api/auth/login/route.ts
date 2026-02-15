@@ -67,7 +67,7 @@ export async function POST(req: Request) {
       
             <div style="width: 100%">
               <div style="width: 400px; display: inline-block; text-align: justify">
-                Dear ${user.first_name}, <br />
+                Dear ${user.firstName}, <br />
                 <br />
       
                 Thank you for choosing us as your music distribution platform. Our

@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     }
 
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user,{password:0,subscriptionCode:0,customerCode:0,authorizationCode:0}) : null;
 
     if (!user) {
       return NextResponse.json({ msg: "User Not Found" }, { status: 401 });

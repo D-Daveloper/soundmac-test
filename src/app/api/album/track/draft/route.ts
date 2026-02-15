@@ -152,6 +152,26 @@ export async function PUT(req: Request) {
     const user = await User.findById(userJwt.user);
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+        } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    }
+    
+    if (user!.type === "EMERGING_ARTIST") {
+      return NextResponse.json(
+        { msg: "Emerging artists can not upload tracks" },
+        { status: 403 },
+      );
     }
 
     const userAlbum = await AlbumModel.findOne<albumFromApi>({

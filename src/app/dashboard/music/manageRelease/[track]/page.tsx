@@ -75,6 +75,10 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
   const handleSubmit = async (action: "draft" | "upload") => {
     try {
+      if (!dashboardContext?.isPremium) {
+        dashboardContext?.setOpenUpgradePopUp(true);
+        return;
+      }
       setIsSubmittingForm(true);
       for (let i = 0; i < tracks.length; i++) {
         tracks[i].artist = album.data[0].artistName;

@@ -25,6 +25,7 @@ const AlbumForm = () => {
   const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [date, setDate] = useState({
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
@@ -73,23 +74,27 @@ const AlbumForm = () => {
       setAlbumForm((prev) => ({ ...prev, [name]: value }));
     }
   };
-  console.log(albumForm);
 
   const handleSubmit = async (form: AlbumForm, action: "draft" | "upload") => {
-    console.log(form);
-    const formData = new FormData();
-    Object.entries(form).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
-      } else {
-        formData.append(key, value);
-      }
-    });
-
-    formData.append("action", action);
-    console.log(...formData);
-    let res;
     try {
+      if (!dashboardContext?.isPremium) {
+        dashboardContext?.setOpenUpgradePopUp(true);
+        return;
+      }
+      setIsSubmittingForm(true);
+      console.log(form);
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      formData.append("action", action);
+      console.log(...formData);
+      let res;
       if (action === "upload") {
         const validForm = isAlbumFormValid(form);
         if (validForm != "true") return toast.warn(validForm);
@@ -128,6 +133,8 @@ const AlbumForm = () => {
         return;
       }
       toast.error("something went wrong.");
+    } finally {
+      setIsSubmittingForm(false);
     }
   };
 
@@ -164,7 +171,7 @@ const AlbumForm = () => {
   }, [dashboardContext]);
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px] px-5">
-      {isLoading ? (
+      {isLoading || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&

@@ -209,3 +209,30 @@ export interface TrackFromApi extends songFromApi {
   validationError:string|null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
 };
+
+
+export interface PaymentEmailData {
+  customerName: string;
+  customerEmail: string;
+  planName: string;
+  amount: string;
+  currency: string;
+  billingCycle: string;
+  nextBillingDate: string;
+  transactionId: string;
+  support_email:string;
+  company_name:string;
+  company_address:string;
+  dashboardUrl:string;
+}
+
+export interface CancellationEmailData {
+  customerName: string;
+  customerEmail: string;
+  planName: string;
+  cancellationDate: string;
+  accessUntilDate: string;
+  dataRetentionDays: string;
+  reactivateUrl: string;
+  feedbackUrl: string;
+}

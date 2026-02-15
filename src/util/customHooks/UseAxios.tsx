@@ -65,8 +65,12 @@ const UseAxios = () => {
         // throw modelStateErrors.flat();
 
         toast.error(message);
-      } else if (status === 403)
-        toast.error("You are not authorized for this action.");
+      } else if (status === 402) {
+        toast.error(message || "Payment is required.");
+        router.push("/pricing");
+      }
+      else if (status === 403)
+        toast.error(message || "You are not authorized for this action.");
         else if (status === 404) toast.error(message || "Not Found.");
         else if (status === 500) toast.error(message || "Server error. Try again later.");
         else toast.error(message);
