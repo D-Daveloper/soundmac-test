@@ -7,7 +7,7 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import { LockKeyhole, X } from "lucide-react";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   // const { data, isLoading } = useAuthUser();
@@ -206,26 +206,34 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               : " hidden"
           }
         >
-          <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
-            <button
-              onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
-              className="ml-auto bg-error-500 p-1 rounded-sm text-white flex justify-center items-center mb-5"
-            >
-              <X width={20} height={20} />
-            </button>
-            <div className="flex flex-col gap-2 mb-2">
+          <div className="flex flex-col gap-5 w-fit py-5 px-5 justify-center items-center bg-neutral-100  rounded-xl shadow-2xl max-w-[350px]">
+            <div className="flex flex-col gap-2 mb-2 justify-center items-center">
+              <LockKeyhole size={80} color="#999" strokeWidth={2} />
               <h3 className="text-xl font-semibold tracking-[-0.5px] text-main-heading">
-                Subscription needed to continue
+                Subscription Required{" "}
               </h3>
+              <p className="text-p font-normal text-sm leading-4 -tracking-[0.5px] text-center">
+                This feature is available only to subscribed users.
+                <br /> Pick a plan and start creating with Soundmac.
+              </p>
             </div>
-            <div>
-              <Link href={"/pricing"}
-                aria-label="go to pricing page"
+            <div className="flex gap-3">
+              <button
+                onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
                 className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 flex text-white! bg-primary-500"
+                  "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm  bg-transparent border-2 border-primary-500 text-[#494949]"
                 }
               >
-                Proceed to pricing
+                Not Now
+              </button>
+              <Link
+                href={"/pricing"}
+                aria-label="go to pricing page"
+                className={
+                  "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
+                }
+              >
+                View Plans
               </Link>
             </div>
           </div>

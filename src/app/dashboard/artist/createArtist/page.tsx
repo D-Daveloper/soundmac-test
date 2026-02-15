@@ -1,5 +1,6 @@
 "use client";
 import Input from "@/app/components/input/Input";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type { CreateArtistForm } from "@/app/type";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useCreatArtistMutation } from "@/util/customHooks/useMutations";
@@ -7,7 +8,7 @@ import { isArtistFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const CreateArtistForm = () => {
@@ -15,6 +16,7 @@ const CreateArtistForm = () => {
   const [image, setImage] = useState<string | null>(null);
   const [preview, setPreview] = useState(false);
   const { mutateAsync, isPending } = useCreatArtistMutation();
+  const dashboardContext = useContext(DashboardContext);
   const [artistForm, setArtistForm] = useState<CreateArtistForm>({
     artist_name: "",
     apple_id: "",
@@ -41,6 +43,10 @@ const CreateArtistForm = () => {
 
   const handleSubmit = async (form: CreateArtistForm) => {
     console.log(form);
+  if(!dashboardContext?.isPremium){
+      dashboardContext?.setOpenUpgradePopUp(true);
+      return;
+    }
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (typeof value === "boolean" || typeof value === "string") {
