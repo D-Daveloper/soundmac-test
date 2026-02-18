@@ -7,113 +7,133 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
-import { LockKeyhole, X } from "lucide-react";
+import { ChevronDown, ChevronUp, LockKeyhole, X } from "lucide-react";
+import { NormalLoadingScreen } from "../components/Loader/loader";
+import { useAuthUser } from "@/util/customHooks/useQueries";
+import DashboardState from "../context/dashboardContext/dashboardState";
+
+const sidebarComponents = [
+  {
+    title: "music",
+    list: [
+      {
+        title: "upload release",
+        icon: "/add.svg",
+        href: "/dashboard/music/uploadMusic",
+        query: "upload",
+      },
+      {
+        title: "manage release",
+        icon: "/musiclibrary2.svg",
+        href: "/dashboard/music/manageRelease?type=single",
+        query: "manageRelease",
+      },
+    ],
+    // isActive: "",
+    // setIsActive: () => setIsActive("music"),
+  },
+  {
+    title: "artist",
+    list: [
+      {
+        title: "create artist",
+        icon: "/add.svg",
+        href: "/dashboard/artist/createArtist",
+        query: "create",
+      },
+      {
+        title: "manage artist",
+        icon: "/profile2user.svg",
+        href: "/dashboard/artist/manageArtist",
+        query: "manageArtist",
+      },
+      {
+        title: "collaborations",
+        icon: "/likeshapes.svg",
+        href: "",
+        query: "collaboration",
+      },
+    ],
+    // isActive: "",
+    // setIsActive: () => setIsActive("artists"),
+  },
+  {
+    title: "insights",
+    list: [
+      {
+        title: "song performance",
+        icon: "/musicplay.svg",
+        href: "",
+        query: "song",
+      },
+    ],
+    // isActive: "",
+    // setIsActive: () => setIsActive("insights"),
+  },
+  {
+    title: "finance",
+    list: [
+      {
+        title: "sales report",
+        icon: "/musicplay.svg",
+        href: "",
+        query: "sales_report",
+      },
+    ],
+    // isActive: "",
+    // setIsActive: () => setIsActive("finance"),
+  },
+  {
+    title: "explore",
+    list: [
+      {
+        title: "promotion",
+        icon: "/add.svg",
+        href: "",
+        query: "promotion",
+      },
+      {
+        title: "cover license",
+        icon: "/musiclibrary2.svg",
+        href: "",
+        query: "manageRelease",
+      },
+    ],
+    // isActive: "",
+    // setIsActive: () => setIsActive("explore"),
+  },
+];
+const profileLinks = [
+  {
+    title: "Help & Support",
+    href: "/dashboard/profile?info=help",
+  },
+  {
+    title: "Subscription",
+    href: "/dashboard/profile?info=subscription",
+  },
+  {
+    title: "Account Information",
+    href: "/dashboard/profile?info=profile-info",
+  },
+];
 
 const layout = ({ children }: { children: React.ReactNode }) => {
-  // const { data, isLoading } = useAuthUser();
+  const { data, isLoading } = useAuthUser();
   const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
-  const sidebarComponents = [
-    {
-      title: "music",
-      list: [
-        {
-          title: "upload release",
-          icon: "/add.svg",
-          href: "/dashboard/music/uploadMusic",
-          query: "upload",
-        },
-        {
-          title: "manage release",
-          icon: "/musiclibrary2.svg",
-          href: "/dashboard/music/manageRelease?type=single",
-          query: "manageRelease",
-        },
-      ],
-      isActive: "",
-      setIsActive: () => setIsActive("music"),
-    },
-    {
-      title: "artist",
-      list: [
-        {
-          title: "create artist",
-          icon: "/add.svg",
-          href: "/dashboard/artist/createArtist",
-          query: "create",
-        },
-        {
-          title: "manage artist",
-          icon: "/profile2user.svg",
-          href: "/dashboard/artist/manageArtist",
-          query: "manageArtist",
-        },
-        {
-          title: "collaborations",
-          icon: "/likeshapes.svg",
-          href: "",
-          query: "collaboration",
-        },
-      ],
-      isActive: "",
-      setIsActive: () => setIsActive("artists"),
-    },
-    {
-      title: "insights",
-      list: [
-        {
-          title: "song performance",
-          icon: "/musicplay.svg",
-          href: "",
-          query: "song",
-        },
-      ],
-      isActive: "",
-      setIsActive: () => setIsActive("insights"),
-    },
-    {
-      title: "finance",
-      list: [
-        {
-          title: "sales report",
-          icon: "/musicplay.svg",
-          href: "",
-          query: "sales_report",
-        },
-      ],
-      isActive: "",
-      setIsActive: () => setIsActive("finance"),
-    },
-    {
-      title: "explore",
-      list: [
-        {
-          title: "promotion",
-          icon: "/add.svg",
-          href: "",
-          query: "promotion",
-        },
-        {
-          title: "cover license",
-          icon: "/musiclibrary2.svg",
-          href: "",
-          query: "manageRelease",
-        },
-      ],
-      isActive: "",
-      setIsActive: () => setIsActive("explore"),
-    },
-  ];
+  const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
+
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
-  // if (isLoading || !data?.firstName) return <NormalLoadingScreen />;
+  if (isLoading || !data) return <NormalLoadingScreen />;
   return (
     <UserRoute>
-      <div>
+      <div className="relative">
         <div className="sticky top-0 z-20">
           <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
             <div
@@ -137,7 +157,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                   : " max-lg:-translate-x-full")
               }
             >
-              <div className="bg-primary-700 py-10 w-full text-main-white remove-scrollbar">
+              <div className="bg-primary-700 py-10 pb-30 w-full text-main-white remove-scrollbar">
                 <div className="flex flex-col gap-12 ml-6 mr-2 overflow-y-auto h-full remove-scrollbar">
                   <div className="flex justify-between items-center">
                     <Link
@@ -237,6 +257,61 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               </Link>
             </div>
           </div>
+        </div>
+        <button
+          onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
+          className="fixed rounded-2xl w-55 h-15 bg-black z-100 top-[90%] left-2 flex p-2 justify-between items-center max-lg:hidden"
+        >
+          <div className="flex">
+            <Image
+              src={"/boomplay.jpg"}
+              width={50}
+              height={50}
+              alt="profile picture"
+              className="rounded-2xl object-cover  "
+            />
+            <div className="flex flex-col justify-center items-center ml-2">
+              <h2 className="font-light text-lg text-white tracking-[-1px] leading-8 capitalize h-8 line-clamp-1">
+                {data.firstName}
+              </h2>
+              <p className="text-primary-300 font-light leading-[18px] -tracking-[-0.5px] text-xs line-clamp-1">
+                {data.type}
+              </p>
+            </div>
+          </div>
+          <div>
+            {isProfilePopUpOpen ? (
+              <ChevronDown color="#fff" />
+            ) : (
+              <ChevronUp color="#fff" />
+            )}
+          </div>
+        </button>
+        <div
+          className={
+            "fixed rounded-2xl w-55 h-55 bg-white z-30 bottom-25 left-2 flex flex-col p-2 justify-between transition-opacity duration-300 " +
+            (isProfilePopUpOpen
+              ? "opacity-100"
+              : " opacity-0 pointer-events-none")
+          }
+        >
+          {profileLinks.map((link, index) => (
+            <Link
+              key={index}
+              href={link.href}
+              className="text-text-body font-normal leading-[18px] -tracking-[-0.5px] text-sm capitalize p-3 hover:bg-gray-200 rounded-lg"
+            >
+              {link.title}
+            </Link>
+          ))}
+          <button
+            // onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
+            className={
+              "px-2 py-2 font-bold rounded-lg max-w-full hover:cursor-pointer text-sm hover:bg-error-400/90 bg-error-400 border-2 border-error-400 text-white text-start"
+            }
+          >
+            Log Out
+          </button>
         </div>
         {children}
       </div>

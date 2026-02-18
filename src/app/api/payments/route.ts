@@ -1,4 +1,5 @@
 import dbConnect from "@/util/db";
+import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import { NextResponse } from "next/server";
 
@@ -105,6 +106,63 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({
       msg: data.message
+    });
+  } catch (err) {
+    console.error("jjjj",err);
+    return NextResponse.json(
+      { msg: "Payment verification failed" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    await dbConnect();
+
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+
+    const user = await User.findById(userJwt.user);
+    if (!user || !user.confirmed || user.otp !== null) {
+      return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
+    } else if (user.premium !== true) {
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      return NextResponse.json(
+        { msg: "Please upgrade your account." },
+        { status: 402 },
+      );
+    }
+
+    const res = await fetch(
+      `https://api.paystack.co/subscription/${user.subscriptionCode}/manage/link`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+    
+
+    const data = await res.json();
+
+    if (!data.status)
+      return NextResponse.json({ msg: data.message }, { status: 400 });
+
+    return NextResponse.json({
+      msg: data.message,
+      url: data.data.link
     });
   } catch (err) {
     console.error("jjjj",err);

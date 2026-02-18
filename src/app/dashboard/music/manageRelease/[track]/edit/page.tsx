@@ -174,7 +174,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         );
       }
       toast.success(res?.data?.msg);
-      queryClient.invalidateQueries({queryKey:["edit tracks",album.data[0].releaseTitle],exact:true})
+      await queryClient.invalidateQueries({queryKey:["edit tracks",album.data[0].releaseTitle],exact:true})
       router.push("/dashboard/music/manageRelease?type=album");
     } catch (error) {
       if (isAxiosError(error)) {

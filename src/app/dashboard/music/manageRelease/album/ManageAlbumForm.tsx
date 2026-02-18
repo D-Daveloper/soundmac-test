@@ -136,7 +136,7 @@ const ManageAlbumForm = ({
         number_of_track: "",
       });
       setImage(null);
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["getAlbum", albumFromApi.releaseTitle],
         exact: true,
       });

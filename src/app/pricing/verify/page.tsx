@@ -5,13 +5,14 @@ import Loading from "../loading";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { toast } from "react-toastify";
 import UseAxios from "@/util/customHooks/UseAxios";
+import { useQueryClient } from "@tanstack/react-query";
 
 const page = () => {
   const router = useRouter();
   const api = UseAxios();
   const { getParam } = useTabQuery();
   const reference = getParam("reference");
-console.log(reference);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const verifyPayment = async () => {
@@ -22,6 +23,7 @@ console.log(reference);
         }
         const res = await api.put("/payments",JSON.stringify({reference}));
         toast.success(res.data.msg);
+        await queryClient.invalidateQueries({queryKey:["authUser"]});
         router.push("/dashboard");
       } catch (error) {}
     };

@@ -158,9 +158,11 @@ a {
   --color-primary: #11456B;
   --color-primary-red: #D91B1B;
   --color-primary-700:#0E2E44;
+  --color-primary-100:#CFDAE1;
   --color-primary-50:#CFDAE1;
   --color-primary-500:#11456B;
   --color-primary-300:#708FA6;
+  --color-secondary-50:#F0F0E7;
   --color-main-icon-color:#103958;
   --color-disable: #CFDAE1;
   --color-text-disable: #A4A4A4;
@@ -179,6 +181,7 @@ a {
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
   --color-error-500: #D91B1B;
+  --color-error-400: #E14949;
   --color-error-100: #F7D1D1;
   --color-error-50: #FBE8E8;
   --color-btn-disabled: #CFDAE1;

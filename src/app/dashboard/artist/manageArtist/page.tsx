@@ -11,9 +11,10 @@ import { usePaginatedArtists } from "@/util/customHooks/useQueries";
 import { FileSearchIcon, ChartNoAxesCombined } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ViewArtist from "./ViewArtist";
 import ViewStats from "./ViewStats";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const artistOptions = [
   { name: "View", icon: <FileSearchIcon strokeWidth={1} /> },
@@ -34,12 +35,15 @@ const ManageArtist = () => {
     artistName: artistNam,
   });
   const router = useRouter();
+  const dashboardContext = useContext(DashboardContext);
   const handleFilterChange = (filter: string) => {
     setFilter(filter);
     setPage(1);
     setIsFilterOpen(false);
   };
-
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Manage Artists");
+  }, []);
   const handleArtistOptionChange = (index: number) => {
     setIsFilterOpen(false);
     if (selectedIndex === index) {

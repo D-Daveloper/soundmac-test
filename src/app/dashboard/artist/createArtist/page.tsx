@@ -24,6 +24,9 @@ const CreateArtistForm = () => {
     artist_image: null,
     hasPlatformId: false,
   });
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Create Artist");
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
@@ -43,7 +46,7 @@ const CreateArtistForm = () => {
 
   const handleSubmit = async (form: CreateArtistForm) => {
     console.log(form);
-  if(!dashboardContext?.isPremium){
+    if (!dashboardContext?.isPremium) {
       dashboardContext?.setOpenUpgradePopUp(true);
       return;
     }
@@ -70,7 +73,7 @@ const CreateArtistForm = () => {
         return;
       }
       toast.error("something went wrong");
-    }finally{
+    } finally {
       setPreview(false);
     }
   };
@@ -103,7 +106,7 @@ const CreateArtistForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col px-10 lg:pl-[260px]">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[260px]">
       <button
         aria-label="go back"
         onClick={() => {
@@ -192,7 +195,7 @@ const CreateArtistForm = () => {
                             alt="music note icon"
                             className={
                               artistForm.artist_image
-                                ? " w-full object-cover"
+                                ? " w-full object-cover min-w-15 h-15 overflow-hidden"
                                 : undefined
                             }
                           />
@@ -200,10 +203,12 @@ const CreateArtistForm = () => {
                         <div className="w-[50%]">
                           {!artistForm.artist_image ? (
                             <p className="mb-2 text-sm text-gray-500">
-                              <span className="font-semibold">
-                                Click to upload
+                              <span className="font-bold text-text-body">
+                                Supported Files:
                               </span>{" "}
-                              or drag and drop
+                              JPG, PNG
+                              <br />
+                              3000 x 3000px minimum
                             </p>
                           ) : (
                             <p className="font-bold text-[16px] text-[#494949] truncate">
@@ -217,7 +222,7 @@ const CreateArtistForm = () => {
                           id="artist_image"
                           name="artist_image"
                           type="file"
-                          accept="image/*"
+                          accept="image/png,image/jpeg"
                           className="hidden"
                           onChange={handleChange}
                         />
@@ -359,7 +364,7 @@ const CreateArtistForm = () => {
                 width={0}
                 height={0}
                 alt="preview of the artist song cover"
-                className="rounded-lg w-full h-full object-contain"
+                className="rounded-lg w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full bg-neutral-100 relative z-[10]">
@@ -371,7 +376,7 @@ const CreateArtistForm = () => {
           </div>
           <div className="flex-1">
             <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
-              {artistForm.artist_name || "Title"}
+              {artistForm.artist_name || "Name"}
             </p>
           </div>
         </div>

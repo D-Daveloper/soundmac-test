@@ -160,7 +160,7 @@ export async function POST(req: Request) {
       releaseDate:
         user!.type === "EMERGING_ARTIST"
           ? addWeeks(new Date(), 2)
-          : payload.releaseDate,
+          : payload.releaseDate == 'undefined' ? null : payload.releaseDate,
       preOrderDate:
         payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
       copyRightHolder:
@@ -321,7 +321,7 @@ export async function PUT(req: Request) {
         releaseDate:
           user!.type === "EMERGING_ARTIST"
             ? addWeeks(new Date(), 2)
-            : payload.releaseDate,
+            : payload.releaseDate == 'undefined' ? null : payload.releaseDate,
         preOrderDate:
           payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
         copyRightHolder:

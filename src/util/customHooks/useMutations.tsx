@@ -74,7 +74,7 @@ export const useCreatArtistMutation = () => {
     mutationFn: async (form: CreateArtistForm) => createArtist(api, form),
     onSuccess: async (data) => {
       toast.success(data.msg);
-      queryClient.invalidateQueries({ queryKey: ["artists"] });
+      await queryClient.invalidateQueries({ queryKey: ["artists"] });
       localStorage.removeItem("artistForm");
     },
     onError: (error) => {
@@ -96,7 +96,7 @@ export const useDeleteArtistMutation = () => {
       DeleteArtist(api, form),
     onSuccess: async (data) => {
       toast.success(data.msg);
-      queryClient.invalidateQueries({ queryKey: ["artists"] });
+      await queryClient.invalidateQueries({ queryKey: ["artists"] });
     },
     onError: (error) => {
       if (isAxiosError(error)) {

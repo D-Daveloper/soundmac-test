@@ -12,6 +12,7 @@ import SideBar from "./components/sideBar/sideBar";
 // import styles from './page.module.css'
 import UpgradeModal from "./components/upgradeModal/upgradeModal";
 import { ToastContainer } from "react-toastify";
+import DashboardState from "./context/dashboardContext/dashboardState";
 
 export default function Root({
   children,
@@ -34,7 +35,11 @@ export default function Root({
         pathname.includes("/blog/")) && <Header />}
       {/* <div className={styles.flexContainer}> */}
       {portalScreens.includes(pathname) && <SideBar />}
-      {children}
+      {pathname.startsWith("/dashboard") ? (
+        <DashboardState>{children}</DashboardState>
+      ) : (
+        children 
+      )}
       {/* </div> */}
       {(rootScreenLinks.includes(pathname) ||
         pathname.startsWith("/promotion/") ||

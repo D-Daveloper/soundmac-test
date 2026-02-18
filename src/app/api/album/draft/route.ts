@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       releaseLanguage: payload.language,
       preOrderCheck: payload.preOrderCheck,
       anotherDistributionCheck: payload.anotherDistributionCheck,
-      releaseDate: payload.releaseDate,
+      releaseDate: payload.releaseDate == 'undefined' ? null : payload.releaseDate,
       preOrderDate:
         payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
       copyRightHolder: payload.copyRightHolder,
@@ -210,7 +210,7 @@ export async function PUT(req: Request) {
         releaseLanguage: payload.language,
         preOrderCheck: payload.preOrderCheck,
         anotherDistributionCheck: payload.anotherDistributionCheck,
-        releaseDate: payload.releaseDate,
+        releaseDate: payload.releaseDate == 'undefined' ? null : payload.releaseDate,
         preOrderDate:
           payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
         copyRightHolder: payload.copyRightHolder,

@@ -26,7 +26,6 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     console.log({ ...formData });
-    const number_of_track = formData.get("number_of_track");
     const payload = parseAlbumFormData(formData);
 
     if (
@@ -103,7 +102,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
-    if (!number_of_track || !numRegex.test(number_of_track as string)) {
+    if (!payload.numberOfTracks || !numRegex.test(payload.numberOfTracks as string)) {
       return NextResponse.json(
         {
           msg: "No. of tracks is required and must be a positive number",
@@ -112,7 +111,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const num = parseInt(number_of_track as string, 10); // Convert string to number
+    if (parseInt(payload.numberOfTracks,10) <= 1 || parseInt(payload.numberOfTracks,10) >= 26) {
+      return NextResponse.json(
+        {
+          msg: "No. of tracks must be greater and 1 but less than 26.",
+        },
+        { status: 400 },
+      );
+    }
+
+    const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
     if (isNaN(num) || num < 1) {
       return NextResponse.json(
         { msg: "No. of tracks must greater than 0" },
@@ -158,7 +166,7 @@ export async function POST(req: Request) {
       releaseImage: imageUrl.coverUrl,
       artistName: userArtist.artistName,
       artist: userArtist._id,
-      numberOfTracks: number_of_track,
+      numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
       user: user._id,
       catalogNumber: "SM" + Date.now(),

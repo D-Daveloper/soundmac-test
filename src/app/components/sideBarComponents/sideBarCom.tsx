@@ -55,9 +55,9 @@ const sideBarCom = (props: Props) => {
               tabIndex={!open ? -1 : 0}
               className={(index > 0? "mt-4 " : "") +
                 " transition-all duration-300 flex gap-5 font-extralight capitalize h-auto w-full px-3 py-2 rounded-lg " +
-                (pathname.includes(props.title.toLocaleLowerCase()) || open
+                ((pathname.includes(props.title.toLocaleLowerCase()) || open)
                   ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99 "
-                  : " opacity-0 pointer-events-none") + (pathname.includes(props.title.toLocaleLowerCase()
+                  : " opacity-0 pointer-events-none ") + (pathname.includes(props.title.toLocaleLowerCase()
                   +"/"+section.title.split(" ")[0].toLocaleLowerCase())? "bg-primary-500/90" : "bg-transparent")
               }
             >
