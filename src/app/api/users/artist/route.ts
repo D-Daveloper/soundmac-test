@@ -86,7 +86,7 @@ export async function POST(req: Request) {
       case "EMERGING_ARTIST":
         total_artists_allowed = 1;
         break;
-      case "INDEPENDENT_ARTISTE":
+      case "INDEPENDENT_ARTIST":
         total_artists_allowed = 1;
         break;
       case "INDIE_LABEL":
