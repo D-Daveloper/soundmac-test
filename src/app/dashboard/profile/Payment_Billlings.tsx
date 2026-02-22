@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 
 const formData = [
   {
-    title: "account name",
+    title: "Account Holder Name",
     placeholder: "Enter your account name",
     alt: "a user icon for first name",
     image: "/user.svg",
@@ -96,15 +96,14 @@ const PaymentForm = () => {
       setIsSubmittingForm(false);
     }
   };
-  
+
   const handleGenerateEditCardLink = async () => {
     try {
       setIsSubmittingForm(true);
       let res;
-      res = await api.get("payments");
+      res = await api.get("payments/subscriptions");
       toast.info("You will be redirected now.");
       window.open(res.data.url, "_blank");
-
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
@@ -128,12 +127,12 @@ const PaymentForm = () => {
   }, [data]);
 
   return (
-    <div className=" w-full max-w-[800px] flex flex-col px-5">
+    <div className=" w-full max-w-[800px] flex flex-col">
       {isLoading || !data || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="flex gap-8 py-5 pb-30">
+          <div className="flex gap-8 py-5 pb-20">
             <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 min-h-[64dvh]">
               <div>
                 <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -161,58 +160,69 @@ const PaymentForm = () => {
                   Add or update the bank account where you&apos;ll receive
                   royalties, sales, and earnings.
                 </p>
-                <div className="flex justify-between items-baseline max-[420px]:flex-col">
-                  <h2 className="text-xl mt-10 font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                    Account Details
-                  </h2>
-                  <button
-                    type="button"
-                    // onClick={() => setParam("type", "album")}
-                    className={
-                      "px-2 py-1 font-bold rounded-lg text-center max-w-fit flex items-center h-8 hover:cursor-pointer text-sm bg-transparent border-2 border-primary-500 text-primary-500"
-                    }
-                  >
-                    <PencilLine color="#11456B " /> Edit Account Info
-                  </button>
-                </div>
-                <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 ">
-                  {formData.map((data, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col w-[40%] max-sm:w-full"
+                <div className="px-5">
+                  <div className="flex justify-between items-baseline max-[420px]:flex-col gap-y-5">
+                    <h2 className="text-xl mt-10 font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                      Account Details
+                    </h2>
+                    <button
+                      type="button"
+                      // onClick={() => setParam("type", "album")}
+                      className={
+                        "px-2 py-1 font-bold rounded-lg text-center max-w-fit flex items-center h-8 hover:cursor-pointer text-sm bg-transparent border-2 border-primary-500 text-primary-500"
+                      } 
                     >
-                      <Input
-                        value={
-                          (paymentForm[
-                            data.name as keyof typeof paymentForm
-                          ] as string) ?? ""
-                        }
-                        title={data.title}
-                        name={data.name}
-                        placeholder={data.placeholder}
-                        updateValue={handleChange}
-                        required={false}
-                        disabled={!wantsToEdit}
-                      />
-                    </div>
-                  ))}
-                  <div className="flex flex-col w-[40%] max-sm:w-full mb-5">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
-                      Country
-                    </p>
-                    <div className="w-full">
-                      <Select
-                        selected={paymentForm.country}
-                        setSelected={(t) =>
-                          setPaymentForm((prev) => ({ ...prev, country: t }))
-                        }
-                        placeholder="Select Country..."
-                        options={country_list}
-                        name="country"
-                        isDisabled={!wantsToEdit}
-                      />
+                      <PencilLine color="#11456B " /> Edit Account Info
+                    </button>
+                  </div>
+                  {/* border line */}
+                  <div className="border border-neutral-100 mt-5"></div>
+                  <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 ">
+                    {formData.map((data, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col w-[40%] max-sm:w-full"
+                      >
+                        <Input
+                          value={
+                            (paymentForm[
+                              data.name as keyof typeof paymentForm
+                            ] as string) ?? ""
+                          }
+                          title={data.title}
+                          name={data.name}
+                          placeholder={data.placeholder}
+                          updateValue={handleChange}
+                          required={false}
+                          disabled={!wantsToEdit}
+                        />
+                      </div>
+                    ))}
+                    <div className="flex flex-col w-[40%] max-sm:w-full mb-5">
+                      <p className="font-medium mb-2 sm:text-sm text-lg">
+                        Country
+                      </p>
+                      <div className="w-full">
+                        <Select
+                          selected={paymentForm.country}
+                          setSelected={(t) =>
+                            setPaymentForm((prev) => ({ ...prev, country: t }))
+                          }
+                          placeholder="Select Country..."
+                          options={country_list}
+                          name="country"
+                          isDisabled={!wantsToEdit}
+                        />
+                      </div>
                     </div>
                   </div>
+                  <p
+                    className={
+                      "font-bold leading-[18px] tracking-tighter text-xs capitalize mt-4 w-fit px-4 py-1 rounded-full  text-error-500 bg-error-100"
+                    }
+                  >
+                    Not Verified
+                  </p>
                 </div>
               </div>
             </div>

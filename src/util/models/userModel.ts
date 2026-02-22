@@ -2,6 +2,65 @@ import mongoose, { Model } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+export const subscriptionDetails = new mongoose.Schema(
+  {
+    authorizationCode: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "authorization code must be a string",
+      },
+      select: false,
+    },
+    subscriptionCode: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "subscription code must be a string",
+      },
+      select: false,
+    },
+    customerCode: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "customer code must be a string",
+      },
+      select: false,
+    },
+    lastFourDigits: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "last four digits code must be a string",
+      },
+    },
+    cardType: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "card type must be a string",
+      },
+    },
+    subscriptionStatus: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "subscription Status  must be a string",
+      },
+    },
+    emailToken: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "email token  must be a string",
+      },
+      select: false,
+    },
+  },
+  { _id: false, strict: "throw" },
+);
+
 export interface IUser extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   firstName: string;
@@ -17,8 +76,8 @@ export interface IUser extends mongoose.Document {
     | "EMERGING_ARTIST"
     | "MAJOR_LABEL"
     | "FREE_ARTISTE"
-    | "INDEPENDENT_ARTISTE"
-    | "INDIE_LABEL"
+    | "INDEPENDENT_ARTIST"
+    | "INDIE_LABEL";
   role: "user" | "admin" | "super_admin";
   label: string | null;
   refreshToken: string | null;
@@ -36,9 +95,15 @@ export interface IUser extends mongoose.Document {
   updatedAt: Date;
   createJWT: () => string;
   comparePassword: (candidatePassword: string) => Promise<boolean>;
-  authorizationCode: String;
-  subscriptionCode: String;
-  customerCode: String;
+  subscriptionDetails: {
+    lastFourDigits?: string;
+    emailToken?: string;
+    subscriptionStatus?: string;
+    customerCode?: string;
+    authorizationCode?: string;
+    subscriptionCode?: string;
+    cardType?: string;
+  };
 }
 
 const UserSchema = new mongoose.Schema(
@@ -87,35 +152,15 @@ const UserSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    authorizationCode: {
-      type: String,
+    subscriptionDetails: {
+      type: subscriptionDetails,
       required: [
         function (this: any) {
-          return this.get("premium") !== false;
+          return this.premium === true;
         },
-        "Auth Code is required",
+        "Subscription details required for premium users",
       ],
-      trim: true,
-    },
-    subscriptionCode: {
-      type: String,
-      required: [
-        function (this: any) {
-          return this.get("premium") !== false;
-        },
-        "Sbscription code is required",
-      ],
-      trim: true,
-    },
-    customerCode: {
-      type: String,
-      required: [
-        function (this: any) {
-          return this.get("premium") !== false;
-        },
-        "Customer code is required",
-      ],
-      trim: true,
+      default: undefined,
     },
     warning: {
       type: Number,
@@ -132,7 +177,7 @@ const UserSchema = new mongoose.Schema(
           "EMERGING_ARTIST",
           "MAJOR_LABEL",
           "FREE_ARTISTE",
-          "INDEPENDENT_ARTISTE",
+          "INDEPENDENT_ARTIST",
           "INDIE_LABEL",
         ],
         message: "{VALUE} is not a valid type",
@@ -210,6 +255,16 @@ UserSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+UserSchema.pre("validate", function (next) {
+  if (this.premium === true && !this.subscriptionDetails) {
+    this.invalidate(
+      "subscriptionDetails",
+      "Subscription details required for premium users",
+    );
+  }
+  next();
 });
 
 UserSchema.methods.createJWT = function () {

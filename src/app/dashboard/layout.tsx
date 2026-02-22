@@ -7,10 +7,9 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronUp, LockKeyhole, X } from "lucide-react";
+import { ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import { useAuthUser } from "@/util/customHooks/useQueries";
-import DashboardState from "../context/dashboardContext/dashboardState";
 
 const sidebarComponents = [
   {
@@ -106,11 +105,11 @@ const sidebarComponents = [
 const profileLinks = [
   {
     title: "Help & Support",
-    href: "/dashboard/profile?info=help",
+    href: "/dashboard/help",
   },
   {
     title: "Subscription",
-    href: "/dashboard/profile?info=subscription",
+    href: "/dashboard/subscription",
   },
   {
     title: "Account Information",
@@ -129,6 +128,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     setIsOpen(false);
+    setIsProfilePopUpOpen(false);
   }, [pathname]);
   if (isLoading || !data) return <NormalLoadingScreen />;
   return (
@@ -140,7 +140,9 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               aria-label="side bar nav button"
               role="button"
               className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => {
+                setIsOpen(!isOpen);
+              }}
             >
               <div className="bg-primary w-5 h-1"></div>
               <div className="bg-primary w-5 h-1"></div>
@@ -176,6 +178,8 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                       className="bg-primary text-white px-5 py-3 rounded-lg lg:hidden"
                       onClick={() => {
                         setIsOpen(false);
+                        setIsProfilePopUpOpen(false);
+
                         console.log(isOpen);
                       }}
                     >
@@ -260,7 +264,10 @@ const layout = ({ children }: { children: React.ReactNode }) => {
         </div>
         <button
           onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
-          className="fixed rounded-2xl w-55 h-15 bg-black z-100 top-[90%] left-2 flex p-2 justify-between items-center max-lg:hidden"
+          className={
+            "transition-all duration-300 ease-in-out fixed rounded-2xl w-55 h-15 bg-black z-100 top-[90%] left-2 flex p-2 justify-between items-center " +
+            (isOpen ? " max-lg:-translate-x-0 " : " max-lg:-translate-x-[110%]")
+          }
         >
           <div className="flex">
             <Image

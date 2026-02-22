@@ -224,6 +224,7 @@ export interface PaymentEmailData {
   company_name:string;
   company_address:string;
   dashboardUrl:string;
+  reactivateUrl?:string
 }
 
 export interface CancellationEmailData {

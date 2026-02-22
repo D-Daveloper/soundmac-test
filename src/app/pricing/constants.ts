@@ -22,15 +22,15 @@ export const pricing: PricingObjects[] = [
         features: [
             'Everything in independent artist', 'Unlimited distribution for 10 artists', 'Royalty split', 'Pitch for Tv & movie sync', '5 Video distribution', 'Keep 95% YouTube content ID', 'Cover art creator', 'Expert advice session', 'Release level country Restrictions', 'Advanced insights', 'Invite team members to artist team', 'Customize ITunes pricing'
         ],
-        plan:""
+        plan:"Indie_Label"
     },
 
     {
         popular: false, bigBox: true, title: 'Major label', subTitle: 'Unlimited multiple artist accounts', price: '$99.99', prompt: 'Get Started',
         features: [
-            'Everything in mini label', 'Unlimited distribution for unlimited artists ( label can distribute for up to 1000+ artists)', 'Keep 100% Royalties', 'Keep 100% YouTube content ID', 'Dedicated support team', 'Customizable label name', 'Recording location', 'Access to global marketing', 'RIAA gold & Platinum monitoring', 'Apply for advances', 'SoundExchange + Neighborhood Right', 'Contract template (base on requests)', 'Best license template (Base on request)', 'Customer soundmac - label profile link', 'Billboard chart registration for each artists', 'Billboard chart registration for each artists', 'Radio play promotion', 'Tv station promotion', 'Eligible to be invested to be SoundMac Partner'
+            'Everything in mini label', 'Unlimited distribution for 100 artists', 'Keep 100% Royalties', 'Keep 100% YouTube content ID', 'Dedicated support team', 'Customizable label name', 'Recording location', 'Access to global marketing', 'RIAA gold & Platinum monitoring', 'Apply for advances', 'SoundExchange + Neighborhood Right', 'Contract template (base on requests)', 'Best license template (Base on request)', 'Customer soundmac - label profile link', 'Billboard chart registration for each artists', 'Billboard chart registration for each artists', 'Radio play promotion', 'Tv station promotion', 'Eligible to be invested to be SoundMac Partner'
         ],
-        plan:""
+        plan:"Major_Label"
     },
 
 

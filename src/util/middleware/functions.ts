@@ -1250,11 +1250,7 @@ export const createEmptyTrack = (): TrackForm => ({
   s3key: "",
 });
 
-export async function handleChargeSuccess(data: any,user:(mongoose.Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
-    _id: mongoose.Types.ObjectId;
-}> & {
-    __v: number;
-})) {
+export async function handleChargeSuccess(data: any) {
   const email = data.customer.email;
 
   // Idempotency check
@@ -1264,17 +1260,22 @@ export async function handleChargeSuccess(data: any,user:(mongoose.Document<unkn
 
   if (existing) return;
 
-  // const user = await User.findOne({ email });
-  // if (!user) return;
-
-  user.premium = true;
-  // user.subscriptionStatus = "active";
-  user.type = data.plan.name;
-  user.premiumExpiration = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-  user.authorizationCode = data.authorization.authorization_code;
-  user.customerCode = data.customer.customer_code;
-
-  await user.save();
+  await User.updateOne(
+    { email },
+    {
+      $set: {
+        premium: true,
+        type: data.plan.name,
+        premiumExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+        "subscriptionDetails.customerCode": data.customer.customer_code,
+        "subscriptionDetails.authorizationCode":
+          data.authorization.authorization_code,
+        "subscriptionDetails.subscriptionStatus": "active",
+        "subscriptionDetails.cardType": data.authorization?.card_type || "",
+        "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
+      },
+    },
+  );
 
   await transactionModel.create({
     reference: data.reference,
@@ -1285,18 +1286,43 @@ export async function handleChargeSuccess(data: any,user:(mongoose.Document<unkn
     planCode: data.plan.plan_code,
     paidAt: new Date(),
   });
-
-
 }
 
 export async function handleSubscriptionCreate(data: any) {
   const email = data.customer.email;
 
-  const user = await User.findOne({ email });
-  if (!user) return;
+  await User.updateOne(
+    { email },
+    {
+      $set: {
+        "subscriptionDetails.subscriptionCode": data.subscription_code,
+        "subscriptionDetails.emailToken": data.email_token,
+      },
+    },
+  );
+}
 
-  user.subscriptionCode = data.subscription_code;
-  await user.save();
+export async function handleSubscriptionDisabled(data: any) {
+  const email = data.customer.email;
+
+  await User.updateOne(
+    { email },
+    {
+      $set: {
+        "subscriptionDetails.subscriptionStatus": "cancelled",
+      },
+    },
+  );
+}
+
+export async function handleSubscriptionCardUpdate(data: any) {
+  const email = data.customer.email;
+
+  await User.updateOne({ email },{$set : {
+    'subscriptionDetails.subscriptionStatus':data.status,
+    "subscriptionDetails.authorizationCode":data.authorization.authorization_code
+  }});
+
 }
 
 export async function handleFailedPayment(data: any) {
@@ -1312,8 +1338,7 @@ export async function handleFailedPayment(data: any) {
 }
 
 export const subSuccessEmail = (props: PaymentEmailData) => {
-
-return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1411,125 +1436,127 @@ return `<!DOCTYPE html>
 </body>
 </html>`;
 };
-//cancelled sub mail
-// <!DOCTYPE html>
-// <html lang="en">
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>Subscription Cancelled</title>
-// </head>
-// <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
-//     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
-//         <tr>
-//             <td style="padding: 40px 20px;">
-//                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    
-//                     <!-- Header -->
-//                     <tr>
-//                         <td style="background-color: #1f2937; padding: 40px 30px; text-align: center;">
-//                             <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Subscription Cancelled</h1>
-//                             <p style="margin: 10px 0 0 0; color: #d1d5db; font-size: 16px;">We're sorry to see you go</p>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Icon -->
-//                     <tr>
-//                         <td style="padding: 30px; text-align: center;">
-//                             <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
-//                                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-//                                     <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-//                                 </svg>
-//                             </div>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Content -->
-//                     <tr>
-//                         <td style="padding: 0 40px 30px 40px;">
-//                             <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{customer_name}}</strong>,</p>
-//                             <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your subscription has been successfully cancelled. You'll continue to have access until the end of your current billing period.</p>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Cancellation Details -->
-//                     <tr>
-//                         <td style="padding: 0 40px 30px 40px;">
-//                             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
-//                                 <tr>
-//                                     <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Plan</td>
-//                                     <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{plan_name}}</td>
-//                                 </tr>
-//                                 <tr>
-//                                     <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Cancellation Date</td>
-//                                     <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{cancellation_date}}</td>
-//                                 </tr>
-//                                 <tr>
-//                                     <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Access Until</td>
-//                                     <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{access_until_date}}</td>
-//                                 </tr>
-//                             </table>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- What Happens Next -->
-//                     <tr>
-//                         <td style="padding: 0 40px 30px 40px;">
-//                             <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What happens next?</h2>
-//                             <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
-//                                 <li style="margin-bottom: 10px;">Your subscription will remain active until <strong>{{access_until_date}}</strong></li>
-//                                 <li style="margin-bottom: 10px;">You won't be charged again</li>
-//                                 <li style="margin-bottom: 10px;">After {{access_until_date}}, you'll lose access to premium features</li>
-//                                 <li style="margin-bottom: 0;">Your account data will be retained for {{data_retention_days}} days</li>
-//                             </ul>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- CTA Buttons -->
-//                     <tr>
-//                         <td style="padding: 0 40px 30px 40px; text-align: center;">
-//                             <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">Changed your mind? You can reactivate your subscription anytime.</p>
-//                             <a href="{{reactivate_url}}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Reactivate Subscription</a>
-//                             <a href="{{feedback_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Share Feedback</a>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Feedback Section -->
-//                     <tr>
-//                         <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
-//                             <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">We'd love your feedback</h3>
-//                             <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 14px;">Help us improve by letting us know why you cancelled:</p>
-//                             <ul style="margin: 0; padding: 0 0 0 20px; color: #6b7280; font-size: 14px;">
-//                                 <li style="margin-bottom: 8px;">Too expensive</li>
-//                                 <li style="margin-bottom: 8px;">Not using it enough</li>
-//                                 <li style="margin-bottom: 8px;">Missing features</li>
-//                                 <li style="margin-bottom: 8px;">Switching to a competitor</li>
-//                                 <li style="margin-bottom: 0;">Other reason</li>
-//                             </ul>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Footer Info -->
-//                     <tr>
-//                         <td style="padding: 30px 40px 20px 40px;">
-//                             <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Need help or have questions? Contact us at <a href="mailto:{{support_email}}" style="color: #667eea; text-decoration: none;">{{support_email}}</a></p>
-//                         </td>
-//                     </tr>
-                    
-//                     <!-- Footer -->
-//                     <tr>
-//                         <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-//                             <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
-//                             <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
-//                         </td>
-//                     </tr>
-                    
-//                 </table>
-//             </td>
-//         </tr>
-//     </table>
-// </body>
-// </html>
+export const subCancelEmail = (props: PaymentEmailData) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Cancelled</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #1f2937; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Subscription Cancelled</h1>
+                            <p style="margin: 10px 0 0 0; color: #d1d5db; font-size: 16px;">We're sorry to see you go</p>
+                        </td>
+                    </tr>
+
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #ef4444; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M18 6L6 18M6 6L18 18" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.customerName}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your subscription has been successfully cancelled. You'll continue to have access until the end of your current billing period.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Cancellation Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Plan</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${props.planName}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Cancellation Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${new Date().toDateString()}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Access Until</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${props.nextBillingDate}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- What Happens Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What happens next?</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                <li style="margin-bottom: 10px;">Your subscription will remain active until <strong>${props.nextBillingDate}</strong></li>
+                                <li style="margin-bottom: 10px;">You won't be charged again</li>
+                                <li style="margin-bottom: 10px;">After ${props.nextBillingDate}, you'll lose access to premium features</li>
+                                <!-- <li style="margin-bottom: 0;">Your account data will be retained for {{data_retention_days}} days</li> -->
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">Changed your mind? You can reactivate your subscription anytime.</p>
+                            <a href="${props.reactivateUrl}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Reactivate Subscription</a>
+                            <a href="mailto:davidmuoegbunam@gmail.com" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Share Feedback</a>
+                        </td>
+                    </tr>
+
+                    <!-- Feedback Section -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">We'd love your feedback</h3>
+                            <p style="margin: 0 0 15px 0; color: #6b7280; font-size: 14px;">Help us improve by letting us know why you cancelled:</p>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #6b7280; font-size: 14px;">
+                                <li style="margin-bottom: 8px;">Too expensive</li>
+                                <li style="margin-bottom: 8px;">Not using it enough</li>
+                                <li style="margin-bottom: 8px;">Missing features</li>
+                                <li style="margin-bottom: 8px;">Switching to a competitor</li>
+                                <li style="margin-bottom: 0;">Other reason</li>
+                            </ul>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Need help or have questions? Contact us at <a href="mailto:davidmuoegbunam@gmail.com" style="color: #667eea; text-decoration: none;">davidmuoegbunam@gmail.com</a></p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
 export function getYearRange() {
   const now = new Date();
 

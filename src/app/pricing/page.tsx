@@ -19,6 +19,13 @@ export default function Pricing() {
   const subscribe = async (plan: string, email: string) => {
     try {
       setIsSubscribing(true);
+      console.log(plan);
+      
+      if(!email){
+        return toast.warn("Please provide a valid email.")
+      }else if (!plan){
+        return toast.warn("Please select a plan.")
+      }
       const res = await api.post(
         "/payments",
         JSON.stringify({ email: email, plan }),

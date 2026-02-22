@@ -3,7 +3,10 @@ import dbConnect from "@/util/db";
 import {
   handleChargeSuccess,
   handleFailedPayment,
+  handleSubscriptionCardUpdate,
   handleSubscriptionCreate,
+  handleSubscriptionDisabled,
+  subCancelEmail,
   subSuccessEmail,
 } from "@/util/middleware/functions";
 import User from "@/util/models/userModel";
@@ -32,23 +35,20 @@ export async function POST(req: Request) {
 
   try {
     if (event.event === "charge.success") {
-
       const user = await User.findOne({ email: event.data.customer.email });
 
       if (!user) return;
 
-      await handleChargeSuccess(event.data, user);
-
+      await handleChargeSuccess(event.data);
 
       const support_email = process.env.SUPPORT_EMAIL!;
       const company_name = process.env.COMPANY_NAME!;
       const company_address = process.env.COMPANY_ADDRESS!;
       const frontendUrl = process.env.FRONTEND_URL;
 
-
       const paymentData: PaymentEmailData = {
-        customerName: user.firstName,
-        customerEmail: user.email,
+        customerName: event.data.customer.first_name,
+        customerEmail: event.data.customer.email,
         planName: event.data.plan.name,
         amount: (event.data.amount / 100).toString(),
         currency: "NGN",
@@ -67,12 +67,51 @@ export async function POST(req: Request) {
       await sendEmail(user.email, "subscription payment", html);
     }
 
+    if (event.event === "subscription.not_renew") {
+      const user = await User.findOne({ email: event.data.customer.email });
+
+      if (!user) return;
+
+      user.subscriptionDetails.subscriptionStatus = event.data.status;
+      await user.save();
+      const support_email = process.env.SUPPORT_EMAIL!;
+      const company_name = process.env.COMPANY_NAME!;
+      const company_address = process.env.COMPANY_ADDRESS!;
+      const frontendUrl = process.env.FRONTEND_URL;
+
+      const paymentData: PaymentEmailData = {
+        customerName: user.firstName,
+        customerEmail: user.email,
+        planName: event.data.plan.name,
+        amount: (event.data.amount / 100).toString(),
+        currency: "NGN",
+        billingCycle: event.data.plan.interval,
+        nextBillingDate: new Date(user.premiumExpiration || "").toDateString(),
+        transactionId: event.data.reference,
+        support_email,
+        company_address,
+        company_name,
+        dashboardUrl: frontendUrl + "/dashboard",
+      };
+      const html = subCancelEmail(paymentData);
+
+      await sendEmail(user.email, "subscription cancelled", html);
+    }
+
     if (event.event === "invoice.payment_failed") {
       await handleFailedPayment(event.data);
     }
 
     if (event.event === "subscription.create") {
       await handleSubscriptionCreate(event.data);
+    }
+
+    if (event.event === "subscription.disable") {
+      await handleSubscriptionDisabled(event.data);
+    }
+
+    if (event.event === "subscription.update") {
+      await handleSubscriptionCardUpdate(event.data);
     }
 
     return NextResponse.json({ received: true });
