@@ -381,3 +381,10 @@ export const enum promotionCategory {
   playlistPitch = "Playlist-Pitch",
   onlinePress = "Online-Press",
 }
+
+export const deactivateReasons = [
+  "No longer using the platform",
+  "Duplicate account",
+  "Privacy concerns",
+  "Other (please specify)",
+];

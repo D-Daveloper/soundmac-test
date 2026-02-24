@@ -6,6 +6,7 @@ import AccountInfo from "./AccountInfo";
 import PaymentForm from "./Payment_Billlings";
 import ScrollableTabs from "./Buttons";
 import Verification from "./Verification";
+import AccountSettings from "./AccountSettings";
 const profileInfoButtons = [
   {
     label: "Profile info",
@@ -51,6 +52,7 @@ const page = () => {
       {!info || (info === "profile-info" && <AccountInfo />)}
       {(info === "payments" && <PaymentForm />)}
       {(info === "verification" && <Verification />)}
+      {(info === "account-settings" && <AccountSettings />)}
     </div>
   );
 };

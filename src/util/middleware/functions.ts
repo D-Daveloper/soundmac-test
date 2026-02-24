@@ -1690,3 +1690,146 @@ export function validateVerificationForm(
 
   return null;
 }
+
+export const accountdeactivationacknowledgementEmail = (props: PaymentEmailData) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Deletion Request Received</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #f97316; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Request Received</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">We've received your account deletion request</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fed7aa; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#f97316"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{customer_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We've received your request to delete your account. We're sorry to see you go!</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your request is currently under review by our team and will be processed within <strong>{{processing_time}}</strong>.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Request Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Request Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Request Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{request_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Request ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{request_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reason</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{deletion_reason}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #fecaca;">
+                                        <span style="background-color: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Pending Review</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Additional Description (if provided) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #f9fafb; border-left: 4px solid #9ca3af; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #374151; font-size: 14px; font-weight: 600;">Additional Details:</h3>
+                                <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6; font-style: italic;">{{description}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- What Happens Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What Happens Next?</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                <li style="margin-bottom: 10px;">Our team will review your request within <strong>{{processing_time}}</strong></li>
+                                <li style="margin-bottom: 10px;">We'll verify your identity and process any pending transactions</li>
+                                <li style="margin-bottom: 10px;">You'll receive a confirmation email once your request is approved</li>
+                                <li style="margin-bottom: 10px;">After approval, your account will be permanently deleted within <strong>{{deletion_time}}</strong></li>
+                                <li style="margin-bottom: 0;">All your personal data will be permanently removed from our systems</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fefce8; border: 1px solid #fde047; padding: 20px; border-radius: 6px;">
+                                <h3 style="margin: 0 0 10px 0; color: #713f12; font-size: 14px; font-weight: 600;">⚠️ Important Notice</h3>
+                                <p style="margin: 0 0 10px 0; color: #713f12; font-size: 14px;">
+                                    <strong>Account deletion is permanent and cannot be undone.</strong> This means:
+                                </p>
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #713f12; font-size: 14px;">
+                                    <li style="margin-bottom: 8px;">All your data will be permanently deleted</li>
+                                    <li style="margin-bottom: 8px;">Your subscription will be cancelled</li>
+                                    <li style="margin-bottom: 8px;">You will lose access to all features and content</li>
+                                    <li style="margin-bottom: 0;">This action cannot be reversed</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">Changed your mind? You can cancel this request.</p>
+                            <a href="{{cancel_request_url}}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Cancel Request</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you didn't request this deletion or believe this is an error, please contact us immediately at <a href="mailto:{{support_email}}" style="color: #f97316; text-decoration: none;">{{support_email}}</a></p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
