@@ -51,12 +51,11 @@ type ProfileForm = {
   last_name: string;
   country: string;
   email: string;
-  // phone: string;
   profile_pic: File | null;
 };
 
 const AccountInfo = () => {
-  const { data, isLoading } = useAuthUser();
+  const { data, isLoading,refetch } = useAuthUser();
   const api = UseAxios();
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
@@ -70,15 +69,16 @@ const AccountInfo = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = e.target;
+    const { value, name,files } = e.target;
     if (name === "profile_pic") {
-      const file = e.target.files && e.target.files.length ? e.target.files[0] : null;
+      const file = files && files.length ? files[0] : null;
         console.log(file);
         console.log(profileForm);
         
         if (file) {
-        setProfileForm((prev) => ({ ...prev, profile_pic: e.target.files![0] }));
+        setProfileForm((prev) => ({ ...prev, profile_pic:file }));
         setImage(URL.createObjectURL(file));
+          return;
       }
     }
     setProfileForm((prev) => ({ ...prev, [name]: value }));
@@ -96,20 +96,12 @@ const AccountInfo = () => {
       });
       console.log(...formData);
       let res;
-      return;
-      res = await api.post("album", formData, {
+      res = await api.put("users/user", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       toast.success(res?.data?.msg);
-      setProfileForm({
-        first_name: "",
-        last_name: "",
-        country: "",
-        email: "",
-        profile_pic: null,
-      });
-      setImage(null);
+      await refetch();
       setWantsToEdit(false);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -131,6 +123,7 @@ const AccountInfo = () => {
         email: data.email,
         profile_pic: null,
       });
+      setImage(data.profilePic);
     }
   }, [data]);
 

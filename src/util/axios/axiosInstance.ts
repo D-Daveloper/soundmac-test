@@ -1,7 +1,7 @@
 // // lib/axiosInstance.ts
 
-import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, songFromApi } from "@/app/type";
-import { AxiosInstance } from "axios";
+import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi } from "@/app/type";
+import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 
 export async function getDashboard(api: AxiosInstance) {
@@ -118,5 +118,11 @@ export const DeleteAlbum = async (
     data: form,
     headers: { "Content-Type": "application/json" },
   });
+  return res.data;
+};
+
+export const getListOfBanksFromPaystack = async (
+): Promise<PayStackBankListResponse> => {
+  const res = await axios.get<Promise<PayStackBankListResponse>>("https://api.paystack.co/bank?country=nigeria");
   return res.data;
 };

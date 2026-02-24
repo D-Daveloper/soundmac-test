@@ -61,12 +61,112 @@ export const subscriptionDetails = new mongoose.Schema(
   { _id: false, strict: "throw" },
 );
 
+export const accountDetails = new mongoose.Schema(
+  {
+    accountHolderName: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "account holder name must be a string",
+      },
+    },
+    accountNumber: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "account Number must be a string",
+      },
+    },
+    bankName: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "bank name must be a string",
+      },
+    },
+    bankCode: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "bank code must be a string",
+      },
+    },
+    currency: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "currency must be a string",
+      },
+    },
+    verified: {
+      type: Boolean,
+      validate: {
+        validator: (v: any) => typeof v === "boolean",
+        message: "verified must be a boolean",
+      },
+    },
+  },
+  { _id: false, strict: "throw" },
+);
+
+export const verificationDetails = new mongoose.Schema(
+  {
+    middleName: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "middle name must be a string",
+      },
+    },
+    dob: {
+      type: Date || undefined,
+    },
+    idType: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "id type must be a string",
+      },
+    },
+    idNumber: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "id number must be a string",
+      },
+    },
+    idImage: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "id image must be a string",
+      },
+    },
+    addressImage: {
+      type: String,
+      validate: {
+        validator: (v: any) => typeof v === "string",
+        message: "address image must be a string",
+      },
+    },
+    verified: {
+      type: Boolean,
+      validate: {
+        validator: (v: any) => typeof v === "boolean",
+        message: "verified must be a boolean",
+      },
+    },
+  },
+  { _id: false, strict: "throw" },
+);
+
 export interface IUser extends mongoose.Document {
   _id: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
   country: string;
   email: string;
+  profilePic: string | null;
   confirmed: boolean;
   premium: boolean;
   premiumExpiration: Date | null;
@@ -104,6 +204,23 @@ export interface IUser extends mongoose.Document {
     subscriptionCode?: string;
     cardType?: string;
   };
+  accountDetails: {
+    accountHolderName: string;
+    accountNumber: string;
+    bankName: string;
+    bankCode: string;
+    currency: string;
+    verified: boolean;
+  };
+  verificationDetails: {
+    middleName: string;
+    idType: string;
+    idNumber: string;
+    idImage: string;
+    addressImage: string;
+    dob: Date | undefined;
+    verified: boolean;
+  } | null;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -139,7 +256,11 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
     },
-
+    profilePic: {
+      type: String,
+      trim: true,
+      default: null,
+    },
     confirmed: {
       type: Boolean,
       default: false,
@@ -161,6 +282,27 @@ const UserSchema = new mongoose.Schema(
         "Subscription details required for premium users",
       ],
       default: undefined,
+    },
+    accountDetails: {
+      type: accountDetails,
+      // required: [
+      //   function (this: any) {
+      //     return this.premium === true;
+      //   },
+      //   "account details required for premium users",
+      // ],
+      default: {
+        accountHolderName: "",
+        accountNumber: "",
+        bankName: "",
+        bankCode: "",
+        currency: "",
+        verified: false,
+      },
+    },
+    verificationDetails: {
+      type: verificationDetails,
+      default:null,
     },
     warning: {
       type: Number,

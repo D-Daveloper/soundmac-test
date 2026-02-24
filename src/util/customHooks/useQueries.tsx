@@ -9,6 +9,7 @@ import {
   getArtistStats,
   getCurrentUser,
   getDashboard,
+  getListOfBanksFromPaystack,
   getSongs,
   getUserArtistsNames,
 } from "../axios/axiosInstance";
@@ -17,6 +18,7 @@ import {
   Artist,
   ArtistStat,
   PAGINATION,
+  PayStackBankListResponse,
   songFromApi,
 } from "@/app/type";
 import { handleReactQueryApiCallError } from "../middleware/functions";
@@ -161,5 +163,15 @@ export function useGetAlbumTracks(params: {
     // placeholderData: (prev) => prev, // avoids UI flicker
     retry: false,
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+export function useGetBankList() {
+  return useQuery<PayStackBankListResponse, Error>({
+    queryKey: [
+      "getBankList",
+    ],
+    queryFn: async () => getListOfBanksFromPaystack(),
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 }

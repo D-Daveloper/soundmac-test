@@ -67,8 +67,8 @@ export const SelectDate = React.memo(
               variant="outline"
               id="date"
               className={
-                "w-full justify-between font-normal px-3 rounded-lg border-2 p-[19px] outline-1 border-neutral-100 gap-3 mt-2 sm:text-sm text-[16px] " +
-                (disabled ? " bg-disable" : " bg-transparent")
+                "w-full justify-between font-normal px-3 rounded-lg p-[19px] outline-2! gap-3 mt-2 sm:text-sm text-[16px] " +
+                (disabled ? " text-text-disable bg-neutral-50! " : " bg-transparent")
               }
             >
               {value != undefined? new Date(value).toLocaleDateString() : "Select date"}

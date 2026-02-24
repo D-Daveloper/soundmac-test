@@ -3,7 +3,11 @@ import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import { handleMongooseValidationError } from "@/util/customError/error";
-import { uploadImage } from "@/util/middleware/functions";
+import {
+  parseVerificationFormData,
+  uploadImage,
+  validateVerificationForm,
+} from "@/util/middleware/functions";
 import sharp from "sharp";
 import PaymentForm from "@/app/dashboard/profile/Payment_Billlings";
 
@@ -104,7 +108,7 @@ export async function PUT(req: Request) {
 
         const imageType = (profile_pic as File).type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/userPictures/${user?.email}/profilePicture.${imageType}`;
+        const imageStorageLocation = `testing/profilePictures/${user?.email}.${imageType}`;
 
         imageUrl = await uploadImage(
           imageType,
@@ -135,8 +139,9 @@ export async function PUT(req: Request) {
 export async function POST(req: Request) {
   try {
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
-    const formData: PaymentForm = await req.json();
-
+    const formData = await req.formData();
+    console.log({ ...formData });
+    const payload = parseVerificationFormData(formData);
     await dbConnect();
 
     const userData = await verifyJWT();
@@ -152,22 +157,11 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 401 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 401 };
-    } else if (
-      typeof formData.account_name != "string" &&
-      !formData.account_name
-    ) {
-      Uploaderror = { msg: "account name must be a string", status: 400 };
-    } else if (
-      typeof formData.account_number != "string" &&
-      !formData.account_number
-    ) {
-      Uploaderror = { msg: "account number must be a string", status: 400 };
-    } else if (typeof formData.country != "string" && !formData.country) {
-      Uploaderror = { msg: "country must be a string", status: 400 };
-    } else if (typeof formData.bankName != "string" && !formData.bankName) {
-      Uploaderror = { msg: "bank name must be a string", status: 400 };
-    } else if (typeof formData.bankCode != "string" && !formData.bankCode) {
-      Uploaderror = { msg: "bank code must be a string", status: 400 };
+    }
+
+    const isFormValid = validateVerificationForm(payload);
+    if (isFormValid) {
+      Uploaderror = { msg: isFormValid, status: 400 };
     }
 
     if (Uploaderror != null) {
@@ -176,39 +170,87 @@ export async function POST(req: Request) {
         { status: Uploaderror.status },
       );
     } // return any errors up to this point and delete the song
-    const res = await fetch(
-      `https://api.paystack.co/bank/resolve?account_number=${formData.account_number}&bank_code=${formData.bankCode}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        },
-      },
-    );
-    const data = await res.json();
+    let idImageUrl: { error: string | null; coverUrl: string | null } = {
+      coverUrl: null,
+      error: "Failed to upload image",
+    };
+    let addressImageUrl: { error: string | null; coverUrl: string | null } = {
+      coverUrl: null,
+      error: "Failed to upload image",
+    };
+    if (payload.id_image) {
+      try {
+        const buffer = Buffer.from(
+          await (payload.id_image as File).arrayBuffer(),
+        );
+        // ---- Resize to distributor standard ----
+        const resized = await sharp(buffer)
+          .resize(3000, 3000, { fit: "cover" })
+          .jpeg({ quality: 90 })
+          .toBuffer(); //resize the image for dpm
+        console.log("buffer", resized);
 
-    if (!data.status) {
-      return NextResponse.json({ error: data.message }, { status: 400 });
+        const imageType = (payload.id_image as File).type.split("/")[1]; //get the image extension
+
+        const imageStorageLocation = `testing/userPictures/${user?.email}/identificationImage.${imageType}`;
+
+        idImageUrl = await uploadImage(
+          imageType,
+          resized as Buffer<ArrayBuffer>,
+          imageStorageLocation,
+        ); //send image to aws
+        console.log(idImageUrl);
+      } catch (error) {
+        console.log("upload image error", error);
+        return NextResponse.json({ msg: "Failed to upload image" });
+      }
     }
-    const accountDetails = {
-      accountHolderName: data.data.account_name,
-      accountNumber: data.data.account_number,
-      bankName: formData.bankName,
-      bankCode: formData.bankCode,
-      verified: true,
-      currency: "NGN",
+    if (payload.address_image) {
+      try {
+        const buffer = Buffer.from(
+          await (payload.address_image as File).arrayBuffer(),
+        );
+        // ---- Resize to distributor standard ----
+        const resized = await sharp(buffer)
+          .resize(3000, 3000, { fit: "cover" })
+          .jpeg({ quality: 90 })
+          .toBuffer(); //resize the image for dpm
+        console.log("buffer", resized);
+
+        const imageType = (payload.address_image as File).type.split("/")[1]; //get the image extension
+
+        const imageStorageLocation = `testing/userPictures/${user?.email}/addressImage.${imageType}`;
+
+        addressImageUrl = await uploadImage(
+          imageType,
+          resized as Buffer<ArrayBuffer>,
+          imageStorageLocation,
+        ); //send image to aws
+        console.log(addressImageUrl);
+      } catch (error) {
+        console.log("upload image error", error);
+        return NextResponse.json({ msg: "Failed to upload image" });
+      }
+    }
+    const verificationDetails = {
+      middleName: payload.middle_name,
+      idType: payload.id_type,
+      idNumber: payload.id_number,
+      idImage: idImageUrl.coverUrl || payload.old_id_image,
+      addressImage: addressImageUrl.coverUrl || payload.address_image,
+      dob: payload.dob,
+      verified: false,
     };
 
-    await User.updateOne(
-      { email: user?.email },
+    await User.findByIdAndUpdate(
+      user?._id,
       {
         $set: {
-          accountDetails: accountDetails,
+          verificationDetails:verificationDetails,
         },
       },
     );
-    
-    return NextResponse.json({ msg: data.message }, { status: 200 });
+    return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 

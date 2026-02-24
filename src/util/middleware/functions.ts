@@ -21,7 +21,9 @@ import Artist from "../models/artistModel";
 import SongModel from "../models/songModel";
 import { languagesList } from "@/app/constant";
 import transactionModel from "../models/transactionModel";
-import User, { IUser } from "../models/userModel";
+import User from "../models/userModel";
+import PaymentForm from "@/app/dashboard/profile/Payment_Billlings";
+import { VerificationForm } from "@/app/dashboard/profile/Verification";
 // import sharp from "sharp";
 // import { s3 } from "./aws";
 // import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -1318,11 +1320,16 @@ export async function handleSubscriptionDisabled(data: any) {
 export async function handleSubscriptionCardUpdate(data: any) {
   const email = data.customer.email;
 
-  await User.updateOne({ email },{$set : {
-    'subscriptionDetails.subscriptionStatus':data.status,
-    "subscriptionDetails.authorizationCode":data.authorization.authorization_code
-  }});
-
+  await User.updateOne(
+    { email },
+    {
+      $set: {
+        "subscriptionDetails.subscriptionStatus": data.status,
+        "subscriptionDetails.authorizationCode":
+          data.authorization.authorization_code,
+      },
+    },
+  );
 }
 
 export async function handleFailedPayment(data: any) {
@@ -1564,4 +1571,122 @@ export function getYearRange() {
   const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
 
   return { startOfYear, endOfYear };
+}
+
+export function isPaymentformValid(form: PaymentForm): string {
+  console.log(form);
+
+  if (form.account_name === "") {
+    return "Account name is required";
+  } else if (form.bankName === "") {
+    return "Bank name is required";
+  } else if (
+    form.account_number === "" ||
+    !/^\d{10}$/.test(form.account_number)
+  ) {
+    return "Account number is required and must be numbers of length 10";
+  } else if (form.country === "") {
+    return "Country is required";
+  } else if (form.bankCode === "") {
+    return "Bank code is required";
+  } else {
+    return "true";
+  }
+}
+
+export function isVerificationformValid(form: VerificationForm): string {
+  console.log(form);
+
+  if (form.id_type === "") {
+    return "ID type is required";
+  } else if (
+    (!form.id_image || !(form.id_image instanceof File)) &&
+    !form.old_id_image
+  ) {
+    return "ID image is required";
+  } else if (
+    (!form.address_image || !(form.address_image instanceof File)) &&
+    !form.old_address_image
+  ) {
+    return "Address image is required";
+  } else if (form.id_number === "" || !/^\d{13}$/.test(form.id_number)) {
+    return "ID number is required and must be numbers of length 13";
+  } else if (form.middle_name === "") {
+    return "Middle name is required";
+  } else if (form.dob === undefined || !(form.dob instanceof Date)) {
+    return "Date of birth is required";
+  } else {
+    return "true";
+  }
+}
+
+export function parseVerificationFormData(formData: FormData) {
+  return {
+    id_type: (formData.get("id_type") as string) || null,
+    id_number: (formData.get("id_number") as string) || null,
+    middle_name: (formData.get("middle_name") as string) || null,
+    dob: (formData.get("dob") as string) || undefined,
+    id_image: (formData.get("id_image") as File) || null,
+    address_image: (formData.get("address_image") as File) || null,
+    old_id_image: (formData.get("old_id_image") as string) || null,
+    old_address_image: (formData.get("old_address_image") as string) || null,
+  };
+}
+
+export function validateVerificationForm(
+  payload: ReturnType<typeof parseVerificationFormData>,
+) {
+  const allowedIdTypes = new Set(["NIN"]);
+  const allowedImageTypes = new Set(["image/jpeg", "image/png"]);
+
+  if (
+    !payload.middle_name ||
+    typeof payload.middle_name !== "string" ||
+    containsEmoji(payload.middle_name)
+  ) {
+    return "Middle name is required.";
+  }
+
+  if (!payload.dob || typeof payload.dob != "string") {
+    return "Date of birth is required and must be a valid date.";
+  }
+
+  if (
+    !payload.id_number ||
+    typeof payload.id_number != "string" ||
+    !numRegex.test(payload.id_number) ||
+    payload.id_number.length !== 13
+  ) {
+    return "ID number is required and must be a number of length 13.";
+  }
+
+  if (
+    !payload.id_type ||
+    typeof payload.id_type != "string" ||
+    !allowedIdTypes.has(payload.id_type)
+  ) {
+    return "ID Type is required or Invalid ID Type.";
+  }
+
+  if (
+    (!payload.id_image || !(payload.id_image instanceof File)) &&
+    !payload.old_id_image
+  ) {
+    return "ID Image is required.";
+  } else if (payload.id_image && !allowedImageTypes.has(payload.id_image.type)) {
+    console.log("id image", payload.id_image);
+    return "Invalid ID image format";
+  }
+
+  if (
+    (!payload.address_image || !(payload.address_image instanceof File)) &&
+    !payload.old_address_image
+  ) {
+    return "Address Image is required.";
+  } else if (payload.address_image && !allowedImageTypes.has(payload.address_image.type)) {
+    console.log("address image", payload.address_image);
+    return "Invalid image format";
+  }
+
+  return null;
 }
