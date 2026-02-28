@@ -42,6 +42,10 @@ export default function Select({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+  // sync opt whenever options prop changes
+useEffect(() => {
+  setopt(options);
+}, [options]);
 
   //   🔹 Handle keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {

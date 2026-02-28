@@ -3,6 +3,7 @@
 import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
+import { IPromotion } from "../models/promotionModel";
 
 export async function getDashboard(api: AxiosInstance) {
   const res = await api.get("dashboard");
@@ -124,5 +125,23 @@ export const DeleteAlbum = async (
 export const getListOfBanksFromPaystack = async (
 ): Promise<PayStackBankListResponse> => {
   const res = await axios.get<Promise<PayStackBankListResponse>>("https://api.paystack.co/bank?country=nigeria");
+  return res.data;
+};
+
+export const getUserReleaseNames = async (
+  api: AxiosInstance,
+  params:{ artist:string }
+): Promise<string[]> => {
+  const res = await api.get<Promise<string[]>>("promotions/getreleasetitle",{
+    params
+  });
+  return res.data;
+};
+export const getPromotionData = async (
+  api: AxiosInstance,
+    params:{ page:number }
+
+): Promise<PAGINATION<IPromotion>> => {
+  const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions");
   return res.data;
 };

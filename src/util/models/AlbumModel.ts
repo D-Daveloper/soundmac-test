@@ -181,6 +181,7 @@ AlbumSchema.index({ artistName: 1, releaseDate: -1 });
 
 // search
 AlbumSchema.index({ releaseTitle: 1, user: 1 });
+AlbumSchema.index({ user: 1, artistName: 1 });
 // AlbumSchema.index({ genre: 1 });
 // AlbumSchema.index({ isrc: 1 }, { unique: true });
 AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });

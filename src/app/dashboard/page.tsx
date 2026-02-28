@@ -46,19 +46,3 @@ const page = () => {
 };
 
 export default page;
-
-// const ManageRelease = () => {
-//   return <div>Manage</div>;
-// };
-// const CreateArtist = () => {
-//   return <div>createArtist</div>;
-// };
-// const ManageArtist = () => {
-//   return <div>manageArtist</div>;
-// };
-// const Collaboration = () => {
-//   return <div>Collaboration</div>;
-// };
-// const SongPerformance = () => {
-//   return <div>SongPerformance</div>;
-// };

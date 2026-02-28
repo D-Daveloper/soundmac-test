@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export const handleMongooseValidationError = (error: any) => {
-console.log({...error});
+console.log(error);
   if (error instanceof mongoose.Error.CastError) {
     return NextResponse.json({
       msg: error.path + " " +'Invalid data type sent',

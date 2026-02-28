@@ -1,18 +1,23 @@
+import { promotionCategory } from "@/app/constant";
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 // Define Promotion interface
 export interface IPromotion extends Document {
   packageName: string;
-  category: string;
-  musicDescription: string;
+  transactionReference: string;
+  category: promotionCategory;
+  promotionImage: string;
+  releaseTitle:string;
+  releaseDescription: string;
   artist: mongoose.Types.ObjectId;
+  artistName: string;
   user: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;
   endDate: Date;
-  isActive:boolean;
-  amount:number;
+  isActive: boolean;
+  amount: string;
 }
 
 // Schema definition
@@ -22,15 +27,30 @@ const PromotionSchema = new Schema<IPromotion>(
       type: String,
       required: [true, "Provide the package name!"],
       trim: true,
-      minlength: 3,
-      maxlength: 32,
+    },
+    transactionReference: {
+      type: String,
+      required: [true, "Provide the transaction reference!"],
+      trim: true,
     },
     category: {
       type: String,
       required: [true, "Provide the category!"],
       trim: true,
     },
-    musicDescription: {
+    promotionImage: {
+      type: String,
+      required: [function (this: any) {
+          return this.get("category") === "Online-press";
+        }, "Provide the promotion image!"],
+      trim: true,
+    },
+    releaseTitle: {
+      type: String,
+      required: [true, "Provide the release title!"],
+      trim: true,
+    },
+    releaseDescription: {
       type: String,
       required: [true, "Provide the music description!"],
       trim: true,
@@ -45,18 +65,38 @@ const PromotionSchema = new Schema<IPromotion>(
       ref: "Artist",
       required: [true, "Provide an artist!"],
     },
+    artistName: {
+      type: String,
+      required: [true, "Provide an artist name!"],
+    },
+    startDate: {
+      type: Date,
+      required: [true, "Please provide a start date for the promotion!"],
+    },
+    endDate: {
+      type: Date,
+      required: [true, "Please provide an end date for the promotion!"],
+    },
+    isActive: {
+      type: Boolean,
+      required: [true, "Please provide an active status for the promotion!"],
+    },
+    amount: {
+      type: String,
+      required: [true, "Please provide an amount for the promotion!"],
+    },
   },
   {
     timestamps: true, // ✅ automatically adds createdAt & updatedAt
-  }
+  },
 );
-PromotionSchema.index({ user: 1, createdAt: -1 });//example 1 Optimizes queries that filter by user and sort by createdAt in descending order (newest first). It's ideal for "get the most recent promotions for a specific user."
-PromotionSchema.index({ user: 1, updatedAt: -1 });//example 2 Optimizes queries filtering by user and sorting by updatedAt descending (most recently updated first). Great for "get the recently edited promotions for a user."
-PromotionSchema.index({ user: 1, artistName: 1 },{unique:true})  // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing promotions alphabetically within a user's scope).
+PromotionSchema.index({ user: 1, createdAt: -1 }); //example 1 Optimizes queries that filter by user and sort by createdAt in descending order (newest first). It's ideal for "get the most recent promotions for a specific user."
+PromotionSchema.index({ user: 1, updatedAt: -1 }); //example 2 Optimizes queries filtering by user and sorting by updatedAt descending (most recently updated first). Great for "get the recently edited promotions for a user."
+PromotionSchema.index({ user: 1, artistName: 1 }); // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing promotions alphabetically within a user's scope).
+PromotionSchema.index({ transactionReference:1 },  { unique: true }); // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing promotions alphabetically within a user's scope).
 // PromotionSchema.index({ artistName: "text" })  // or { name: "text" } if searching text
 // PromotionSchema.index({ artistName: 1 },{unique:true})  // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing promotions alphabetically within a user's scope).
 // PromotionSchema.index({ artistName: "text" })  // or { name: "text" } if searching text
-
 
 // Middleware to ensure updatedAt updates correctly on findOneAndUpdate
 PromotionSchema.pre("findOneAndUpdate", function (next) {
@@ -68,9 +108,9 @@ PromotionSchema.pre("findOneAndUpdate", function (next) {
 
 // Model creation
 const Promotion: Model<IPromotion> =
-  mongoose.models?.Promotion || mongoose.model<IPromotion>("Promotion", PromotionSchema);
+  mongoose.models?.Promotion ||
+  mongoose.model<IPromotion>("Promotion", PromotionSchema);
 export default Promotion;
-
 
 //example 1
 // Find the 10 most recently created artists for a specific user

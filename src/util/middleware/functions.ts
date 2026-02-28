@@ -24,6 +24,9 @@ import transactionModel from "../models/transactionModel";
 import User from "../models/userModel";
 import PaymentForm from "@/app/dashboard/profile/Payment_Billlings";
 import { VerificationForm } from "@/app/dashboard/profile/Verification";
+import Promotion from "../models/promotionModel";
+import { handleMongooseValidationError } from "../customError/error";
+import dbConnect from "../db";
 // import sharp from "sharp";
 // import { s3 } from "./aws";
 // import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -1673,7 +1676,10 @@ export function validateVerificationForm(
     !payload.old_id_image
   ) {
     return "ID Image is required.";
-  } else if (payload.id_image && !allowedImageTypes.has(payload.id_image.type)) {
+  } else if (
+    payload.id_image &&
+    !allowedImageTypes.has(payload.id_image.type)
+  ) {
     console.log("id image", payload.id_image);
     return "Invalid ID image format";
   }
@@ -1683,7 +1689,10 @@ export function validateVerificationForm(
     !payload.old_address_image
   ) {
     return "Address Image is required.";
-  } else if (payload.address_image && !allowedImageTypes.has(payload.address_image.type)) {
+  } else if (
+    payload.address_image &&
+    !allowedImageTypes.has(payload.address_image.type)
+  ) {
     console.log("address image", payload.address_image);
     return "Invalid image format";
   }
@@ -1691,7 +1700,9 @@ export function validateVerificationForm(
   return null;
 }
 
-export const accountdeactivationacknowledgementEmail = (props: PaymentEmailData) => {
+export const accountdeactivationacknowledgementEmail = (
+  props: PaymentEmailData,
+) => {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1833,3 +1844,100 @@ export const accountdeactivationacknowledgementEmail = (props: PaymentEmailData)
 </body>
 </html>`;
 };
+
+/**
+ * Extracts the price amount from a package string
+ * @param {string} packageString - The package string (e.g., "Bronze package (5 B-tier playlist + Push Notifications 2m+ Impressions) | N300,000")
+ * @returns {number} - The extracted amount (e.g., "300,000")
+ */
+export const extractAmount = (packageString: string): number | null => {
+  // Split by the pipe symbol
+  const parts = packageString.split("|");
+
+  if (parts.length < 2) {
+    return null; // Invalid format
+  }
+
+  // Get the price part (after the pipe) and trim whitespace
+  const pricePart = parts[1].trim();
+
+  // Remove the "N" prefix and get the amount
+  const amount = pricePart.replace(/^N/, "");
+
+  return parseFloat(amount.replace(/,/g, ""));
+};
+
+/**
+ * Extracts package name and amount into an object
+ * @param {string} packageString - The package string
+ * @returns {object} - Object with name and amount
+ */
+export const parsePackage = (packageString: string): object => {
+  const parts = packageString.split("|");
+
+  return {
+    name: parts[0].trim(),
+    amount: parts[1].trim().replace(/^N/, ""),
+  };
+};
+
+export async function handlePromotionSuccess(data: any) {
+  try {
+    const email = data.metadata.email;
+    await dbConnect();
+    const user = await User.findOne({ email });
+    if (!user) return;
+
+    const existing = await Promotion.find({
+      transactionReference: data.metadata.transactionReference,
+    });
+
+    if (!existing || existing.length === 0) {
+      console.log("entered here pplease work ");
+
+      await Promotion.create({
+        transactionReference: data.metadata.transactionReference,
+        user: user._id,
+        amount: (data.amount / 100).toString(),
+        isActive: true,
+        releaseTitle: data.metadata.releaseTitle,
+        releaseDescription: data.metadata.releaseDescription,
+        artistName: data.metadata.artistName,
+        artist: data.metadata.artistId,
+        packageName: data.metadata.promotionPackage,
+        category: data.metadata.promotionType,
+        promotionImage: data.metadata.promotionImage,
+        startDate: new Date(),
+        endDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      });
+    } else {
+      await Promotion.findOneAndUpdate(
+        { transactionReference: data.metadata.transactionReference },
+        {
+          isActive: true,
+          endDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000),
+        },
+        { new: true },
+      );
+    }
+  } catch (error) {
+    console.error(error);
+
+    return handleMongooseValidationError(error);
+  }
+}
+
+
+export function parsePromotionFormData(formData: FormData) {
+  return {
+
+    artist: formData.get("artist") as string | null,
+
+    promotionType: formData.get("promotionType") as string | null,
+    promotionImage: formData.get("promotionImage") as File | null,
+    promotionPackage: formData.get("promotionPackage") as string | null,
+    releaseDescription: formData.get("releaseDescription") as string | null,
+
+    releaseTitle: formData.get("releaseTitle") as string | null,
+  };
+}

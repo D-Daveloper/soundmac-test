@@ -10,8 +10,10 @@ import {
   getCurrentUser,
   getDashboard,
   getListOfBanksFromPaystack,
+  getPromotionData,
   getSongs,
   getUserArtistsNames,
+  getUserReleaseNames,
 } from "../axios/axiosInstance";
 import {
   albumFromApi,
@@ -22,6 +24,7 @@ import {
   songFromApi,
 } from "@/app/type";
 import { handleReactQueryApiCallError } from "../middleware/functions";
+import { IPromotion } from "../models/promotionModel";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -175,3 +178,30 @@ export function useGetBankList() {
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
   });
 }
+export function useGetUserReleaseNames(params:{
+  artist:string;
+},options:{
+  enabled:boolean;
+}) {
+  const api = UseAxios();
+  return useQuery<string[], Error>({
+    queryKey: ["userReleaseNames", params.artist],
+    queryFn: async () => getUserReleaseNames(api,params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    enabled:options.enabled,  
+  });
+}
+
+export function useGetPromotionData(params:{ page:number }
+) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<IPromotion>, Error>({
+    queryKey: ["promotionData",params.page],
+    queryFn: async () => getPromotionData(api,params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount,error) => handleReactQueryApiCallError(failedCount,error),
+    staleTime: 1000 * 60 * 30,
+  });
+} 

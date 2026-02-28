@@ -88,7 +88,7 @@ const sidebarComponents = [
       {
         title: "promotion",
         icon: "/add.svg",
-        href: "",
+        href: "/dashboard/promotion?page=explore",
         query: "promotion",
       },
       {
