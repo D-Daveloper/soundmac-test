@@ -137,6 +137,15 @@ export const getUserReleaseNames = async (
   });
   return res.data;
 };
+export const getUserReleaseTrackNames = async (
+  api: AxiosInstance,
+  params:{ release_title:string }
+): Promise<string[]> => {
+  const res = await api.get<Promise<string[]>>("album/track/getusertracknames",{
+    params
+  });
+  return res.data;
+};
 export const getPromotionData = async (
   api: AxiosInstance,
     params:{ page:number }

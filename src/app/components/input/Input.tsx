@@ -10,7 +10,7 @@ interface Props {
   updateValue: (e: React.ChangeEvent<HTMLInputElement>) => void;
   value: string;
   placeholder: string;
-  type?: string;
+  type?: React.HTMLInputTypeAttribute;
   alt?: string;
   disabled?:boolean
   uppercase?:boolean

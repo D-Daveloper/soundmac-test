@@ -1892,9 +1892,33 @@ export async function handlePromotionSuccess(data: any) {
       transactionReference: data.metadata.transactionReference,
     });
 
+    let endDate = null;
+    switch (data.metadata.promotionType) {
+      case "Boomplay":
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        break;
+      case "Deezer":
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        break;
+      case "Online-Press":
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        break;
+      case "Shazam":
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        break;
+      case "Radio-Promotion":
+        endDate = new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
+        break;
+      case "Playlist-Pitch":
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+
+        break;
+    }
     if (!existing || existing.length === 0) {
       console.log("entered here pplease work ");
-
       await Promotion.create({
         transactionReference: data.metadata.transactionReference,
         user: user._id,
@@ -1908,36 +1932,51 @@ export async function handlePromotionSuccess(data: any) {
         category: data.metadata.promotionType,
         promotionImage: data.metadata.promotionImage,
         startDate: new Date(),
-        endDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        endDate,
       });
     } else {
       await Promotion.findOneAndUpdate(
         { transactionReference: data.metadata.transactionReference },
         {
           isActive: true,
-          endDate: new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000),
+          endDate,
         },
         { new: true },
       );
     }
   } catch (error) {
     console.error(error);
-
     return handleMongooseValidationError(error);
   }
 }
 
-
 export function parsePromotionFormData(formData: FormData) {
   return {
-
     artist: formData.get("artist") as string | null,
-
-    promotionType: formData.get("promotionType") as string | null,
-    promotionImage: formData.get("promotionImage") as File | null,
-    promotionPackage: formData.get("promotionPackage") as string | null,
-    releaseDescription: formData.get("releaseDescription") as string | null,
-
-    releaseTitle: formData.get("releaseTitle") as string | null,
+    country: formData.get("country") as string | null,
+    promotionType: formData.get("promotion_type") as string | null,
+    promotionImage: formData.get("promotion_image") as File | null,
+    promotionPackage: formData.get("promotion_package") as string | null,
+    releaseDescription: formData.get("release_description") as string | null,
+    releaseTitle: formData.get("release_title") as string | null,
+    priority: formData.get("priority") as string | null,
+    configuration: formData.get("configuration") as string | null,
+    typeOfRelease: formData.get("type_of_release") as string | null,
+    editorialTeams: formData.get("editorial_teams") as string | null,
+    marketingDetail: formData.get("marketing_detail") as string | null,
+    artistGender: formData.get("artist_gender") as string | null,
+    location: formData.get("location") as string | null,
+    releaseTime: formData.get("release_time") as string | null,
+    subgenres: getArray<string>(formData, "subgenres") as string[],
+    moods: formData.get("moods") as string | null,
+    comment: formData.get("comment") as string | null,
+    facebookProfileLink: formData.get("facebook_profile_link") as string | null,
+    instagramProfileLink: formData.get("instagram_profile_link") as
+      | string
+      | null,
+    twitterProfileLink: formData.get("twitter_profile_link") as string | null,
+    youtubeProfileLink: formData.get("youtube_profile_link") as string | null,
+    tiktokProfileLink: formData.get("tiktok_profile_link") as string | null,
+    focusTrack: formData.get("focus_track") as string | null,
   };
 }

@@ -2,9 +2,12 @@ import {
   boomplayPackages,
   deezerPackages,
   onlinePressPackages,
+  promotionCategory,
   radioPromotionPackages,
   shazamPackages,
 } from "@/app/constant";
+import { albumFromApi, songFromApi, TrackFromApi } from "@/app/type";
+import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import {
   extractAmount,
@@ -16,6 +19,7 @@ import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import Promotion, { IPromotion } from "@/util/models/promotionModel";
 import SongModel from "@/util/models/songModel";
+import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
@@ -24,7 +28,7 @@ import sharp from "sharp";
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
-    console.log({...formData})
+    // console.log({ ...formData });
 
     const payload = parsePromotionFormData(formData);
     const {
@@ -34,13 +38,31 @@ export async function POST(req: Request) {
       promotionPackage,
       promotionType,
       promotionImage,
+      priority,
+      configuration,
+      typeOfRelease,
+      editorialTeams,
+      marketingDetail,
+      artistGender,
+      location,
+      releaseTime,
+      subgenres,
+      moods,
+      comment,
+      facebookProfileLink,
+      instagramProfileLink,
+      twitterProfileLink,
+      youtubeProfileLink,
+      tiktokProfileLink,
+      focusTrack,
+      country,
     } = payload;
-    console.log(promotionType);
 
     await dbConnect();
     let userArtist = null;
-    let userSong = null;
-    let userAlbum = null;
+    let userSong: songFromApi | null = null;
+    let userAlbum: albumFromApi | null = null;
+    let userTrack: TrackFromApi | null = null;
     let Uploaderror: { msg: string; status: number } | null = null;
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -57,26 +79,34 @@ export async function POST(req: Request) {
     } else if (
       artist == null ||
       releaseTitle == null ||
-      releaseDescription == null ||
-      promotionPackage == null ||
       promotionType == null
+    ) {
+      Uploaderror = { msg: "Please provide all required fields", status: 400 };
+    } else if (
+      (priority == null || editorialTeams == null || marketingDetail == null) &&
+      promotionType === promotionCategory.playlistPitch
+    ) {
+      Uploaderror = { msg: "Please provide all required fields", status: 400 };
+    } else if (
+      releaseDescription == null &&
+      promotionType != promotionCategory.playlistPitch
     ) {
       Uploaderror = { msg: "Please provide all required fields", status: 400 };
     } else if (typeof artist != "string") {
       Uploaderror = { msg: "Artist must be a string", status: 400 };
     } else if (
-      (!promotionImage ||
-      (!(promotionImage instanceof File))) && promotionType === "Online-Press"
+      (!promotionImage || !(promotionImage instanceof File)) &&
+      promotionType === promotionCategory.onlinePress
     ) {
       Uploaderror = { msg: "Promotion image is required", status: 400 };
     } else if (typeof releaseTitle != "string") {
       Uploaderror = { msg: "Release title must be a string", status: 400 };
-    } else if (typeof releaseDescription != "string") {
+    } else if (releaseDescription && typeof releaseDescription != "string") {
       Uploaderror = {
         msg: "Release description must be a string",
         status: 400,
       };
-    } else if (typeof promotionPackage != "string") {
+    } else if (promotionPackage && typeof promotionPackage != "string") {
       Uploaderror = { msg: "Promotion package must be a string", status: 400 };
     } else if (
       typeof promotionType != "string" ||
@@ -96,11 +126,15 @@ export async function POST(req: Request) {
         artistName: (artist as string)?.trim(),
       })) as any;
       userSong = await SongModel.findOne({
-        release: (releaseTitle as string)?.trim(),
+        releaseTitle: (releaseTitle as string)?.trim(),
         user: userJwt.user,
       });
       userAlbum = await AlbumModel.findOne({
-        release: (releaseTitle as string)?.trim(),
+        releaseTitle: (releaseTitle as string)?.trim(),
+        user: userJwt.user,
+      });
+      userTrack = await TrackModel.findOne({
+        releaseTitle: (focusTrack as string)?.trim(),
         user: userJwt.user,
       });
     }
@@ -114,6 +148,13 @@ export async function POST(req: Request) {
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    } else if (!userAlbum && !userSong) {
+      return NextResponse.json(
+        { msg: "Invalid Release Title." },
+        { status: 400 },
+      );
+    } else if (userAlbum && !userTrack) {
+      return NextResponse.json({ msg: "Invalid Track." }, { status: 400 });
     }
 
     switch (promotionType) {
@@ -157,6 +198,8 @@ export async function POST(req: Request) {
           );
         }
         break;
+      case "Playlist-Pitch":
+        break;
 
       default:
         return NextResponse.json(
@@ -165,19 +208,15 @@ export async function POST(req: Request) {
         );
         break;
     }
-    const amount = extractAmount(promotionPackage!);
 
-    if (amount === null) {
-      return NextResponse.json(
-        { msg: "Invalid Promotion package" },
-        { status: 400 },
-      );
-    }
     let imageUrl: { error: string | null; coverUrl: string | null } = {
       coverUrl: null,
       error: "Failed to upload image",
     };
-    if (promotionType === "Online-Press") {
+    if (
+      promotionType === promotionCategory.onlinePress ||
+      (promotionType === promotionCategory.playlistPitch && promotionImage)
+    ) {
       try {
         const buffer = Buffer.from(await promotionImage!.arrayBuffer());
         // ---- Resize to distributor standard ----
@@ -189,7 +228,7 @@ export async function POST(req: Request) {
 
         const imageType = promotionImage!.type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `online-press/${user!.email}/${userArtist.artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const imageStorageLocation = `$${promotionType}/${user!.email}/${userArtist.artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
         imageUrl = await uploadImage(
           imageType,
@@ -205,8 +244,73 @@ export async function POST(req: Request) {
         console.log("upload image error", error);
       }
     }
-
     const new_reference = `promo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`; // generate a unique transaction reference for this promotion.
+
+    if (promotionType === promotionCategory.playlistPitch) {
+      try {
+        await Promotion.create({
+          transactionReference: new_reference,
+          user: user!._id,
+          amount: 0,
+          isActive: true,
+          releaseTitle,
+          releaseDescription: "Playlist Pitch",
+          artistName: userArtist.artistName,
+          artist: userArtist._id,
+          packageName: "Editorial Playlist Pitch",
+          category: promotionType,
+          promotionImage: imageUrl?.coverUrl,
+          startDate: new Date(),
+          endDate: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+          pitchPlayListDetails: {
+            priority,
+            label: user!.type,
+            releaseDate: userAlbum?.releaseDate || userSong?.releaseDate,
+            upc: userAlbum?.upc || userSong?.upc,
+            featuredArtist:
+              userTrack?.featuredArtist || userSong?.featuredArtist,
+            trackLanguage:
+              userAlbum?.releaseLanguage || userSong?.releaseLanguage,
+            focusTrack: userAlbum ? userTrack?.releaseTitle : "",
+            focusTrackIsrc: userAlbum ? userTrack?.isrc : userSong?.isrc,
+            genre: userAlbum?.genre || userSong?.genre,
+            country: country ? country : "",
+            configuration: userAlbum ? "album" : "single",
+            typeOfRelease: typeOfRelease ? typeOfRelease : "",
+            editorialTeams,
+            marketingDetail,
+            artistGender: artistGender ? artistGender : "",
+            location: location ? location : "",
+            releaseTime: releaseTime ? releaseTime : "",
+            subgenres: subgenres ? subgenres : [""],
+            mood: moods ? moods : "",
+            comment: comment ? comment : "",
+            facebookProfileLink: facebookProfileLink ? facebookProfileLink : "",
+            instagramProfileLink: instagramProfileLink
+              ? instagramProfileLink
+              : "",
+            twitterProfileLink: twitterProfileLink ? twitterProfileLink : "",
+            youtubeProfileLink: youtubeProfileLink ? youtubeProfileLink : "",
+            tiktokProfileLink: tiktokProfileLink ? tiktokProfileLink : "",
+          },
+        });
+
+        return NextResponse.json({
+          msg: "Your pitch has been submitted.",
+        });
+      } catch (error) {
+        return handleMongooseValidationError(error);
+      }
+    }
+
+    const amount = extractAmount(promotionPackage!);
+
+    if (amount === null) {
+      return NextResponse.json(
+        { msg: "Invalid Promotion package" },
+        { status: 400 },
+      );
+    }
     const res = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -236,7 +340,6 @@ export async function POST(req: Request) {
         },
       }),
     });
-    // console.log(res);
 
     const data = await res.json();
     console.log(data);

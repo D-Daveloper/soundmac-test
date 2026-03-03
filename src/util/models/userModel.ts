@@ -113,48 +113,41 @@ export const verificationDetails = new mongoose.Schema(
   {
     middleName: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "middle name must be a string",
-      },
+      required: [false, "middle name is optional"],
     },
     dob: {
-      type: Date || undefined,
+      type: Date,
+      required: [true, "date of birth is required"],
+      validate: {
+        validator: function (value: Date) {
+          const age = Math.floor(
+            (Date.now() - value.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+          );
+          return age >= 13;
+        },
+        message: "you must be at least 13 years old",
+      },
     },
     idType: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "id type must be a string",
-      },
+      required: [true, "id type is required"],
+      enum: ["passport", "driver_license", "NIN", "other"],
     },
     idNumber: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "id number must be a string",
-      },
+      required: [true, "id number is required"],
     },
     idImage: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "id image must be a string",
-      },
+      required: [true, "id image is required"],
     },
     addressImage: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "address image must be a string",
-      },
+      required: [true, "address image is required"],
     },
     verified: {
       type: Boolean,
-      validate: {
-        validator: (v: any) => typeof v === "boolean",
-        message: "verified must be a boolean",
-      },
+      default: false,
     },
   },
   { _id: false, strict: "throw" },
@@ -302,7 +295,7 @@ const UserSchema = new mongoose.Schema(
     },
     verificationDetails: {
       type: verificationDetails,
-      default:null,
+      default: null,
     },
     warning: {
       type: Number,

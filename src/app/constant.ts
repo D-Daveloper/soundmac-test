@@ -388,3 +388,57 @@ export const deactivateReasons = [
   "Privacy concerns",
   "Other (please specify)",
 ];
+
+export const timeList = ["00:00 (UTC)","01:00 (UTC)","02:00 (UTC)","03:00 (UTC)","04:00 (UTC)","05:00 (UTC)","06:00 (UTC)","07:00 (UTC)","08:00 (UTC)","09:00 (UTC)","10:00 (UTC)","11:00 (UTC)","12:00 (UTC)","13:00 (UTC)","14:00 (UTC)","15:00 (UTC)","16:00 (UTC)", "17:00 (UTC)","18:00 (UTC)","19:00 (UTC)","20:00 (UTC)","21:00 (UTC)","22:00 (UTC)","23:00 (UTC)","24:00 (UTC)",]
+
+export const priorityList = ["High", "Medium", "Low"];
+
+export const genderList = ["Male", "Female"]
+
+export const moods = ["Happy",
+
+"Energetic",
+
+"Party",
+
+"Romantic",
+
+"Heartbreak",
+
+"Emotional",
+
+"Inspirational",
+
+"Chill",
+
+"Street", 
+
+"Conscious",
+
+"Dark",
+"Motivational",]
+
+export const editorialTeams = [
+  "Apple Music Editorial",
+
+"Spotify Editorial",
+
+"Audiomack Editorial",
+
+"Tidal Editorial",
+
+"Boomplay Editorial",
+
+"Deezer Editorial",
+
+"YouTube Music Editorial",
+]
+
+export const typeOfRelease = ["Standard" ,
+"Remix" ,
+"Reissue" ,
+"Instant grat" ,
+"Pre save" ,
+"Alternative version" ,
+"Live",
+]
