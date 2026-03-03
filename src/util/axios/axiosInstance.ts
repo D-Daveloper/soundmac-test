@@ -151,6 +151,6 @@ export const getPromotionData = async (
     params:{ page:number }
 
 ): Promise<PAGINATION<IPromotion>> => {
-  const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions");
+  const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions",{params});
   return res.data;
 };
