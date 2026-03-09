@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
   getAlbum,
@@ -15,6 +15,7 @@ import {
   getUserArtistsNames,
   getUserReleaseNames,
   getUserReleaseTrackNames,
+  getWithdrawalHistory,
 } from "../axios/axiosInstance";
 import {
   albumFromApi,
@@ -23,6 +24,7 @@ import {
   PAGINATION,
   PayStackBankListResponse,
   songFromApi,
+  WithdrawalResponse,
 } from "@/app/type";
 import { handleReactQueryApiCallError } from "../middleware/functions";
 import { IPromotion } from "../models/promotionModel";
@@ -49,7 +51,6 @@ export const useDashboard = () => {
     refetchOnMount: false,
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    
   });
 };
 
@@ -171,13 +172,14 @@ export function useGetAlbumTracks(params: { albumTitle: string }) {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
-export function useGetBankList() {
+export function useGetBankList(options: { enabled?: boolean }) {
   return useQuery<PayStackBankListResponse, Error>({
     queryKey: ["getBankList"],
     queryFn: async () => getListOfBanksFromPaystack(),
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    enabled: options.enabled || false,
   });
 }
 export function useGetUserReleaseNames(
@@ -236,3 +238,17 @@ export function useGetPromotionData(params: { page: number }) {
     staleTime: 1000 * 60 * 30,
   });
 }
+
+export const useWithdrawals = (params:{withdrawalStatusFilter:string,sort?:string,period:string}) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<WithdrawalResponse, Error>({
+    queryKey: ["withdrawals",params.sort,params.withdrawalStatusFilter,params.period],
+    queryFn: async ({ pageParam }) => getWithdrawalHistory(api, {...params,cursor:pageParam as string}),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};

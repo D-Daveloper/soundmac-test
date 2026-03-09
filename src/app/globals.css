@@ -190,6 +190,7 @@ a {
   --color-success-100: #D5ECD7;
   --color-success-500: #2B9E36;
   --color-secondary-50: #F0F0E7;
+  --text-md: 16px;
   --breakpoint-mobile: 850px;
   --breakpoint-xs: 500px;
   --text-body-two-regular:16px;

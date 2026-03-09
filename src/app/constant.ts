@@ -442,3 +442,40 @@ export const typeOfRelease = ["Standard" ,
 "Alternative version" ,
 "Live",
 ]
+
+export const periodFilterOptions = [
+  {
+    label:"All Time",
+    value:"all"
+  },
+  {
+    label:"1 Week",
+    value:"week"
+  },
+  {
+    label:"Last Month",
+    value:"month"
+  },
+  {
+    label:"Last 3 Month",
+    value:"3months"
+  },
+]
+export const withdrawalStatusFilterOptions = [
+  {
+    label:"All",
+    value:"all"
+  },
+  {
+    label:"Pending",
+    value:"pending"
+  },
+  {
+    label:"Successful",
+    value:"successful"
+  },
+  {
+    label:"Failed",
+    value:"failed"
+  },
+]

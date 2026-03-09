@@ -40,7 +40,7 @@ type PaymentForm = {
 
 const PaymentForm = () => {
   const { data, isLoading } = useAuthUser();
-  const { data: bankData, isLoading: bankLoading, error } = useGetBankList();
+  const { data: bankData, isLoading: bankLoading, error } = useGetBankList({enabled:true});
   const api = UseAxios();
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);

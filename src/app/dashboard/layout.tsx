@@ -75,7 +75,7 @@ const sidebarComponents = [
       {
         title: "sales report",
         icon: "/musicplay.svg",
-        href: "",
+        href: "/dashboard/salesReport",
         query: "sales_report",
       },
     ],

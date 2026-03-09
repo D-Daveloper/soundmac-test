@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi } from "@/app/type";
+import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -152,5 +152,13 @@ export const getPromotionData = async (
 
 ): Promise<PAGINATION<IPromotion>> => {
   const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions",{params});
+  return res.data;
+};
+export const getWithdrawalHistory = async (
+  api: AxiosInstance,
+    params:{ cursor:string }
+
+): Promise<WithdrawalResponse> => {
+  const res = await api.get<Promise<WithdrawalResponse>>("users/withdrawal/history",{params});
   return res.data;
 };

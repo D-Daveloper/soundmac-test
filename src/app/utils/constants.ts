@@ -1,95 +1,86 @@
-import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG, songFromApi } from "../type"
-
+import { Props } from "../dashboard/salesReport/history/withdrawalLine";
+import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG, songFromApi } from "../type";
 
 export const navigationLinks = [
-    { name: 'Home', link: '/' },
-    { name: 'Pricing', link: '/pricing' },
-    { name: 'Promotion', link: '/promotion' },
-    { name: 'Blog', link: '/blog' },
-    { name: 'Convert', link: '/convert' },
-]
+  { name: "Home", link: "/" },
+  { name: "Pricing", link: "/pricing" },
+  { name: "Promotion", link: "/promotion" },
+  { name: "Blog", link: "/blog" },
+  { name: "Convert", link: "/convert" },
+];
 
-const nL = navigationLinks.map(n => n.link)
-export const rootScreenLinks = [
-    ...nL,
-]
-
-
+const nL = navigationLinks.map((n) => n.link);
+export const rootScreenLinks = [...nL];
 
 export const linkRoutes: ROUTE_CONFIG = {
-    'Home': '/',
-    SignIn: '/login',
-    SignUp: '/register',
-    artists: {
-        user: '/user/artists/create-artist',
-        admin: '/admin/dashboard',
-    },
-}
-
-
+  Home: "/",
+  SignIn: "/login",
+  SignUp: "/register",
+  artists: {
+    user: "/user/artists/create-artist",
+    admin: "/admin/dashboard",
+  },
+};
 
 export const USER_PORTAL_NAVIGATION_LINKS = {
-    Artists: [
-        { name: 'create artists', link: `/user/artists/create-artist` },
-        { name: 'manage artists', link: `/user/artists/manage-artist` },
-        { name: 'artist\'s insight', link: `/user/artists/insight` },
-    ],
+  Artists: [
+    { name: "create artists", link: `/user/artists/create-artist` },
+    { name: "manage artists", link: `/user/artists/manage-artist` },
+    { name: "artist's insight", link: `/user/artists/insight` },
+  ],
 
-    Songs: [
-        { name: 'upload songs', link: `/user/songs/upload-songs` },
-        { name: 'manage songs', link: `/user/songs/manage-songs` },
-    ],
+  Songs: [
+    { name: "upload songs", link: `/user/songs/upload-songs` },
+    { name: "manage songs", link: `/user/songs/manage-songs` },
+  ],
 
-    Albums: [
-        { name: 'upload albums', link: `/user/songs/upload-albums` },
-        { name: 'manage albums', link: `/user/songs/manage-albums` },
-    ],
+  Albums: [
+    { name: "upload albums", link: `/user/songs/upload-albums` },
+    { name: "manage albums", link: `/user/songs/manage-albums` },
+  ],
 
-    '': [
-        { name: 'sales report', link: `/user/sales/report` },
-        { name: 'promotions', link: `/user/promotions/` },
-        { name: 'advance', link: `/user/advance/` },
-    ],
-}
-
+  "": [
+    { name: "sales report", link: `/user/sales/report` },
+    { name: "promotions", link: `/user/promotions/` },
+    { name: "advance", link: `/user/advance/` },
+  ],
+};
 
 export const ADMIN_PORTAL_NAVIGATION_LINKS = {
-    Artists: [
-        { name: 'create artists', link: `/user/artists/create-artist` },
-        { name: 'manage artists', link: `/user/artists/manage-artist` },
-        { name: 'artist\'s insight', link: `/user/artists/insight` },
-    ],
+  Artists: [
+    { name: "create artists", link: `/user/artists/create-artist` },
+    { name: "manage artists", link: `/user/artists/manage-artist` },
+    { name: "artist's insight", link: `/user/artists/insight` },
+  ],
 
-    Songs: [
-        { name: 'upload songs', link: `/user/songs/upload-songs` },
-        { name: 'manage songs', link: `/user/songs/manage-songs` },
-    ],
+  Songs: [
+    { name: "upload songs", link: `/user/songs/upload-songs` },
+    { name: "manage songs", link: `/user/songs/manage-songs` },
+  ],
 
-    Albums: [
-        { name: 'upload albums', link: `/user/songs/upload-albums` },
-        { name: 'manage albums', link: `/user/songs/manage-albums` },
-    ],
+  Albums: [
+    { name: "upload albums", link: `/user/songs/upload-albums` },
+    { name: "manage albums", link: `/user/songs/manage-albums` },
+  ],
 
-    '': [
-        { name: 'sales report', link: `/user/sales/report` },
-        { name: 'promotions', link: `/user/promotions/` },
-        { name: 'advance', link: `/user/advance/` },
-    ],
-}
+  "": [
+    { name: "sales report", link: `/user/sales/report` },
+    { name: "promotions", link: `/user/promotions/` },
+    { name: "advance", link: `/user/advance/` },
+  ],
+};
 
 export const LOCATION_TREE: LOCATION_TREE_ASSIGNOR = {
-    user: USER_PORTAL_NAVIGATION_LINKS,
-    admin: ADMIN_PORTAL_NAVIGATION_LINKS
-}
-
-
+  user: USER_PORTAL_NAVIGATION_LINKS,
+  admin: ADMIN_PORTAL_NAVIGATION_LINKS,
+};
 
 export const portalScreens = [
-    ...Object.values(USER_PORTAL_NAVIGATION_LINKS).flatMap(section =>
-      section.map(linkObj => linkObj.link)
-    )
-  ];
-  export const genreList = [
+  ...Object.values(USER_PORTAL_NAVIGATION_LINKS).flatMap((section) =>
+    section.map((linkObj) => linkObj.link),
+  ),
+];
+export const genreList = [
   "African",
   "Afro-Beat",
   "Afro-Pop",
@@ -312,30 +303,236 @@ export const portalScreens = [
 ];
 
 export const territories = [
-    { label: "Nigeria", value: "ng" },
-    { label: "Ghana", value: "gh" },
-    { label: "South Africa", value: "za" },
-    { label: "Kenya", value: "ke" },
-    { label: "USA", value: "us" },
-    { label: "UK", value: "uk" },
-  ];
+  { label: "Nigeria", value: "ng" },
+  { label: "Ghana", value: "gh" },
+  { label: "South Africa", value: "za" },
+  { label: "Kenya", value: "ke" },
+  { label: "USA", value: "us" },
+  { label: "UK", value: "uk" },
+];
 export const performerRoles = [
-    "Performer",
-    "Soloist",
-    "Choir",
-    "Ensemble",
-    "Orchestra",
-    "Other Performer",
-  ];
+  "Performer",
+  "Soloist",
+  "Choir",
+  "Ensemble",
+  "Orchestra",
+  "Other Performer",
+];
 export const producerRoles = [
-    "Performer",
-    "Soloist",
-    "Choir",
-    "Ensemble",
-    "Orchestra",
-    "Other Performer",
-  ];
-export const country_list = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Cape Verde","Cayman Islands","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cruise Ship","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyz Republic","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Namibia","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Satellite","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","St. Lucia","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Uganda","Ukraine","United Arab Emirates","United Kingdom","Uruguay","Uzbekistan","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
+  "Performer",
+  "Soloist",
+  "Choir",
+  "Ensemble",
+  "Orchestra",
+  "Other Performer",
+];
+export const country_list = [
+  "Afghanistan",
+  "Albania",
+  "Algeria",
+  "Andorra",
+  "Angola",
+  "Anguilla",
+  "Antigua &amp; Barbuda",
+  "Argentina",
+  "Armenia",
+  "Aruba",
+  "Australia",
+  "Austria",
+  "Azerbaijan",
+  "Bahamas",
+  "Bahrain",
+  "Bangladesh",
+  "Barbados",
+  "Belarus",
+  "Belgium",
+  "Belize",
+  "Benin",
+  "Bermuda",
+  "Bhutan",
+  "Bolivia",
+  "Bosnia &amp; Herzegovina",
+  "Botswana",
+  "Brazil",
+  "British Virgin Islands",
+  "Brunei",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Cambodia",
+  "Cameroon",
+  "Cape Verde",
+  "Cayman Islands",
+  "Chad",
+  "Chile",
+  "China",
+  "Colombia",
+  "Congo",
+  "Cook Islands",
+  "Costa Rica",
+  "Cote D Ivoire",
+  "Croatia",
+  "Cruise Ship",
+  "Cuba",
+  "Cyprus",
+  "Czech Republic",
+  "Denmark",
+  "Djibouti",
+  "Dominica",
+  "Dominican Republic",
+  "Ecuador",
+  "Egypt",
+  "El Salvador",
+  "Equatorial Guinea",
+  "Estonia",
+  "Ethiopia",
+  "Falkland Islands",
+  "Faroe Islands",
+  "Fiji",
+  "Finland",
+  "France",
+  "French Polynesia",
+  "French West Indies",
+  "Gabon",
+  "Gambia",
+  "Georgia",
+  "Germany",
+  "Ghana",
+  "Gibraltar",
+  "Greece",
+  "Greenland",
+  "Grenada",
+  "Guam",
+  "Guatemala",
+  "Guernsey",
+  "Guinea",
+  "Guinea Bissau",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Hong Kong",
+  "Hungary",
+  "Iceland",
+  "India",
+  "Indonesia",
+  "Iran",
+  "Iraq",
+  "Ireland",
+  "Isle of Man",
+  "Israel",
+  "Italy",
+  "Jamaica",
+  "Japan",
+  "Jersey",
+  "Jordan",
+  "Kazakhstan",
+  "Kenya",
+  "Kuwait",
+  "Kyrgyz Republic",
+  "Laos",
+  "Latvia",
+  "Lebanon",
+  "Lesotho",
+  "Liberia",
+  "Libya",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Macau",
+  "Macedonia",
+  "Madagascar",
+  "Malawi",
+  "Malaysia",
+  "Maldives",
+  "Mali",
+  "Malta",
+  "Mauritania",
+  "Mauritius",
+  "Mexico",
+  "Moldova",
+  "Monaco",
+  "Mongolia",
+  "Montenegro",
+  "Montserrat",
+  "Morocco",
+  "Mozambique",
+  "Namibia",
+  "Nepal",
+  "Netherlands",
+  "Netherlands Antilles",
+  "New Caledonia",
+  "New Zealand",
+  "Nicaragua",
+  "Niger",
+  "Nigeria",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Palestine",
+  "Panama",
+  "Papua New Guinea",
+  "Paraguay",
+  "Peru",
+  "Philippines",
+  "Poland",
+  "Portugal",
+  "Puerto Rico",
+  "Qatar",
+  "Reunion",
+  "Romania",
+  "Russia",
+  "Rwanda",
+  "Saint Pierre &amp; Miquelon",
+  "Samoa",
+  "San Marino",
+  "Satellite",
+  "Saudi Arabia",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leone",
+  "Singapore",
+  "Slovakia",
+  "Slovenia",
+  "South Africa",
+  "South Korea",
+  "Spain",
+  "Sri Lanka",
+  "St Kitts &amp; Nevis",
+  "St Lucia",
+  "St Vincent",
+  "St. Lucia",
+  "Sudan",
+  "Suriname",
+  "Swaziland",
+  "Sweden",
+  "Switzerland",
+  "Syria",
+  "Taiwan",
+  "Tajikistan",
+  "Tanzania",
+  "Thailand",
+  "Timor L'Este",
+  "Togo",
+  "Tonga",
+  "Trinidad &amp; Tobago",
+  "Tunisia",
+  "Turkey",
+  "Turkmenistan",
+  "Turks &amp; Caicos",
+  "Uganda",
+  "Ukraine",
+  "United Arab Emirates",
+  "United Kingdom",
+  "Uruguay",
+  "Uzbekistan",
+  "Venezuela",
+  "Vietnam",
+  "Virgin Islands (US)",
+  "Yemen",
+  "Zambia",
+  "Zimbabwe",
+];
 
 // export const mockSongs:songFromApi[] = [
 //   {
@@ -743,7 +940,7 @@ export const country_list = ["Afghanistan","Albania","Algeria","Andorra","Angola
 //     songStatus: "rejected"
 //   }
 // ];
- // utils/debounce.ts
+// utils/debounce.ts
 // export function debounce<F extends (...args: any[]) => void>(func: F, delay: number) {
 //   let timer: ReturnType<typeof setTimeout>;
 
@@ -761,3 +958,40 @@ export const RETRY_CONFIG = {
   maxDelayMs: 10000, // 10 seconds
   backoffMultiplier: 2, // Exponential backoff
 };
+export const top_performing_artist = [
+  {
+    name: "Two-faced ban",
+    featuredArtist: "feat Ariaate, Wenthy",
+    amount: "9,432.00",
+  },
+  {
+    name: "Stay a Little Longer",
+    featuredArtist: "feat Ariaate, Wenthy",
+    amount: "9,432.00",
+  },
+  {
+    name: "Stay a Little Longer",
+    featuredArtist: "feat Ariaate, Wenthy",
+    amount: "9,432.00",
+  },
+];
+export const withdrawalHistory:Props[] = [
+  {
+    account_number: "1234567890",
+    status: "pending",
+    amount: "9,432.00",
+    date:"2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    account_number: "1234567890",
+    status: "successful",
+    amount: "9,432.00",
+    date:"2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    account_number: "1234567890",
+    status: "failed",
+    amount: "9,432.00",
+    date:"2026-01-19T10:23:01.128+00:00",
+  },
+];

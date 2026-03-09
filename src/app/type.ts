@@ -89,15 +89,15 @@ export interface SongForm extends musicFormBase {
 }
 
 export interface AlbumForm extends musicFormBase {
-    number_of_track:string;
+  number_of_track: string;
 }
 
 export type CreateArtistForm = {
   artist_name: string;
   apple_id: string;
   spotify_id: string;
-  artist_image: File | null ;
-  hasPlatformId:boolean
+  artist_image: File | null;
+  hasPlatformId: boolean;
 };
 
 export type OtpForm = {
@@ -107,9 +107,17 @@ export type OtpForm = {
   password?: string;
 };
 
-export type Artist = Pick<IArtist, 'artistName' | 'artistImage' | 'appleId' | 'spotifyId' | 'updatedAt' | 'createdAt'>;
+export type Artist = Pick<
+  IArtist,
+  | "artistName"
+  | "artistImage"
+  | "appleId"
+  | "spotifyId"
+  | "updatedAt"
+  | "createdAt"
+>;
 
-export type SELECTED_IMAGE = string | null | ArrayBuffer
+export type SELECTED_IMAGE = string | null | ArrayBuffer;
 
 // export interface ARTIST {
 //     _id: string
@@ -121,71 +129,66 @@ export type SELECTED_IMAGE = string | null | ArrayBuffer
 // }
 
 export interface PAGINATION<T> {
-  data:T[];
-    page: number
-    skip: number
-    sort: string
-    limit: number
-    hasNextPage: boolean
-    totalCount: number,
-    totalPages: number
+  data: T[];
+  page: number;
+  skip: number;
+  sort: string;
+  limit: number;
+  hasNextPage: boolean;
+  totalCount: number;
+  totalPages: number;
 }
 
 export interface ARTIST_TABLE extends Artist {
-    lastRoyalty:number;
-    totalRoyalty:number;
-    totalTracks:number;
-    totalReleases:number;
-
+  lastRoyalty: number;
+  totalRoyalty: number;
+  totalTracks: number;
+  totalReleases: number;
 }
 
 export type ArtistStat = {
-  artists:string[],
-  totalReleases:string
-  artist:Artist
+  artists: string[];
+  totalReleases: string;
+  artist: Artist;
+};
+
+interface BaseApiResponseForRelease {
+  _id: string;
+  releaseTitle: string;
+  genre: string;
+  releaseLanguage: string;
+  artistName: string;
+  artist: Artist;
+  releaseDate: Date;
+  preOrderDate: Date | null;
+  preOrderCheck: boolean;
+  anotherDistributionCheck: boolean;
+  territories: string[];
+  releaseImage: string;
+  dsp: string[];
+  upc: string;
+  releaseStatus: "pending" | "approved" | "rejected" | "draft";
+  copyRightHolder: string;
+  copyRightYear: string;
+  createdAt: Date;
+  updatedAt: Date;
+  __v: number;
 }
 
-interface BaseApiResponseForRelease{
-  _id: string
-  releaseTitle: string
-  genre: string
-  releaseLanguage: string
-  artistName: string
-  artist: Artist
-  releaseDate: Date
-  preOrderDate: Date | null
-  preOrderCheck: boolean
-  anotherDistributionCheck: boolean
-  territories: string[]
-  releaseImage: string
-  dsp: string[]
-  upc: string
-  releaseStatus: "pending"|"approved"|"rejected"|"draft"
-  copyRightHolder: string
-  copyRightYear: string
-  createdAt: Date
-  updatedAt: Date
-  __v: number
+export interface songFromApi extends BaseApiResponseForRelease {
+  featuredArtist: FeaturedArtist[];
+  performer: Performer[];
+  songWriter: SongWriter[];
+  producer: Producer[];
+  releaseAudio: string;
+  lyrics: string;
+  startClip: string;
+  isrc: string;
+  explicitContent: boolean;
 }
-
-export interface songFromApi extends BaseApiResponseForRelease
-  {
-  featuredArtist: FeaturedArtist[]
-  performer: Performer[]
-  songWriter: SongWriter[]
-  producer: Producer[]
-  releaseAudio: string
-  lyrics: string
-  startClip: string
-  isrc: string
-  explicitContent: boolean
-
-}
-export interface albumFromApi extends BaseApiResponseForRelease
-  {
-  numberOfTracks:string;
-  unassignedNumbers:string[];
-
+export interface albumFromApi extends BaseApiResponseForRelease {
+  numberOfTracks: string;
+  unassignedNumbers: string[];
 }
 
 export interface NonRetryableErrorCode {
@@ -199,17 +202,16 @@ export interface NonRetryableErrorCode {
 // Assuming Artist is an object with basic properties (since not fully defined in schema, using a simple structure)
 export interface TrackForm extends SongForm {
   id: string; // frontend-only (uuid)
-  track_number:string;
-  validationError:string|null;
+  track_number: string;
+  validationError: string | null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
-  s3key:string;
-};
+  s3key: string;
+}
 export interface TrackFromApi extends songFromApi {
-  trackNumber:string;
-  validationError:string|null;
+  trackNumber: string;
+  validationError: string | null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
-};
-
+}
 
 export interface PaymentEmailData {
   customerName: string;
@@ -220,11 +222,11 @@ export interface PaymentEmailData {
   billingCycle: string;
   nextBillingDate: string;
   transactionId: string;
-  support_email:string;
-  company_name:string;
-  company_address:string;
-  dashboardUrl:string;
-  reactivateUrl?:string
+  support_email: string;
+  company_name: string;
+  company_address: string;
+  dashboardUrl: string;
+  reactivateUrl?: string;
 }
 
 export interface CancellationEmailData {
@@ -239,26 +241,38 @@ export interface CancellationEmailData {
 }
 
 export interface PayStackBankListResponse {
-  status: boolean
-  message: string
-  data: BankObject[]
+  status: boolean;
+  message: string;
+  data: BankObject[];
 }
 
 export interface BankObject {
-  id: number
-  name: string
-  slug: string
-  code: string
-  longcode: string
-  gateway: any
-  pay_with_bank: boolean
-  supports_transfer: boolean
-  available_for_direct_debit: boolean
-  active: boolean
-  country: string
-  currency: string
-  type: string
-  is_deleted: boolean
-  createdAt: string
-  updatedAt: string
+  id: number;
+  name: string;
+  slug: string;
+  code: string;
+  longcode: string;
+  gateway: any;
+  pay_with_bank: boolean;
+  supports_transfer: boolean;
+  available_for_direct_debit: boolean;
+  active: boolean;
+  country: string;
+  currency: string;
+  type: string;
+  is_deleted: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
+type withdrawals = {
+  amount: string;
+  withdrawalStatus: "pending" | "successful" | "failed";
+  accountNumber: string;
+  createdAt: string;
+  updatedAt: string;
+};
+export type WithdrawalResponse = {
+  data: withdrawals[];
+  nextCursor?: string;
+  hasMore: boolean;
+};

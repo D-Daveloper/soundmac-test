@@ -3,37 +3,93 @@ import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import { handleMongooseValidationError } from "@/util/customError/error";
-import { uploadImage } from "@/util/middleware/functions";
-import sharp from "sharp";
+import { generateOtp, numRegex } from "@/util/middleware/functions";
 import PaymentForm from "@/app/dashboard/profile/Payment_Billlings";
+import withDrawalModel from "@/util/models/withDrawalModel";
+import sendEmail from "@/util/sendMail/sendEmail";
 
 export async function GET(req: Request) {
   try {
     await dbConnect();
 
     const userData = await verifyJWT();
-
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-
-    const user = userJwt.user
-      ? await User.findById(userJwt.user, {
-          password: 0,
-          refreshToken: 0,
-          refreshTokenExpires: 0,
-          otp: 0,
-          otpExpires: 0,
-        })
-      : null;
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
 
     if (!user) {
-      return NextResponse.json({ msg: "User Not Found" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, msg: "User not found" },
+        { status: 404 },
+      );
     }
 
-    return NextResponse.json({ msg: "Successful", user });
+    const otp = generateOtp();
+    // update user
+    const updatedUser = await User.findByIdAndUpdate(
+      {
+        _id: user._id.toString(),
+      },
+      {
+        otp: otp,
+        otpExpires: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes in milliseconds (1 minute = 60,000 milliseconds)
+      },
+      {
+        new: true,
+        runValidators: true,
+        select: "-password -otp -otpExpires -refreshToken -refreshTokenExpires",
+      },
+    );
+    if (process.env.NODE_ENV == "production")
+      try {
+        const mailRes = await sendEmail(
+          `${updatedUser?.email}`,
+          "OTP!",
+          `
+        
+        <!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Withdrawal OTP</title>
+	</head>
+	<body>
+		<div>
+			Here is your otp ${otp}
+			<p>Expires in 5 mins </p>
+
+		</div>
+	</body>
+</html>
+            `,
+        );
+        if (!mailRes) {
+          return NextResponse.json(
+            { msg: "Failed to send OTP. Please try again later." },
+            { status: 500 },
+          );
+        }
+        return NextResponse.json(
+          { msg: "An otp has been sent to your email", otp: true },
+          { status: 200 },
+        );
+      } catch (error) {
+        console.log(error);
+        return NextResponse.json(
+          { msg: "Failed to send OTP. Please try again later." },
+          { status: 500 },
+        );
+      }
+    else {
+      return NextResponse.json({ msg: "Please check your mailbox to verify." });
+    }
   } catch (error: unknown) {
+    console.log(error);
+
     if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
     } else {
@@ -45,16 +101,13 @@ export async function GET(req: Request) {
   }
 }
 
-export async function PUT(req: Request) {
+export async function POST(req: Request) {
   try {
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
-    const formData = await req.formData();
-    console.log({ ...formData });
-    const profile_pic = formData.get("profile_pic");
-    const firstName = formData.get("first_name");
-    const lastName = formData.get("last_name");
-    const email = formData.get("email");
-    const country = formData.get("country");
+    const formData: {
+      otp: string;
+      amount: string;
+    } = await req.json();
     await dbConnect();
 
     const userData = await verifyJWT();
@@ -62,25 +115,25 @@ export async function PUT(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
       Uploaderror = { msg: "Invalid Request", status: 401 };
     } else if (!user.confirmed) {
       Uploaderror = { msg: "Please verify your email address", status: 401 };
-    } else if (user.otp !== null) {
-      Uploaderror = { msg: "Please login", status: 401 };
-    } else if (typeof firstName != "string" && !firstName) {
-      Uploaderror = { msg: "first must be a string", status: 400 };
-    } else if (typeof lastName != "string" && !lastName) {
-      Uploaderror = { msg: "last name must be a string", status: 400 };
-    } else if (typeof country != "string" && !country) {
-      Uploaderror = { msg: "country must be a string", status: 400 };
-    } else if (typeof email != "string" && !email) {
-      Uploaderror = { msg: "Email must be a valid email.", status: 400 };
-    } else if (profile_pic && !(profile_pic instanceof File)) {
-      Uploaderror = { msg: "Profile pic must be a file", status: 400 };
+    } else if (user.otp === null) {
+      Uploaderror = { msg: "Invalid otp", status: 400 };
+    } else if (user.otpExpires === null) {
+      Uploaderror = { msg: "Invalid otp", status: 400 };
+    } else if (user.otp != formData.otp || new Date() > user.otpExpires) {
+      Uploaderror = { msg: "Invalid otp or Expired otp", status: 400 };
+    } else if (
+      !formData.amount ||
+      !numRegex.test(formData.amount) ||
+      parseInt(formData.amount, 10) < 1000
+    ) {
+      Uploaderror = { msg: "Invalid amount.", status: 400 };
     }
+    // else if (parseInt(formData.amount) > userBalance - 1000)
 
     if (Uploaderror != null) {
       return NextResponse.json(
@@ -88,54 +141,31 @@ export async function PUT(req: Request) {
         { status: Uploaderror.status },
       );
     } // return any errors up to this point and delete the song
-    let imageUrl: { error: string | null; coverUrl: string | null } = {
-      coverUrl: null,
-      error: "Failed to upload image",
-    };
-    if (profile_pic) {
-      try {
-        const buffer = Buffer.from(await (profile_pic as File).arrayBuffer());
-        // ---- Resize to distributor standard ----
-        const resized = await sharp(buffer)
-          .resize(3000, 3000, { fit: "cover" })
-          .jpeg({ quality: 90 })
-          .toBuffer(); //resize the image for dpm
-        console.log("buffer", resized);
+    await withDrawalModel.create({
+      amount: formData.amount,
+      withdrawalStatus: "pending",
+      user: user?._id,
+      accountNumber: user?.accountDetails.accountNumber,
+      paidAt: null,
+    });
 
-        const imageType = (profile_pic as File).type.split("/")[1]; //get the image extension
-
-        const imageStorageLocation = `testing/userPictures/${user?.email}/profilePicture.${imageType}`;
-
-        imageUrl = await uploadImage(
-          imageType,
-          resized as Buffer<ArrayBuffer>,
-          imageStorageLocation,
-        ); //send image to aws
-        console.log(imageUrl);
-      } catch (error) {
-        console.log("upload image error", error);
-        return NextResponse.json({ msg: "Failed to upload image" });
-      }
-    }
-
-    user!.firstName = firstName ? firstName.toString() : user!.firstName;
-    user!.lastName = lastName ? lastName.toString() : user!.lastName;
-    user!.country = country ? country.toString() : user!.country;
-    user!.email = email ? email?.toString() : user!.email;
-    user!.profilePic = imageUrl.coverUrl;
+    user!.otp = null;
+    user!.otpExpires = null;
     await user!.save();
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+
+    return NextResponse.json({ msg: "success" }, { status: 201 });
   } catch (error: unknown) {
     console.log(error);
-
     return handleMongooseValidationError(error);
   }
 }
 
-export async function POST(req: Request) {
+export async function PUT(req: Request) {
   try {
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
-    const formData: PaymentForm = await req.json();
+    const formData: PaymentForm & {
+      is_new_account: boolean;
+    } = await req.json();
 
     await dbConnect();
 
@@ -153,20 +183,19 @@ export async function POST(req: Request) {
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 401 };
     } else if (
-      typeof formData.account_name != "string" &&
-      formData.account_name
-    ) {
-      Uploaderror = { msg: "account name must be a string", status: 400 };
-    } else if (
-      typeof formData.account_number != "string" ||
-      !formData.account_number
+      formData.is_new_account &&
+      (typeof formData.account_number != "string" || !formData.account_number)
     ) {
       Uploaderror = { msg: "account number must be a string", status: 400 };
-    } else if (typeof formData.country != "string" || !formData.country) {
-      Uploaderror = { msg: "country must be a string", status: 400 };
-    } else if (typeof formData.bankName != "string" || !formData.bankName) {
+    } else if (
+      formData.is_new_account &&
+      (typeof formData.bankName != "string" || !formData.bankName)
+    ) {
       Uploaderror = { msg: "bank name must be a string", status: 400 };
-    } else if (typeof formData.bankCode != "string" || !formData.bankCode) {
+    } else if (
+      formData.is_new_account &&
+      (typeof formData.bankCode != "string" || !formData.bankCode)
+    ) {
       Uploaderror = { msg: "bank code must be a string", status: 400 };
     }
 
@@ -203,13 +232,12 @@ export async function POST(req: Request) {
       { email: user?.email },
       {
         $set: {
-          country: formData.country,
           accountDetails: accountDetails,
         },
       },
     );
-    
-    return NextResponse.json({ msg: data.message,accountDetails }, { status: 200 });
+
+    return NextResponse.json({ msg: data.message }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 
