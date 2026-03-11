@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { adminDashboardType, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -162,3 +162,8 @@ export const getWithdrawalHistory = async (
   const res = await api.get<Promise<WithdrawalResponse>>("users/withdrawal/history",{params});
   return res.data;
 };
+
+export async function getAdminDashboard(api: AxiosInstance):Promise<adminDashboardType> {
+  const res = await api.get("admin/dashboard");
+  return res.data;
+}

@@ -9,32 +9,42 @@ import { NormalLoadingScreen } from "../components/Loader/loader";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import { isAxiosError } from "axios";
 import { toast } from "react-toastify";
+import { useEffect } from "react";
 
-export default function UserRoute({ children }: Readonly<{ children: React.ReactNode; }>) {
-   const { data: user, isLoading, isError, error } = useAuthUser();
+export default function UserRoute({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
+  const { data: user, isLoading, isError, error } = useAuthUser();
   const router = useRouter();
 
-  if (isLoading) {
-      return <NormalLoadingScreen />
-  }
-  if (isError) {
-    if (isAxiosError(error)) {
-      if (error.status === 401) {
-        return;
+  useEffect(() => {
+    if (isError) {
+      if (isAxiosError(error)) {
+        if (error.status === 401) {
+          router.replace("/login");
+        } else {
+          router.back();
+        }
       } else {
+        toast.error(error?.message);
         router.back();
-        return;
       }
-    } else {
-      toast.error(error?.message);
-      router.back();
-      return;
     }
+
+    if (user && user.role !== "user") {
+      router.replace("/dashboardAdmin");
+    }
+  }, [user, isError, error, router]);
+
+  if (isLoading) {
+    return <NormalLoadingScreen />;
   }
 
+  if (user?.role != "user") {
+    return <NormalLoadingScreen />;
+  }
 
-  
-  return( <>{children}</>)
+  return <>{children}</>;
 }
 // export default function UserRoute({ children }: Readonly<{ children: React.ReactNode; }>) {
 //     const userContext = useContext(UserContext)

@@ -177,8 +177,10 @@ a {
   --color-p: #494949;
   --color-neutral-50: #F4F4F4;
   --color-neutral-100: #E8E8E8;
+  --color-neutral-200: #D2D2D2;
   --color-neutral-500: #8D8D8D;
-  --color-neutral-700: #777777;
+  --color-neutral-700: #606060;
+  --color-neutral-900: #333333;
   --color-lightbackground: #D4E9F9;
   --color-footer: #1C4E59;
   --color-error-500: #D91B1B;
@@ -189,6 +191,7 @@ a {
   --color-btn-hover: #416A89;
   --color-success-100: #D5ECD7;
   --color-success-500: #2B9E36;
+  --color-success-50: #EAF5EB;
   --color-secondary-50: #F0F0E7;
   --text-md: 16px;
   --breakpoint-mobile: 850px;

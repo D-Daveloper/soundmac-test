@@ -1,5 +1,6 @@
 import { IArtist } from "@/util/models/artistModel";
 import { USER } from "./context/userContext/types";
+import { nextReleases } from "./utils/constants";
 
 export interface AYNCardProps {
   index: number;
@@ -276,3 +277,15 @@ export type WithdrawalResponse = {
   nextCursor?: string;
   hasMore: boolean;
 };
+
+export type adminDashboardType = {
+      totalRelease: number;
+      totalApprovedReleases: number;
+      totalRejectedReleases: number;
+      totalPendingReleases: number;
+      totalUsers: number;
+      totalArtists: number;
+      totalSupportRequests: number;
+      totalEarnings: number;
+      upomingReleases: typeof nextReleases,
+    };

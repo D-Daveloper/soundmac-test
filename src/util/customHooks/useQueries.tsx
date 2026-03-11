@@ -2,6 +2,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
+  getAdminDashboard,
   getAlbum,
   getAlbums,
   getAlbumTracks,
@@ -18,6 +19,7 @@ import {
   getWithdrawalHistory,
 } from "../axios/axiosInstance";
 import {
+  adminDashboardType,
   albumFromApi,
   Artist,
   ArtistStat,
@@ -250,5 +252,19 @@ export const useWithdrawals = (params:{withdrawalStatusFilter:string,sort?:strin
       lastPage.hasMore ? lastPage.nextCursor : undefined,
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
+  });
+};
+
+export const useGetAdminDashboard = () => {
+  const api = UseAxios();
+  return useQuery<adminDashboardType,Error>({
+    queryKey: ["Admindashboard"],
+    queryFn: () => getAdminDashboard(api),
+    staleTime: 1000 * 60 * 15, // 15 minutes: consider data fresh
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
   });
 };

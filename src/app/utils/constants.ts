@@ -975,23 +975,50 @@ export const top_performing_artist = [
     amount: "9,432.00",
   },
 ];
-export const withdrawalHistory:Props[] = [
+export const withdrawalHistory: Props[] = [
   {
     account_number: "1234567890",
     status: "pending",
     amount: "9,432.00",
-    date:"2026-01-19T10:23:01.128+00:00",
+    date: "2026-01-19T10:23:01.128+00:00",
   },
   {
     account_number: "1234567890",
     status: "successful",
     amount: "9,432.00",
-    date:"2026-01-19T10:23:01.128+00:00",
+    date: "2026-01-19T10:23:01.128+00:00",
   },
   {
     account_number: "1234567890",
     status: "failed",
     amount: "9,432.00",
-    date:"2026-01-19T10:23:01.128+00:00",
+    date: "2026-01-19T10:23:01.128+00:00",
+  },
+];
+
+export const nextReleases = [
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    date: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    date: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    date: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    date: "2026-01-19T10:23:01.128+00:00",
   },
 ];
