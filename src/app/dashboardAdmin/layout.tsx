@@ -1,10 +1,8 @@
 "use client";
-import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarAdmin/sideBarCom";
-import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
@@ -17,90 +15,70 @@ const sidebarComponents = [
     title: "music",
     list: [
       {
-        title: "upload release",
+        title: "All Releases",
         icon: "/add.svg",
-        href: "/dashboardAdmin/music/uploadMusic",
+        href: "/dashboardAdmin/all-releases/single",
         query: "upload",
       },
       {
-        title: "manage release",
+        title: "Release Requests",
         icon: "/musiclibrary2.svg",
         href: "/dashboardAdmin/music/manageRelease?type=single",
         query: "manageRelease",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("music"),
   },
   {
     title: "artist",
     list: [
       {
-        title: "create artist",
+        title: "All Artists",
         icon: "/add.svg",
         href: "/dashboardAdmin/artist/createArtist",
         query: "create",
       },
       {
-        title: "manage artist",
+        title: "All Labels",
         icon: "/profile2user.svg",
         href: "/dashboardAdmin/artist/manageArtist",
         query: "manageArtist",
       },
       {
-        title: "collaborations",
+        title: "Smartlink Requests",
+        icon: "/likeshapes.svg",
+        href: "",
+        query: "collaboration",
+      },
+      {
+        title: "Collaborations",
         icon: "/likeshapes.svg",
         href: "",
         query: "collaboration",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("artists"),
   },
   {
-    title: "insights",
+    title: "users",
     list: [
       {
-        title: "song performance",
+        title: "Manage Users",
+        icon: "/people.svg",
+        href: "",
+        query: "song",
+      },
+      {
+        title: "Verification Requests",
+        icon: "/musicplay.svg",
+        href: "",
+        query: "song",
+      },
+      {
+        title: "Collaborator Accounts",
         icon: "/musicplay.svg",
         href: "",
         query: "song",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("insights"),
-  },
-  {
-    title: "finance",
-    list: [
-      {
-        title: "sales report",
-        icon: "/musicplay.svg",
-        href: "/dashboardAdmin/salesReport",
-        query: "sales_report",
-      },
-    ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("finance"),
-  },
-  {
-    title: "explore",
-    list: [
-      {
-        title: "promotion",
-        icon: "/add.svg",
-        href: "/dashboardAdmin/promotion?page=explore",
-        query: "promotion",
-      },
-      {
-        title: "cover license",
-        icon: "/musiclibrary2.svg",
-        href: "",
-        query: "manageRelease",
-      },
-    ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("explore"),
   },
 ];
 const profileLinks = [

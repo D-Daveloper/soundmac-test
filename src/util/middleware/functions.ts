@@ -6,6 +6,7 @@ import {
   PaymentEmailData,
   Performer,
   Producer,
+  rejectEmailProps,
   SongForm,
   SongWriter,
   TrackForm,
@@ -57,6 +58,11 @@ export const isSongFormValid = (form: SongForm): string => {
     return "Genre is required";
   } else if (form.language === "") {
     return "language is required";
+  } else if (
+    form.featured_artist.length > 1 &&
+    form.featured_artist.some((artist) => artist.artistName === "")
+  ) {
+    return "Invalid featured artist.";
   } else if (
     form.song_writer.some((artist) => artist.first_name === "") ||
     form.song_writer.some((artist) => artist.last_name === "")
@@ -179,6 +185,11 @@ export const isTrackFormValid = (form: TrackForm): string => {
     form.song_writer.some((artist) => artist.last_name === "")
   ) {
     return "song writer is required";
+  } else if (
+    form.featured_artist.length > 1 &&
+    form.featured_artist.some((artist) => artist.artistName === "")
+  ) {
+    return "Invalid featured artist.";
   } else if (
     form.performer.some((artist) => artist.name === "") ||
     form.performer.some((artist) => artist.role === "")
@@ -709,6 +720,13 @@ export function validateNonDraftSongs(
   }
 
   if (
+    (payload.featured_artist && !(payload.featured_artist instanceof Array)) ||
+    payload.featured_artist.some((artist) => artist.artistName === "")
+  ) {
+    return "Invalid featured artist.";
+  }
+
+  if (
     !payload.song_writer ||
     !(payload.song_writer instanceof Array) ||
     payload.song_writer.some((artist) => artist.first_name === "") ||
@@ -1069,6 +1087,14 @@ export function validateDraftTracks(
   }
 
   if (
+    payload.featured_artist &&
+    payload.featured_artist.length > 0 &&
+    (!(payload.featured_artist instanceof Array) ||
+      payload.featured_artist.some((artist) => artist.artistName === ""))
+  ) {
+    return "Invalid featured.";
+  }
+  if (
     payload.song_writer &&
     (!(payload.song_writer instanceof Array) ||
       payload.song_writer.some((artist) => artist.first_name === "") ||
@@ -1157,6 +1183,15 @@ export function validateNonDraftTracks(
 
   if (!payload.language || !languagesList.includes(payload.language)) {
     return "Invalid language";
+  }
+
+  if (
+    (payload.featured_artist &&
+      payload.featured_artist.length > 0 &&
+      !(payload.featured_artist instanceof Array)) ||
+    payload.featured_artist.some((artist) => artist.artistName === "")
+  ) {
+    return "invalid featured artist.";
   }
 
   if (
@@ -1980,3 +2015,138 @@ export function parsePromotionFormData(formData: FormData) {
     focusTrack: formData.get("focus_track") as string | null,
   };
 }
+export const releaseRejectionEmail = (props: rejectEmailProps) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Update</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px 30px 30px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Release Status Update</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <!-- Greeting -->
+                            <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                Hi <strong>${props.artistName}</strong>,
+                            </p>
+
+                            <!-- Message Body -->
+                            <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                Thank you for submitting your release <strong>"${props.releaseTitle}"</strong> to our platform. After careful review, we regret to inform you that we cannot approve this release at this time.
+                            </p>
+
+                            <!-- Release Details Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-radius: 8px; margin: 30px 0;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h3 style="margin: 0 0 15px 0; color: #333333; font-size: 16px; font-weight: 600;">Release Details</h3>
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #666666; font-size: 14px; width: 140px;">Song Name:</td>
+                                                <td style="padding: 6px 0; color: #333333; font-size: 14px; font-weight: 500;">${props.releaseTitle}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #666666; font-size: 14px;">Artist:</td>
+                                                <td style="padding: 6px 0; color: #333333; font-size: 14px; font-weight: 500;">${props.artistName}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #666666; font-size: 14px;">Status:</td>
+                                                <td style="padding: 6px 0;">
+                                                    <span style="display: inline-block; padding: 4px 12px; background-color: #fee; color: #c00; font-size: 13px; font-weight: 500; border-radius: 12px;">Rejected</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Rejection Reason -->
+                            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 30px 0; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #856404; font-size: 16px; font-weight: 600;">Reason for Rejection</h3>
+                                <p style="margin: 0; color: #856404; font-size: 15px; line-height: 1.6;">
+                                    ${props.rejectionReason}
+                                </p>
+                            </div>
+
+                            <!-- Next Steps -->
+                            <h3 style="margin: 30px 0 15px 0; color: #333333; font-size: 18px; font-weight: 600;">What's Next?</h3>
+                            <p style="margin: 0 0 15px 0; color: #333333; font-size: 15px; line-height: 1.6;">
+                                You can resubmit your release after addressing the issues mentioned above. Please ensure that:
+                            </p>
+                            <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #333333; font-size: 15px; line-height: 1.8;">
+                                <li>All audio files meet our quality standards</li>
+                                <li>Metadata is complete and accurate</li>
+                                <li>Cover art follows our guidelines (minimum 3000x3000px)</li>
+                                <li>All rights and permissions are properly cleared</li>
+                            </ul>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${props.dashboardUrl}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
+                                            Go to Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Support -->
+                            <p style="margin: 20px 0 0 0; color: #666666; font-size: 14px; line-height: 1.6;">
+                                If you have any questions or need assistance, please don't hesitate to reach out to our support team at <a href=${props.supportEmail} style="color: #667eea; text-decoration: none;">${props.supportEmail}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 30px 40px; text-align: center; border-top: 1px solid #e9ecef;">
+                            <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                Best regards,<br>
+                                <strong>The SoundMac Team</strong>
+                            </p>
+                            <p style="margin: 20px 0 0 0; color: #999999; font-size: 12px; line-height: 1.6;">
+                                © 2025 SoundMac. All rights reserved.<br>
+                                {{COMPANY_ADDRESS}}
+                            </p>
+                            <div style="margin-top: 20px;">
+                                <a href="{{WEBSITE_URL}}" style="color: #667eea; text-decoration: none; font-size: 12px; margin: 0 10px;">Website</a>
+                                <a href="{{HELP_CENTER_URL}}" style="color: #667eea; text-decoration: none; font-size: 12px; margin: 0 10px;">Help Center</a>
+                                <a href="{{TERMS_URL}}" style="color: #667eea; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms</a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Unsubscribe -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="margin-top: 20px;">
+                    <tr>
+                        <td align="center" style="padding: 10px;">
+                            <p style="margin: 0; color: #999999; font-size: 11px;">
+                                You're receiving this email because you submitted a release to SoundMac.<br>
+                                <a href="{{UNSUBSCRIBE_URL}}" style="color: #999999; text-decoration: underline;">Unsubscribe from release notifications</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};

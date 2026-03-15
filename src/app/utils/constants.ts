@@ -1,5 +1,5 @@
 import { Props } from "../dashboard/salesReport/history/withdrawalLine";
-import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG, songFromApi } from "../type";
+import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type";
 
 export const navigationLinks = [
   { name: "Home", link: "/" },
@@ -1001,24 +1001,24 @@ export const nextReleases = [
     releaseTitle: "Falling Skies",
     featuredArtist: ["feat Ariaate", "Wenthy"],
     artistName: "TomBaggz",
-    date: "2026-01-19T10:23:01.128+00:00",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
   {
     releaseTitle: "Falling Skies",
     featuredArtist: ["feat Ariaate", "Wenthy"],
     artistName: "TomBaggz",
-    date: "2026-01-19T10:23:01.128+00:00",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
   {
     releaseTitle: "Falling Skies",
     featuredArtist: ["feat Ariaate", "Wenthy"],
     artistName: "TomBaggz",
-    date: "2026-01-19T10:23:01.128+00:00",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
   {
     releaseTitle: "Falling Skies",
     featuredArtist: ["feat Ariaate", "Wenthy"],
     artistName: "TomBaggz",
-    date: "2026-01-19T10:23:01.128+00:00",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
 ];

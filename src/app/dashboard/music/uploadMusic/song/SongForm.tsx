@@ -209,7 +209,7 @@ const SongForm = () => {
   };
 
   const handleSubmit = async (form: SongForm, action: "draft" | "upload") => {
-    if(!dashboardContext?.isPremium){
+    if (!dashboardContext?.isPremium) {
       dashboardContext?.setOpenUpgradePopUp(true);
       return;
     }
@@ -255,7 +255,9 @@ const SongForm = () => {
         formData.append(key, value);
       }
     });
-
+      if (form.featured_artist.length === 1 && form.featured_artist.some((artist) => artist.artistName === "")) {
+       formData.delete("featured_artist");
+      }
     formData.append("action", action);
     let res;
     try {
@@ -382,7 +384,7 @@ const SongForm = () => {
     }
   }, []);
 
-    useEffect(() => {
+  useEffect(() => {
     dashboardContext?.setLayoutHeaderMessage("Upload Single");
   }, [dashboardContext]);
   return (

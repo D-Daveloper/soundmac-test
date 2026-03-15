@@ -367,7 +367,7 @@ const SongModelSchema = new mongoose.Schema(
     catalogNumber: {
       type: String,
       required: [true, "catalog number is required"],
-      unique:true
+      unique: true,
     },
   },
   {
@@ -376,23 +376,41 @@ const SongModelSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
-SongModelSchema.index({ artistName: 1 ,releaseDate: -1});
-SongModelSchema.index({ releaseTitle: 1,user:1 });
-SongModelSchema.index({ user: 1,artistName:1 });
-SongModelSchema.index({ user: 1,createdAt:1 });
-// enforce uniqueness
+
+// Uniqueness constraints
+SongModelSchema.index({ artistName: 1, releaseTitle: 1 }, { unique: true });
+SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true });
+SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true });
+
+// Admin endpoint
+SongModelSchema.index({ createdAt: -1 }); // no filters
 SongModelSchema.index(
-  { artist: 1, releaseTitle: 1 },
-  { unique: true }
-);
-// SongModelSchema.index({ genre: 1 });
+  {
+    createdAt: -1,
+    releaseTitle: 1,
+    artistName: 1,
+    catalogNumber: 1,
+    upc: 1,
+    releaseDate: 1,
+    releaseStatus: 1,
+    releaseImage: 1,
+    _id: 1,
+  },
+  { collation: { locale: "en", strength: 2 } },
+); // no filters
+SongModelSchema.index({ releaseStatus: 1, createdAt: -1 }); // status only
+SongModelSchema.index({ artistName: 1, releaseStatus: 1, createdAt: -1 }); // combined
 SongModelSchema.index(
-  { isrc: 1 },
-  { unique: true, sparse: true },
-);
+  { releaseTitle: 1, createdAt: -1 },
+  { collation: { locale: "en", strength: 2 } },
+); // title search
+
+// User-scoped queries (keep if used elsewhere in your app)
+SongModelSchema.index({ user: 1, createdAt: -1 });
+SongModelSchema.index({ user: 1, artistName: 1 });
 SongModelSchema.index(
-  { upc: 1 },
-  { unique: true, sparse: true },
+  { user: 1, releaseTitle: 1, createdAt: -1 },
+  { collation: { locale: "en", strength: 2 } },
 );
 // delete mongoose.models.Song;
 

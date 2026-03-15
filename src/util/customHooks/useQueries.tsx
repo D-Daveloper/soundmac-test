@@ -2,10 +2,12 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
+  getAdminArtistsNames,
   getAdminDashboard,
   getAlbum,
   getAlbums,
   getAlbumTracks,
+  getAllReleases,
   getArtists,
   getArtistStats,
   getCurrentUser,
@@ -20,6 +22,7 @@ import {
 } from "../axios/axiosInstance";
 import {
   adminDashboardType,
+  AdminRelease,
   albumFromApi,
   Artist,
   ArtistStat,
@@ -268,3 +271,46 @@ export const useGetAdminDashboard = () => {
       handleReactQueryApiCallError(failedCount, error),
   });
 };
+
+export function usePaginatedAdminReleases(params: {
+  page: number;
+  sort: string;
+  releaseTitle: string;
+  releaseStatusFilter: string;
+  artist: string;
+  limit:string;
+  releaseType?:string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<AdminRelease>, Error>({
+    queryKey: [
+      "allreleases",
+      params.page,
+      params.sort,
+      params.releaseTitle,
+      params.releaseStatusFilter,
+      params.artist,
+      params?.releaseType
+    ],
+    queryFn: async () => getAllReleases(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAdminArtistsNames() {
+  const api = UseAxios();
+  return useQuery<string[], Error>({
+    queryKey: ["adminArtistsNames"],
+    queryFn: async () => getAdminArtistsNames(api),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}

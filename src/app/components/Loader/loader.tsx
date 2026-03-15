@@ -73,3 +73,17 @@ export function InlineLoadingScreen() {
     </div>
   );
 }
+export function ModelLoadingScreen() {
+  return (
+    <div className="flex justify-center items-center min-h-full!">
+      <Image
+        priority={true}
+        src={logo}
+        alt="Soundmac's Logo"
+        className={"animate-spin"}
+        width={100}
+        height={100}
+      />
+    </div>
+  );
+}

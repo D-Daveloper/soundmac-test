@@ -31,7 +31,7 @@ const Song = () => {
   const [showDeletePopUp, setShowDeletePopUp] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState("createdAt");
+  const [filter, setFilter] = useState("-createdAt");
   const [songStatusFilter, setSongStatusFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");

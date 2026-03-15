@@ -198,7 +198,7 @@ export async function GET(req: Request) {
     console.log(searchParams);
 
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const sort = searchParams.get("sort") || "createdAt";
+    const sort = searchParams.get("sort") || "-createdAt";
     const albumTitle = searchParams.get("albumTitle");
     const artist = searchParams.get("artist");
     const albumStatusFilter = searchParams.get("albumStatusFilter");

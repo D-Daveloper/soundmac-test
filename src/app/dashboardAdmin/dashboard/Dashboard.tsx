@@ -1,15 +1,12 @@
 "use client";
 import {
   useAuthUser,
-  useDashboard,
   useGetAdminDashboard,
 } from "@/util/customHooks/useQueries";
 import Image from "next/image";
 import { useContext, useEffect } from "react";
 import DashboardContext from "../../context/dashboardContext/dashboardContext";
 import ReleaseComp from "./ReleaseComp";
-import { nextReleases } from "@/app/utils/constants";
-import Link from "next/link";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useGetAdminDashboard();
@@ -96,8 +93,7 @@ const Dashboard = () => {
                 priority={false}
                 height={50}
                 width={50}
-                alt="head phones icon"
-                className=""
+                alt="people icon"
               />
               <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit truncate">
                 {data?.totalUsers || 0}
@@ -127,8 +123,7 @@ const Dashboard = () => {
               priority={false}
               height={50}
               width={53}
-              alt="music note icon"
-              className=""
+              alt="money icon"
             />
             <div className="flex flex-col">
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">
@@ -156,11 +151,11 @@ const Dashboard = () => {
           >
             Next Releases
           </h4>
-          {data && data.upomingReleases.length > 0 ? (
+          {data && data.upcomingReleases.length > 0 ? (
             <div
               className={"flex flex-col gap-5 mt-5 " + (isLoading && " hidden")}
             >
-              {data?.upomingReleases.map((item, index) => (
+              {data?.upcomingReleases.map((item, index) => (
                 <ReleaseComp key={index} {...item} />
               ))}
             </div>
@@ -196,8 +191,7 @@ const Dashboard = () => {
                 priority={false}
                 height={50}
                 width={50}
-                alt="head phones icon"
-                className=""
+                alt="micro phone icon"
               />
               <div>
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">
@@ -227,8 +221,7 @@ const Dashboard = () => {
                 priority={false}
                 height={50}
                 width={50}
-                alt="head phones icon"
-                className=""
+                alt="support icon"
               />
               <div>
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">

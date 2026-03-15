@@ -110,7 +110,7 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     }
-    
+
     if (user!.type === "EMERGING_ARTIST") {
       return NextResponse.json(
         { msg: "Emerging artists can not upload tracks" },
@@ -139,6 +139,12 @@ export async function POST(req: Request) {
     // console.log("first",userAlbum.unassignedNumbers);
 
     for (let i = 0; i < tracks.length; i++) {
+      if (
+        tracks[i].featured_artist.length === 1 &&
+        tracks[i].featured_artist.some((artist) => artist.artistName === "")
+      ) {
+        tracks[i].featured_artist = [];
+      }
       const err = validateNonDraftTracks(
         tracks[i],
         userAlbum.unassignedNumbers,
@@ -230,6 +236,12 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
     }
     for (let i = 0; i < tracks.length; i++) {
+      if (
+        tracks[i].featured_artist.length === 1 &&
+        tracks[i].featured_artist.some((artist) => artist.artistName === "")
+      ) {
+        tracks[i].featured_artist = [];
+      }
       const err = validateNonDraftTracks(
         tracks[i],
         userAlbum.unassignedNumbers,

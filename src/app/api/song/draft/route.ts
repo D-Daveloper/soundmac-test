@@ -107,7 +107,7 @@ export async function POST(req: Request) {
     if (
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
-        (payload.song_writer.length === 1 &&
+        (payload.song_writer.length > 0 &&
           payload.song_writer.some((artist) => artist.first_name === "") &&
           payload.song_writer.some((artist) => artist.last_name === "")))
     ) {
@@ -116,7 +116,7 @@ export async function POST(req: Request) {
     if (
       payload.performer &&
       (!(payload.performer instanceof Array) ||
-        (payload.performer.length === 1 &&
+        (payload.performer.length > 0 &&
           payload.performer.some((artist) => artist.name === "") &&
           payload.performer.some((artist) => artist.role === "")))
     ) {
@@ -125,7 +125,7 @@ export async function POST(req: Request) {
     if (
       payload.featured_artist &&
       (!(payload.featured_artist instanceof Array) ||
-        (payload.featured_artist.length === 1 &&
+        (payload.featured_artist.length > 0 &&
           payload.featured_artist.some((artist) => artist.artistName === "")))
     ) {
       payload.featured_artist = [];
@@ -133,7 +133,7 @@ export async function POST(req: Request) {
     if (
       payload.producer &&
       (!(payload.producer instanceof Array) ||
-        (payload.producer.length === 1 &&
+        (payload.producer.length > 0 &&
           payload.producer.some((artist) => artist.name === "")))
     ) {
       payload.producer = [];
@@ -248,11 +248,11 @@ export async function PUT(req: Request) {
     let releaseTitleAlreadyExist = null;
 
     releaseTitleAlreadyExist = await SongModel.find({
-      artist: userArtist._id,
+      artistName: userArtist.artistName,
       releaseTitle: payload.title,
     });
 
-    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 1) {
+    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length >= 1) {
       return NextResponse.json(
         { msg: "Release title already exists" },
         { status: 400 },
@@ -261,8 +261,8 @@ export async function PUT(req: Request) {
     if (
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
-        (payload.song_writer.length === 1 &&
-          payload.song_writer.some((artist) => artist.first_name === "") &&
+        (payload.song_writer.length > 0 &&
+          payload.song_writer.some((artist) => artist.first_name === "") ||
           payload.song_writer.some((artist) => artist.last_name === "")))
     ) {
       payload.song_writer = [];
@@ -270,8 +270,8 @@ export async function PUT(req: Request) {
     if (
       payload.performer &&
       (!(payload.performer instanceof Array) ||
-        (payload.performer.length === 1 &&
-          payload.performer.some((artist) => artist.name === "") &&
+        (payload.performer.length > 0 &&
+          payload.performer.some((artist) => artist.name === "") ||
           payload.performer.some((artist) => artist.role === "")))
     ) {
       payload.performer = [];
@@ -279,7 +279,7 @@ export async function PUT(req: Request) {
     if (
       payload.featured_artist &&
       (!(payload.featured_artist instanceof Array) ||
-        (payload.featured_artist.length === 1 &&
+        (payload.featured_artist.length > 0 &&
           payload.featured_artist.some((artist) => artist.artistName === "")))
     ) {
       payload.featured_artist = [];
@@ -287,7 +287,7 @@ export async function PUT(req: Request) {
     if (
       payload.producer &&
       (!(payload.producer instanceof Array) ||
-        (payload.producer.length === 1 &&
+        (payload.producer.length > 0 &&
           payload.producer.some((artist) => artist.name === "")))
     ) {
       payload.producer = [];

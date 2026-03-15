@@ -173,21 +173,25 @@ const AlbumSchema = new mongoose.Schema(
   },
 );
 
-// artist page (newest first)
-AlbumSchema.index({ artistName: 1, releaseDate: -1 });
-
-// user dashboard
-// AlbumSchema.index({ user: 1, createdAt: -1 });
-
-// search
-AlbumSchema.index({ releaseTitle: 1, user: 1 });
-AlbumSchema.index({ user: 1, artistName: 1 });
-// AlbumSchema.index({ genre: 1 });
-// AlbumSchema.index({ isrc: 1 }, { unique: true });
-AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
-// enforce uniqueness
+// Admin endpoint
+AlbumSchema.index({ createdAt: -1 });                              // no filters
+AlbumSchema.index({ releaseStatus: 1, createdAt: -1 });            // status only
+AlbumSchema.index({ artistName: 1, releaseStatus: 1, createdAt: -1 }); // combined
 AlbumSchema.index(
-  { artist: 1, releaseTitle: 1 },
+  { releaseTitle: 1, createdAt: -1 },
+  { collation: { locale: "en", strength: 2 } }
+);
+
+// User-scoped queries (keep if used elsewhere in your app)
+AlbumSchema.index({ user: 1, createdAt: -1 });
+AlbumSchema.index(
+  { user: 1, releaseTitle: 1, createdAt: -1 },
+  { collation: { locale: "en", strength: 2 } }
+);
+AlbumSchema.index({ user: 1, artistName: 1 });
+AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
+AlbumSchema.index(
+  { artistName: 1, releaseTitle: 1 },
   { unique: true }
 );
 

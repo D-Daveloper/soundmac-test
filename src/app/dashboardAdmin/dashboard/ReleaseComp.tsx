@@ -3,9 +3,9 @@ import React from "react";
 
 export type Props = {
   artistName: string;
-  featuredArtist: string[];
+  featuredArtist?: string[];
   releaseTitle: string;
-  date: string;
+  releaseDate: string;
 };
 
 const ReleaseComp = (Props: Props) => {
@@ -28,14 +28,14 @@ const ReleaseComp = (Props: Props) => {
             </h1>
             <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
               ~{Props.artistName}
-              {"(" + Props.featuredArtist.join(",") + ")"}
+              {Props.featuredArtist && "(" + Props.featuredArtist.join(",") + ")"}
             </p>
           </div>
         </div>
 
-        {/* date and time */}
+        {/* releaseDate and time */}
         <div className=" flex bg-secondary-50 p-3 rounded-full max-w-fit text-text-body font-medium text-md leading-5 tracking-tighter">
-          <p>{new Date(Props.date).toDateString()}</p>
+          <p>{new Date(Props.releaseDate).toDateString()}</p>
         </div>
       </div>
 

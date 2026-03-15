@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { adminDashboardType, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { adminDashboardType, AdminRelease, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -167,3 +167,21 @@ export async function getAdminDashboard(api: AxiosInstance):Promise<adminDashboa
   const res = await api.get("admin/dashboard");
   return res.data;
 }
+
+export const getAllReleases = async (
+  api: AxiosInstance,
+  params:{ page:number,sort:string,releaseTitle:string,releaseStatusFilter:string,artist:string,limit:string,releaseType?:string }
+): Promise<PAGINATION<AdminRelease>> => {
+  const res = await api.get<Promise<PAGINATION<AdminRelease>>>("admin/all-releases", {
+    params:params,
+  });
+  return res.data;
+};
+
+
+export const getAdminArtistsNames = async (
+  api: AxiosInstance,
+): Promise<string[]> => {
+  const res = await api.get<Promise<string[]>>("admin/artist");
+  return res.data;
+};

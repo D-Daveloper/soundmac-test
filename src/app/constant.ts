@@ -479,3 +479,26 @@ export const withdrawalStatusFilterOptions = [
     value:"failed"
   },
 ]
+
+export const allReleaseStatusFilterOptions = [
+  {
+    label:"All",
+    value:"all"
+  },
+  {
+    label:"Approved",
+    value:"approved"
+  },
+  {
+    label:"Pending",
+    value:"pending"
+  },
+  {
+    label:"Rejected",
+    value:"rejected"
+  },
+  {
+    label:"Draft",
+    value:"draft"
+  },
+]

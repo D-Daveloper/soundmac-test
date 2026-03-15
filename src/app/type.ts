@@ -279,13 +279,61 @@ export type WithdrawalResponse = {
 };
 
 export type adminDashboardType = {
-      totalRelease: number;
-      totalApprovedReleases: number;
-      totalRejectedReleases: number;
-      totalPendingReleases: number;
-      totalUsers: number;
-      totalArtists: number;
-      totalSupportRequests: number;
-      totalEarnings: number;
-      upomingReleases: typeof nextReleases,
-    };
+  totalRelease: number;
+  totalApprovedReleases: number;
+  totalRejectedReleases: number;
+  totalPendingReleases: number;
+  totalUsers: number;
+  totalArtists: number;
+  totalSupportRequests: number;
+  totalEarnings: number;
+  upcomingReleases: typeof nextReleases;
+};
+export type featuredArtistType = {
+  artistName: string;
+  spotifyId: string;
+  appleId: string;
+};
+export type songWriterType = {
+  first_name: string;
+  last_name: string;
+};
+
+export type producerType = {
+  name: string;
+};
+
+export interface AdminRelease {
+  _id: string;
+  releaseTitle: string;
+  artistName: string;
+  catalogNumber: string;
+  isrc: string;
+  upc: string;
+  releaseDate: string;
+  releaseStatus: "pending" | "approved" | "draft" | "rejected";
+  releaseImage?: string;
+  genre: string;
+  featuredArtist: featuredArtistType[];
+  songWriter: songWriterType[];
+  producer: producerType[];
+  artist:{
+    appleId:string;
+    spotifyId:string
+  }
+}
+export interface admingAllReleaseResponse {
+  releases: AdminRelease[];
+  page: number;
+  msg: string;
+  totalCount: number;
+  totalPages: number;
+}
+
+export interface rejectEmailProps {
+  artistName: string;
+  releaseTitle: string;
+  rejectionReason?: string;
+  supportEmail: string;
+  dashboardUrl: string;
+}

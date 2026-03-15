@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Select({
   options,
@@ -136,6 +136,7 @@ useEffect(() => {
               height={20}
             />
             <input
+              name="search"
               type="search"
               className="w-full p-1 text-[16px] sm:text-sm outline-0"
               onChange={handleChange}

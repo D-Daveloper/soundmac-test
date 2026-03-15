@@ -106,6 +106,9 @@ export async function POST(req: Request) {
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
+    if (!payload.featured_artist) {
+      payload.featured_artist = [];
+    }
 
     audioTracker = await AudioUploadTrackerModel.findOne({
       _id: payload.uploadId,
@@ -653,7 +656,7 @@ export async function GET(req: Request) {
     console.log(searchParams);
 
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const sort = searchParams.get("sort") || "createdAt";
+    const sort = searchParams.get("sort") || "-createdAt";
     const songTitle = searchParams.get("songTitle");
     const artist = searchParams.get("artist");
     const songStatusFilter = searchParams.get("songStatusFilter");
@@ -677,6 +680,12 @@ export async function GET(req: Request) {
       .sort(sortQuery)
       .skip((page - 1) * limit)
       .limit(limit);
+    // const exec = await SongModel.find(query)
+    //   .collation({ locale: "en", strength: 2 })
+    //   .sort(sortQuery)
+    //   .skip((page - 1) * limit)
+    //   .limit(limit).explain("executionStats");
+
     totalCount = await SongModel.countDocuments(query);
     console.log("song filters", songStatusFilter);
 
@@ -684,6 +693,7 @@ export async function GET(req: Request) {
       {
         data: songs,
         page,
+        // exec,
         // skip: (page - 1) * limit,
         // sort,
         // limit,
@@ -863,7 +873,10 @@ export async function PUT(req: Request) {
     }
 
     const isSongValid = validateNonDraftSongs(payload);
-
+    if (!payload.featured_artist) {
+      payload.featured_artist = [];
+    }
+    
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
