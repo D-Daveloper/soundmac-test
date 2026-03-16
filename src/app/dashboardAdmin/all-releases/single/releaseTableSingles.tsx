@@ -91,7 +91,7 @@ console.log(selectedRelease);
                     onClick={()=> setselectedRelease(release)}
                     tabIndex={1}
                       key={release._id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="hover:bg-gray-200 transition-colors cursor-pointer"
                     >
                       <td className="min-w-50 pl-2 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">

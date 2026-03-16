@@ -7,16 +7,15 @@ import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3 } from "@/util/middleware/aws";
+import AlbumModel from "@/util/models/AlbumModel";
+import TrackModel from "@/util/models/trackModel";
 
 export async function POST(req: Request) {
   try {
     const body: {
       requestType: "approved" | "rejected";
       message?: string;
-      songId: string;
+      albumId: string;
     } = await req.json();
     console.log(body);
 
@@ -43,10 +42,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (body.requestType == "rejected" && !body.message) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (!body.songId || !Types.ObjectId.isValid(body.songId)) {
+    } else if (!body.albumId || !Types.ObjectId.isValid(body.albumId)) {
       return NextResponse.json({ msg: "Invalid Request." });
     }
-    const release = await SongModel.findById(body.songId).populate(
+    const release = await SongModel.findById(body.albumId).populate(
       "user",
       "email",
     );
@@ -63,13 +62,13 @@ export async function POST(req: Request) {
     if (body.requestType == "approved") {
       // create the dpm callback here
       await SongModel.findByIdAndUpdate(
-        body.songId,
+        body.albumId,
         { releaseStatus: body.requestType },
         { runValidators: true },
       );
     } else if (body.requestType == "rejected") {
       const updateRelease = SongModel.findByIdAndUpdate(
-        body.songId,
+        body.albumId,
         { releaseStatus: body.requestType },
         { runValidators: true },
       );
@@ -131,35 +130,48 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     // console.log(searchParams);
 
-    let songId = searchParams.get("songId");
-    if (!songId || !Types.ObjectId.isValid(songId)) {
+    let albumId = searchParams.get("albumId");
+    if (!albumId || !Types.ObjectId.isValid(albumId)) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
     // Get audio record from database
-    const release = await SongModel.findById(songId, {
+    const release = await AlbumModel.findById(albumId, {
       releaseTitle: 1,
-      releaseAudio: 1,
-    });
-    if (!release || !release.releaseAudio) {
+      releaseStatus: 1,
+      releaseImage: 1,
+      artistName: 1,
+      genre: 1,
+      releaseDate: 1,
+      upc: 1,
+      catalogNumber: 1,
+    }).populate("artist", "spotifyId appleId -_id");
+    const tracks = await TrackModel.find(
+      { album: albumId },
+      {
+        releaseTitle: 1,
+        releaseAudio: 1,
+        releaseStatus: 1,
+        trackNumber: 1,
+        artistName: 1,
+        genre: 1,
+        releaseDate: 1,
+        upc: 1,
+        isrc: 1,
+        featuredArtist: 1,
+        songWriter: 1,
+        producer: 1,
+        catalogNumber: 1,
+        explicitContent: 1,
+      },
+    );
+    if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });
     }
     console.log(release);
 
-    // Generate presigned URL
-    const command = new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET!,
-      Key: release.releaseAudio,
-      ResponseContentDisposition: `attachment; filename="${release.releaseTitle}"`,
-    });
-
-    const downloadUrl = await getSignedUrl(s3, command, {
-      expiresIn: 3600, // 1 hour
-    });
-
     return NextResponse.json({
-      downloadUrl,
-      fileName: release.releasteTitle,
-      expiresIn: 3600,
+      release,
+      tracks,
       msg: "Link generated Successfully.",
     });
   } catch (error) {

@@ -317,10 +317,10 @@ export interface AdminRelease {
   featuredArtist: featuredArtistType[];
   songWriter: songWriterType[];
   producer: producerType[];
-  artist:{
-    appleId:string;
-    spotifyId:string
-  }
+  artist: {
+    appleId: string;
+    spotifyId: string;
+  };
 }
 export interface admingAllReleaseResponse {
   releases: AdminRelease[];
@@ -336,4 +336,42 @@ export interface rejectEmailProps {
   rejectionReason?: string;
   supportEmail: string;
   dashboardUrl: string;
+}
+
+export interface AdminAlbumDetails {
+  _id: string;
+  releaseTitle: string;
+  releaseStatus: string;
+  releaseImage: string;
+  artistName: string;
+  genre: string;
+  releaseDate: string;
+  upc: string;
+  catalogNumber: string;
+  artist: {
+    spotifyId: string;
+    appleId: string;
+  };
+}
+export interface AdminTrackDetails {
+  _id: string;
+  releaseTitle: string;
+  releaseAudio: string;
+  releaseStatus: string;
+  artistName: string;
+  genre: string;
+  releaseDate: string;
+  upc: string;
+  isrc: string;
+  featuredArtist: featuredArtistType[];
+  songWriter: songWriterType[];
+  producer: producerType[];
+  catalogNumber: string;
+  explicitContent: boolean;
+  trackNumber: number;
+}
+export interface AdminAlbumDetailsResponse {
+  release: AdminAlbumDetails;
+  tracks: AdminTrackDetails[];
+  msg: string;
 }

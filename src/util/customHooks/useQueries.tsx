@@ -2,6 +2,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
+  getAdminAlbumDetails,
   getAdminArtistsNames,
   getAdminDashboard,
   getAlbum,
@@ -21,6 +22,7 @@ import {
   getWithdrawalHistory,
 } from "../axios/axiosInstance";
 import {
+  AdminAlbumDetailsResponse,
   adminDashboardType,
   AdminRelease,
   albumFromApi,
@@ -305,6 +307,20 @@ export function useGetAdminArtistsNames() {
   return useQuery<string[], Error>({
     queryKey: ["adminArtistsNames"],
     queryFn: async () => getAdminArtistsNames(api),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+export function useGetAdminAlbumDetails(params:{albumId:string}) {
+  const api = UseAxios();
+  return useQuery<AdminAlbumDetailsResponse, Error>({
+    queryKey: ["adminAlbumDetails",params.albumId],
+    queryFn: async () => getAdminAlbumDetails(api,params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),

@@ -48,7 +48,7 @@ const LoginForm = () => {
   const redirect = searchParams.get("redirect");
   const safeRedirect = redirect?.startsWith("/")
     ? redirect
-    : "/dashboard?tab=dashboard";
+    : "/dashboard";
   const [loginForm, setLoginForm] = useState<LoginForm>({
     password: "",
     email: "",

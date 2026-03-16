@@ -22,8 +22,6 @@ const sideBarCom = (props: Props) => {
   const pathname = usePathname();
   const pathNameArray = pathname.split("/")
   const newPathName = pathNameArray[2]
-console.log(pathNameArray);
-
   return (
     <div className="">
       <p

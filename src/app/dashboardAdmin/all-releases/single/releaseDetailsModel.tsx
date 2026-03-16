@@ -67,13 +67,13 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
   const handleRejectRelease = async () => {
     try {
       setisSubmitting(true);
-      if (!rejectReason){
+      if (!rejectReason) {
         return toast.warn("Please enter the reason for the rejected.");
       }
       const res = await api.post("admin/all-releases/singles", {
         songId: releaseDetails?._id,
         requestType: "rejected",
-        message:rejectReason
+        message: rejectReason,
       });
       console.log(res.data);
       toast.success(res.data.msg);
@@ -81,6 +81,39 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
       if (releaseDetails) {
         releaseDetails.releaseStatus = "rejected";
       }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Something went wrong!");
+    } finally {
+      setisSubmitting(false);
+    }
+  };
+
+  const handleDownloadSong = async () => {
+    try {
+      setisSubmitting(true);
+      const res = await api.get("admin/all-releases/singles", {
+        params: { songId: releaseDetails?._id },
+      });
+      console.log(res.data);
+      // 2. Create temporary link and trigger download
+      const link = document.createElement("a");
+      link.href = res.data.downloadUrl;
+      link.download = res.data.fileName;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+
+      // Append to body (required for Firefox)
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      document.body.removeChild(link);
+
+      toast.success(res.data.msg);
     } catch (error) {
       if (isAxiosError(error)) {
         console.log(error);
@@ -155,6 +188,7 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
                     </div>
                     <div className="flex items-center gap-4">
                       <button
+                        onClick={handleDownloadSong}
                         aria-label="download music"
                         className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
                       >

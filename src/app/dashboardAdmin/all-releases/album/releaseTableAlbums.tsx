@@ -2,6 +2,7 @@ import React from "react";
 import { AdminRelease } from "@/app/type";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
+import { useRouter } from "next/navigation";
 
 const ReleaseTable = ({
   releases,
@@ -10,6 +11,7 @@ const ReleaseTable = ({
   releases: AdminRelease[];
   isfetching: boolean;
 }) => {
+  const router = useRouter();
   const getStatusBadge = (status: AdminRelease["releaseStatus"]) => {
     const styles = {
       approved: "bg-green-100 text-green-700 border-green-200",
@@ -81,10 +83,15 @@ const ReleaseTable = ({
                 <tbody className="bg-white divide-y divide-gray-100 text-text-body text-md font-medium leading-5 tracking-tight">
                   {releases.map((release) => (
                     <tr
+                      onClick={() =>
+                        router.push(
+                          "/dashboardAdmin/all-releases/album/" + release._id,
+                        )
+                      }
                       key={release._id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className="hover:bg-gray-200 transition-colors cursor-pointer"
                     >
-                      <td className="min-w-50 pl-2 py-4 whitespace-nowrap">
+                      <td className="min-w-50 pl-2 py-4 whitespace-nowrap text-center">
                         <div className="flex items-center gap-3">
                           <div
                             className={
@@ -101,19 +108,19 @@ const ReleaseTable = ({
                           <span className="">{release.releaseTitle}</span>
                         </div>
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap font-bold">
+                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap text-center font-bold">
                         {release.artistName}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap text-center">
                         {release.catalogNumber}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap text-center">
                         {release.upc}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap text-center">
                         {new Date(release.releaseDate).toDateString()}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap text-center">
                         {getStatusBadge(release.releaseStatus)}
                       </td>
                     </tr>

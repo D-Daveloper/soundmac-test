@@ -166,7 +166,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                   <div className="flex flex-col gap-5">
                     <Link
                       className={
-                        "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-neutral-700/90" +
+                        "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer focus:bg-neutral-700/90 hover:bg-neutral-700/90 transition-all duration-300 " +
                         (pathname.endsWith("dashboardAdmin") && " bg-neutral-700")
                       }
                       href={"/dashboardAdmin"}

@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { adminDashboardType, AdminRelease, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -183,5 +183,12 @@ export const getAdminArtistsNames = async (
   api: AxiosInstance,
 ): Promise<string[]> => {
   const res = await api.get<Promise<string[]>>("admin/artist");
+  return res.data;
+};
+export const getAdminAlbumDetails = async (
+  api: AxiosInstance,
+  params:{albumId:string}
+): Promise<AdminAlbumDetailsResponse> => {
+  const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/all-releases/album",{params});
   return res.data;
 };
