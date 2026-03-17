@@ -159,7 +159,7 @@ const AlbumSchema = new mongoose.Schema(
     },
     releaseStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected", "draft"],
+      enum: ["pending","completed", "approved", "rejected", "draft"],
       default: "pending",
     },
     catalogNumber: {

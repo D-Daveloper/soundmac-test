@@ -138,6 +138,7 @@ export interface PAGINATION<T> {
   hasNextPage: boolean;
   totalCount: number;
   totalPages: number;
+  msg:string;
 }
 
 export interface ARTIST_TABLE extends Artist {
@@ -168,7 +169,6 @@ interface BaseApiResponseForRelease {
   releaseImage: string;
   dsp: string[];
   upc: string;
-  releaseStatus: "pending" | "approved" | "rejected" | "draft";
   copyRightHolder: string;
   copyRightYear: string;
   createdAt: Date;
@@ -186,10 +186,12 @@ export interface songFromApi extends BaseApiResponseForRelease {
   startClip: string;
   isrc: string;
   explicitContent: boolean;
+  releaseStatus: "pending" | "approved" | "rejected" | "draft";
 }
 export interface albumFromApi extends BaseApiResponseForRelease {
   numberOfTracks: string;
   unassignedNumbers: string[];
+  releaseStatus: "pending" | "completed" | "approved" | "rejected" | "draft";
 }
 
 export interface NonRetryableErrorCode {
@@ -311,7 +313,7 @@ export interface AdminRelease {
   isrc: string;
   upc: string;
   releaseDate: string;
-  releaseStatus: "pending" | "approved" | "draft" | "rejected";
+  releaseStatus: "pending" | "completed" | "approved" | "draft" | "rejected";
   releaseImage?: string;
   genre: string;
   featuredArtist: featuredArtistType[];

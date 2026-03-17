@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     } else if (body.requestType == "rejected" && !body.message) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body.songId || !Types.ObjectId.isValid(body.songId)) {
-      return NextResponse.json({ msg: "Invalid Request." });
+      return NextResponse.json({ msg: "Invalid Request." },{status:400});
     }
     const release = await SongModel.findById(body.songId).populate(
       "user",

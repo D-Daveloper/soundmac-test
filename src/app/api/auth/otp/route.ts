@@ -30,6 +30,7 @@ export async function POST(req: Request) {
       if (user.otp !== body.otp || new Date() >= user.otpExpires) {
         return NextResponse.json({ msg: "Invalid OTP" }, { status: 400 });
       }
+    }
       if (body.type === "forgotPassword") {
         if (!body.password) {
           return NextResponse.json(
@@ -50,7 +51,6 @@ export async function POST(req: Request) {
         user.updatedAt = new Date(); // Update the updatedAt field
         await user.save();
       }
-    }
     //   create token
     const token = user.createJWT();
 

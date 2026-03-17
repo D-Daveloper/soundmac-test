@@ -4,7 +4,14 @@ import React, { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { songFilterOptions, songStatusFilterArray } from "@/app/constant";
 import Select from "@/components/Select";
-import { Trash2, Music, BadgeAlert, FileSearchIcon } from "lucide-react";
+import {
+  Trash2,
+  Music,
+  BadgeAlert,
+  FileSearchIcon,
+  CircleCheck,
+  Eye,
+} from "lucide-react";
 import {
   useGetUserArtistsNames,
   usePaginatedAlbums,
@@ -14,7 +21,10 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import { albumFromApi } from "@/app/type";
 import { toast } from "react-toastify";
-import { useDeleteAlbumMutation } from "@/util/customHooks/useMutations";
+import {
+  useDeleteAlbumMutation,
+  useMarkAlbumCompleteMutation,
+} from "@/util/customHooks/useMutations";
 import ManageAlbumForm from "./ManageAlbumForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
@@ -38,6 +48,9 @@ const Album = () => {
   const albumTitle = useDebounce<string>(query, 500);
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [showCannotAddTracks, setShowCannotAddTracks] = useState(false);
+  const [infoPopUpText, setinfoPopUpText] = useState(
+    "Draft Albums can not add tracks, please complete your album to be able to add tracks.",
+  );
 
   const {
     data,
@@ -56,6 +69,10 @@ const Album = () => {
     artist,
   });
   const { mutateAsync, isPending: isDeletePending } = useDeleteAlbumMutation();
+  const {
+    mutateAsync: markAlbumCompletedAsync,
+    isPending: isPendingMarkAlbumCompletedAsync,
+  } = useMarkAlbumCompleteMutation();
 
   const {
     isLoading: isLoadingArtistNames,
@@ -75,12 +92,37 @@ const Album = () => {
     {
       name: "Upload Track",
       icon: <Music strokeWidth={1} />,
-      iconFunction: () => {},
+      iconFunction: (release: albumFromApi) => {
+        if (release.releaseStatus === "draft") {
+          setShowCannotAddTracks(true);
+          return;
+        }
+        router.push(
+          `/dashboard/music/manageRelease/${release.releaseTitle.trim().replaceAll(" ", "-")}`,
+        );
+        return;
+      },
     },
     {
       name: "View Track",
-      icon: <Music strokeWidth={1} />,
-      iconFunction: () => {},
+      icon: <Eye strokeWidth={1} />,
+      iconFunction: (release: albumFromApi) => {
+        if (release.releaseStatus === "draft") {
+          setShowCannotAddTracks(true);
+          return;
+        }
+        router.push(
+          `/dashboard/music/manageRelease/${release.releaseTitle.trim().replaceAll(" ", "-")}/edit`,
+        );
+        return;
+      },
+    },
+    {
+      name: "Mark Complete",
+      icon: <CircleCheck strokeWidth={1} />,
+      iconFunction: (release: albumFromApi) => {
+        handleMarkAlbumcomplete(release);
+      },
     },
     {
       name: "Delete",
@@ -124,12 +166,39 @@ const Album = () => {
         return toast.info("Only draft Albums can be deleted");
       }
       await mutateAsync({
-        artist_name: release.artistName,
         releaseTitle: release.releaseTitle,
       });
       setShowDeletePopUp(false);
       setSelectedIndex(null);
       refetch();
+    } catch (error) {
+      console.log("error deleting album", error);
+    }
+  };
+
+  const handleMarkAlbumcomplete = async (release: albumFromApi) => {
+    try {
+      if (release.releaseStatus! !== "pending") {
+        setinfoPopUpText(
+          "Please assign all track numbers to mark as complete.",
+        );
+        setShowCannotAddTracks(true);
+        return;
+      }
+      if (release.unassignedNumbers.length > 0) {
+        setinfoPopUpText(
+          "Please assign all track numbers to mark as complete.",
+        );
+        setShowCannotAddTracks(true);
+        return;
+      }
+      await markAlbumCompletedAsync({
+        releaseTitle: release.releaseTitle,
+      });
+      setSelectedIndex(null);
+      release.releaseStatus = "completed";
+      // setShowDeletePopUp(false);
+      // refetch();
     } catch (error) {
       console.log("error deleting album", error);
     }
@@ -383,15 +452,16 @@ const Album = () => {
           {/* main body */}
           <div
             className={
-              isFetching || isLoading || isPendingAlbums || isRefetchingAlbums
-                ? "flex justify-center items-center md:max-h-[400px]"
+              isFetching || isLoading || isPendingAlbums || isRefetchingAlbums ||isPendingMarkAlbumCompletedAsync
+                ? "flex justify-center items-center md:max-h-[400px] w-full"
                 : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[600px] "
             }
           >
             {isFetching ||
             isLoading ||
             isPendingAlbums ||
-            isRefetchingAlbums ? (
+            isRefetchingAlbums ||
+            isPendingMarkAlbumCompletedAsync? (
               <InlineLoadingScreen />
             ) : (
               // song card
@@ -427,7 +497,8 @@ const Album = () => {
                     <p
                       className={
                         "font-bold leading-[18px] tracking-tighter text-xs capitalize w-fit px-4 py-1 rounded-full " +
-                        (song.releaseStatus === "pending"
+                        (song.releaseStatus === "pending" ||
+                        song.releaseStatus === "completed"
                           ? " text-warning-500 bg-warning-100"
                           : song.releaseStatus === "approved"
                             ? " text-success-500 bg-success-100"
@@ -459,24 +530,7 @@ const Album = () => {
                       <button
                         key={index}
                         onClick={() => {
-                          if (options.name == "Upload Track"){
-                            if (song.releaseStatus === "draft"){
-                              setShowCannotAddTracks(true);
-                              return
-                            }
-                            router.push(`/dashboard/music/manageRelease/${song.releaseTitle}`)
-                            // options.iconFunction(song.releaseTitle);
-                            return;
-                          }else if (options.name == "View Track"){
-                            if (song.releaseStatus === "draft"){
-                              setShowCannotAddTracks(true);
-                              return
-                            }
-                            router.push(`/dashboard/music/manageRelease/${song.releaseTitle}/edit`)
-                            // options.iconFunction(song.releaseTitle);
-                            return;
-                          }
-                          options.iconFunction();
+                          options.iconFunction(song);
                         }}
                         name={options.name}
                         aria-label={options.name}
@@ -572,8 +626,7 @@ const Album = () => {
                     Unavaliable
                   </h3>
                   <p className="text-body-two-regular text-text-body">
-                    Draft Albums can not add tracks, please complete your album
-                    to be able to add tracks.
+                    {infoPopUpText}
                   </p>
                   {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
                     Note: Only pending and draft releases can be deleted.

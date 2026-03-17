@@ -77,7 +77,7 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
       });
       console.log(res.data);
       toast.success(res.data.msg);
-      await queryClient.invalidateQueries({ queryKey: ["allreleases"] });
+      await queryClient.invalidateQueries({ queryKey: ["single",] });
       if (releaseDetails) {
         releaseDetails.releaseStatus = "rejected";
       }

@@ -34,13 +34,18 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
     isLoading,
     refetch,
   } = useGetAlbums({
-    albumTitle: track.replaceAll("%20", " "),
+    albumTitle: track.replaceAll("-", " "),
   });
   const [tracks, setTracks] = useState<TrackForm[]>([createEmptyTrack()]);
   const [activeTrackId, setActiveTrackId] = useState(tracks[0].id);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   if (isLoading || !album) {
     return <InlineLoadingScreen />;
+  }else if(
+    album.data.length < 1
+  ){
+    toast.error(album.msg)
+    return router.push("/dashboard/music/manageRelease?type=album");
   }
   const maxTracks = parseInt(album.data[0].numberOfTracks, 10); // e.g. 5
 

@@ -1,8 +1,7 @@
-import { rejectEmailProps } from "@/app/type";
+import { albumFromApi, rejectEmailProps } from "@/app/type";
 import dbConnect from "@/util/db";
 import { releaseRejectionEmail } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { Types } from "mongoose";
@@ -43,34 +42,51 @@ export async function POST(req: Request) {
     } else if (body.requestType == "rejected" && !body.message) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body.albumId || !Types.ObjectId.isValid(body.albumId)) {
-      return NextResponse.json({ msg: "Invalid Request." });
+      return NextResponse.json({ msg: "Invalid Request." },{status:400});
     }
-    const release = await SongModel.findById(body.albumId).populate(
-      "user",
-      "email",
-    );
+    const release = await AlbumModel.findById<
+      albumFromApi & { user: { email: string } }
+    >(body.albumId)
+      .populate("user", "email")
+      .lean();
 
-    if (!release) {
+    if (!release || release.unassignedNumbers.length > 0) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (release.releaseStatus != "pending") {
+    } else if (release.releaseStatus != "completed") {
       return NextResponse.json(
-        { msg: "Only pending songs can be " + body.requestType },
+        { msg: "Only completed albums can be " + body.requestType },
         { status: 400 },
       );
     }
 
     if (body.requestType == "approved") {
       // create the dpm callback here
-      await SongModel.findByIdAndUpdate(
+      await AlbumModel.findByIdAndUpdate(
         body.albumId,
         { releaseStatus: body.requestType },
         { runValidators: true },
       );
+      await TrackModel.updateMany(
+        {
+          album: body.albumId,
+        },
+        {
+          releaseStatus: body.requestType,
+        },
+      );
     } else if (body.requestType == "rejected") {
-      const updateRelease = SongModel.findByIdAndUpdate(
+      const updateRelease = AlbumModel.findByIdAndUpdate(
         body.albumId,
         { releaseStatus: body.requestType },
         { runValidators: true },
+      );
+      const updateTracks = TrackModel.updateMany(
+        {
+          album: body.albumId,
+        },
+        {
+          releaseStatus: body.requestType,
+        },
       );
       const rejectEmailData: rejectEmailProps = {
         artistName: release.artistName,
@@ -79,20 +95,23 @@ export async function POST(req: Request) {
         dashboardUrl: "release",
         supportEmail: "release",
       };
-
-      //send mail here
+      ///prepare email body
       const rejectionEmail = releaseRejectionEmail(rejectEmailData);
-      await Promise.all([
-        sendEmail(release.user.email, "Release Rejection", rejectionEmail),
-        updateRelease,
-      ]).catch((error) => {
-        console.error("failed to reject release ", error);
 
+      try {
+        const result = await Promise.all([
+          //send mail here
+          sendEmail(release.user.email, "Release Rejection", rejectionEmail),
+          updateRelease,
+          updateTracks,
+        ]);
+      } catch (error) {
+        console.error("failed to reject release ", error);
         return NextResponse.json(
           { msg: "Failed to reject release." },
           { status: 200 },
         );
-      });
+      }
     }
 
     return NextResponse.json(
@@ -144,7 +163,7 @@ export async function GET(req: Request) {
       releaseDate: 1,
       upc: 1,
       catalogNumber: 1,
-    }).populate("artist", "spotifyId appleId -_id");
+    }).populate("artist", "spotifyId appleId -_id").lean();
     const tracks = await TrackModel.find(
       { album: albumId },
       {
@@ -163,7 +182,7 @@ export async function GET(req: Request) {
         catalogNumber: 1,
         explicitContent: 1,
       },
-    );
+    ).lean();
     if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });
     }

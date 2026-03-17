@@ -281,7 +281,7 @@ export function usePaginatedAdminReleases(params: {
   releaseStatusFilter: string;
   artist: string;
   limit:string;
-  releaseType?:string;
+  releaseType:string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<AdminRelease>, Error>({
@@ -292,7 +292,7 @@ export function usePaginatedAdminReleases(params: {
       params.releaseTitle,
       params.releaseStatusFilter,
       params.artist,
-      params?.releaseType
+      params.releaseType
     ],
     queryFn: async () => getAllReleases(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker

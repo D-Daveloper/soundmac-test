@@ -111,9 +111,20 @@ export const getAlbumTracks = async (
   return res.data;
 };
 
+export const MarkAlbumComplete = async (
+  api: AxiosInstance,
+  form: {releaseTitle:string}
+) => {
+  const res = await api.patch("album", {
+    ...form,
+    headers: { "Content-Type": "application/json" },
+  });
+  return res.data;
+};
+
 export const DeleteAlbum = async (
   api: AxiosInstance,
-  form: {artist_name:string,releaseTitle:string}
+  form: {releaseTitle:string}
 ) => {
   const res = await api.delete("album", {
     data: form,

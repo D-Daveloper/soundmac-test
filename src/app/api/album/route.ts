@@ -102,7 +102,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
-    if (!payload.numberOfTracks || !numRegex.test(payload.numberOfTracks as string)) {
+    if (
+      !payload.numberOfTracks ||
+      !numRegex.test(payload.numberOfTracks as string)
+    ) {
       return NextResponse.json(
         {
           msg: "No. of tracks is required and must be a positive number",
@@ -111,7 +114,10 @@ export async function POST(req: Request) {
       );
     }
 
-    if (parseInt(payload.numberOfTracks,10) <= 1 || parseInt(payload.numberOfTracks,10) >= 26) {
+    if (
+      parseInt(payload.numberOfTracks, 10) <= 1 ||
+      parseInt(payload.numberOfTracks, 10) >= 26
+    ) {
       return NextResponse.json(
         {
           msg: "No. of tracks must be greater and 1 but less than 26.",
@@ -401,15 +407,19 @@ export async function PUT(req: Request) {
     return handleMongooseValidationError(error);
   }
 }
-export async function DELETE(req: Request) {
-  // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
-
+export async function PATCH(req: Request) {
   try {
-    let release: any = null;
+    type Track = {
+      _id: string;
+      releaseStatus: string;
+      trackNumber: string;
+    };
+    let release: albumFromApi | null = null;
+    let tracks:
+      | { _id: string; releaseStatus: string; trackNumber: string }[]
+      | null = null;
     const formData = await req.json();
-    if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
-    } else if (formData.artist_name.trim() === "" || !formData.artist_name) {
+    if (!formData.releaseTitle) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
     const userData = await verifyJWT();
@@ -432,9 +442,115 @@ export async function DELETE(req: Request) {
     } else {
       // Find and verify release belongs to user before deleting
       release = await AlbumModel.findOne({
-        releaseTitle: formData.releaseTitle,
-        artistName: formData.artist_name.trim(),
         user: user._id,
+        releaseTitle: formData.releaseTitle,
+      }).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
+      tracks = await TrackModel.find<Track>(
+        {
+          user: user._id,
+          albumName: formData.releaseTitle,
+        },
+        { releaseStatus: 1, trackNumber: 1 },
+      ).lean<Track[]>();
+    }
+    if (!release || !tracks) {
+      return NextResponse.json(
+        {
+          msg: "Invalid Release",
+        },
+        { status: 400 },
+      );
+    }
+    if (release.releaseStatus != "pending") {
+      return NextResponse.json(
+        {
+          msg: "Only pending albums can be marked as completed",
+        },
+        { status: 400 },
+      );
+    } else if (release.unassignedNumbers.length > 0) {
+      return NextResponse.json(
+        {
+          msg: "Please assign all track numbers.",
+        },
+        { status: 400 },
+      );
+    }
+    for (let i = 0; i < tracks.length; i++) {
+      const track = tracks[i];
+      if (track.releaseStatus != "pending")
+        return NextResponse.json(
+          {
+            msg: `Track ${track.trackNumber} has status as ${track.releaseStatus}`,
+            msg1: "please distribute all tracks to change status to pending"
+          },
+          { status: 400 },
+        );
+    }
+    try {
+      const result = await Promise.all([
+        AlbumModel.findOneAndUpdate(
+          { user: user._id, releaseTitle: formData.releaseTitle },
+          { releaseStatus: "completed" },
+        ),
+        TrackModel.updateMany(
+          { user: user._id, albumName: formData.releaseTitle },
+          { releaseStatus: "completed" },
+        ),
+      ]);
+
+      console.log("mark as completed result", result);
+      return NextResponse.json(
+        { msg: "Release Marked as Completed!" },
+        { status: 200 },
+      );
+    } catch (error) {
+      console.error("mark as completed error", error);
+      return NextResponse.json(
+        { msg: "Failed to update status" },
+        { status: 500 },
+      );
+    }
+  } catch (error: unknown) {
+    console.error("mark as completed error", error);
+
+    return NextResponse.json(
+      { msg: "Failed to update status" },
+      { status: 500 },
+    );
+  }
+}
+export async function DELETE(req: Request) {
+  // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+
+  try {
+    let release: any = null;
+    const formData = await req.json();
+    if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+
+    await dbConnect();
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+    } else if (!user.confirmed) {
+      return NextResponse.json(
+        { msg: "Please verify your email address" },
+        { status: 401 },
+      );
+    } else if (user.otp !== null) {
+      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else {
+      // Find and verify release belongs to user before deleting
+      release = await AlbumModel.findOne({
+        user: user._id,
+        releaseTitle: formData.releaseTitle,
       });
 
       if (!release) {

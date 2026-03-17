@@ -2057,7 +2057,7 @@ export const releaseRejectionEmail = (props: rejectEmailProps) => {
                                         <h3 style="margin: 0 0 15px 0; color: #333333; font-size: 16px; font-weight: 600;">Release Details</h3>
                                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                                             <tr>
-                                                <td style="padding: 6px 0; color: #666666; font-size: 14px; width: 140px;">Song Name:</td>
+                                                <td style="padding: 6px 0; color: #666666; font-size: 14px; width: 140px;">Release Name:</td>
                                                 <td style="padding: 6px 0; color: #333333; font-size: 14px; font-weight: 500;">${props.releaseTitle}</td>
                                             </tr>
                                             <tr>

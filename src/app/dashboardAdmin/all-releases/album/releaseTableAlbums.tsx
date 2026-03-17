@@ -16,6 +16,7 @@ const ReleaseTable = ({
     const styles = {
       approved: "bg-green-100 text-green-700 border-green-200",
       pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
+      completed: "bg-[#2D68C4] text-white border-[#2D68C4]",
       draft: "bg-gray-100 text-gray-700 border-gray-200",
       rejected: "bg-error-500 text-white border-gray-200",
     };
@@ -23,6 +24,7 @@ const ReleaseTable = ({
     const icons = {
       approved: "/tick-circle.svg",
       pending: "/info-circle.svg",
+      completed: "/info-circle.svg",
       draft: "/info-circle.svg",
       rejected: "/info-circle.svg",
     };

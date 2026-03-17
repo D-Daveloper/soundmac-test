@@ -401,7 +401,7 @@ const Song = () => {
                       className="object-cover rounded-lg shadow-md max-h-[80px] "
                     />
                   </div>
-                  <div className="flex flex-col flex-2">
+                  <div className="flex flex-col flex-2 overflow-hidden">
                     <h1 className="text-lg font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-1">
                       {song.releaseTitle}
                     </h1>

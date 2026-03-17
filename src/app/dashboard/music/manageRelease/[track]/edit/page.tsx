@@ -19,32 +19,42 @@ import { useQueryClient } from "@tanstack/react-query";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
-    const queryClient = useQueryClient();
-    const dashboardContext = useContext(DashboardContext);
-    useEffect(() => {
-      dashboardContext?.setLayoutHeaderMessage("Edit Tracks");
-    }, []);
+  const queryClient = useQueryClient();
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Edit Tracks");
+  }, []);
   const router = useRouter();
   const { track } = use(params);
 
   const api = UseAxios();
 
   const { data: album, isLoading: isAlbumLoading } = useGetAlbums({
-    albumTitle: track.replaceAll("%20"," "),
+    albumTitle: track.replaceAll("-", " "),
   });
-  const { data, isLoading, isError, error,refetch } = useGetAlbumTracks({
-    albumTitle: track.replaceAll("%20"," "),
+  const { data, isLoading, isError, error, refetch } = useGetAlbumTracks({
+    albumTitle: track.replaceAll("-", " "),
   });
 
   const [tracks, setTracks] = useState<TrackForm[]>([]);
   const [activeTrackId, setActiveTrackId] = useState<string | null>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
 
-  if (isError) {
-    router.push("/dashboard/music/manageRelease?type=album");
-  }
-
   useEffect(() => {
+    if (isError) {
+      if (isAxiosError(error)) {
+        if (error.status === 401) {
+          return;
+        } else {
+          router.back();
+          return;
+        }
+      } else {
+        toast.error(error?.message);
+        router.back();
+        return;
+      }
+    }
     if (!data?.data?.length) return;
 
     const mappedTracks: TrackForm[] = data.data.map((item: TrackFromApi) => ({
@@ -56,11 +66,16 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       release_date: item.releaseDate || null,
       preOrderDate: item.preOrderDate || null,
 
-      featured_artist: item.featuredArtist.length > 0 ? item.featuredArtist : [
-        { artistName: "", spotifyId: "", appleId: "" },
-      ],
-      performer: item.performer.length > 0 ? item.performer : [{ name: "", role: "" }],
-      song_writer: item.songWriter.length > 0 ? item.songWriter : [{ first_name: "", last_name: "" }],
+      featured_artist:
+        item.featuredArtist.length > 0
+          ? item.featuredArtist
+          : [{ artistName: "", spotifyId: "", appleId: "" }],
+      performer:
+        item.performer.length > 0 ? item.performer : [{ name: "", role: "" }],
+      song_writer:
+        item.songWriter.length > 0
+          ? item.songWriter
+          : [{ first_name: "", last_name: "" }],
       producer: item.producer.length > 0 ? item.producer : [{ name: "" }],
 
       pre_order_check: item.preOrderCheck || false,
@@ -81,11 +96,11 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
     setTracks(mappedTracks);
     setActiveTrackId(mappedTracks[0].id);
-  }, [data]);
+  }, [data, isError, router]);
 
   console.log(tracks);
 
-  if (isAlbumLoading || !album || !data) {
+  if (isAlbumLoading || !album || album.data.length < 1 || !data) {
     return <InlineLoadingScreen />;
   }
 
@@ -145,9 +160,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
             setIsSubmittingForm(false);
             return toast.warn("track" + " " + (i + 1) + " " + validForm);
           }
-        }
-        else if(action === "draft"){
-          
+        } else if (action === "draft") {
         }
       }
 
@@ -174,7 +187,10 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         );
       }
       toast.success(res?.data?.msg);
-      await queryClient.invalidateQueries({queryKey:["edit tracks",album.data[0].releaseTitle],exact:true})
+      await queryClient.invalidateQueries({
+        queryKey: ["edit tracks", album.data[0].releaseTitle],
+        exact: true,
+      });
       router.push("/dashboard/music/manageRelease?type=album");
     } catch (error) {
       if (isAxiosError(error)) {
@@ -194,7 +210,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   //   );
   // };
 
-  return isLoading || !activeTrack || !activeTrackId || isSubmittingForm? (
+  return isLoading || !activeTrack || !activeTrackId || isSubmittingForm ? (
     <InlineLoadingScreen />
   ) : (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[260px]">

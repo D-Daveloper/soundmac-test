@@ -45,6 +45,7 @@ const page = () => {
     page,
     limit: "50",
     releaseTitle,
+    releaseType:"single"
   });
 
   useEffect(() => {

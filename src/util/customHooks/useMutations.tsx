@@ -6,7 +6,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
 import { CreateArtistForm, OtpForm } from "@/app/type";
-import { createArtist, DeleteAlbum, DeleteArtist, DeleteSong } from "../axios/axiosInstance";
+import {
+  createArtist,
+  DeleteAlbum,
+  DeleteArtist,
+  DeleteSong,
+  MarkAlbumComplete,
+} from "../axios/axiosInstance";
 
 export const useOtpMutation = () => {
   const queryClient = useQueryClient();
@@ -24,14 +30,20 @@ export const useOtpMutation = () => {
       // Seed the authUser query with the returned user details
       queryClient.setQueryData(["authUser"], data.user);
       const session = parseInt(
-        process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
+        process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200",
       );
       const sessionExpiry = Date.now() + session * 1000;
       const redirect = localStorage.getItem("soundmacRedirectAfterOtp"); //incase their session ends and they get redirected to login page after  login pick up the redirect link
       localStorage.clear();
       localStorage.removeItem("soundmacotpExpiry");
       localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
-      router.push(redirect? redirect : data.user.role === "user" ?"/dashboard" : "/dashboardAdmin");
+      router.push(
+        redirect
+          ? redirect
+          : data.user.role === "user"
+            ? "/dashboard"
+            : "/dashboardAdmin",
+      );
     },
     onError: (error) => {
       if (isAxiosError(error)) {
@@ -112,9 +124,9 @@ export const useDeleteSongMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { artist_name: string,releaseTitle:string }) =>
+    mutationFn: async (form: { artist_name: string; releaseTitle: string }) =>
       DeleteSong(api, form),
-    onSuccess: async (data,variables) => {
+    onSuccess: async (data, variables) => {
       toast.success(data.msg);
     },
     onError: (error) => {
@@ -122,7 +134,29 @@ export const useDeleteSongMutation = () => {
         console.log(error);
         return;
       }
-      toast.error(error.message||"Something went wrong, Please try again.");
+      toast.error(error.message || "Something went wrong, Please try again.");
+    },
+  });
+};
+export const useMarkAlbumCompleteMutation = () => {
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (form: { releaseTitle: string }) =>
+      MarkAlbumComplete(api, form),
+    onSuccess: async (data, variables) => {
+      toast.success(data.msg);
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        // delay for a while before showing the second message
+        setTimeout(() => {
+          toast.error((error.response?.data as any)?.msg1);
+        }, 2000);
+        console.log(error);
+        return;
+      }
+      toast.error(error.message || "Something went wrong, Please try again.");
     },
   });
 };
@@ -130,9 +164,9 @@ export const useDeleteAlbumMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { artist_name: string,releaseTitle:string }) =>
+    mutationFn: async (form: { releaseTitle: string }) =>
       DeleteAlbum(api, form),
-    onSuccess: async (data,variables) => {
+    onSuccess: async (data, variables) => {
       toast.success(data.msg);
     },
     onError: (error) => {
@@ -140,7 +174,7 @@ export const useDeleteAlbumMutation = () => {
         console.log(error);
         return;
       }
-      toast.error(error.message||"Something went wrong, Please try again.");
+      toast.error(error.message || "Something went wrong, Please try again.");
     },
   });
 };

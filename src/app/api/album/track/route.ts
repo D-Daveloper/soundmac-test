@@ -45,9 +45,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     }
     tracks = await TrackModel.find({
-      albumName: albumTitle.replaceAll("%20", " "),
+      albumName: albumTitle,
       user: userJwt.user,
-    });
+    }).lean();
 
     if (tracks && tracks.length <= 0) {
       return NextResponse.json(
@@ -232,7 +232,7 @@ export async function PUT(req: Request) {
       releaseTitle: album,
     });
 
-    if (!userAlbum) {
+    if (!userAlbum || userAlbum.releaseStatus === "approved") {
       return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
     }
     for (let i = 0; i < tracks.length; i++) {
