@@ -5,6 +5,7 @@ import {
   getAdminAlbumDetails,
   getAdminArtistsNames,
   getAdminDashboard,
+  getAdminSingleDetails,
   getAlbum,
   getAlbums,
   getAlbumTracks,
@@ -15,6 +16,7 @@ import {
   getDashboard,
   getListOfBanksFromPaystack,
   getPromotionData,
+  getReleaseRequest,
   getSongs,
   getUserArtistsNames,
   getUserReleaseNames,
@@ -25,11 +27,13 @@ import {
   AdminAlbumDetailsResponse,
   adminDashboardType,
   AdminRelease,
+  AdminSingleDetailsResponse,
   albumFromApi,
   Artist,
   ArtistStat,
   PAGINATION,
   PayStackBankListResponse,
+  ReleaseRequestResponse,
   songFromApi,
   WithdrawalResponse,
 } from "@/app/type";
@@ -246,12 +250,22 @@ export function useGetPromotionData(params: { page: number }) {
   });
 }
 
-export const useWithdrawals = (params:{withdrawalStatusFilter:string,sort?:string,period:string}) => {
+export const useWithdrawals = (params: {
+  withdrawalStatusFilter: string;
+  sort?: string;
+  period: string;
+}) => {
   const api = UseAxios();
 
   return useInfiniteQuery<WithdrawalResponse, Error>({
-    queryKey: ["withdrawals",params.sort,params.withdrawalStatusFilter,params.period],
-    queryFn: async ({ pageParam }) => getWithdrawalHistory(api, {...params,cursor:pageParam as string}),
+    queryKey: [
+      "withdrawals",
+      params.sort,
+      params.withdrawalStatusFilter,
+      params.period,
+    ],
+    queryFn: async ({ pageParam }) =>
+      getWithdrawalHistory(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.hasMore ? lastPage.nextCursor : undefined,
@@ -262,7 +276,7 @@ export const useWithdrawals = (params:{withdrawalStatusFilter:string,sort?:strin
 
 export const useGetAdminDashboard = () => {
   const api = UseAxios();
-  return useQuery<adminDashboardType,Error>({
+  return useQuery<adminDashboardType, Error>({
     queryKey: ["Admindashboard"],
     queryFn: () => getAdminDashboard(api),
     staleTime: 1000 * 60 * 15, // 15 minutes: consider data fresh
@@ -280,8 +294,8 @@ export function usePaginatedAdminReleases(params: {
   releaseTitle: string;
   releaseStatusFilter: string;
   artist: string;
-  limit:string;
-  releaseType:string;
+  limit: string;
+  releaseType: string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<AdminRelease>, Error>({
@@ -292,7 +306,7 @@ export function usePaginatedAdminReleases(params: {
       params.releaseTitle,
       params.releaseStatusFilter,
       params.artist,
-      params.releaseType
+      params.releaseType,
     ],
     queryFn: async () => getAllReleases(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
@@ -316,11 +330,11 @@ export function useGetAdminArtistsNames() {
     refetchOnMount: false,
   });
 }
-export function useGetAdminAlbumDetails(params:{albumId:string}) {
+export function useGetAdminAlbumDetails(params: { albumId: string }) {
   const api = UseAxios();
   return useQuery<AdminAlbumDetailsResponse, Error>({
-    queryKey: ["adminAlbumDetails",params.albumId],
-    queryFn: async () => getAdminAlbumDetails(api,params),
+    queryKey: ["adminAlbumDetails", params.albumId],
+    queryFn: async () => getAdminAlbumDetails(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
@@ -330,3 +344,32 @@ export function useGetAdminAlbumDetails(params:{albumId:string}) {
     refetchOnMount: false,
   });
 }
+export function useGetAdminSingleDetails(params: { songId: string }) {
+  const api = UseAxios();
+  return useQuery<AdminSingleDetailsResponse, Error>({
+    queryKey: ["adminSingleDetails", params.songId],
+    queryFn: async () => getAdminSingleDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+export const useReleaseRequests = (params: { releaseTitle: string,limit:string }) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<ReleaseRequestResponse, Error>({
+    queryKey: ["release-request", params.releaseTitle],
+    queryFn: async ({ pageParam }) =>
+      getReleaseRequest(api, { ...params, cursor: pageParam as string }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};

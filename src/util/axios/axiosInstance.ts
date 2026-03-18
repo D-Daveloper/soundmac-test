@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, albumFromApi, Artist, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -201,5 +201,20 @@ export const getAdminAlbumDetails = async (
   params:{albumId:string}
 ): Promise<AdminAlbumDetailsResponse> => {
   const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/all-releases/album",{params});
+  return res.data;
+};
+export const getAdminSingleDetails = async (
+  api: AxiosInstance,
+  params:{songId:string}
+): Promise<AdminSingleDetailsResponse> => {
+  const res = await api.get<Promise<AdminSingleDetailsResponse>>("admin/request-release/single/"+params.songId,);
+  return res.data;
+};
+export const getReleaseRequest = async (
+  api: AxiosInstance,
+    params:{ cursor:string,releaseTitle:string ,limit:string}
+
+): Promise<ReleaseRequestResponse> => {
+  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/request-release/single",{params});
   return res.data;
 };

@@ -138,12 +138,6 @@ console.log(selectedRelease);
             <ReleaseDetailsModal
                 isOpen={selectedRelease != null}
                 onClose={() => setselectedRelease(null)}
-                // onApprove={() => {
-                //   alert("Release approved!");
-                // }}
-                // onReject={(reason) => {
-                //   alert(`Release rejected. Reason: ${reason}`);
-                // }}
                 releaseDetails={selectedRelease ? selectedRelease : undefined}
               />
           </>

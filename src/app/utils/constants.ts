@@ -1022,3 +1022,29 @@ export const nextReleases = [
     releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
 ];
+export const requestReleaseMock = [
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
+  },
+  {
+    releaseTitle: "Falling Skies",
+    featuredArtist: ["feat Ariaate", "Wenthy"],
+    artistName: "TomBaggz",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
+  },
+];

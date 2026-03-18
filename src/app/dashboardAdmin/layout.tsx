@@ -23,7 +23,7 @@ const sidebarComponents = [
       {
         title: "Release Requests",
         icon: "/musiclibrary2.svg",
-        href: "/dashboardAdmin/music/manageRelease?type=single",
+        href: "/dashboardAdmin/release-requests/single",
         query: "manageRelease",
       },
     ],

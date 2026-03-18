@@ -4,93 +4,24 @@ import Image from "next/image";
 import { AdminRelease } from "@/app/type";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
-import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { ModelLoadingScreen } from "@/app/components/Loader/loader";
 
 interface ReleaseDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // onApprove: () => void;
-  // onReject: (reason: string) => void;
   releaseDetails?: AdminRelease;
 }
 
 export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
   isOpen,
   onClose,
-  // onApprove,
-  // onReject,
   releaseDetails,
 }) => {
-  const queryClient = useQueryClient();
   const api = UseAxios();
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectReason, setRejectReason] = useState("");
   const [isSubmitting, setisSubmitting] = useState(false);
 
   if (!isOpen) return null;
-
-  const handleRejectSubmit = () => {
-    if (rejectReason.trim()) {
-      handleRejectRelease();
-      setShowRejectModal(false);
-      setRejectReason("");
-    }
-  };
-  console.log(releaseDetails);
-
-  const handleApproveRelease = async () => {
-    try {
-      setisSubmitting(true);
-      const res = await api.post("admin/all-releases/singles", {
-        songId: releaseDetails?._id,
-        requestType: "approved",
-      });
-      console.log(res.data);
-      toast.success(res.data.msg);
-      await queryClient.invalidateQueries({ queryKey: ["allreleases"] });
-      if (releaseDetails) {
-        releaseDetails.releaseStatus = "approved";
-      }
-    } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error);
-        return;
-      }
-      toast.error("Something went wrong!");
-    } finally {
-      setisSubmitting(false);
-    }
-  };
-
-  const handleRejectRelease = async () => {
-    try {
-      setisSubmitting(true);
-      if (!rejectReason) {
-        return toast.warn("Please enter the reason for the rejected.");
-      }
-      const res = await api.post("admin/all-releases/singles", {
-        songId: releaseDetails?._id,
-        requestType: "rejected",
-        message: rejectReason,
-      });
-      console.log(res.data);
-      toast.success(res.data.msg);
-      await queryClient.invalidateQueries({ queryKey: ["single",] });
-      if (releaseDetails) {
-        releaseDetails.releaseStatus = "rejected";
-      }
-    } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error);
-        return;
-      }
-      toast.error("Something went wrong!");
-    } finally {
-      setisSubmitting(false);
-    }
-  };
 
   const handleDownloadSong = async () => {
     try {
@@ -379,83 +310,9 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
                       </div>
                     </div>
                   </div>
-
-                  {/* Action Buttons */}
-                  {releaseDetails?.releaseStatus === "pending" && (
-                    <div className="flex items-center justify-end gap-4 pt-2 border-t border-gray-200">
-                      <button
-                        onClick={() => setShowRejectModal(true)}
-                        className="px-6 py-2 bg-white border-2 border-red-500 text-red-500 font-semibold rounded-lg hover:bg-red-50 transition-colors"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        onClick={handleApproveRelease}
-                        className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  )}
                 </div>
               </>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* Reject Reason Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-60 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-2xl w-[500px] shadow-2xl">
-            {/* Reject Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Reject Release
-              </h3>
-              <button
-                onClick={() => {
-                  setShowRejectModal(false);
-                  setRejectReason("");
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Reject Modal Content */}
-            <div className="p-6">
-              <p className="text-gray-600 mb-4">
-                Please provide a reason for rejecting this release:
-              </p>
-              <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                placeholder="Enter rejection reason..."
-              />
-
-              {/* Reject Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 mt-6">
-                <button
-                  onClick={() => {
-                    setShowRejectModal(false);
-                    setRejectReason("");
-                  }}
-                  className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleRejectSubmit}
-                  disabled={!rejectReason.trim()}
-                  className="px-5 py-2.5 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                >
-                  Submit Rejection
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}

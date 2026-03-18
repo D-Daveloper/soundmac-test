@@ -120,15 +120,6 @@ export type Artist = Pick<
 
 export type SELECTED_IMAGE = string | null | ArrayBuffer;
 
-// export interface ARTIST {
-//     _id: string
-//     artistName: string
-//     artistImage: string
-//     createdAt: Date
-//     appleId: string
-//     spotifyId: string
-// }
-
 export interface PAGINATION<T> {
   data: T[];
   page: number;
@@ -138,7 +129,7 @@ export interface PAGINATION<T> {
   hasNextPage: boolean;
   totalCount: number;
   totalPages: number;
-  msg:string;
+  msg: string;
 }
 
 export interface ARTIST_TABLE extends Artist {
@@ -173,7 +164,7 @@ interface BaseApiResponseForRelease {
   copyRightYear: string;
   createdAt: Date;
   updatedAt: Date;
-  __v: number;
+  catalogNumber: string;
 }
 
 export interface songFromApi extends BaseApiResponseForRelease {
@@ -377,3 +368,22 @@ export interface AdminAlbumDetailsResponse {
   tracks: AdminTrackDetails[];
   msg: string;
 }
+export interface AdminSingleDetailsResponse {
+  release: songFromApi;
+  msg: string;
+}
+type ReleaseRequest = {
+  _id: string;
+  releaseTitle: string;
+  releaseImage: string;
+  releaseDate: string;
+  artist: {
+    artistName: string;
+    artistImage: string;
+  };
+};
+export type ReleaseRequestResponse = {
+  data: ReleaseRequest[];
+  nextCursor?: string;
+  hasMore: boolean;
+};
