@@ -212,9 +212,9 @@ export const getAdminSingleDetails = async (
 };
 export const getReleaseRequest = async (
   api: AxiosInstance,
-    params:{ cursor:string,releaseTitle:string ,limit:string}
+    params:{ cursor:string,releaseTitle:string ,limit:string,releaseType:string}
 
 ): Promise<ReleaseRequestResponse> => {
-  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/request-release/single",{params});
+  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/request-release",{params});
   return res.data;
 };

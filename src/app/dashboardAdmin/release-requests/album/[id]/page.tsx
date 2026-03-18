@@ -3,8 +3,10 @@ import React, { use, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import { AdminAlbumDetails, AdminTrackDetails } from "@/app/type";
 import { CircleCheck, Music, X } from "lucide-react";
-import { useGetAdminSingleDetails } from "@/util/customHooks/useQueries";
+import { useGetAdminAlbumDetails } from "@/util/customHooks/useQueries";
+import { useRouter } from "next/navigation";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
@@ -13,48 +15,57 @@ import Link from "next/link";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const api = UseAxios();
   const dashboardContext = useContext(DashboardContext);
+  const [showConfirmApproveSong, setshowConfirmApproveSong] = useState(false);
+
   const [isSubmitting, setisSubmitting] = useState(false);
   const [showRejectModal, setshowRejectModal] = useState(false);
   const [rejectReason, setrejectReason] = useState("");
-  const [showConfirmApproveSong, setshowConfirmApproveSong] = useState(false);
-
+  const [isTrack, setisTrack] = useState(false);
+  const [album, setalbum] = useState<AdminAlbumDetails | null>(null);
+  const [selectedTrack, setselectedTrack] = useState<
+    AdminTrackDetails | AdminTrackDetails | null
+  >(null);
   const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
   }
   const {
-    isLoading: isLoadingSingleDetails,
-    data: singleDetails,
+    isLoading: isLoadingAlbumDetails,
+    data: albumDetails,
     isFetching,
     isPending,
     isRefetching,
     isError,
-  } = useGetAdminSingleDetails({ songId: id });
+  } = useGetAdminAlbumDetails({ albumId: id });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Song Info");
+    dashboardContext?.setLayoutHeaderMessage("Album Details");
   }, []);
-
-  console.log(id);
-  const handleRejectSubmit = () => {
-    if (rejectReason.trim()) {
-      handleRejectRelease();
-      setshowRejectModal(false);
-      setrejectReason("");
+  useEffect(() => {
+    if (albumDetails?.release) {
+      setalbum(albumDetails.release);
+      setisTrack(false);
     }
+  }, [albumDetails]);
+  console.log(id);
+  const handleSelectTrack = (track: AdminTrackDetails) => {
+    setisTrack(true);
+    setselectedTrack(track);
   };
   const handleApproveRelease = async () => {
     try {
       setisSubmitting(true);
-      const res = await api.post("admin/request-release/single/"+singleDetails?.release?._id, {
+      const res = await api.post("admin/all-releases/album", {
+        albumId: id,
         requestType: "approved",
       });
       console.log(res.data);
       toast.success(res.data.msg);
       await queryClient.invalidateQueries({ queryKey: ["release-request"] });
-      if (singleDetails?.release) {
-        singleDetails.release.releaseStatus = "approved";
+      if (albumDetails) {
+        albumDetails.release.releaseStatus = "approved";
       }
     } catch (error) {
       if (isAxiosError(error)) {
@@ -66,22 +77,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       setisSubmitting(false);
     }
   };
-
+  const handleRejectSubmit = () => {
+    if (rejectReason.trim()) {
+      handleRejectRelease();
+      setshowRejectModal(false);
+      setrejectReason("");
+    }
+  };
   const handleRejectRelease = async () => {
     try {
       setisSubmitting(true);
       if (!rejectReason) {
         return toast.warn("Please enter the reason for the rejected.");
       }
-      const res = await api.post("admin/request-release/single/"+singleDetails?.release?._id, {
+      const res = await api.post("admin/all-releases/album", {
+        albumId: id,
         requestType: "rejected",
         message: rejectReason,
       });
       console.log(res.data);
       toast.success(res.data.msg);
       await queryClient.invalidateQueries({ queryKey: ["release-request"] });
-      if (singleDetails?.release) {
-        singleDetails.release.releaseStatus = "rejected";
+      if (albumDetails) {
+        albumDetails.release.releaseStatus = "rejected";
       }
     } catch (error) {
       if (isAxiosError(error)) {
@@ -97,8 +115,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const handleDownloadSong = async () => {
     try {
       setisSubmitting(true);
-      const res = await api.get("admin/all-releases/singles", {
-        params: { songId: singleDetails?.release?._id },
+      const res = await api.get("admin/all-releases/album/track", {
+        params: { trackId: selectedTrack?._id },
       });
       console.log(res.data);
       // 2. Create temporary link and trigger download
@@ -132,7 +150,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
         <Link
-          href={"/dashboardAdmin/release-requests/single"}
+          href={"/dashboardAdmin/release-requests/album"}
           aria-label="go back"
           className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
         >
@@ -143,47 +161,48 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             alt="arrow left"
           />
         </Link>
-        {isSubmitting || !singleDetails || isLoadingSingleDetails ? (
+        {isSubmitting || !albumDetails || isLoadingAlbumDetails ? (
           <InlineLoadingScreen />
         ) : (
           <>
             <div className="flex mt-3">
               {/* Content */}
               <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
-                <div className="flex items-center gap-4 mb-10">
-                  <button
-                    onClick={handleDownloadSong}
-                    aria-label="download music"
-                    className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
-                  >
-                    {/* Icon placeholder - add your music note icon here */}
-                    <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
-                      <Music />
-                    </div>
-                    Download Audio file
-                  </button>
-                  <button className="w-fit h-fit px-4 py-2 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-colors">
-                    {/* Icon */}
-                    <Image
-                      priority={false}
-                      src={"/play-circle.svg"}
-                      alt="play icon"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
-                </div>
-
+                {isTrack && (
+                  <div className="flex items-center gap-4 mb-10">
+                    <button
+                      onClick={handleDownloadSong}
+                      aria-label="download music"
+                      className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
+                    >
+                      {/* Icon placeholder - add your music note icon here */}
+                      <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
+                        <Music />
+                      </div>
+                      Download Audio file
+                    </button>
+                    <button className="w-fit h-fit px-4 py-2 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-colors">
+                      {/* Icon */}
+                      <Image
+                        priority={false}
+                        src={"/play-circle.svg"}
+                        alt="play icon"
+                        width={20}
+                        height={20}
+                      />
+                    </button>
+                  </div>
+                )}
                 {/* Song Details Grid */}
                 <div className="flex flex-col gap-x-12">
                   <div className="flex ">
                     {/* Song Name */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
-                        Song name
+                        Album name
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {singleDetails.release.releaseTitle}
+                        {albumDetails.release.releaseTitle}
                       </p>
                     </div>
 
@@ -194,7 +213,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </p>
                       <div>
                         <p className="text-gray-900 text-lg font-medium mb-1">
-                          {singleDetails.release.artistName}
+                          {albumDetails.release.artistName}
                         </p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -207,7 +226,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {singleDetails.release.artist.spotifyId}
+                              {albumDetails.release.artist.spotifyId}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -220,7 +239,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {singleDetails.release.artist.appleId}
+                              {albumDetails.release.artist.appleId}
                             </span>
                           </div>
                         </div>
@@ -237,7 +256,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         Genre
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {singleDetails.release.genre}
+                        {albumDetails.release.genre}
                       </p>
                     </div>
 
@@ -248,7 +267,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
                         {new Date(
-                          singleDetails.release?.releaseDate,
+                          albumDetails.release?.releaseDate,
                         ).toDateString()}
                       </p>
                     </div>
@@ -263,7 +282,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         UPC
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {singleDetails.release.upc}
+                        {albumDetails.release.upc}
                       </p>
                     </div>
 
@@ -273,24 +292,24 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         Catalog Number
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {singleDetails.release.catalogNumber}
+                        {albumDetails.release.catalogNumber}
                       </p>
                     </div>
                   </div>
                 </div>
 
-              
-                  {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* Featured Artists */}
-                  <div className="flex w-full gap-1">
-                    <div className="flex-1 max-w-[50%]">
-                      <p className="text-text-disable font-bold text-sm mb-1">
-                        Featured Artists
-                      </p>
-                      <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
-                        {singleDetails.release.featuredArtist.map(
-                          (item, index) => (
+                {selectedTrack && isTrack && (
+                  <>
+                    {/* border line */}
+                    <div className="border border-neutral-100 mb-6"></div>
+                    {/* Featured Artists */}
+                    <div className="flex w-full gap-1">
+                      <div className="flex-1 max-w-[50%]">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Featured Artists
+                        </p>
+                        <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
+                          {selectedTrack.featuredArtist.map((item, index) => (
                             <div
                               key={index}
                               className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
@@ -323,59 +342,38 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                                 </span>
                               </div>
                             </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1 max-w-[50%]">
-                      <div className="relative max-w-[350px]">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Producers
-                        </p>
-                        <div
-                          className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                          style={{
-                            scrollbarWidth: "none",
-                            msOverflowStyle: "none",
-                          }}
-                        >
-                          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {singleDetails.release.producer
-                            .map((item) => item.name)
-                            .join(", ")}{" "}
+                          ))}
                         </div>
-                        {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                      </div>
+                      <div className="flex-1 max-w-[50%]">
+                        <div className="relative max-w-[350px]">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Producers
+                          </p>
+                          <div
+                            className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                            style={{
+                              scrollbarWidth: "none",
+                              msOverflowStyle: "none",
+                            }}
+                          >
+                            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                            {selectedTrack.producer
+                              .map((item) => item.name)
+                              .join(", ")}{" "}
+                          </div>
+                          {/* fade hint on the right */}
+                          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* Songwriter and Producer */}
-                  <div className="grid grid-cols-2">
-                    <div className="relative max-w-[400px]">
-                      <p className="text-text-disable font-bold text-sm mb-1">
-                        Song Writers
-                      </p>
-                      <div
-                        className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                        style={{
-                          scrollbarWidth: "none",
-                          msOverflowStyle: "none",
-                        }}
-                      >
-                        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                        {singleDetails.release.songWriter
-                          .map((item) => item.first_name)
-                          .join(", ")}
-                      </div>
-                      {/* fade hint on the right */}
-                      <div className="absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-                    </div>
-                    <div>
+                    {/* border line */}
+                    <div className="border border-neutral-100 mb-6"></div>
+                    {/* Songwriter and Producer */}
+                    <div className="grid grid-cols-2">
                       <div className="relative max-w-[400px]">
                         <p className="text-text-disable font-bold text-sm mb-1">
-                          Producers
+                          Song Writers
                         </p>
                         <div
                           className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
@@ -385,31 +383,53 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           }}
                         >
                           <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {singleDetails.release.producer
-                            .map((item) => item.name)
-                            .join(", ")}{" "}
+                          {selectedTrack.songWriter
+                            .map((item) => item.first_name)
+                            .join(", ")}
                         </div>
                         {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                        <div className="absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                      </div>
+                      <div>
+                        <div className="relative max-w-[400px]">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Producers
+                          </p>
+                          <div
+                            className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                            style={{
+                              scrollbarWidth: "none",
+                              msOverflowStyle: "none",
+                            }}
+                          >
+                            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                            {selectedTrack.producer
+                              .map((item) => item.name)
+                              .join(", ")}{" "}
+                          </div>
+                          {/* fade hint on the right */}
+                          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* explicit content */}
-                  <div className="">
-                    <p className="text-text-body font-bold text-sm my-1">
-                      Explicit Content
-                    </p>
-                    <input
-                      type="checkbox"
-                      checked={singleDetails.release.explicitContent}
-                      disabled
-                      className="cursor-pointer w-5 h-5 accent-primary-500"
-                    />
-                  </div>
+                    <div className="border border-neutral-100 mb-6"></div>
+                    {/* explicit content */}
+                    <div className="">
+                      <p className="text-text-body font-bold text-sm my-1">
+                        Explicit Content
+                      </p>
+                      <input
+                        type="checkbox"
+                        checked={selectedTrack.explicitContent}
+                        disabled
+                        className="cursor-pointer w-5 h-5 accent-primary-500"
+                      />
+                    </div>
+                  </>
+                )}
 
                 {/* Action Buttons */}
-                {singleDetails.release.releaseStatus === "pending" && (
+                {albumDetails.release.releaseStatus === "completed" && (
                   <div className="bg-[#F0F0E7] border border-neutral-100 text-white flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
                     <button
                       onClick={() => setshowRejectModal(true)}
@@ -428,13 +448,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
 
               {/* side bar */}
-              <div className="flex-1 flex flex-col items-end! gap-5">
+              <div className="flex-1 flex flex-col items-end!">
                 <div className="bg-neutral-50 p-3 rounded-lg">
                   <div className=" relative overflow-hidden w-50 h-50">
                     <Image
                       priority={false}
                       src={
-                        singleDetails.release.releaseImage || "/signinimage.png"
+                        albumDetails.release.releaseImage || "/signinimage.png"
                       }
                       alt="release image"
                       fill
@@ -443,21 +463,21 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                   <div>
                     <h1 className="text-2xl capitalize font-normal leading-[30px] tracking-tighter text-main-heading">
-                      {singleDetails.release.releaseTitle}
+                      {albumDetails.release.releaseTitle}
                     </h1>
                     <p className="text-md capitalize font-light leading-[20px] tracking-tighter text-main-heading">
-                      {singleDetails.release.artistName}
+                      {albumDetails.release.artistName}
                     </p>
                   </div>
                 </div>
-                <div className="bg-secondary-50 rounded-xl p-3 mb-2 flex items-center justify-between max-w-fit">
+                <div className="bg-secondary-50 rounded-xl p-3 flex items-center justify-between max-w-65 w-full max-h-14 h-full font-bold text-sm text-center mt-5">
                   <div className="flex items-center gap-4">
                     {/* Album Art Placeholder */}
                     <a
                       aria-label="download cover art"
                       download="releaseImage"
                       href={
-                        singleDetails.release.releaseImage || "/signinimage.png"
+                        albumDetails.release.releaseImage || "/signinimage.png"
                       }
                       target="_blank"
                       className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
@@ -473,6 +493,41 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       Download Cover Art
                     </a>
                   </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setisTrack(false);
+                  }}
+                  className={
+                    "rounded-xl p-3 flex items-center justify-between max-w-65 w-full max-h-14 h-full font-bold text-sm text-center mt-10 mb-5 " +
+                    (!isTrack
+                      ? " bg-primary-500 text-white"
+                      : " bg-neutral-50 text-text-disable")
+                  }
+                >
+                  Album Info
+                </button>
+                <div className=" max-w-65 w-full max-h-100 overflow-y-auto ">
+                  {albumDetails.tracks.map((track, index) => (
+                    <button
+                      onClick={() => {
+                        handleSelectTrack(track);
+                      }}
+                      key={index}
+                      className={
+                        "rounded-xl p-3 flex items-center justify-between max-w-65 w-full max-h-14 h-full font-bold text-sm text-center my-5 " +
+                        (isTrack &&
+                        selectedTrack &&
+                        "isrc" in selectedTrack &&
+                        selectedTrack.isrc === track.isrc
+                          ? " bg-primary-500 text-white"
+                          : " bg-neutral-50 text-text-disable")
+                      }
+                    >
+                      {track.releaseTitle + " " + track.trackNumber}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
@@ -531,7 +586,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
             )}
-
             {/*info pop up */}
             <div
               className={

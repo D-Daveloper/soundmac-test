@@ -377,6 +377,7 @@ type ReleaseRequest = {
   releaseTitle: string;
   releaseImage: string;
   releaseDate: string;
+  numberOfTracks:string;
   artist: {
     artistName: string;
     artistImage: string;

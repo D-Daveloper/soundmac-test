@@ -4,29 +4,22 @@ import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import {
-  AdminAlbumDetails,
   AdminTrackDetails,
 } from "@/app/type";
-import { Music, X } from "lucide-react";
+import { Music } from "lucide-react";
 import { useGetAdminAlbumDetails } from "@/util/customHooks/useQueries";
-import { useRouter } from "next/navigation";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
-import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
-  const queryClient = useQueryClient();
-  const router = useRouter();
   const api = UseAxios();
   const dashboardContext = useContext(DashboardContext);
   const [isSubmitting, setisSubmitting] = useState(false);
-  const [showRejectModal, setshowRejectModal] = useState(false);
-  const [rejectReason, setrejectReason] = useState("");
   const [isTrack, setisTrack] = useState(false);
-  const [album, setalbum] = useState<AdminAlbumDetails | null>(null);
   const [selectedTrack, setselectedTrack] = useState<
-    AdminTrackDetails | AdminTrackDetails | null
+    AdminTrackDetails | null
   >(null);
   const { id } = use(params);
   if (!id) {
@@ -35,17 +28,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const {
     isLoading: isLoadingAlbumDetails,
     data: albumDetails,
-    isFetching,
-    isPending,
-    isRefetching,
-    isError,
   } = useGetAdminAlbumDetails({ albumId: id });
   useEffect(() => {
     dashboardContext?.setLayoutHeaderMessage("Album Details");
   }, []);
   useEffect(() => {
     if (albumDetails?.release) {
-      setalbum(albumDetails.release);
       setisTrack(false);
     }
   }, [albumDetails]);
@@ -53,63 +41,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const handleSelectTrack = (track: AdminTrackDetails) => {
     setisTrack(true);
     setselectedTrack(track);
-  };
-  const handleApproveRelease = async () => {
-    try {
-      setisSubmitting(true);
-      const res = await api.post("admin/all-releases/album", {
-        albumId: id,
-        requestType: "approved",
-      });
-      console.log(res.data);
-      toast.success(res.data.msg);
-      await queryClient.invalidateQueries({ queryKey: ["album"] });
-      if (albumDetails) {
-        albumDetails.release.releaseStatus = "approved";
-      }
-    } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error);
-        return;
-      }
-      toast.error("Something went wrong!");
-    } finally {
-      setisSubmitting(false);
-    }
-  };
-  const handleRejectSubmit = () => {
-    if (rejectReason.trim()) {
-      handleRejectRelease();
-      setshowRejectModal(false);
-      setrejectReason("");
-    }
-  };
-  const handleRejectRelease = async () => {
-    try {
-      setisSubmitting(true);
-      if (!rejectReason) {
-        return toast.warn("Please enter the reason for the rejected.");
-      }
-      const res = await api.post("admin/all-releases/album", {
-        albumId: id,
-        requestType: "rejected",
-        message: rejectReason,
-      });
-      console.log(res.data);
-      toast.success(res.data.msg);
-      await queryClient.invalidateQueries({ queryKey: ["allreleases"] });
-      if (albumDetails) {
-        albumDetails.release.releaseStatus = "rejected";
-      }
-    } catch (error) {
-      if (isAxiosError(error)) {
-        console.log(error);
-        return;
-      }
-      toast.error("Something went wrong!");
-    } finally {
-      setisSubmitting(false);
-    }
   };
 
   const handleDownloadSong = async () => {
@@ -149,22 +80,22 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     <>
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
+        <Link
+          href={"/dashboardAdmin/all-releases/album"}
+          aria-label="go back"
+          className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
+        >
+          <Image
+            src={"/arrow-left.svg"}
+            height={32}
+            width={32}
+            alt="arrow left"
+          />
+        </Link>
         {isSubmitting || !albumDetails || isLoadingAlbumDetails ? (
           <InlineLoadingScreen />
         ) : (
           <>
-            <button
-              onClick={() => router.back()}
-              aria-label="go back"
-              className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
-            >
-              <Image
-                src={"/arrow-left.svg"}
-                height={32}
-                width={32}
-                alt="arrow left"
-              />
-            </button>
             <div className="flex mt-3">
               {/* Content */}
               <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
@@ -427,25 +358,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </>
                 )}
-
-                {/* Action Buttons */}
-                {albumDetails.release.releaseStatus === "completed" &&
-                  !isTrack && (
-                    <div className="flex items-center justify-end gap-4 pt-2 border-t border-gray-200">
-                      <button
-                        onClick={() => setshowRejectModal(true)}
-                        className="px-6 py-2 bg-white border-2 border-red-500 text-red-500 font-semibold rounded-lg hover:bg-red-50 transition-colors"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        onClick={handleApproveRelease}
-                        className="px-6 py-2 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
-                      >
-                        Approve
-                      </button>
-                    </div>
-                  )}
               </div>
 
               {/* side bar */}
@@ -523,61 +435,6 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 </div>
               </div>
             </div>
-            {/* Reject Reason Modal */}
-            {showRejectModal && (
-              <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-60 flex items-center justify-center z-[60]">
-                <div className="bg-white rounded-2xl w-[500px] shadow-2xl">
-                  {/* Reject Modal Header */}
-                  <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      Reject Release
-                    </h3>
-                    <button
-                      onClick={() => {
-                        setshowRejectModal(false);
-                        setrejectReason("");
-                      }}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                      <X size={20} />
-                    </button>
-                  </div>
-
-                  {/* Reject Modal Content */}
-                  <div className="p-6">
-                    <p className="text-gray-600 mb-4">
-                      Please provide a reason for rejecting this release:
-                    </p>
-                    <textarea
-                      value={rejectReason}
-                      onChange={(e) => setrejectReason(e.target.value)}
-                      className="w-full h-32 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                      placeholder="Enter rejection reason..."
-                    />
-
-                    {/* Reject Modal Buttons */}
-                    <div className="flex items-center justify-end gap-3 mt-6">
-                      <button
-                        onClick={() => {
-                          setshowRejectModal(false);
-                          setrejectReason("");
-                        }}
-                        className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleRejectSubmit}
-                        disabled={!rejectReason.trim()}
-                        className="px-5 py-2.5 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                      >
-                        Submit Rejection
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </>
         )}
       </div>

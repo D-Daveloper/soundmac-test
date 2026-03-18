@@ -359,11 +359,11 @@ export function useGetAdminSingleDetails(params: { songId: string }) {
   });
 }
 
-export const useReleaseRequests = (params: { releaseTitle: string,limit:string }) => {
+export const useReleaseRequests = (params: { releaseTitle: string,limit:string,releaseType:string }) => {
   const api = UseAxios();
 
   return useInfiniteQuery<ReleaseRequestResponse, Error>({
-    queryKey: ["release-request", params.releaseTitle],
+    queryKey: ["release-request", params.releaseTitle,params.releaseType],
     queryFn: async ({ pageParam }) =>
       getReleaseRequest(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,

@@ -4,6 +4,7 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import mongoose from "mongoose";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
+import AlbumModel from "@/util/models/AlbumModel";
 
 export async function GET(req: Request) {
   try {
@@ -28,9 +29,10 @@ export async function GET(req: Request) {
 
     const cursor = searchParams.get("cursor");
 
+    const releaseType = searchParams.get("releaseType");
     const releaseTitle = searchParams.get("releaseTitle");
     const limit = parseInt(searchParams.get("limit") || "50", 10);
-    const query: any = { releaseStatus: "pending" };
+    const query: any = { releaseStatus: releaseType == "single" ? "pending" :"completed" };
 
     // If cursor exists, fetch items AFTER it
     if (cursor && !releaseTitle) {
@@ -45,11 +47,20 @@ export async function GET(req: Request) {
       releaseImage: 1,
       releaseDate: 1,
     };
-    release = await SongModel.find(query, projection)
-      .collation({ locale: "en", strength: 2 })
-      .sort({ _id: -1 })
-      .limit(limit + 1)
-      .populate("artist", "artistName artistImage");
+
+    if (releaseType != "single") {
+      release = await AlbumModel.find(query, {...projection,numberOfTracks:1})
+        .collation({ locale: "en", strength: 2 })
+        .sort({ _id: -1 })
+        .limit(limit + 1)
+        .populate("artist", "artistName artistImage");
+    } else {
+      release = await SongModel.find(query, projection)
+        .collation({ locale: "en", strength: 2 })
+        .sort({ _id: -1 })
+        .limit(limit + 1)
+        .populate("artist", "artistName artistImage");
+    }
 
     let nextCursor = null;
     let hasMore = false;

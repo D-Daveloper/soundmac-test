@@ -29,6 +29,7 @@ const Page = () => {
     status,
     fetchNextPage,
   } = useReleaseRequests({
+    releaseType:"single",
     releaseTitle,
     limit: "50",
   });

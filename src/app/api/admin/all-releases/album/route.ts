@@ -91,7 +91,7 @@ export async function POST(req: Request) {
       const rejectEmailData: rejectEmailProps = {
         artistName: release.artistName,
         releaseTitle: release.releaseTitle,
-        rejectionReason: body.message,
+        rejectionReason: body.message?.trim(),
         dashboardUrl: "release",
         supportEmail: "release",
       };
