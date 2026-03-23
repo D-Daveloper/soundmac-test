@@ -5,53 +5,76 @@ import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useReleaseRequests } from "@/util/customHooks/useQueries";
+import { useGetAllArtists } from "@/util/customHooks/useQueries";
+import { useTabQuery } from "@/util/customHooks/useTabQuery";
 
 const Page = () => {
   const dashboardContext = useContext(DashboardContext);
+  const { getParam, setParam } = useTabQuery();
+  const artistStatus = getParam("artistStatus");
   const [query, setQuery] = useState("");
-  const releaseTitle = useDebounce<string>(query, 500);
+  const artistName = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("release Requests");
+    dashboardContext?.setLayoutHeaderMessage("all artists");
   }, []);
+
+  useEffect(() => {
+    if (
+      !artistStatus ||
+      (artistStatus != "active" && artistStatus != "inactive")
+    ) {
+      setParam("artistStatus", "active");
+    }
+  }, [artistStatus]);
 
   const handleSearchQueryChange = (filter: string) => {
     setQuery(filter);
   };
   const {
-    data: releaseRequests,
-    isFetching: isFetchingReleaseRequests,
+    data: allArtists,
+    isFetching: isFetchingAllArtists,
     isFetchingNextPage,
     // isRefetching:isRefecthingreleaseRequests,
     isError: isWithdrawalError,
     hasNextPage,
     status,
     fetchNextPage,
-  } = useReleaseRequests({
-    releaseTitle,
-    releaseType: "album",
+  } = useGetAllArtists({
+    artistStatus: artistStatus || "active",
+    artistName,
     limit: "50",
   });
+
   return (
     <div className="bg-main-white max-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
       <div className="flex gap-3 mt-5">
-        <Link
-          href={"/dashboardAdmin/release-requests/single"}
+        <button
+          onClick={() => {
+            setParam("artistStatus", "active");
+          }}
           className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
+            (artistStatus === "active"
+              ? " bg-primary hover:bg-primary/90 text-white"
+              : " bg-transparent border-2 border-text-disable text-text-disable")
           }
         >
-          Songs
-        </Link>
-        <Link
-          href={"/dashboardAdmin/release-requests/album"}
+          Active
+        </button>
+        <button
+          onClick={() => {
+            setParam("artistStatus", "inactive");
+          }}
           className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
+            (artistStatus === "inactive"
+              ? " bg-primary hover:bg-primary/90 text-white"
+              : " bg-transparent border-2 border-text-disable text-text-disable")
           }
         >
-          Albums
-        </Link>
+          Deactivated
+        </button>
       </div>
       {/* Filters */}
       <div className="flex p-1 outline-1 rounded-lg w-full max-w-[40%] max-h-fit mt-5 ">
@@ -72,11 +95,11 @@ const Page = () => {
           placeholder="Search"
         />
       </div>
-      {status === "pending" || !releaseRequests ? (
+      {status === "pending" || !allArtists ? (
         <InlineLoadingScreen />
       ) : (
         <>
-          {releaseRequests.pages[0].data.length < 1 ? (
+          {allArtists.pages[0].data.length < 1 ? (
             <div className="flex flex-col justify-center items-center h-[80dvh] gap-15 ">
               <div>
                 <Image
@@ -88,34 +111,39 @@ const Page = () => {
                 />
               </div>
               <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-                There are no Requested Releases, Right Now.
+                There are no {artistStatus == "active" ? "active":"Deactivated"} Artists Right Now.
               </p>
-              <Link
-                href={"/dashboardAdmin/release-requests/single"}
+              <button
+                onClick={() => {
+                  if (artistStatus == "active") {
+                    setParam("artistStatus", "inactive");
+                  }
+                  else{
+                    setParam("artistStatus", "active");
+                  }
+                }}
                 className={
                   "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white! bg-primary-500 "
                 }
               >
-                Go to Singles
-              </Link>
+                {artistStatus == "active" ? "Go to Deactivated" : "Go to Active"}
+              </button>
             </div>
           ) : (
             <div className="mt-5 flex flex-col gap-5 mb-10">
               <div className="flex flex-col gap-5 h-[500px] overflow-y-auto p-5">
-                {releaseRequests.pages.map((item, index) =>
+                {allArtists.pages.map((item, index) =>
                   item.data.map((release, idx) => (
                     <Link
-                      href={
-                        "/dashboardAdmin/release-requests/album/" + release._id
-                      }
+                      href={"/dashboardAdmin/all-artists/" + release._id}
                       key={idx}
-                      className="bg-warning-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
+                      className="bg-neutral-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
                     >
                       <div className="flex gap-2">
-                        <div className="relative w-30 h-30 max-w-30 max-h-30">
+                        <div className="relative w-20 h-20 max-w-20 max-h-20">
                           <Image
                             priority={true}
-                            src={release.releaseImage}
+                            src={release.artistImage}
                             alt="release Image"
                             fill
                             className="rounded-lg object-cover"
@@ -123,40 +151,33 @@ const Page = () => {
                         </div>
                         <div>
                           <h1 className="text-2xl font-normal leading-[30px] tracking-tighter text-main-heading">
-                            {release.releaseTitle}
+                            {release.artistName}
                           </h1>
-                          <div className="flex gap-2 border border-neutral-100 rounded-lg items-center p-2 w-fit">
-                            <div className="relative w-10 h-10 max-w-10 max-h-10">
-                              <Image
-                                priority={true}
-                                src={release.artist.artistImage}
-                                alt="artist Image"
-                                fill
-                                className="rounded-lg object-cover"
-                              />
-                            </div>
-                            <h2 className="text-sm font-bold leading-[18px] tracking-tighter text-text-body">
-                              {release.artist.artistName}
-                            </h2>
-                          </div>
+                          <h2 className="text-sm font-bold leading-[18px] tracking-tighter text-text-body">
+                            {release.artistName}
+                          </h2>
                         </div>
                       </div>
-                      <div className="flex gap-3">
-
-                      <div className="bg-primary-50 py-6 px-3 text-center rounded-lg flex flex-col justify-center ">
-                        
-                        <p className="text-primary-500 text-xl font-bold leading-[24px] tracking-tighter">
-                          {release.numberOfTracks} track(s)
-                        </p>
-                      </div>
-                      <div className="bg-secondary-50 py-6 px-3 text-center rounded-lg flex flex-col justify-center ">
-                        <p className="text-md font-normal leading-[20px] tracking-tighter text-text-disable">
-                          Proposed Release Date:
-                        </p>
-                        <p className="text-primary-500 text-xl font-bold leading-[24px] tracking-tighter">
-                          {new Date(release.releaseDate).toDateString()}
-                        </p>
-                      </div>
+                      <div className="bg-primary-50/99 py-1 px-3 text-center rounded-lg flex gap-3 ">
+                        <div className="relative w-10 h-10 max-w-10 max-h-10">
+                          <Image
+                            priority={true}
+                            src={release.artistImage}
+                            alt="artist Image"
+                            fill
+                            className="rounded-lg object-cover"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <p className="text-md font-bold leading-[20px] tracking-tighter text-black">
+                            {release.user.lastName +
+                              " " +
+                              release.user.firstName}
+                          </p>
+                          <p className="text-black text-sm font-light leading-[18px] tracking-tighter">
+                            {release.user.email}
+                          </p>
+                        </div>
                       </div>
                     </Link>
                   )),
@@ -165,7 +186,7 @@ const Page = () => {
                   <button
                     className="font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white! bg-primary-500 "
                     onClick={() => fetchNextPage()}
-                    disabled={!hasNextPage || isFetchingReleaseRequests}
+                    disabled={!hasNextPage || isFetchingAllArtists}
                   >
                     {isFetchingNextPage
                       ? "Loading more..."

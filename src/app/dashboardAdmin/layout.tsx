@@ -34,7 +34,7 @@ const sidebarComponents = [
       {
         title: "All Artists",
         icon: "/add.svg",
-        href: "/dashboardAdmin/artist/createArtist",
+        href: "/dashboardAdmin/all-artists?artistStatus=active",
         query: "create",
       },
       {

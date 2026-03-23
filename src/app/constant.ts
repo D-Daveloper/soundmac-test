@@ -101,6 +101,7 @@ export const blogContent = [
 ];
 export const artistContent: Artist[] = [
   {
+    _id: "",
     artistName: "The Midnight Echoes",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -110,6 +111,7 @@ export const artistContent: Artist[] = [
   },
 
   {
+    _id: "",
     artistName: "Kingsley & The Vibe Collective",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -119,6 +121,7 @@ export const artistContent: Artist[] = [
   },
 
   {
+    _id: "",
     artistName: "ohn Doe",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -127,6 +130,7 @@ export const artistContent: Artist[] = [
     createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
   },
   {
+    _id: "",
     artistName: "ohn Doe",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -135,6 +139,7 @@ export const artistContent: Artist[] = [
     createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
   },
   {
+    _id: "",
     artistName: "ohn Doe",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -143,6 +148,7 @@ export const artistContent: Artist[] = [
     createdAt: new Date("2025-08-28T12:30:35.144+00:00"),
   },
   {
+    _id: "",
     artistName: "ohn Doe",
     artistImage: "/signinimage.png",
     appleId: "",
@@ -270,7 +276,7 @@ export const languagesList = [
 ];
 
 export const OTP_EXPIRY_SECONDS = parseInt(
-  process.env.NEXT_PUBLIC_OTP_EXPIRY_SECONDS || "300"
+  process.env.NEXT_PUBLIC_OTP_EXPIRY_SECONDS || "300",
 );
 
 export const filterOptions = [
@@ -286,7 +292,11 @@ export const songFilterOptions = [
   { label: "Z-A", value: "-songTitle" },
 ];
 export const songStatusFilterArray = [
-"all","approved","pending","rejected","draft"
+  "all",
+  "approved",
+  "pending",
+  "rejected",
+  "draft",
 ];
 
 export const promotionTestData = [
@@ -389,116 +399,145 @@ export const deactivateReasons = [
   "Other (please specify)",
 ];
 
-export const timeList = ["00:00 (UTC)","01:00 (UTC)","02:00 (UTC)","03:00 (UTC)","04:00 (UTC)","05:00 (UTC)","06:00 (UTC)","07:00 (UTC)","08:00 (UTC)","09:00 (UTC)","10:00 (UTC)","11:00 (UTC)","12:00 (UTC)","13:00 (UTC)","14:00 (UTC)","15:00 (UTC)","16:00 (UTC)", "17:00 (UTC)","18:00 (UTC)","19:00 (UTC)","20:00 (UTC)","21:00 (UTC)","22:00 (UTC)","23:00 (UTC)","24:00 (UTC)",]
+export const timeList = [
+  "00:00 (UTC)",
+  "01:00 (UTC)",
+  "02:00 (UTC)",
+  "03:00 (UTC)",
+  "04:00 (UTC)",
+  "05:00 (UTC)",
+  "06:00 (UTC)",
+  "07:00 (UTC)",
+  "08:00 (UTC)",
+  "09:00 (UTC)",
+  "10:00 (UTC)",
+  "11:00 (UTC)",
+  "12:00 (UTC)",
+  "13:00 (UTC)",
+  "14:00 (UTC)",
+  "15:00 (UTC)",
+  "16:00 (UTC)",
+  "17:00 (UTC)",
+  "18:00 (UTC)",
+  "19:00 (UTC)",
+  "20:00 (UTC)",
+  "21:00 (UTC)",
+  "22:00 (UTC)",
+  "23:00 (UTC)",
+  "24:00 (UTC)",
+];
 
 export const priorityList = ["High", "Medium", "Low"];
 
-export const genderList = ["Male", "Female"]
+export const genderList = ["Male", "Female"];
 
-export const moods = ["Happy",
+export const moods = [
+  "Happy",
 
-"Energetic",
+  "Energetic",
 
-"Party",
+  "Party",
 
-"Romantic",
+  "Romantic",
 
-"Heartbreak",
+  "Heartbreak",
 
-"Emotional",
+  "Emotional",
 
-"Inspirational",
+  "Inspirational",
 
-"Chill",
+  "Chill",
 
-"Street", 
+  "Street",
 
-"Conscious",
+  "Conscious",
 
-"Dark",
-"Motivational",]
+  "Dark",
+  "Motivational",
+];
 
 export const editorialTeams = [
   "Apple Music Editorial",
 
-"Spotify Editorial",
+  "Spotify Editorial",
 
-"Audiomack Editorial",
+  "Audiomack Editorial",
 
-"Tidal Editorial",
+  "Tidal Editorial",
 
-"Boomplay Editorial",
+  "Boomplay Editorial",
 
-"Deezer Editorial",
+  "Deezer Editorial",
 
-"YouTube Music Editorial",
-]
+  "YouTube Music Editorial",
+];
 
-export const typeOfRelease = ["Standard" ,
-"Remix" ,
-"Reissue" ,
-"Instant grat" ,
-"Pre save" ,
-"Alternative version" ,
-"Live",
-]
+export const typeOfRelease = [
+  "Standard",
+  "Remix",
+  "Reissue",
+  "Instant grat",
+  "Pre save",
+  "Alternative version",
+  "Live",
+];
 
 export const periodFilterOptions = [
   {
-    label:"All Time",
-    value:"all"
+    label: "All Time",
+    value: "all",
   },
   {
-    label:"1 Week",
-    value:"week"
+    label: "1 Week",
+    value: "week",
   },
   {
-    label:"Last Month",
-    value:"month"
+    label: "Last Month",
+    value: "month",
   },
   {
-    label:"Last 3 Month",
-    value:"3months"
+    label: "Last 3 Month",
+    value: "3months",
   },
-]
+];
 export const withdrawalStatusFilterOptions = [
   {
-    label:"All",
-    value:"all"
+    label: "All",
+    value: "all",
   },
   {
-    label:"Pending",
-    value:"pending"
+    label: "Pending",
+    value: "pending",
   },
   {
-    label:"Successful",
-    value:"successful"
+    label: "Successful",
+    value: "successful",
   },
   {
-    label:"Failed",
-    value:"failed"
+    label: "Failed",
+    value: "failed",
   },
-]
+];
 
 export const allReleaseStatusFilterOptions = [
   {
-    label:"All",
-    value:"all"
+    label: "All",
+    value: "all",
   },
   {
-    label:"Approved",
-    value:"approved"
+    label: "Approved",
+    value: "approved",
   },
   {
-    label:"Pending",
-    value:"pending"
+    label: "Pending",
+    value: "pending",
   },
   {
-    label:"Rejected",
-    value:"rejected"
+    label: "Rejected",
+    value: "rejected",
   },
   {
-    label:"Draft",
-    value:"draft"
+    label: "Draft",
+    value: "draft",
   },
-]
+];

@@ -9,7 +9,9 @@ import {
   getAlbum,
   getAlbums,
   getAlbumTracks,
+  getAllArtists,
   getAllReleases,
+  getArtistDetails,
   getArtists,
   getArtistStats,
   getCurrentUser,
@@ -29,7 +31,9 @@ import {
   AdminRelease,
   AdminSingleDetailsResponse,
   albumFromApi,
+  AllArtistResponse,
   Artist,
+  ArtistDetails,
   ArtistStat,
   PAGINATION,
   PayStackBankListResponse,
@@ -373,3 +377,40 @@ export const useReleaseRequests = (params: { releaseTitle: string,limit:string,r
     refetchOnWindowFocus: false,
   });
 };
+export const useGetAllArtists = (params: { artistName: string,limit:string,artistStatus:string }) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<AllArtistResponse, Error>({
+    queryKey: ["release-request", params.artistName,params.artistStatus],
+    queryFn: async ({ pageParam }) =>
+      getAllArtists(api, { ...params, cursor: pageParam as string }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+export function usePaginatedAdminArtistDetails(params: {
+  page: number;
+  releaseTitle: string;
+  releaseStatusFilter: string;
+  limit: string;
+  id: string;
+}) {
+  const api = UseAxios();
+  return useQuery<ArtistDetails, Error>({
+    queryKey: [
+      "artistDetail",
+      params.page,
+      params.releaseStatusFilter,
+      params.id,
+      params.releaseTitle
+    ],
+    queryFn: async () => getArtistDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}

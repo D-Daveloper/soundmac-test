@@ -7,10 +7,10 @@ export interface IArtist extends Document {
   appleId?: string;
   spotifyId?: string;
   user: mongoose.Types.ObjectId;
+  artistStatus: "active" | "inactive";
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 // Schema definition
 const ArtistSchema = new Schema<IArtist>(
@@ -43,18 +43,22 @@ const ArtistSchema = new Schema<IArtist>(
       ref: "User",
       required: [true, "Provide a user!"],
     },
+    artistStatus: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
   {
     timestamps: true, // ✅ automatically adds createdAt & updatedAt
-  }
+  },
 );
-ArtistSchema.index({ user: 1, createdAt: -1 });//example 1 Optimizes queries that filter by user and sort by createdAt in descending order (newest first). It's ideal for "get the most recent artists for a specific user."
-ArtistSchema.index({ user: 1, updatedAt: -1 });//example 2 Optimizes queries filtering by user and sorting by updatedAt descending (most recently updated first). Great for "get the recently edited artists for a user."
-ArtistSchema.index({ user: 1, artistName: 1 },{unique:true});
+ArtistSchema.index({ user: 1, createdAt: -1 }); //example 1 Optimizes queries that filter by user and sort by createdAt in descending order (newest first). It's ideal for "get the most recent artists for a specific user."
+ArtistSchema.index({ user: 1, updatedAt: -1 }); //example 2 Optimizes queries filtering by user and sorting by updatedAt descending (most recently updated first). Great for "get the recently edited artists for a user."
+ArtistSchema.index({ user: 1, artistName: 1 }, { unique: true });
 // ArtistSchema.index({ artistName: "text" })  // or { name: "text" } if searching text
 // ArtistSchema.index({ artistName: 1 },{unique:true})  // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing artists alphabetically within a user's scope).
 // ArtistSchema.index({ artistName: "text" })  // or { name: "text" } if searching text
-
 
 // Middleware to ensure updatedAt updates correctly on findOneAndUpdate
 ArtistSchema.pre("findOneAndUpdate", function (next) {
@@ -70,7 +74,6 @@ const Artist: Model<IArtist> =
   mongoose.models?.Artist || mongoose.model<IArtist>("Artist", ArtistSchema);
 
 export default Artist;
-
 
 //example 1
 // Find the 10 most recently created artists for a specific user

@@ -14,7 +14,7 @@ import ReleaseTable from "./releaseTableSingles";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Pagination from "@/app/components/pagination/Pagination";
 
-const page = () => {
+const Page = () => {
   const dashboardContext = useContext(DashboardContext);
   const [isFilterOpen, setisFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -223,4 +223,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

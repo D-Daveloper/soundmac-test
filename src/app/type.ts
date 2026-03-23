@@ -116,6 +116,7 @@ export type Artist = Pick<
   | "spotifyId"
   | "updatedAt"
   | "createdAt"
+  | "_id"
 >;
 
 export type SELECTED_IMAGE = string | null | ArrayBuffer;
@@ -388,3 +389,12 @@ export type ReleaseRequestResponse = {
   nextCursor?: string;
   hasMore: boolean;
 };
+type AllArtist = Artist & {user:{email:string,firstName:string,lastName:string}} 
+export type AllArtistResponse = {
+  data: AllArtist[];
+  nextCursor?: string;
+  hasMore: boolean;
+  msg:string;
+};
+
+export type ArtistDetails =PAGINATION<AdminRelease> & {artist:Artist}

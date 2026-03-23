@@ -159,7 +159,7 @@ a {
   --color-primary-red: #D91B1B;
   --color-primary-700:#0E2E44;
   --color-primary-100:#CFDAE1;
-  --color-primary-50:#CFDAE1;
+  --color-primary-50:#E7ECF0;
   --color-primary-500:#11456B;
   --color-primary-300:#708FA6;
   --color-secondary-50:#F0F0E7;
@@ -191,6 +191,7 @@ a {
   --color-btn-hover: #416A89;
   --color-success-100: #D5ECD7;
   --color-success-500: #2B9E36;
+  --color-success-800: #18461C;
   --color-success-50: #EAF5EB;
   --color-secondary-50: #F0F0E7;
   --text-md: 16px;

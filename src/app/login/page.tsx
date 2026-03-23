@@ -23,7 +23,7 @@ const page = () => {
             Log into Your Soundmac Account
           </h1>
           <p className="text-p font-normal text-sm leading-5 tracking-[0.5px] mt-5">
-            Welcom back creator!
+            Welcome back creator!
           </p>
           <div className="border-2 border-dashed border-[#E1E1CF] my-10"></div>
         </div>
