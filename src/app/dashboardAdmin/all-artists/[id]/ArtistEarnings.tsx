@@ -1,12 +1,9 @@
 "use client";
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { AdminTrackDetails } from "@/app/type";
-import { Copy } from "lucide-react";
-import {
-  usePaginatedAdminArtistDetails,
-} from "@/util/customHooks/useQueries";
+import { Coins, Copy } from "lucide-react";
+import { usePaginatedAdminArtistDetails } from "@/util/customHooks/useQueries";
 import Link from "next/link";
 import { handleCopy } from "@/util/middleware/functions";
 import useDebounce from "@/app/components/searchBox/searchBox";
@@ -14,7 +11,7 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { allReleaseStatusFilterOptions } from "@/app/constant";
 import ReleaseTable from "./releaseTableArtists";
 
-export default function ArtistEarnings({ params }: { params: Promise<{ id: string }> }) {
+export default function ArtistEarnings({ id }: { id: string }) {
   const [isFilterOpen, setisFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
@@ -24,138 +21,27 @@ export default function ArtistEarnings({ params }: { params: Promise<{ id: strin
     releaseStatusFilter: "all",
     sort: "",
   });
-  const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
   }
-  const {
-    isLoading: isLoadingAllReleases,
-    data: artistDetails,
-  } = usePaginatedAdminArtistDetails({
-    ...filter,
-    page,
-    limit: "50",
-    releaseTitle,
-    id,
-  });
+  const { isLoading: isLoadingAllReleases, data: artistDetails } =
+    usePaginatedAdminArtistDetails({
+      ...filter,
+      page,
+      limit: "50",
+      releaseTitle,
+      id,
+    });
   const handleSearchQueryChange = (filter: string) => {
     setPage(1);
     setQuery(filter);
     setfilter((prev) => ({ ...prev, releaseStatusFilter: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
-      <div className="flex gap-3 mt-5">
-        <Link
-          href={"/dashboardAdmin/release-requests/single"}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
-          }
-        >
-          Artist Info
-        </Link>
-        <Link
-          href={"/dashboardAdmin/release-requests/album"}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
-          }
-        >
-          View Earnings
-        </Link>
-      </div>
-      <Link
-        href={"/dashboardAdmin/all-artists"}
-        aria-label="go back"
-        className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
-      >
-        <Image
-          src={"/arrow-left.svg"}
-          height={32}
-          width={32}
-          alt="arrow left"
-        />
-      </Link>
-      <div className="flex gap-5">
-        <div className={"bg-neutral-50 p-3 rounded-lg flex-1 h-[250px] " + (isLoadingAllReleases && " shimmer")}>
-          <div className={" flex flex-col justify-between h-full " + ((isLoadingAllReleases || !artistDetails) && "hidden")}>
-            <div className="flex gap-3">
-              <div className="relative w-20 h-20 max-w-20 max-h-20">
-                <Image
-                  priority={true}
-                  src={"/signinimage.png"}
-                  alt="release Image"
-                  fill
-                  className="rounded-lg object-cover"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-light leading-[30px] tracking-tighter text-main-heading">
-                  Kingsley & The Vibe Collective
-                </h1>
-                <p className="text-md font-semibold leading-[20px] tracking-tighter text-text-body">
-                  Kingsley Okafor
-                </p>
-              </div>
-            </div>
-            <div className="mt-auto">
-              <p className="text-success-800 font-bold leading-[18px] tracking-tighter text-xs">
-                Active since {new Date().toDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className={"bg-secondary-50 p-3 rounded-lg flex-1 h-[250px] " + (isLoadingAllReleases && " shimmer")}>
-          <div className={"flex flex-col gap-3 justify-between h-full " + ((isLoadingAllReleases || !artistDetails) && "hidden")}>
-            <div className="flex justify-between">
-              <div className="flex flex-col gap-3">
-                <h3 className="text-text-disable font-bold leading-[18px] tracking-tighter text-sm">
-                  Spotify ID
-                </h3>
-                <button
-                  value={artistDetails?.artist.spotifyId}
-                  onClick={(e) => handleCopy(e.currentTarget.value)}
-                  className="text-primary-500 font-normal leading-[18px] tracking-tighter text-2xl flex gap-3"
-                >
-                  {artistDetails?.artist.spotifyId}
-                  <Copy color="#11456B" />
-                </button>
-              </div>
-              <div className="flex flex-col gap-3">
-                <h3 className="text-text-disable font-bold leading-[18px] tracking-tighter text-sm">
-                  Apple Music ID
-                </h3>
-                <button
-                  value={artistDetails?.artist.appleId}
-                  onClick={(e) => handleCopy(e.currentTarget.value)}
-                  className="text-primary-500 font-normal leading-[18px] tracking-tighter text-2xl flex gap-3"
-                >
-                  {artistDetails?.artist.appleId}
-                  <Copy color="#11456B" />
-                </button>
-              </div>
-            </div>
-            <div className="flex flex-col gap-3 mb-20">
-              <h3 className="text-text-disable font-bold leading-[18px] tracking-tighter text-sm">
-                Artist Smartlink
-              </h3>
-              <button
-                value={"www.smartlink/kingsleyandthe...tive.io"}
-                onClick={(e) => handleCopy(e.currentTarget.value)}
-                className="text-primary-500 font-normal leading-[18px] tracking-tighter text-2xl flex gap-3"
-              >
-                www.smartlink/kingsleyandthe...tive.io
-                <Copy color="#11456B" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="mt-10">
-        <h2 className="font-medium mb-2 text-2xl pl-6">
-          Artist&apos;s Releases
-        </h2>
+    <div className="w-full">
+      <div className="mt-4">
         {/* Filters */}
-        <div className="w-full flex gap-5 pl-6 ">
+        <div className="w-full flex gap-5 ">
           <div className="flex p-1 outline-1 rounded-lg w-full max-w-[30%] h-fit ">
             <Image
               priority={true}
@@ -224,7 +110,14 @@ export default function ArtistEarnings({ params }: { params: Promise<{ id: strin
             </div>
           </div>
         </div>
-
+        <div className="bg-warning-50 flex flex-col w-full max-w-1/2 mt-10 gap-5 p-5 rounded-2xl h-fit">
+          <h1 className="font-semibold text-[16px] flex gap-1 leading-[20px] tracking-tighter text-primary-500">
+            <Coins color="#103958" /> Total Earnings
+          </h1>
+          <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
+            ₦34,998.68
+          </p>
+        </div>
         {!artistDetails || artistDetails.data.length < 1 ? (
           <div className="flex flex-col justify-center items-center h-[80dvh] gap-15 ">
             <div>
@@ -252,7 +145,7 @@ export default function ArtistEarnings({ params }: { params: Promise<{ id: strin
           <div className="mt-5 flex flex-col mb-10">
             <ReleaseTable
               releases={artistDetails.data}
-              isfetching={(isLoadingAllReleases)}
+              isfetching={isLoadingAllReleases}
             />
             {/* Pagination */}
             <div className="px-6">

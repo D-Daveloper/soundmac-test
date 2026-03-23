@@ -1,9 +1,7 @@
 'use client'
-import React, { useContext, useEffect } from "react";
 import Song from "./song/Song";
 import Album from "./album/Album";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
-import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const ManageRelease = () => {
   const { setParam, getParam } = useTabQuery();

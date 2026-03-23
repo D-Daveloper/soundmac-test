@@ -135,7 +135,7 @@ const Page = () => {
                 {allArtists.pages.map((item, index) =>
                   item.data.map((release, idx) => (
                     <Link
-                      href={"/dashboardAdmin/all-artists/" + release._id}
+                      href={"/dashboardAdmin/all-artists/" + release._id +"?tab=artist-info"}
                       key={idx}
                       className="bg-neutral-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
                     >

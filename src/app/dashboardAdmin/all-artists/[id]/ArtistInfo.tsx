@@ -1,12 +1,9 @@
 "use client";
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { AdminTrackDetails } from "@/app/type";
 import { Copy } from "lucide-react";
-import {
-  usePaginatedAdminArtistDetails,
-} from "@/util/customHooks/useQueries";
+import { usePaginatedAdminArtistDetails } from "@/util/customHooks/useQueries";
 import Link from "next/link";
 import { handleCopy } from "@/util/middleware/functions";
 import useDebounce from "@/app/components/searchBox/searchBox";
@@ -14,7 +11,7 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { allReleaseStatusFilterOptions } from "@/app/constant";
 import ReleaseTable from "./releaseTableArtists";
 
-export default function ArtistInfo({ params }: { params: Promise<{ id: string }> }) {
+export default function ArtistInfo({ id }: { id: string }) {
   const [isFilterOpen, setisFilterOpen] = useState(false);
 
   const [page, setPage] = useState(1);
@@ -25,60 +22,37 @@ export default function ArtistInfo({ params }: { params: Promise<{ id: string }>
     releaseStatusFilter: "all",
     sort: "",
   });
-  const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
   }
-  const {
-    isLoading: isLoadingAllReleases,
-    data: artistDetails,
-  } = usePaginatedAdminArtistDetails({
-    ...filter,
-    page,
-    limit: "50",
-    releaseTitle,
-    id,
-  });
+  const { isLoading: isLoadingAllReleases, data: artistDetails } =
+    usePaginatedAdminArtistDetails({
+      ...filter,
+      page,
+      limit: "50",
+      releaseTitle,
+      id,
+    });
   const handleSearchQueryChange = (filter: string) => {
     setPage(1);
     setQuery(filter);
     setfilter((prev) => ({ ...prev, releaseStatusFilter: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
-      <div className="flex gap-3 mt-5">
-        <Link
-          href={"/dashboardAdmin/release-requests/single"}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
-          }
-        >
-          Artist Info
-        </Link>
-        <Link
-          href={"/dashboardAdmin/release-requests/album"}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
-          }
-        >
-          View Earnings
-        </Link>
-      </div>
-      <Link
-        href={"/dashboardAdmin/all-artists"}
-        aria-label="go back"
-        className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
-      >
-        <Image
-          src={"/arrow-left.svg"}
-          height={32}
-          width={32}
-          alt="arrow left"
-        />
-      </Link>
+    <div className="w-full">
       <div className="flex gap-5">
-        <div className={"bg-neutral-50 p-3 rounded-lg flex-1 h-[250px] " + (isLoadingAllReleases && " shimmer")}>
-          <div className={" flex flex-col justify-between h-full " + ((isLoadingAllReleases || !artistDetails) && "hidden")}>
+        <div
+          className={
+            "bg-neutral-50 p-3 rounded-lg flex-1 h-[250px] " +
+            (isLoadingAllReleases && " shimmer")
+          }
+        >
+          <div
+            className={
+              " flex flex-col justify-between h-full " +
+              ((isLoadingAllReleases || !artistDetails) && "hidden")
+            }
+          >
             <div className="flex gap-3">
               <div className="relative w-20 h-20 max-w-20 max-h-20">
                 <Image
@@ -105,8 +79,18 @@ export default function ArtistInfo({ params }: { params: Promise<{ id: string }>
             </div>
           </div>
         </div>
-        <div className={"bg-secondary-50 p-3 rounded-lg flex-1 h-[250px] " + (isLoadingAllReleases && " shimmer")}>
-          <div className={"flex flex-col gap-3 justify-between h-full " + ((isLoadingAllReleases || !artistDetails) && "hidden")}>
+        <div
+          className={
+            "bg-secondary-50 p-3 rounded-lg flex-1 h-[250px] " +
+            (isLoadingAllReleases && " shimmer")
+          }
+        >
+          <div
+            className={
+              "flex flex-col gap-3 justify-between h-full " +
+              ((isLoadingAllReleases || !artistDetails) && "hidden")
+            }
+          >
             <div className="flex justify-between">
               <div className="flex flex-col gap-3">
                 <h3 className="text-text-disable font-bold leading-[18px] tracking-tighter text-sm">
@@ -253,7 +237,7 @@ export default function ArtistInfo({ params }: { params: Promise<{ id: string }>
           <div className="mt-5 flex flex-col mb-10">
             <ReleaseTable
               releases={artistDetails.data}
-              isfetching={(isLoadingAllReleases)}
+              isfetching={isLoadingAllReleases}
             />
             {/* Pagination */}
             <div className="px-6">

@@ -1,5 +1,4 @@
 "use client";
-import Input from "@/app/components/input/Input";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import { country_list } from "@/app/utils/constants";
 import Select from "@/components/Select";
@@ -12,8 +11,6 @@ import FAQAccordion from "./Faq";
 
 const page = () => {
   const dashboardContext = useContext(DashboardContext);
-  const router = useRouter();
-  const api = UseAxios();
   const [helpForm, setHelpForm] = useState({
     title: "",
     description: "",
