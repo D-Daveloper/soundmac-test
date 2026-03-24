@@ -1,6 +1,12 @@
-import { rejectEmailProps } from "@/app/type";
+import {
+  DetactivateArtistEmail,
+  sendUserNotificationEmailType,
+} from "@/app/type";
 import dbConnect from "@/util/db";
-import { releaseRejectionEmail } from "@/util/middleware/functions";
+import {
+  artistDeactivationEmail,
+  sendUserNotificationEmail,
+} from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
@@ -9,41 +15,58 @@ import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
 import Artist from "@/util/models/artistModel";
 import AlbumModel from "@/util/models/AlbumModel";
+import ArtistDeactivation from "@/util/models/deactivateArtist";
+import UserNotification from "@/util/models/userNotification";
 
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ artistId: string }> },
 ) {
-  const { artistId } = await params; // Access the dynamic 'id' parameter
   try {
-    // Check admin authorization (adjust to your auth system)
+    const { artistId } = await params;
+
+    // Validate input before hitting auth/DB
+    if (!artistId || !Types.ObjectId.isValid(artistId)) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
+
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
+
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (user.role != "admin" && user.role != "super_admin") {
+    }
+    if (user.role !== "admin" && user.role !== "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    if (!artistId || !Types.ObjectId.isValid(artistId)) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
-    }
     const { searchParams } = new URL(req.url);
-    let page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "50", 10);
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
+    const limit = Math.min(
+      100,
+      parseInt(searchParams.get("limit") || "50", 10),
+    );
     const releaseTitle = searchParams.get("releaseTitle");
     const releaseStatusFilter = searchParams.get("releaseStatusFilter");
-    const query: any = { artist: artistId };
+
+    // Build the shared match query
+    const matchQuery: Record<string, any> = {
+      artist: new Types.ObjectId(artistId),
+    };
     if (releaseTitle?.trim()) {
-      query.releaseTitle = { $regex: `^${releaseTitle}`, $options: "i" };
-      // page = 1;
+      matchQuery.releaseTitle = { $regex: `^${releaseTitle}`, $options: "i" };
     }
+    if (releaseStatusFilter?.trim() && releaseStatusFilter != "all") {
+      matchQuery.releaseStatus = releaseStatusFilter; // now actually applied
+    }
+    console.log(matchQuery);
+
     const projection = {
       releaseTitle: 1,
       releaseStatus: 1,
@@ -52,71 +75,72 @@ export async function GET(
       upc: 1,
       isrc: 1,
       catalogNumber: 1,
-      // genre: 1,
-      // releaseAudio: 1,
-      // featuredArtist: 1,
-      // songWriter: 1,
-      // producer: 1,
-      // explicitContent: 1,
     };
-    let totalCountSingles;
-    let totalCountAlbums;
-    try {
-      const release = SongModel.find(query, projection)
-        .collation({ locale: "en", strength: 2 })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-      totalCountSingles = SongModel.countDocuments(query);
 
+    // Run combined releases aggregation and artist fetch in parallel
+    const [aggregationResult, artist] = await Promise.all([
+      SongModel.aggregate([
+        { $match: matchQuery },
+        { $addFields: { type: "single" } },
+        { $project: projection },
 
-      const album = AlbumModel.find(query, projection)
-        .collation({ locale: "en", strength: 2 })
-        .sort({ createdAt: -1 })
-        .skip((page - 1) * limit)
-        .limit(limit);
-      totalCountAlbums = AlbumModel.countDocuments(query);
+        {
+          // Merge albums into the same pipeline as one dataset
+          $unionWith: {
+            coll: AlbumModel.collection.name,
+            pipeline: [
+              { $match: matchQuery },
+              { $addFields: { type: "album" } },
+              { $project: projection },
+            ],
+          },
+        },
+        { $sort: { createdAt: -1 } },
+        {
+          // Single pass: get paginated data AND total count together
+          $facet: {
+            data: [
+              { $skip: (page - 1) * limit },
+              { $limit: limit },
+              { $project: projection },
+            ],
+            totalCount: [{ $count: "count" }],
+          },
+        },
+      ]),
+      Artist.findById(artistId).lean(),
+    ]);
+    console.log(aggregationResult);
 
+    const totalCount = aggregationResult[0]?.totalCount[0]?.count ?? 0;
 
-      const artist = Artist.findById(artistId);
-
-      const result = await Promise.all([release, album, artist,totalCountSingles,totalCountAlbums]);
-
-      const totalCount = result[3] + result[4];
-
-      return NextResponse.json({
-        data: [...result[0], ...result[1]],
-        artist: result[2],
-        page,
-        limit,
-        totalCount: totalCount,
-        totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
-        msg: "Link generated Successfully.",
-      });
-    } catch (error) {
-      return NextResponse.json({
-        msg: "Failed to get artist data.",
-      });
-    }
+    return NextResponse.json({
+      data: aggregationResult[0]?.data ?? [],
+      artist,
+      page,
+      limit,
+      totalCount,
+      totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
+      msg: "Artist data fetched successfully.",
+    });
   } catch (error) {
-    console.error("Error generating download URL:", error);
+    console.error("Error fetching artist data:", error);
     return NextResponse.json(
-      { error: "Failed to generate download URL" },
+      { msg: "Failed to fetch artist data." },
       { status: 500 },
     );
   }
 }
 
-export async function POST(
+export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ artistId: string }> },
 ) {
   const { artistId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
-      requestType: "approved" | "rejected";
-      message?: string;
-      artistId: string;
+      appleId: string;
+      spotifyId: string;
     } = await req.json();
     console.log(body);
 
@@ -127,6 +151,89 @@ export async function POST(
     }
     await dbConnect();
 
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    } else if (user.role != "admin" && user.role != "super_admin") {
+      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+    }
+    if (!artistId || !Types.ObjectId.isValid(artistId)) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (typeof body.appleId != "string" && body.appleId) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (typeof body.spotifyId != "string" && body.spotifyId) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+    const artist = await Artist.findById(artistId).lean();
+
+    if (!artist) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else {
+      await Artist.findByIdAndUpdate(artistId, {
+        appleId: body.appleId,
+        spotifyId: body.spotifyId,
+      });
+      return NextResponse.json(
+        { msg: "Artist details updated successfully" },
+        { status: 201 },
+      );
+    }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ msg: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json(
+        { msg: "An unknown error occurred" },
+        { status: 500 },
+      );
+    }
+  }
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ artistId: string }> },
+) {
+  const { artistId } = await params; // Access the dynamic 'id' parameter
+  try {
+    const body: {
+      deactivateReason: string;
+      deactivateOption: string;
+      deactivateMessage: string;
+    } = await req.json();
+    console.log(body);
+
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+    await dbConnect();
+
+    if (!artistId || !Types.ObjectId.isValid(artistId)) {
+      console.log("no artistId");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body) {
+      console.log("no request body");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body.deactivateMessage) {
+      console.log("no deactivation Message");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body.deactivateOption) {
+      console.log("no deactivation option");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body.deactivateReason) {
+      console.log("no deactivation reason");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
@@ -134,70 +241,156 @@ export async function POST(
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    if (!body) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (
-      body.requestType != "approved" &&
-      body.requestType != "rejected"
-    ) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (body.requestType == "rejected" && !body.message) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (!artistId || !Types.ObjectId.isValid(artistId)) {
+    const artist: any = await Artist.findById(artistId)
+      .populate("user", "email")
+      .lean();
+    console.log(artist);
+
+    if (!artist) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    const release = await SongModel.findById(artistId).populate(
-      "user",
-      "email",
-    );
+    if (artist.artistStatus == "inactive") {
+      console.log("artist already deactivated");
+      NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
 
-    if (!release) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (release.releaseStatus != "pending") {
+    const deactivateArtist = Artist.findByIdAndUpdate(artistId, {
+      artistStatus: "inactive",
+    });
+    const deactivateEmail: DetactivateArtistEmail = {
+      artist_name: artist.artistName, // "Artist Name"
+      deactivation_type: body.deactivateOption, // Dropdown: "Temporary Suspension", etc.
+      deactivation_reason: body.deactivateReason, // Dropdown: "Copyright Infringement", etc.
+      additional_notes: body.deactivateMessage, // Text area content
+      reference_id: "string", // Generated reference ID
+      deactivation_date: "string", // Auto-generated
+      data_retention_date: "string", // 30 days from now
+      appeal_url: "string", // Link to appeal form
+      support_url: "string", // Link to support
+      download_data_url: "string", // Link to data export
+    };
+
+    //send mail here
+    const deactivationHtml = artistDeactivationEmail(deactivateEmail);
+    await Promise.all([
+      sendEmail(artist.user.email!, "Artist Deactivation", deactivationHtml),
+      deactivateArtist,
+      ArtistDeactivation.create({
+        artistId: artist._id,
+        userId: artist.user._id!,
+        deactivationType: body.deactivateOption,
+        deactivationReason: body.deactivateReason,
+        additionalNotes: body.deactivateMessage,
+        deactivatedBy: user._id,
+        status: "pending",
+      }),
+    ]).catch((error) => {
+      console.error("Failed to Deactivate User ", error);
+
       return NextResponse.json(
-        { msg: "Only pending songs can be " + body.requestType },
-        { status: 400 },
+        { msg: "Failed to Deactivate User." },
+        { status: 200 },
       );
-    }
-
-    if (body.requestType == "approved") {
-      // create the dpm callback here
-      await SongModel.findByIdAndUpdate(
-        artistId,
-        { releaseStatus: body.requestType },
-        { runValidators: true },
-      );
-    } else if (body.requestType == "rejected") {
-      const updateRelease = SongModel.findByIdAndUpdate(
-        artistId,
-        { releaseStatus: body.requestType },
-        { runValidators: true },
-      );
-      const rejectEmailData: rejectEmailProps = {
-        artistName: release.artistName,
-        releaseTitle: release.releaseTitle,
-        rejectionReason: body.message,
-        dashboardUrl: "release",
-        supportEmail: "release",
-      };
-
-      //send mail here
-      const rejectionEmail = releaseRejectionEmail(rejectEmailData);
-      await Promise.all([
-        sendEmail(release.user.email, "Release Rejection", rejectionEmail),
-        updateRelease,
-      ]).catch((error) => {
-        console.error("failed to reject release ", error);
-
-        return NextResponse.json(
-          { msg: "Failed to reject release." },
-          { status: 200 },
-        );
-      });
-    }
-
+    });
     return NextResponse.json(
-      { msg: "Release" + " " + body.requestType + "." },
+      { msg: "Artist Deactivated successfully." },
+      { status: 200 },
+    );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ msg: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json(
+        { msg: "An unknown error occurred" },
+        { status: 500 },
+      );
+    }
+  }
+}
+
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ artistId: string }> },
+) {
+  const { artistId } = await params; // Access the dynamic 'id' parameter
+  try {
+    const body: {
+      notifyUserReason: string;
+      notifyUserMessage: string;
+    } = await req.json();
+    console.log(body);
+
+    const userData = await verifyJWT();
+    const userJwt = verifyUser(userData);
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
+    await dbConnect();
+
+    if (!artistId || !Types.ObjectId.isValid(artistId)) {
+      console.log("no artistId");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body) {
+      console.log("no request body notification");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body.notifyUserMessage) {
+      console.log("no notification Message");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body.notifyUserReason) {
+      console.log("no notification reason");
+
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    } else if (user.role != "admin" && user.role != "super_admin") {
+      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+    }
+
+    const artist: any = await Artist.findById(artistId)
+      .populate("user", "firstName email")
+      .lean();
+    console.log(artist);
+
+    if (!artist) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+
+    const notificationEmail: sendUserNotificationEmailType = {
+      user_name: artist.user.firstName!, // "John Doe"
+      user_email: artist.user.email!, // "john@example.com"
+      notification_reason: body.notifyUserReason, // Dropdown selection
+      additional_message: body.notifyUserMessage, // Text area content
+      dashboard_url: "string", // Link to user dashboard
+      support_url: "string",
+    };
+
+    //send mail here
+    const notificationHtml = sendUserNotificationEmail(notificationEmail);
+    await Promise.all([
+      sendEmail(artist.user.email!, body.notifyUserReason, notificationHtml),
+      UserNotification.create({
+        userId: artist.user._id!,
+        adminId: user._id,
+        reason: body.notifyUserReason,
+        message: body.notifyUserMessage,
+        status: "delivered",
+      }),
+    ]).catch((error) => {
+      console.error("Failed to send Notification ", error);
+
+      return NextResponse.json(
+        { msg: "Failed to send Notification." },
+        { status: 200 },
+      );
+    });
+    return NextResponse.json(
+      { msg: "Notification sent successfully." },
       { status: 200 },
     );
   } catch (error: unknown) {

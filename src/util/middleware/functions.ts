@@ -1,12 +1,14 @@
 import {
   AlbumForm,
   CreateArtistForm,
+  DetactivateArtistEmail,
   FeaturedArtist,
   NonRetryableErrorCode,
   PaymentEmailData,
   Performer,
   Producer,
   rejectEmailProps,
+  sendUserNotificationEmailType,
   SongForm,
   SongWriter,
   TrackForm,
@@ -2143,6 +2145,272 @@ export const releaseRejectionEmail = (props: rejectEmailProps) => {
                             </p>
                         </td>
                     </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const artistDeactivationEmail = (props: DetactivateArtistEmail) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Profile Deactivation Notice</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #dc2626; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Artist Profile Deactivated</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Important notice about your artist account</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fecaca; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="#dc2626"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.artist_name}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We're writing to inform you that your artist profile has been <strong>deactivated</strong> by our administrative team.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Deactivation Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Deactivation Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Deactivation Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${props.deactivation_type}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reason</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${props.deactivation_reason}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Deactivation Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${props.deactivation_date}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reference ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${props.reference_id}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #fecaca;">
+                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Deactivated</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Additional Notes -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #f9fafb; border-left: 4px solid #6b7280; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #374151; font-size: 14px; font-weight: 600;">Additional Details:</h3>
+                                <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${props.additional_notes}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- What This Means -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What This Means</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                <li style="margin-bottom: 10px;">Your artist profile is no longer visible to the public</li>
+                                <li style="margin-bottom: 10px;">Your music and content are no longer accessible on the platform</li>
+                                <li style="margin-bottom: 10px;">You cannot upload new content or make changes to your profile</li>
+                                <li style="margin-bottom: 10px;">Your artist dashboard access may be restricted</li>
+                                <li style="margin-bottom: 0;">Any active promotions or campaigns have been paused</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef2f2; border: 2px solid #dc2626; padding: 20px; border-radius: 6px;">
+                                <h3 style="margin: 0 0 10px 0; color: #991b1b; font-size: 16px; font-weight: 700;">⚠️ Important Notice</h3>
+                                <p style="margin: 0 0 10px 0; color: #991b1b; font-size: 14px;">
+                                    This deactivation was done after careful review by our team. If you believe this was done in error or would like to appeal this decision, please contact our support team immediately.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Next Steps -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What You Can Do</h2>
+                            <div style="background-color: #ecfdf5; border: 1px solid #6ee7b7; padding: 20px; border-radius: 6px;">
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #065f46; font-size: 14px;">
+                                    <li style="margin-bottom: 10px;"><strong>Contact Support:</strong> Reach out to discuss this decision</li>
+                                    <li style="margin-bottom: 10px;"><strong>Request Review:</strong> Submit an appeal if you believe this is an error</li>
+                                    <li style="margin-bottom: 10px;"><strong>Download Your Data:</strong> Request a copy of your content before {{data_retention_date}</li>
+                                    <li style="margin-bottom: 0;"><strong>Resolve Issues:</strong> Address any policy violations to request reactivation</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{appeal_url}}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Submit Appeal</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Data Export Option -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>💾 Download Your Content</strong><br>
+                                    Your content will be available for download until <strong>${props.data_retention_date}</strong>. After this date, it may be permanently removed.
+                                </p>
+                                <a href="{{download_data_url}}" style="display: inline-block; margin-top: 10px; padding: 10px 20px; background-color: #fbbf24; color: #78350f; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px;">Download My Content</a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have questions or concerns about this deactivation, please contact us at <a href="mailto:{{support_email}}" style="color: #dc2626; text-decoration: none;">${"props.support_email"}</a> and reference ID <strong>${props.reference_id}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Our support team is available to assist you Monday-Friday, 9AM-6PM.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${"props.company_address"}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const sendUserNotificationEmail = (props: sendUserNotificationEmailType) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Important Notification</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: #11456B; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Important Notification</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Message from our team</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #dbeafe; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#11456B"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.user_name}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We're reaching out to inform you about an important matter regarding your account.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Notification Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #eff6ff; border-left: 4px solid #11456B; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px; font-weight: 600;">Reason:</h3>
+                                <p style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">${props.notification_reason}</p>
+                                
+                                <h3 style="margin: 15px 0 10px 0; color: #1e40af; font-size: 16px; font-weight: 600;">Message:</h3>
+                                <p style="margin: 0; color: #1e3a8a; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${props.additional_message}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+<!-- put it here -->
+                    
+                    <!-- Action Required (if applicable) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef9c3; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>⚠️ Action may be required</strong><br>
+                                    Please review this notification carefully. If you have any questions or concerns, contact our support team.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{dashboard_url}}" style="display: inline-block; padding: 14px 32px; background-color: #11456B; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">View Account</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have any questions about this notification, please don't hesitate to reach out to our support team at <a href="mailto:{{support_email}}" style="color: #3b82f6; text-decoration: none;">${"props.support_email"}</a></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">This is an automated notification from our administrative team.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${"props.company_address"}</p>
+                        </td>
+                    </tr>
+                    
                 </table>
             </td>
         </tr>

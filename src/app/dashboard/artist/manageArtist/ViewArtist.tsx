@@ -6,7 +6,7 @@ import { handleCopy } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import { Copy, X } from "lucide-react";
 import Image from "next/image";
-import React, { Dispatch, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 const ViewArtist = ({

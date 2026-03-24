@@ -20,13 +20,13 @@ const artistOptions = [
   { name: "View", icon: <FileSearchIcon strokeWidth={1} /> },
   { name: "Stats", icon: <ChartNoAxesCombined strokeWidth={1} /> },
 ];
-const ManageArtist = () => {
+const Page = () => {
   const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
   const [viewArtist, setViewArtist] = useState<null | Artist>(null);
   const [viewStats, setViewStats] = useState<null | Artist>(null);
-  const [filter, setFilter] = useState("createdAt");
+  const [filter, setFilter] = useState("-createdAt");
   const [query, setQuery] = useState("");
   const artistNam = useDebounce<string>(query, 500);
   const { data, isLoading, isError, error, isFetching } = usePaginatedArtists({
@@ -79,10 +79,11 @@ const ManageArtist = () => {
     );
   }
   return (
-    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-10 lg:pl-[260px] ">
+    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-8 lg:pl-[260px] ">
       {isLoading ? (
         <InlineLoadingScreen />
-      ) : !isLoading && (isError || data === undefined ||data.data.length === 0) ? (
+      ) : !isLoading &&
+        (isError || data === undefined || data.data.length === 0) ? (
         <div className="flex flex-col justify-center items-center min-h-[90dvh] gap-15">
           <div>
             <Image
@@ -130,44 +131,46 @@ const ManageArtist = () => {
                 placeholder="Search"
               />
             </div>
-            <button
-              disabled={isLoading || isFetching}
-              aria-label="open filters button"
-              className={
-                "border-2 w-[50px]  h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
-                (isFetching && " hover:!cursor-not-allowed ")
-              }
-              onClick={() => {
-                setIsFilterOpen(!isFilterOpen);
-                setSelectedIndex(null);
-              }}
-            >
-              <div className="bg-primary w-[25px] h-[2px]"></div>
-              <div className="bg-primary w-[15px] h-[2px]"></div>
-              <div className="bg-primary w-[10px] h-[2px]"></div>
-            </button>
-            {isFilterOpen && (
-              <div className="p-3 absolute mt-2 w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-40 flex flex-col gap-2">
-                {filterOptions.map((options, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleFilterChange(options.value)}
-                    name={options.label}
-                    aria-label={options.label}
-                    className=" flex items-center gap-2"
-                  >
-                    {" "}
-                    <div
-                      className={
-                        "w-2 h-2 rounded-full bg-primary " +
-                        (filter != options.value && " opacity-0")
-                      }
-                    ></div>
-                    {options.label}
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="relative">
+              <button
+                disabled={isLoading || isFetching}
+                aria-label="open filters button"
+                className={
+                  "border-2 w-[50px]  h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
+                  (isFetching && " hover:!cursor-not-allowed ")
+                }
+                onClick={() => {
+                  setIsFilterOpen(!isFilterOpen);
+                  setSelectedIndex(null);
+                }}
+              >
+                <div className="bg-primary w-[25px] h-[2px]"></div>
+                <div className="bg-primary w-[15px] h-[2px]"></div>
+                <div className="bg-primary w-[10px] h-[2px]"></div>
+              </button>
+              {isFilterOpen && (
+                <div className="p-3 absolute mt-2 w-full min-w-fit bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm sm:text-md  right-10 top-10 flex flex-col gap-2">
+                  {filterOptions.map((options, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleFilterChange(options.value)}
+                      name={options.label}
+                      aria-label={options.label}
+                      className=" flex items-center gap-2 px-3"
+                    >
+                      {" "}
+                      <div
+                        className={
+                          "w-2 h-2 rounded-full bg-primary  " +
+                          (filter != options.value && " opacity-0")
+                        }
+                      ></div>
+                      {options.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[400px]">
             {
@@ -241,4 +244,4 @@ const ManageArtist = () => {
   );
 };
 
-export default ManageArtist;
+export default Page;

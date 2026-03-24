@@ -398,3 +398,26 @@ export type AllArtistResponse = {
 };
 
 export type ArtistDetails =PAGINATION<AdminRelease> & {artist:Artist}
+
+export type DetactivateArtistEmail ={
+  artist_name: string;            // "Artist Name"
+  deactivation_type: string;      // Dropdown: "Temporary Suspension", etc.
+  deactivation_reason: string;    // Dropdown: "Copyright Infringement", etc.
+  additional_notes: string;       // Text area content
+  reference_id: string;           // Generated reference ID
+  deactivation_date: string;      // Auto-generated
+  data_retention_date: string;    // 30 days from now
+  appeal_url: string;             // Link to appeal form
+  support_url: string;            // Link to support
+  download_data_url: string;      // Link to data export
+}
+export type sendUserNotificationEmailType ={
+  user_name: string;              // "John Doe"
+  user_email?: string;             // "john@example.com"
+  notification_reason: string;    // Dropdown selection
+  additional_message: string;     // Text area content
+  notification_id?: string;        // Generated ID for tracking
+  notification_date?: string;      // Auto-generated
+  dashboard_url: string;          // Link to user dashboard
+  support_url: string;            // Link to support
+}

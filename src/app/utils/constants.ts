@@ -975,26 +975,6 @@ export const top_performing_artist = [
     amount: "9,432.00",
   },
 ];
-export const withdrawalHistory: Props[] = [
-  {
-    account_number: "1234567890",
-    status: "pending",
-    amount: "9,432.00",
-    date: "2026-01-19T10:23:01.128+00:00",
-  },
-  {
-    account_number: "1234567890",
-    status: "successful",
-    amount: "9,432.00",
-    date: "2026-01-19T10:23:01.128+00:00",
-  },
-  {
-    account_number: "1234567890",
-    status: "failed",
-    amount: "9,432.00",
-    date: "2026-01-19T10:23:01.128+00:00",
-  },
-];
 
 export const nextReleases = [
   {
@@ -1047,4 +1027,14 @@ export const requestReleaseMock = [
     artistName: "TomBaggz",
     releaseDate: "2026-01-19T10:23:01.128+00:00",
   },
+];
+export const adminNotifyUserReasons = [
+  "Account Update",
+  "Policy Violation",
+  "Incomplete Profile",
+  "Release Issue",
+  "Important Announcement",
+  "Payment or Royalty Update",
+  "Other",
+
 ];

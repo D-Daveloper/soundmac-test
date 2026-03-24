@@ -381,7 +381,7 @@ export const useGetAllArtists = (params: { artistName: string,limit:string,artis
   const api = UseAxios();
 
   return useInfiniteQuery<AllArtistResponse, Error>({
-    queryKey: ["release-request", params.artistName,params.artistStatus],
+    queryKey: ["admin-all-artists", params.artistName,params.artistStatus],
     queryFn: async ({ pageParam }) =>
       getAllArtists(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,

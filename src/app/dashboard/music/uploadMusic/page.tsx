@@ -6,7 +6,7 @@ import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import AlbumForm from "./album/AlbumForm";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
-const UploadMusic = () => {
+const Page = () => {
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
     const dashboardContext = useContext(DashboardContext);
@@ -20,7 +20,7 @@ const UploadMusic = () => {
     return <AlbumForm />;
   } else {
     return (
-    <main className="lg:pl-[260px] px-5 w-full h-full bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-10">
+    <main className="lg:pl-[260px] px-5 w-full min-h-screen bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-10">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
             Choose Your Release Type
@@ -79,4 +79,4 @@ const UploadMusic = () => {
   }
 };
 
-export default UploadMusic;
+export default Page;

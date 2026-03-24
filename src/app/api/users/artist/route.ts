@@ -100,9 +100,12 @@ export async function POST(req: Request) {
         total_artists_allowed = 1;
         break;
     }
-    
-    if(total_artists >= total_artists_allowed){
-      NextResponse.json({msg:"Artist creation limit reached, please upgrade your account."},{status:402})
+
+    if (total_artists >= total_artists_allowed) {
+      NextResponse.json(
+        { msg: "Artist creation limit reached, please upgrade your account." },
+        { status: 402 },
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -297,35 +300,26 @@ export async function GET(req: Request) {
     console.log(searchParams);
 
     const page = parseInt(searchParams.get("page") || "1", 10);
-    const sort = searchParams.get("sort") || "createdAt";
+    const sort = searchParams.get("sort") || "-createdAt";
     const name = searchParams.get("artistName");
     const sortQuery = buildSort(sort) as {
       [key: string]: SortOrder | { $meta: any };
     }; //this is use to format the sort query for mongodb.
+    let query: any = {
+      user: userJwt.user,
+    };
 
     if (name && name.trim() !== "") {
-      const query = {
-        artistName: { $regex: "^" + name, $options: "i" },
-        user: userJwt.user,
-      };
-
-      artists = await Artist.find(query)
-        .collation({ locale: "en", strength: 2 })
-        .sort(sortQuery)
-        .skip((page - 1) * limit)
-        .limit(limit);
-      totalCount = await Artist.countDocuments(query);
-      // return NextResponse.json({artists,msg:artists.  > 0?"Successful":"No artists found" }, { status:artists.length > 0? 200 : 404 });
-    } else {
-      artists = await Artist.find({ user: userJwt.user })
-        .collation({ locale: "en", strength: 2 })
-        .sort(sortQuery)
-        .skip((page - 1) * limit)
-        .limit(limit);
-      totalCount = await Artist.countDocuments({ user: userJwt.user });
-      // totalCount = 0;
-      // artists = [];
+      query.artistName = { $regex: "^" + name, $options: "i" };
     }
+    
+    artists = await Artist.find(query)
+      .collation({ locale: "en", strength: 2 })
+      .sort(sortQuery)
+      .skip((page - 1) * limit)
+      .limit(limit);
+    totalCount = await Artist.countDocuments(query);
+    // return NextResponse.json({artists,msg:artists.  > 0?"Successful":"No artists found" }, { status:artists.length > 0? 200 : 404 });
 
     return NextResponse.json(
       {

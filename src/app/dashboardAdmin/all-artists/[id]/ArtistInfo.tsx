@@ -39,7 +39,7 @@ export default function ArtistInfo({ id }: { id: string }) {
     setfilter((prev) => ({ ...prev, releaseStatusFilter: "all" }));
   };
   return (
-    <div className="w-full">
+    <div className="w-full mt-10">
       <div className="flex gap-5">
         <div
           className={

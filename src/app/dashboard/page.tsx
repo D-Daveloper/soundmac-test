@@ -1,10 +1,10 @@
 "use client";
 import Dashboard from "./Dashboard";
 
-const page = () => {
+const Page = () => {
 
   return (
-    <main className="section h-full relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
+    <main className="section min-h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
       <div className="flex h-full">
         <div className="text-[#333333] lg:ml-[250px] w-full h-full">
           <div className="h-full">
@@ -45,4 +45,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

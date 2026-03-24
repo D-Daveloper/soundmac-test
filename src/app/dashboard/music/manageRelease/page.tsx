@@ -3,7 +3,7 @@ import Song from "./song/Song";
 import Album from "./album/Album";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 
-const ManageRelease = () => {
+const Page = () => {
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
   if (type == "single") {
@@ -52,4 +52,4 @@ const ManageRelease = () => {
   }
 };
 
-export default ManageRelease;
+export default Page;

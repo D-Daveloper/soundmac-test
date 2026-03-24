@@ -47,7 +47,7 @@ const Page = () => {
   });
 
   return (
-    <div className="bg-main-white max-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
       <div className="flex gap-3 mt-5">
         <button
           onClick={() => {
