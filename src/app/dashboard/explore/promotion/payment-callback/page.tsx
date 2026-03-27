@@ -20,12 +20,12 @@ const hasCalled = useRef(false);
     hasCalled.current = true;
       try {
         if (!reference) {
-          router.push("/dashboard/promotion?page=myPromotions");
+          router.push("/dashboard/explore/promotion?page=myPromotions");
           return;
         }
         const res = await api.patch("promotions",JSON.stringify({reference}));
         toast.success(res.data.msg);
-        router.push("/dashboard/promotion?page=myPromotions");
+        router.push("/dashboard/explore/promotion?page=myPromotions");
       } catch (error) {
         toast.error("Payment Verification Failed");
       }

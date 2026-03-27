@@ -89,7 +89,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
 
         return NextResponse.json(
           { msg: "Failed to reject release." },
-          { status: 200 },
+          { status: 400 },
         );
       });
     }

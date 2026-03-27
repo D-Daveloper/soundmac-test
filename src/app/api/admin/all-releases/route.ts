@@ -4,6 +4,7 @@ import { buildSort } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import SongModel from "@/util/models/songModel";
+import User from "@/util/models/userModel";
 import { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -17,6 +18,14 @@ export async function GET(req: Request) {
 
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }    
+    await dbConnect();
+
+    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    } else if (user.role != "admin" && user.role != "super_admin") {
+      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
     const { searchParams } = new URL(req.url);
     // console.log(searchParams);

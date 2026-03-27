@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, albumFromApi, AllArtistResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, albumFromApi, AllArtistResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -234,5 +234,37 @@ export const getArtistDetails = async (
   const res = await api.get<Promise<ArtistDetails>>("admin/all-artists/"+params.id, {
     params:params,
   });
+  return res.data;
+};
+export const getAllUsers = async (
+  api: AxiosInstance,
+  params:{ 
+  page: number;
+  sort: string;
+  name: string;
+  limit: string;
+  accountType: string; 
+  userStatus:string
+}
+): Promise<PAGINATION<IUser>> => {
+  const res = await api.get<Promise<PAGINATION<IUser>>>("admin/users/manage-users", {
+    params:params,
+  });
+  return res.data;
+};
+export const getAdminUserDetails = async (
+  api: AxiosInstance,
+  params:{userId:string}
+): Promise<AdminUserDetailsResponse> => {
+  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/"+params.userId,);
+  return res.data;
+};
+
+export const getUserWithdrawalHistory = async (
+  api: AxiosInstance,
+  params:{ cursor:string,userId:string }
+
+): Promise<WithdrawalResponse> => {
+  const res = await api.get<Promise<WithdrawalResponse>>("admin/users/manage-users/" + params.userId +"/history",{params});
   return res.data;
 };

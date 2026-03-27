@@ -6,11 +6,13 @@ import {
   getAdminArtistsNames,
   getAdminDashboard,
   getAdminSingleDetails,
+  getAdminUserDetails,
   getAlbum,
   getAlbums,
   getAlbumTracks,
   getAllArtists,
   getAllReleases,
+  getAllUsers,
   getArtistDetails,
   getArtists,
   getArtistStats,
@@ -23,6 +25,7 @@ import {
   getUserArtistsNames,
   getUserReleaseNames,
   getUserReleaseTrackNames,
+  getUserWithdrawalHistory,
   getWithdrawalHistory,
 } from "../axios/axiosInstance";
 import {
@@ -30,6 +33,7 @@ import {
   adminDashboardType,
   AdminRelease,
   AdminSingleDetailsResponse,
+  AdminUserDetailsResponse,
   albumFromApi,
   AllArtistResponse,
   Artist,
@@ -43,6 +47,7 @@ import {
 } from "@/app/type";
 import { handleReactQueryApiCallError } from "../middleware/functions";
 import { IPromotion } from "../models/promotionModel";
+import { IUser } from "../models/userModel";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -414,3 +419,64 @@ export function usePaginatedAdminArtistDetails(params: {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
+export function usePaginatedAdminAllUsers(params: {
+  page: number;
+  sort: string;
+  name: string;
+  limit: string;
+  accountType: string;
+  userStatus:string
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<IUser>, Error>({
+    queryKey: [
+      "allUsers",
+      params.page,
+      params.sort,
+      params.name,
+      params.accountType,
+      params.userStatus,
+    ],
+    queryFn: async () => getAllUsers(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAdminUserDetails(params: { userId: string }) {
+  const api = UseAxios();
+  return useQuery<AdminUserDetailsResponse, Error>({
+    queryKey: ["adminUserDetails", params.userId],
+    queryFn: async () => getAdminUserDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+export const useGetUserWithdrawals = (params: {
+  userId: string;
+}) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<WithdrawalResponse, Error>({
+    queryKey: [
+      "userWithdrawals",
+      params.userId
+    ],
+    queryFn: async ({ pageParam }) =>
+      getUserWithdrawalHistory(api, { ...params, cursor: pageParam as string }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};

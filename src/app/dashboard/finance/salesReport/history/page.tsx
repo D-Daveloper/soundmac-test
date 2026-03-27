@@ -56,7 +56,7 @@ const page = () => {
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
       <Link
         aria-label="go back"
-        href={"/dashboard/salesReport"}
+        href={"/dashboard/finance/salesReport"}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
       >
         <Image
@@ -178,7 +178,7 @@ const page = () => {
                 started.
               </p>
               <Link
-                href={"/dashboard/salesReport"}
+                href={"/dashboard/finance/salesReport"}
                 className={
                   "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white! bg-primary-500 "
                 }

@@ -247,14 +247,14 @@ const page = () => {
   };
   if (bankError) {
     toast.warn("Unable to get back names please try again later");
-    router.push("/dashboard/salesReport");
+    router.push("/dashboard/finance/salesReport");
     return;
   }
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
       <Link
         aria-label="go back"
-        href={"/dashboard/salesReport"}
+        href={"/dashboard/finance/salesReport"}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
       >
         <Image

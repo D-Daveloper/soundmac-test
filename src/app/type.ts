@@ -1,6 +1,7 @@
 import { IArtist } from "@/util/models/artistModel";
 import { USER } from "./context/userContext/types";
 import { nextReleases } from "./utils/constants";
+import { IUser } from "@/util/models/userModel";
 
 export interface AYNCardProps {
   index: number;
@@ -399,8 +400,9 @@ export type AllArtistResponse = {
 
 export type ArtistDetails =PAGINATION<AdminRelease> & {artist:Artist}
 
-export type DetactivateArtistEmail ={
+export type DetactivateEmail ={
   artist_name: string;            // "Artist Name"
+  first_name: string;            // "Artist Name"
   deactivation_type: string;      // Dropdown: "Temporary Suspension", etc.
   deactivation_reason: string;    // Dropdown: "Copyright Infringement", etc.
   additional_notes: string;       // Text area content
@@ -420,4 +422,13 @@ export type sendUserNotificationEmailType ={
   notification_date?: string;      // Auto-generated
   dashboard_url: string;          // Link to user dashboard
   support_url: string;            // Link to support
+}
+
+export interface AdminUserDetailsResponse {
+  data: IUser;
+  artists:Artist[];
+  songCount:number;
+  totalEarnings:number
+  label:string;
+  msg: string;
 }

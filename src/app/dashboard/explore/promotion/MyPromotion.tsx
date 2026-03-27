@@ -92,7 +92,7 @@ const MyPromotion = () => {
           </p>
           <button
             onClick={() => {
-              router.push("/dashboard/promotion?page=explore");
+              router.push("/dashboard/explore/promotion?page=explore");
             }}
             className={
               "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "

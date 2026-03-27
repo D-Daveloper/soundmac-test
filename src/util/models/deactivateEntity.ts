@@ -1,15 +1,15 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-interface IArtistDeactivation extends Document {
-  artistId: mongoose.Schema.Types.ObjectId;
-  userId: mongoose.Schema.Types.ObjectId;
+interface IEntityDeactivation extends Document {
+  entityType: "user" | "artist",
+  entityId: mongoose.Schema.Types.ObjectId;
   deactivationType: string;
   deactivationReason: string;
   additionalNotes?: string;
   deactivatedBy: mongoose.Schema.Types.ObjectId;
   deactivatedAt?: Date;
   dataRetentionDate?: Date;
-  status: string;
+  entityStatus: string;
   reactivatedAt?: Date;
   reactivatedBy?: string;
   reactivationNotes?: string;
@@ -17,19 +17,21 @@ interface IArtistDeactivation extends Document {
   updatedAt: Date;
 }
 
-const artistDeactivationSchema: Schema = new Schema<IArtistDeactivation>(
+const entityDeactivationSchema: Schema = new Schema<IEntityDeactivation>(
   {
-    artistId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: [true, "Artist ID is required"],
-      maxlength: [100, "Artist ID cannot exceed 100 characters"],
-      ref: "Artist",
+    entityType: {
+      type: String,
+      enum: {
+        values: ["user", "artist"],
+        message: "{VALUE} is not a valid entry",
+      },
+      required: [true, "add the entity type is required"],
+      maxlength: [50, "the entity type cannot exceed 50 characters"],
     },
-    userId: {
+    entityId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, "User Id is required"],
-      maxlength: [100, "User Id cannot exceed 100 characters"],
-      ref: "User",
+      required: [true, "add the entity Id is required"],
+      maxlength: [100, "add the entity Id cannot exceed 100 characters"],
     },
     deactivationType: {
       type: String,
@@ -57,7 +59,7 @@ const artistDeactivationSchema: Schema = new Schema<IArtistDeactivation>(
     dataRetentionDate: {
       type: Date,
     },
-    status: {
+    entityStatus: {
       type: String,
       default: "deactivated",
       enum: ["deactivated", "reactivated", "pending"],
@@ -80,22 +82,21 @@ const artistDeactivationSchema: Schema = new Schema<IArtistDeactivation>(
 );
 
 // Indexes for performance
-artistDeactivationSchema.index({ artistId: 1 });
-artistDeactivationSchema.index({ referenceId: 1 });
-artistDeactivationSchema.index({ status: 1 });
-artistDeactivationSchema.index({ deactivatedAt: -1 });
+entityDeactivationSchema.index({ entityId: 1 });
+entityDeactivationSchema.index({ entityStatus: 1 });
+entityDeactivationSchema.index({ deactivatedAt: -1 });
 
 // Pre-save middleware for updatedAt
-artistDeactivationSchema.pre("save", function (next) {
+entityDeactivationSchema.pre("save", function (next) {
   this.updatedAt = new Date();
   next();
 });
 
-const ArtistDeactivation: Model<IArtistDeactivation> =
-  mongoose.models.ArtistDeactivation ||
-  mongoose.model<IArtistDeactivation>(
-    "ArtistDeactivation",
-    artistDeactivationSchema,
+const EntityDeactivation: Model<IEntityDeactivation> =
+  mongoose.models.EntityDeactivation ||
+  mongoose.model<IEntityDeactivation>(
+    "EntityDeactivation",
+    entityDeactivationSchema,
   );
 
-export default ArtistDeactivation;
+export default EntityDeactivation;

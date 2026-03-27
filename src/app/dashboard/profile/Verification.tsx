@@ -188,7 +188,7 @@ const Verification = () => {
       if (data.verificationDetails) {
         setIdImage(data.verificationDetails.idImage);
         setAddressImage(data.verificationDetails.addressImage);
-        setIsVerified(data.verificationDetails.verified || false);
+        setIsVerified(data.verificationDetails.verified == "approved" ? true : false);
       }
     }
   }, [data]);

@@ -6,7 +6,6 @@ import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import { AdminAlbumDetails, AdminTrackDetails } from "@/app/type";
 import { CircleCheck, Music, X } from "lucide-react";
 import { useGetAdminAlbumDetails } from "@/util/customHooks/useQueries";
-import { useRouter } from "next/navigation";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
@@ -15,11 +14,9 @@ import Link from "next/link";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const api = UseAxios();
   const dashboardContext = useContext(DashboardContext);
   const [showConfirmApproveSong, setshowConfirmApproveSong] = useState(false);
-
   const [isSubmitting, setisSubmitting] = useState(false);
   const [showRejectModal, setshowRejectModal] = useState(false);
   const [rejectReason, setrejectReason] = useState("");

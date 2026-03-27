@@ -75,7 +75,7 @@ const sidebarComponents = [
       {
         title: "sales report",
         icon: "/musicplay.svg",
-        href: "/dashboard/salesReport",
+        href: "/dashboard/finance/salesReport",
         query: "sales_report",
       },
     ],
@@ -88,7 +88,7 @@ const sidebarComponents = [
       {
         title: "promotion",
         icon: "/add.svg",
-        href: "/dashboard/promotion?page=explore",
+        href: "/dashboard/explore/promotion?page=explore",
         query: "promotion",
       },
       {

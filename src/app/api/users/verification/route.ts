@@ -239,7 +239,7 @@ export async function POST(req: Request) {
       idImage: idImageUrl.coverUrl || payload.old_id_image,
       addressImage: addressImageUrl.coverUrl || payload.address_image,
       dob: payload.dob,
-      verified: false,
+      verified: "pending",
     };
 
     await User.findByIdAndUpdate(

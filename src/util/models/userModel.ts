@@ -146,8 +146,12 @@ export const verificationDetails = new mongoose.Schema(
       required: [true, "address image is required"],
     },
     verified: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: {
+        values: ["pending", "approved", "rejected"],
+        message: "{VALUE} is not a valid entry",
+      },
+      default: "pending",
     },
   },
   { _id: false, strict: "throw" },
@@ -159,6 +163,7 @@ export interface IUser extends mongoose.Document {
   lastName: string;
   country: string;
   email: string;
+  userStatus: "active" | "inactive";
   profilePic: string | null;
   confirmed: boolean;
   premium: boolean;
@@ -168,7 +173,7 @@ export interface IUser extends mongoose.Document {
   type:
     | "EMERGING_ARTIST"
     | "MAJOR_LABEL"
-    | "FREE_ARTISTE"
+    | "FREE_ARTIST"
     | "INDEPENDENT_ARTIST"
     | "INDIE_LABEL";
   role: "user" | "admin" | "super_admin";
@@ -212,7 +217,7 @@ export interface IUser extends mongoose.Document {
     idImage: string;
     addressImage: string;
     dob: Date | undefined;
-    verified: boolean;
+    verified: "pending" | "approved" | "rejected";
   } | null;
 }
 
@@ -248,6 +253,11 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       index: true,
+    },
+    userStatus:{
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
     },
     profilePic: {
       type: String,
@@ -311,13 +321,13 @@ const UserSchema = new mongoose.Schema(
         values: [
           "EMERGING_ARTIST",
           "MAJOR_LABEL",
-          "FREE_ARTISTE",
+          "FREE_ARTIST",
           "INDEPENDENT_ARTIST",
           "INDIE_LABEL",
         ],
         message: "{VALUE} is not a valid type",
       },
-      default: "FREE_ARTISTE",
+      default: "FREE_ARTIST",
     },
     role: {
       type: String,

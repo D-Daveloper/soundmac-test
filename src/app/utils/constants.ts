@@ -1,4 +1,4 @@
-import { Props } from "../dashboard/salesReport/history/withdrawalLine";
+import { Props } from "../dashboard/finance/salesReport/history/withdrawalLine";
 import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type";
 
 export const navigationLinks = [

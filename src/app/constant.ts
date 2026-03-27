@@ -1,5 +1,4 @@
-import { IArtist } from "@/util/models/artistModel";
-import { Artist, CreateArtistForm } from "./type";
+import { Artist } from "./type";
 
 export const SERVER = process.env.NEXT_PUBLIC_APP_URL;
 export const AYNCardItems = [
@@ -41,6 +40,7 @@ export const categories = [
   "Industry Insights",
   "Music Marketing",
 ];
+
 export const blogContent = [
   {
     id: 1,
@@ -99,6 +99,7 @@ export const blogContent = [
     slug: "tips-for-independent-artists-to-succeed",
   },
 ];
+
 export const artistContent: Artist[] = [
   {
     _id: "",
@@ -500,6 +501,7 @@ export const periodFilterOptions = [
     value: "3months",
   },
 ];
+
 export const withdrawalStatusFilterOptions = [
   {
     label: "All",
@@ -541,3 +543,34 @@ export const allReleaseStatusFilterOptions = [
     value: "draft",
   },
 ];
+
+export const allUsersFilterOptions = [
+  {
+    label: "All",
+    value: "all",
+  },
+  {
+    label: "Free Artist",
+    value: "FREE_ARTIST",
+  },
+  {
+    label: "Emerging Artist",
+    value: "EMERGING_ARTIST",
+  },
+  {
+    label: "Independent Artist",
+    value: "INDEPENDENT_ARTIST",
+  },
+  {
+    label: "Major Label",
+    value: "MAJOR_LABEL",
+  },
+  {
+    label: "Indie Label",
+    value: "INDIE_LABEL",
+  },
+];
+
+export const userTypeOptionsForAdmin = [
+  "user","admin"
+]

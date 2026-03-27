@@ -320,7 +320,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         email: user!.email,
         amount: amount * 100,
-        callback_url: `${process.env.FRONTEND_URL}/dashboard/promotion/payment-callback`,
+        callback_url: `${process.env.FRONTEND_URL}/dashboard/explore/promotion/payment-callback`,
         // channels:["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer"],
         channels: ["card", "bank", "ussd"],
         reference: new_reference,
@@ -517,7 +517,7 @@ export async function PUT(req: Request) {
       body: JSON.stringify({
         email: user!.email,
         amount: parseInt(promotion!.amount, 10) * 100,
-        callback_url: `${process.env.FRONTEND_URL}/dashboard/promotion/payment-callback`,
+        callback_url: `${process.env.FRONTEND_URL}/dashboard/explore/promotion/payment-callback`,
         channels: ["card", "bank", "ussd"],
         // reference: reference, // use the generated unique transaction reference
         metadata: {
