@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, albumFromApi, AllArtistResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -200,14 +200,14 @@ export const getAdminAlbumDetails = async (
   api: AxiosInstance,
   params:{albumId:string}
 ): Promise<AdminAlbumDetailsResponse> => {
-  const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/all-releases/album",{params});
+  const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/music/all-releases/album",{params});
   return res.data;
 };
 export const getAdminSingleDetails = async (
   api: AxiosInstance,
   params:{songId:string}
 ): Promise<AdminSingleDetailsResponse> => {
-  const res = await api.get<Promise<AdminSingleDetailsResponse>>("admin/request-release/single/"+params.songId,);
+  const res = await api.get<Promise<AdminSingleDetailsResponse>>("admin/music/request-release/single/"+params.songId,);
   return res.data;
 };
 export const getReleaseRequest = async (
@@ -231,7 +231,7 @@ export const getArtistDetails = async (
   api: AxiosInstance,
   params:{ page:number,releaseTitle:string,releaseStatusFilter:string,limit:string,id:string }
 ): Promise<ArtistDetails> => {
-  const res = await api.get<Promise<ArtistDetails>>("admin/all-artists/"+params.id, {
+  const res = await api.get<Promise<ArtistDetails>>("admin/artist/all-artists/"+params.id, {
     params:params,
   });
   return res.data;
@@ -266,5 +266,43 @@ export const getUserWithdrawalHistory = async (
 
 ): Promise<WithdrawalResponse> => {
   const res = await api.get<Promise<WithdrawalResponse>>("admin/users/manage-users/" + params.userId +"/history",{params});
+  return res.data;
+};
+
+export const getAllVerificationRequests = async (
+  api: AxiosInstance,
+  params:{ 
+  page: number;
+  sort: string;
+  limit: string;
+}
+): Promise<PAGINATION<IUser>> => {
+  const res = await api.get<Promise<PAGINATION<IUser>>>("admin/users/verification-requests", {
+    params:params,
+  });
+  return res.data;
+};
+
+export const getAllWithdrawalRequests = async (
+  api: AxiosInstance,
+  params:{ 
+  page: number;
+  sort: string;
+  limit: string;
+  withdrawalStatus:string;
+  email:string;
+}
+): Promise<PAGINATION<withdrawals>> => {
+  const res = await api.get<Promise<PAGINATION<withdrawals>>>("admin/finance/withdrawal-requests", {
+    params:params,
+  });
+  return res.data;
+};
+
+export const getAdminWithdrawalDetails = async (
+  api: AxiosInstance,
+  params:{withdrawalId:string}
+): Promise<AdminWithdrawalDetailsResponse> => {
+  const res = await api.get<Promise<AdminWithdrawalDetailsResponse>>("admin/finance/withdrawal-requests/"+params.withdrawalId,{params});
   return res.data;
 };

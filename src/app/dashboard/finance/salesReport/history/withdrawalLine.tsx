@@ -1,7 +1,7 @@
 import React from "react";
 
 export type Props = {
-  status: "pending" | "successful" | "failed";
+  status: "pending" | "approved" | "rejected";
   amount: string;
   account_number: string;
   date: string;
@@ -17,9 +17,9 @@ const WithdrawalLine = (Props: Props) => {
             "font-bold leading-[18px] tracking-tighter text-xs capitalize w-fit px-4 py-1 h-fit rounded-full flex-1 max-w-fit " +
             (Props.status === "pending"
               ? " text-warning-500 bg-warning-100"
-              : Props.status === "successful"
+              : Props.status === "approved"
                 ? " text-success-500 bg-success-100"
-                : Props.status === "failed"
+                : Props.status === "rejected"
                   ? " text-error-500 bg-error-100"
                   : " text-primary-500 bg-primary-50")
           }

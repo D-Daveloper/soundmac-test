@@ -17,13 +17,13 @@ const sidebarComponents = [
       {
         title: "All Releases",
         icon: "/add.svg",
-        href: "/dashboardAdmin/all-releases/single",
+        href: "/dashboardAdmin/music/all-releases/single",
         query: "upload",
       },
       {
         title: "Release Requests",
         icon: "/musiclibrary2.svg",
-        href: "/dashboardAdmin/release-requests/single",
+        href: "/dashboardAdmin/music/release-requests/single",
         query: "manageRelease",
       },
     ],
@@ -34,7 +34,7 @@ const sidebarComponents = [
       {
         title: "All Artists",
         icon: "/add.svg",
-        href: "/dashboardAdmin/all-artists?artistStatus=active",
+        href: "/dashboardAdmin/artist/all-artists?artistStatus=active",
         query: "create",
       },
       {
@@ -69,7 +69,7 @@ const sidebarComponents = [
       {
         title: "Verification Requests",
         icon: "/musicplay.svg",
-        href: "",
+        href: "/dashboardAdmin/users/verification-requests",
         query: "song",
       },
       {
@@ -77,6 +77,23 @@ const sidebarComponents = [
         icon: "/musicplay.svg",
         href: "",
         query: "song",
+      },
+    ],
+  },
+  {
+    title: "finance",
+    list: [
+      {
+        title: "sales report",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/finance/sales-report",
+        query: "sales_report",
+      },
+      {
+        title: "withdrawal requests",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/finance/withdrawal-requests?withdrawalStatus=all",
+        query: "sales_report",
       },
     ],
   },
@@ -96,7 +113,7 @@ const profileLinks = [
   },
 ];
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   const { data, isLoading } = useAuthUser();
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
@@ -137,7 +154,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
               }
             >
               <div className="bg-neutral-900 py-10 pb-30 w-full text-main-white! remove-scrollbar">
-                <div className="flex flex-col gap-12 ml-6 mr-2 overflow-y-auto h-full remove-scrollbar">
+                <div className="flex flex-col gap-12 ml-6 mr-2 overflow-y-auto min-h-screen h-full remove-scrollbar">
                   <div className="flex justify-between items-center">
                     <Link
                       href={"/"}
@@ -187,6 +204,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
                       list={component.list}
                     />
                   ))}
+                  <div className="mt-30"></div>
                 </div>
               </div>
             </div>
@@ -295,4 +313,4 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default layout;
+export default Layout;

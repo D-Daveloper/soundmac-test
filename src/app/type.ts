@@ -1,7 +1,7 @@
 import { IArtist } from "@/util/models/artistModel";
 import { USER } from "./context/userContext/types";
 import { nextReleases } from "./utils/constants";
-import { IUser } from "@/util/models/userModel";
+import { accountDetails, IUser } from "@/util/models/userModel";
 
 export interface AYNCardProps {
   index: number;
@@ -260,11 +260,26 @@ export interface BankObject {
   createdAt: string;
   updatedAt: string;
 }
-type withdrawals = {
+export type withdrawals = {
+  _id: string;
   amount: string;
-  withdrawalStatus: "pending" | "successful" | "failed";
+  user: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    country: string;
+    accountDetails: {
+      accountHolderName?: string | null | undefined;
+      accountNumber?: string | null | undefined;
+      bankName?: string | null | undefined;
+      bankCode?: string | null | undefined;
+      currency?: string | null | undefined;
+      verified?: boolean | null | undefined;
+    };
+  };
+  withdrawalStatus: "pending" | "approved" | "rejected";
   accountNumber: string;
-  createdAt: string;
+  createdAt: Date;
   updatedAt: string;
 };
 export type WithdrawalResponse = {
@@ -379,7 +394,7 @@ type ReleaseRequest = {
   releaseTitle: string;
   releaseImage: string;
   releaseDate: string;
-  numberOfTracks:string;
+  numberOfTracks: string;
   artist: {
     artistName: string;
     artistImage: string;
@@ -390,45 +405,67 @@ export type ReleaseRequestResponse = {
   nextCursor?: string;
   hasMore: boolean;
 };
-type AllArtist = Artist & {user:{email:string,firstName:string,lastName:string}} 
+type AllArtist = Artist & {
+  user: { email: string; firstName: string; lastName: string };
+};
 export type AllArtistResponse = {
   data: AllArtist[];
   nextCursor?: string;
   hasMore: boolean;
-  msg:string;
+  msg: string;
 };
 
-export type ArtistDetails =PAGINATION<AdminRelease> & {artist:Artist}
+export type ArtistDetails = PAGINATION<AdminRelease> & { artist: Artist };
 
-export type DetactivateEmail ={
-  artist_name: string;            // "Artist Name"
-  first_name: string;            // "Artist Name"
-  deactivation_type: string;      // Dropdown: "Temporary Suspension", etc.
-  deactivation_reason: string;    // Dropdown: "Copyright Infringement", etc.
-  additional_notes: string;       // Text area content
-  reference_id: string;           // Generated reference ID
-  deactivation_date: string;      // Auto-generated
-  data_retention_date: string;    // 30 days from now
-  appeal_url: string;             // Link to appeal form
-  support_url: string;            // Link to support
-  download_data_url: string;      // Link to data export
-}
-export type sendUserNotificationEmailType ={
-  user_name: string;              // "John Doe"
-  user_email?: string;             // "john@example.com"
-  notification_reason: string;    // Dropdown selection
-  additional_message: string;     // Text area content
-  notification_id?: string;        // Generated ID for tracking
-  notification_date?: string;      // Auto-generated
-  dashboard_url: string;          // Link to user dashboard
-  support_url: string;            // Link to support
-}
+export type DetactivateEmail = {
+  artist_name: string; // "Artist Name"
+  first_name: string; // "Artist Name"
+  deactivation_type: string; // Dropdown: "Temporary Suspension", etc.
+  deactivation_reason: string; // Dropdown: "Copyright Infringement", etc.
+  additional_notes: string; // Text area content
+  reference_id: string; // Generated reference ID
+  deactivation_date: string; // Auto-generated
+  data_retention_date: string; // 30 days from now
+  appeal_url: string; // Link to appeal form
+  support_url: string; // Link to support
+  download_data_url: string; // Link to data export
+};
+export type sendUserNotificationEmailType = {
+  user_name: string; // "John Doe"
+  user_email?: string; // "john@example.com"
+  notification_reason: string; // Dropdown selection
+  additional_message: string; // Text area content
+  notification_id?: string; // Generated ID for tracking
+  notification_date?: string; // Auto-generated
+  dashboard_url: string; // Link to user dashboard
+  support_url: string; // Link to support
+};
 
 export interface AdminUserDetailsResponse {
   data: IUser;
-  artists:Artist[];
-  songCount:number;
-  totalEarnings:number
-  label:string;
+  artists: Artist[];
+  songCount: number;
+  totalEarnings: number;
+  label: string;
   msg: string;
 }
+
+export interface AdminWithdrawalDetailsResponse {
+  withdrawal: withdrawals;
+  msg: string;
+}
+
+export type WithdrawalEmailBody = {
+  user_name: string;
+  currency: string;
+  amount: string;
+  transaction_id: string;
+  request_date: string;
+  update_date: string;
+  rejection_reason?: string;
+  admin_message?: string;
+  bank_name: string;
+  account_name: string;
+  account_number: string;
+  processing_time: string;
+};

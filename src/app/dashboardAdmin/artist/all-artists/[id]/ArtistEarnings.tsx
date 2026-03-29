@@ -8,9 +8,9 @@ import Link from "next/link";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Pagination from "@/app/components/pagination/Pagination";
 import { allReleaseStatusFilterOptions } from "@/app/constant";
-import ReleaseTable from "@/app/dashboardAdmin/artist/all-artists/[id]/releaseTableArtists";
+import ReleaseTable from "./releaseTableArtists";
 
-export default function UserEarnings({ userId }: { userId: string }) {
+export default function ArtistEarnings({ id }: { id: string }) {
   const [isFilterOpen, setisFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
@@ -20,7 +20,7 @@ export default function UserEarnings({ userId }: { userId: string }) {
     releaseStatusFilter: "all",
     sort: "",
   });
-  if (!userId) {
+  if (!id) {
     return <InlineLoadingScreen />;
   }
   const { isLoading: isLoadingAllReleases, data: artistDetails } =
@@ -29,7 +29,7 @@ export default function UserEarnings({ userId }: { userId: string }) {
       page,
       limit: "50",
       releaseTitle,
-      id:userId,
+      id,
     });
   const handleSearchQueryChange = (filter: string) => {
     setPage(1);

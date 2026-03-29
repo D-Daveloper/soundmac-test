@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/util/db";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import { buildSort } from "@/util/middleware/functions";
 import withDrawalModel from "@/util/models/withDrawalModel";
-import mongoose, { SortOrder, Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import User from "@/util/models/userModel";
 
 export async function GET(
@@ -40,7 +39,7 @@ export async function GET(
     const limit = parseInt(searchParams.get("limit") || "50", 10);
 
     const query: any = {
-      user: userJwt.user,
+      user: userId,
     };
 
     console.log(query);
@@ -73,7 +72,7 @@ export async function GET(
         nextCursor,
         hasMore,
         msg:
-          withdrawals.length > 0 ? "Successful" : "No songswithdrawals found",
+          withdrawals.length > 0 ? "Successful" : "No withdrawals found",
       },
       { status: 200 },
     );

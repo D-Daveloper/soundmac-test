@@ -2582,3 +2582,718 @@ export const sendUserNotificationEmail = (props: sendUserNotificationEmailType) 
 </body>
 </html>`;
 };
+
+export const userVerifictaionRejectionEmail = (props: DetactivateEmail) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Not Approved</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #f97316; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Verification Not Approved</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your verification request needs attention</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fed7aa; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#f97316"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.first_name}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Thank you for submitting your verification request. After careful review, we're unable to approve your verification at this time.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Don't worry - you can resubmit your request after addressing the issues mentioned below.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Rejection Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Rejection Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Verification Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">${"NIN"}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reviewed Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${new Date().toDateString()}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reason</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">${props.deactivation_reason}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #fecaca;">
+                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Not Approved</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Admin Message -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fff7ed; border-left: 4px solid #f97316; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #9a3412; font-size: 16px; font-weight: 600;">Message from our Team:</h3>
+                                <p style="margin: 0; color: #9a3412; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${props.additional_notes}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- What to Do Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What You Can Do</h2>
+                            <div style="background-color: #dbeafe; border: 1px solid #93c5fd; padding: 20px; border-radius: 6px;">
+                                <ol style="margin: 0; padding: 0 0 0 20px; color: #1e3a8a; font-size: 14px;">
+                                    <li style="margin-bottom: 12px;"><strong>Review the Feedback:</strong> Carefully read the reason and message above</li>
+                                    <li style="margin-bottom: 12px;"><strong>Address the Issues:</strong> Make the necessary changes or corrections</li>
+                                    <li style="margin-bottom: 12px;"><strong>Gather Required Documents:</strong> Ensure you have all necessary verification materials</li>
+                                    <li style="margin-bottom: 12px;"><strong>Resubmit Your Request:</strong> Submit a new verification request when ready</li>
+                                    <li style="margin-bottom: 0;"><strong>Contact Support:</strong> Reach out if you need clarification or assistance</li>
+                                </ol>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Common Reasons (Help Section) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Common Issues and Solutions</h3>
+                            <div style="background-color: #f9fafb; padding: 20px; border-radius: 6px;">
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                    <li style="margin-bottom: 10px;"><strong>Unclear Documents:</strong> Ensure all documents are high-quality, clear, and legible</li>
+                                    <li style="margin-bottom: 10px;"><strong>Information Mismatch:</strong> Verify that all information matches across documents</li>
+                                    <li style="margin-bottom: 10px;"><strong>Expired Documents:</strong> Check that all documents are current and not expired</li>
+                                    <li style="margin-bottom: 10px;"><strong>Incomplete Submission:</strong> Make sure all required documents are included</li>
+                                    <li style="margin-bottom: 0;"><strong>Invalid Document Type:</strong> Use only accepted document formats</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>⚠️ Important:</strong> You can resubmit your verification request at any time. There is no limit to the number of attempts. Make sure to address all the issues mentioned before resubmitting.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{resubmit_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f97316; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Resubmit Verification</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Verification Guidelines -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">📋 Verification Requirements</h3>
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Before resubmitting, please ensure:</p>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #6b7280; font-size: 14px;">
+                                <li style="margin-bottom: 8px;">All required documents are included</li>
+                                <li style="margin-bottom: 8px;">Documents are clear, legible, and in accepted formats</li>
+                                <li style="margin-bottom: 8px;">Personal information matches across all documents</li>
+                                <li style="margin-bottom: 8px;">All documents are current and not expired</li>
+                                <li style="margin-bottom: 0;">You've followed all verification guidelines</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have questions about this decision or need help with your verification, please contact us at <a href="mailto:{{support_email}}" style="color: #f97316; text-decoration: none;">${"props.support_email"}}</a></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Our support team is here to help you through the verification process.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${"props.company_address"}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+export const userVerifictaionApprovalEmail = (props: DetactivateEmail) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Approved</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Verification Approved!</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your account has been verified</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Success Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #d1fae5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.first_name}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Great news! Your account verification has been <strong>approved</strong> by our team.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">You now have access to all verified user features and benefits.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Verification Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #ecfdf5; border-left: 4px solid #10b981; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #065f46; font-size: 16px; font-weight: 600;">✓ Verification Complete</h3>
+                                <p style="margin: 0; color: #047857; font-size: 14px; line-height: 1.6;">Your account is now verified and you have full access to all platform features.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Verification Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Verification Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Verification Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">NIN</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Approved Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">${new Date().toDateString()}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Verified Email</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">${props.additional_notes}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #e5e7eb;">
+                                        <span style="background-color: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✓ Verified</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- What's New -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What's Unlocked</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                <li style="margin-bottom: 10px;"><strong>Verified Badge:</strong> A verified badge will appear on your profile</li>
+                                <li style="margin-bottom: 10px;"><strong>Increased Limits:</strong> Higher upload limits and storage space</li>
+                                <li style="margin-bottom: 10px;"><strong>Premium Features:</strong> Access to exclusive verified user features</li>
+                                <li style="margin-bottom: 10px;"><strong>Priority Support:</strong> Faster response times from our support team</li>
+                                <li style="margin-bottom: 10px;"><strong>Enhanced Trust:</strong> Build more credibility with your audience</li>
+                                <li style="margin-bottom: 0;"><strong>Advanced Analytics:</strong> Detailed insights and reporting tools</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Next Steps -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #dbeafe; border: 1px solid #93c5fd; padding: 20px; border-radius: 6px;">
+                                <h3 style="margin: 0 0 10px 0; color: #1e40af; font-size: 16px; font-weight: 600;">🎉 Get Started</h3>
+                                <p style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 14px;">
+                                    Your verified account is ready to use. Here's what you can do next:
+                                </p>
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #1e3a8a; font-size: 14px;">
+                                    <li style="margin-bottom: 8px;">Update your profile with verified badge</li>
+                                    <li style="margin-bottom: 8px;">Explore new features in your dashboard</li>
+                                    <li style="margin-bottom: 8px;">Check out your increased limits</li>
+                                    <li style="margin-bottom: 0;">Start using premium tools</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Button -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{dashboard_url}}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Go to Dashboard</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Congratulations on your verification! If you have any questions, feel free to reach out at <a href="mailto:{{support_email}}" style="color: #10b981; text-decoration: none;">{{support_email}}</a></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Thank you for being part of our verified community!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const withdrawalApprovalEmail = () => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Approved</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Withdrawal Approved!</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your earnings are on the way</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Success Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #d1fae5; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{user_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Great news! Your withdrawal request has been approved and is being processed.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">The funds will be transferred to your account within <strong>{{processing_time}}</strong>.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Withdrawal Amount (Highlight) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 2px solid #10b981; border-radius: 8px; padding: 30px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #065f46; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Withdrawal Amount</p>
+                                <h2 style="margin: 0; color: #047857; font-size: 42px; font-weight: 700;">{{currency}}{{amount}}</h2>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Withdrawal Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Withdrawal Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Transaction ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{transaction_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Request Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{request_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Approval Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{update_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #e5e7eb;">
+                                        <span style="background-color: #d1fae5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✓ Approved</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Bank Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Payment Destination</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Bank Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{bank_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Number</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_number}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Timeline -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px; font-weight: 600;">⏱️ What Happens Next</h3>
+                                <div style="margin-bottom: 15px;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">Now</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">Your withdrawal has been approved and is being processed</p>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">Within {{processing_time}}</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">Funds will be transferred to your bank account</p>
+                                </div>
+                                <div style="margin-bottom: 0;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">Once Received</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">Check your bank account for the credit notification</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>💡 Please Note:</strong><br>
+                                    Bank transfer times may vary depending on your bank's processing schedule. If you don't receive the funds within the expected timeframe, please contact your bank or our support team.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Button -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{transaction_history_url}}" style="display: inline-block; padding: 14px 32px; background-color: #10b981; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">View Transaction History</a>
+                        </td>
+                    </tr>
+                    
+
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have any questions about this withdrawal, please contact us at <a href="mailto:{{support_email}}" style="color: #10b981; text-decoration: none;">{{support_email}}</a> and reference Transaction ID <strong>{{transaction_id}}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Thank you for being part of our community!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const withdrawalRejectionEmail = () => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Request - Action Required</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #ef4444; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Withdrawal Request Declined</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Action required on your withdrawal</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fecaca; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{user_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We're writing to inform you that your withdrawal request could not be processed at this time.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Please review the details below and take the necessary action to resubmit your withdrawal request.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Withdrawal Amount -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 25px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #7f1d1d; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Declined Amount</p>
+                                <h2 style="margin: 0; color: #991b1b; font-size: 42px; font-weight: 700;">{{currency}}{{amount}}</h2>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Rejection Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Withdrawal Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Transaction ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{transaction_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Request Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{request_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Review Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{update_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reason</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{rejection_reason}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #fecaca;">
+                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Declined</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Admin Message -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fff7ed; border-left: 4px solid #f97316; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #9a3412; font-size: 16px; font-weight: 600;">Message from our Team:</h3>
+                                <p style="margin: 0; color: #9a3412; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">{{admin_message}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Bank Account Details (for reference) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Submitted Bank Details</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Bank Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{bank_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Number</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_number}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- What to Do Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What You Need to Do</h2>
+                            <div style="background-color: #dbeafe; border: 1px solid #93c5fd; padding: 20px; border-radius: 6px;">
+                                <ol style="margin: 0; padding: 0 0 0 20px; color: #1e3a8a; font-size: 14px;">
+                                    <li style="margin-bottom: 12px;"><strong>Review the Reason:</strong> Carefully read the rejection reason and our team's message above</li>
+                                    <li style="margin-bottom: 12px;"><strong>Fix the Issue:</strong> Make the necessary corrections to your account or bank details</li>
+                                    <li style="margin-bottom: 12px;"><strong>Verify Your Information:</strong> Ensure all your details are accurate and up to date</li>
+                                    <li style="margin-bottom: 12px;"><strong>Resubmit Your Request:</strong> Once corrected, submit a new withdrawal request</li>
+                                    <li style="margin-bottom: 0;"><strong>Contact Support:</strong> Reach out if you need help or clarification</li>
+                                </ol>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Common Reasons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Common Issues and Solutions</h3>
+                            <div style="background-color: #f9fafb; padding: 20px; border-radius: 6px;">
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                    <li style="margin-bottom: 10px;"><strong>Incorrect Bank Details:</strong> Verify your account number and bank name are correct</li>
+                                    <li style="margin-bottom: 10px;"><strong>Name Mismatch:</strong> Ensure your account name matches your registered name</li>
+                                    <li style="margin-bottom: 10px;"><strong>Insufficient Balance:</strong> Check that you have enough available balance for withdrawal</li>
+                                    <li style="margin-bottom: 10px;"><strong>Minimum Withdrawal:</strong> Ensure you meet the minimum withdrawal amount</li>
+                                    <li style="margin-bottom: 10px;"><strong>Pending Verification:</strong> Complete any required account verification steps</li>
+                                    <li style="margin-bottom: 0;"><strong>Account Restrictions:</strong> Check if there are any restrictions on your account</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>💡 Good News:</strong><br>
+                                    Your funds remain safe in your account. You can request a new withdrawal once you've addressed the issues mentioned above.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{update_bank_url}}" style="display: inline-block; padding: 14px 32px; background-color: #ef4444; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Update Bank Details</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Current Balance -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">💰 Your Current Balance</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Available Balance</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{currency}}{{available_balance}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Pending Earnings</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{currency}}{{pending_balance}}</td>
+                                </tr>
+                            </table>
+                            <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px; font-style: italic;">
+                                Your declined withdrawal amount has been returned to your available balance.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have questions about this decision or need assistance, please contact us at <a href="mailto:{{support_email}}" style="color: #ef4444; text-decoration: none;">{{support_email}}</a> and reference Transaction ID <strong>{{transaction_id}}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">We're here to help you complete your withdrawal successfully.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+// Helper function to replace placeholders
+export function replaceTemplatePlaceholders(
+  html: string,
+  data: Record<string, string>
+): string {
+  let result = html;
+  
+  Object.keys(data).forEach((key) => {
+    const placeholder = `{{${key}}}`;
+    result = result.replace(new RegExp(placeholder, 'g'), data[key]);
+  });
+  
+  // Add common fields
+  const commonData: Record<string, string> = {
+    year: new Date().getFullYear().toString(),
+    company_name: process.env.COMPANY_NAME || 'Your Company',
+    company_address: process.env.COMPANY_ADDRESS || '123 Business St, City, State 12345',
+    support_email: process.env.SUPPORT_EMAIL || 'support@yourcompany.com',
+  };
+  
+  Object.keys(commonData).forEach((key) => {
+    const placeholder = `{{${key}}}`;
+    result = result.replace(new RegExp(placeholder, 'g'), commonData[key]);
+  });
+  
+  return result;
+}

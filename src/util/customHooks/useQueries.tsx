@@ -7,12 +7,15 @@ import {
   getAdminDashboard,
   getAdminSingleDetails,
   getAdminUserDetails,
+  getAdminWithdrawalDetails,
   getAlbum,
   getAlbums,
   getAlbumTracks,
   getAllArtists,
   getAllReleases,
   getAllUsers,
+  getAllVerificationRequests,
+  getAllWithdrawalRequests,
   getArtistDetails,
   getArtists,
   getArtistStats,
@@ -34,6 +37,7 @@ import {
   AdminRelease,
   AdminSingleDetailsResponse,
   AdminUserDetailsResponse,
+  AdminWithdrawalDetailsResponse,
   albumFromApi,
   AllArtistResponse,
   Artist,
@@ -44,6 +48,7 @@ import {
   ReleaseRequestResponse,
   songFromApi,
   WithdrawalResponse,
+  withdrawals,
 } from "@/app/type";
 import { handleReactQueryApiCallError } from "../middleware/functions";
 import { IPromotion } from "../models/promotionModel";
@@ -480,3 +485,62 @@ export const useGetUserWithdrawals = (params: {
     refetchOnWindowFocus: false,
   });
 };
+
+export function usePaginatedAdminAllVerificationRequests(params: {
+  page: number;
+  sort: string;
+  limit: string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<IUser>, Error>({
+    queryKey: [
+      "allVerificationRequests",
+      params.page,
+      params.sort,
+    ],
+    queryFn: async () => getAllVerificationRequests(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function usePaginatedAdminAllWithdrawalRequests(params: {
+  page: number;
+  withdrawalStatus:string
+  sort: string;
+  limit: string;
+  email:string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<withdrawals>, Error>({
+    queryKey: [
+      "allWithdrawalRequests",
+      params.page,
+      params.sort,
+      params.withdrawalStatus,
+      params.email,
+    ],
+    queryFn: async () => getAllWithdrawalRequests(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAdminWithdrawaldetails(params: { withdrawalId: string }) {
+  const api = UseAxios();
+  return useQuery<AdminWithdrawalDetailsResponse, Error>({
+    queryKey: ["adminWithdrawalDetails", params.withdrawalId],
+    queryFn: async () => getAdminWithdrawalDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}

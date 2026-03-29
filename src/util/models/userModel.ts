@@ -154,7 +154,7 @@ export const verificationDetails = new mongoose.Schema(
       default: "pending",
     },
   },
-  { _id: false, strict: "throw" },
+  { _id: false, strict: "throw", timestamps:true },
 );
 
 export interface IUser extends mongoose.Document {
@@ -217,6 +217,8 @@ export interface IUser extends mongoose.Document {
     idImage: string;
     addressImage: string;
     dob: Date | undefined;
+    createdAt: Date;
+    updatedAt: Date;
     verified: "pending" | "approved" | "rejected";
   } | null;
 }

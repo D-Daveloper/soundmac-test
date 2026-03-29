@@ -5,7 +5,7 @@ export const WithDrawalSchema = new mongoose.Schema(
     amount: { type: String, required: [true, "Please Provide an amount"] },
     withdrawalStatus: {
       type: String,
-      enum: ["pending", "successful", "failed"],
+      enum: ["pending", "approved", "rejected"],
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

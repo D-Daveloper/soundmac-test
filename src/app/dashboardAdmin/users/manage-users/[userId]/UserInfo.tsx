@@ -167,7 +167,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
               <div className="bg-neutral-50 border border-neutral-100 rounded-lg h-[300px] overflow-y-scroll">
                 {userDetails.artists.map((item, index) => (
                   <Link
-                    href={"/dashboardAdmin/all-artists/"+item._id+"?tab=artist-info"}
+                    href={"/dashboardAdmin/artist/all-artists/"+item._id+"?tab=artist-info"}
                     key={index}
                     className="flex gap-3 border-b border-neutral-100 p-3 items-center"
                   >
