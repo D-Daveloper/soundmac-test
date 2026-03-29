@@ -281,7 +281,7 @@ export default function Page({
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
                         {new Date(
-                          withdrawalDetails.withdrawal.createdAt,
+                          withdrawalDetails.withdrawal.createdAt
                         ).toDateString()}
                       </p>
                     </div>
