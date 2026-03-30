@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -304,5 +304,14 @@ export const getAdminWithdrawalDetails = async (
   params:{withdrawalId:string}
 ): Promise<AdminWithdrawalDetailsResponse> => {
   const res = await api.get<Promise<AdminWithdrawalDetailsResponse>>("admin/finance/withdrawal-requests/"+params.withdrawalId,{params});
+  return res.data;
+};
+
+export const getAllSupportRequests = async (
+  api: AxiosInstance,
+    params:{ cursor:string,limit:string,supportStatus:string}
+
+): Promise<AllSupportRequestsResponse> => {
+  const res = await api.get<Promise<AllSupportRequestsResponse>>("admin/users/support-requests",{params});
   return res.data;
 };

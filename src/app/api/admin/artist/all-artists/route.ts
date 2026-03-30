@@ -17,7 +17,7 @@ export async function GET(req: Request) {
 
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (user.role != "admin" && user.role != "super_admin") {

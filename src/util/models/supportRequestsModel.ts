@@ -1,4 +1,20 @@
 import mongoose from "mongoose";
+export interface ISupportRequest {
+  _id:string;
+  issueCategory: string;
+  issueDetail: string;
+  issueStatus: "pending"| "in-progress"| "completed"| "rejected";
+  screenshot: string | null;
+  user: {
+    _id: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    profilePic: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export const supportRequestsSchema = new mongoose.Schema(
   {
@@ -12,7 +28,7 @@ export const supportRequestsSchema = new mongoose.Schema(
     },
     issueStatus: {
       type: String,
-      enum: ["pending", "inprogress", "completed", "rejected"],
+      enum: ["pending", "in-progress", "completed", "rejected"],
     },
     screenshot: {
       type: String,
@@ -31,7 +47,8 @@ supportRequestsSchema.index({
   createdAt: -1,
 });
 
-const supportRequestsModel = mongoose.models?.supportRequests ||
+const supportRequestsModel =
+  mongoose.models?.supportRequests ||
   mongoose.model("supportRequests", supportRequestsSchema);
-  
+
 export default supportRequestsModel;

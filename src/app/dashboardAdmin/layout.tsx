@@ -78,6 +78,12 @@ const sidebarComponents = [
         href: "",
         query: "song",
       },
+      {
+        title: "Support Requests",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/users/support-requests?supportStatus=all",
+        query: "song",
+      },
     ],
   },
   {

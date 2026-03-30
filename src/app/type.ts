@@ -2,6 +2,7 @@ import { IArtist } from "@/util/models/artistModel";
 import { USER } from "./context/userContext/types";
 import { nextReleases } from "./utils/constants";
 import { accountDetails, IUser } from "@/util/models/userModel";
+import { ISupportRequest } from "@/util/models/supportRequestsModel";
 
 export interface AYNCardProps {
   index: number;
@@ -468,4 +469,12 @@ export type WithdrawalEmailBody = {
   account_name: string;
   account_number: string;
   processing_time: string;
+};
+
+
+export type AllSupportRequestsResponse = {
+  data: ISupportRequest[];
+  nextCursor?: string;
+  hasMore: boolean;
+  msg: string;
 };

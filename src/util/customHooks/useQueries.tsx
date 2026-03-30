@@ -13,6 +13,7 @@ import {
   getAlbumTracks,
   getAllArtists,
   getAllReleases,
+  getAllSupportRequests,
   getAllUsers,
   getAllVerificationRequests,
   getAllWithdrawalRequests,
@@ -40,6 +41,7 @@ import {
   AdminWithdrawalDetailsResponse,
   albumFromApi,
   AllArtistResponse,
+  AllSupportRequestsResponse,
   Artist,
   ArtistDetails,
   ArtistStat,
@@ -544,3 +546,18 @@ export function useGetAdminWithdrawaldetails(params: { withdrawalId: string }) {
     refetchOnMount: false,
   });
 }
+
+export const useGetAllSupportRequests = (params: { limit:string,supportStatus:string }) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<AllSupportRequestsResponse, Error>({
+    queryKey: ["admin-all-support-requests",params.supportStatus],
+    queryFn: async ({ pageParam }) =>
+      getAllSupportRequests(api, { ...params, cursor: pageParam as string }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};

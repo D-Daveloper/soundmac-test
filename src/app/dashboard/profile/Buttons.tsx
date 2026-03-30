@@ -57,7 +57,7 @@ export default function ScrollableTabs({
           key={i}
           onClick={() => onChange?.(i)}
           className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold 
-            whitespace-nowrap border-2 transition-all duration-200
+            whitespace-nowrap border-2 transition-all duration-200 capitalize 
             ${
               active === i
                 ? "bg-main-icon-color text-white"
