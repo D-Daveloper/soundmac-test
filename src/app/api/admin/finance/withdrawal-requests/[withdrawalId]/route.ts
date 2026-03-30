@@ -170,6 +170,10 @@ export async function GET(
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
+    
+    if (!withdrawalId || !Types.ObjectId.isValid(withdrawalId)) {
+      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+    }
     await dbConnect();
 
     const admin = userJwt.user
@@ -181,9 +185,7 @@ export async function GET(
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    if (!withdrawalId || !Types.ObjectId.isValid(withdrawalId)) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
-    }
+
 
     const withdrawal = await withDrawalModel
       .findById(withdrawalId)

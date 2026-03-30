@@ -183,7 +183,7 @@ export const getAllReleases = async (
   api: AxiosInstance,
   params:{ page:number,sort:string,releaseTitle:string,releaseStatusFilter:string,artist:string,limit:string,releaseType?:string }
 ): Promise<PAGINATION<AdminRelease>> => {
-  const res = await api.get<Promise<PAGINATION<AdminRelease>>>("admin/all-releases", {
+  const res = await api.get<Promise<PAGINATION<AdminRelease>>>("admin/music/all-releases", {
     params:params,
   });
   return res.data;
@@ -215,7 +215,7 @@ export const getReleaseRequest = async (
     params:{ cursor:string,releaseTitle:string ,limit:string,releaseType:string}
 
 ): Promise<ReleaseRequestResponse> => {
-  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/request-release",{params});
+  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/music/request-release",{params});
   return res.data;
 };
 export const getAllArtists = async (
@@ -223,7 +223,7 @@ export const getAllArtists = async (
     params:{ cursor:string,artistName:string ,limit:string,artistStatus:string}
 
 ): Promise<AllArtistResponse> => {
-  const res = await api.get<Promise<AllArtistResponse>>("admin/all-artists",{params});
+  const res = await api.get<Promise<AllArtistResponse>>("admin/artist/all-artists",{params});
   return res.data;
 };
 

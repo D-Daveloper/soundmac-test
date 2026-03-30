@@ -37,7 +37,7 @@ const Page = () => {
     <div className="bg-main-white max-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
       <div className="flex gap-3 mt-5">
         <Link
-          href={"/dashboardAdmin/release-requests/single"}
+          href={"/dashboardAdmin/music/release-requests/single"}
           className={
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
           }
@@ -45,7 +45,7 @@ const Page = () => {
           Songs
         </Link>
         <Link
-          href={"/dashboardAdmin/release-requests/album"}
+          href={"/dashboardAdmin/music/release-requests/album"}
           className={
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
           }
@@ -91,7 +91,7 @@ const Page = () => {
                 There are no Requested Releases, Right Now.
               </p>
               <Link
-                href={"/dashboardAdmin/release-requests/album"}
+                href={"/dashboardAdmin/music/release-requests/album"}
                 className={
                   "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white! bg-primary-500 "
                 }
@@ -105,7 +105,7 @@ const Page = () => {
                 {releaseRequests.pages.map((item, index) =>
                   item.data.map((release, idx) => (
                     <Link
-                    href={"/dashboardAdmin/release-requests/single/"+release._id}
+                    href={"/dashboardAdmin/music/release-requests/single/"+release._id}
                       key={idx}
                       className="bg-warning-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
                     >

@@ -130,7 +130,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
       <Link
-        href={"/dashboardAdmin/artist/all-artists"}
+        href={"/dashboardAdmin/artist/all-artists?artistStatus=active"}
         aria-label="go back"
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
       >

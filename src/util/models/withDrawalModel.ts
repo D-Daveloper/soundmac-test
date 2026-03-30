@@ -20,7 +20,7 @@ export const WithDrawalSchema = new mongoose.Schema(
       type: Date,
       required: [
         function (this: any) {
-          return this.get("/withdrawalStatus") === "successful";
+          return this.get("withdrawalStatus") === "approved";
         },
         "Provide a date the amount was paid",
       ],

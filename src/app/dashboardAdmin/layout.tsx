@@ -63,7 +63,7 @@ const sidebarComponents = [
       {
         title: "Manage Users",
         icon: "/people.svg",
-        href: "/dashboardAdmin/users/manage-users",
+        href: "/dashboardAdmin/users/manage-users?userStatus=active",
         query: "song",
       },
       {
