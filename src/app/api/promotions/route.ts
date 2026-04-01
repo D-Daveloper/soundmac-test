@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       Uploaderror = { msg: "Invalid Request", status: 401 };
     } else if (!user.confirmed) {
@@ -252,7 +252,7 @@ export async function POST(req: Request) {
           transactionReference: new_reference,
           user: user!._id,
           amount: 0,
-          isActive: true,
+          promotionStatus: "pending",
           releaseTitle,
           releaseDescription: "Playlist Pitch",
           artistName: userArtist.artistName,
@@ -516,7 +516,7 @@ export async function PUT(req: Request) {
       },
       body: JSON.stringify({
         email: user!.email,
-        amount: parseInt(promotion!.amount, 10) * 100,
+        amount: promotion!.amount * 100,
         callback_url: `${process.env.FRONTEND_URL}/dashboard/explore/promotion/payment-callback`,
         channels: ["card", "bank", "ussd"],
         // reference: reference, // use the generated unique transaction reference

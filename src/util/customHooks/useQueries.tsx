@@ -12,6 +12,7 @@ import {
   getAlbums,
   getAlbumTracks,
   getAllArtists,
+  getAllPromotions,
   getAllReleases,
   getAllSupportRequests,
   getAllUsers,
@@ -24,6 +25,7 @@ import {
   getDashboard,
   getListOfBanksFromPaystack,
   getPromotionData,
+  getPromotionDetails,
   getReleaseRequest,
   getSongs,
   getUserArtistsNames,
@@ -561,3 +563,36 @@ export const useGetAllSupportRequests = (params: { limit:string,supportStatus:st
     refetchOnWindowFocus: false,
   });
 };
+
+export function useGetPaginatedPromotions(params: { page:number,sort:string,releaseTitle:string,limit:string,promotionType:string,promotionStatus:string }) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<IPromotion>, Error>({
+    queryKey: [
+      "allpromotions",
+      params.page,
+      params.sort,
+      params.releaseTitle,
+      params.promotionType,
+      params.promotionStatus,
+    ],
+    queryFn: async () => getAllPromotions(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+export function useGetPromotionDetails(params: { promotionId: string }) {
+  const api = UseAxios();
+  return useQuery<IPromotion, Error>({
+    queryKey: ["promotionDetails", params.promotionId],
+    queryFn: async () => getPromotionDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}

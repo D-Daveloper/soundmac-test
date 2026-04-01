@@ -67,9 +67,9 @@ export async function POST(req: Request) {
           company_name,
           dashboardUrl: frontendUrl + "/dashboard",
         };
-        // const html = subSuccessEmail(paymentData)
+        const html = subSuccessEmail(paymentData)
 
-        // await sendEmail(user.email, "subscription payment", html);
+        await sendEmail(user.email, "subscription payment", html);
       }
     }
 

@@ -310,7 +310,7 @@ export const promotionTestData = [
     endDate: "2025-09-12T15:06:33.593",
     status: "In Progress",
     type: "radioPromotion",
-    isActive: true,
+    promotionStatus: "approved",
   },
   {
     id: 1,
@@ -321,7 +321,7 @@ export const promotionTestData = [
     endDate: "2025-09-12T15:06:33.593",
     status: "In Progress",
     type: "radioPromotion",
-    isActive: true,
+    promotionStatus: "approved",
   },
   {
     id: 1,
@@ -332,7 +332,7 @@ export const promotionTestData = [
     endDate: "2025-09-12T15:06:33.593",
     status: "In Progress",
     type: "radioPromotion",
-    isActive: false,
+    promotionStatus: "pending",
   },
 ];
 
@@ -568,6 +568,28 @@ export const allUsersFilterOptions = [
   {
     label: "Indie Label",
     value: "INDIE_LABEL",
+  },
+];
+export const allPromotionsFilterOptions = [
+  {
+    label: "All",
+    value: "all",
+  },
+  {
+    label: "Boomplay Promotion",
+    value: "Boomplay",
+  },
+  {
+    label: "Radio Promotion",
+    value: "Radio-Promotion",
+  },
+  {
+    label: "Online Press",
+    value: "Online-Press",
+  },
+  {
+    label: "Pitch Playlist",
+    value: "Playlist-Pitch",
   },
 ];
 

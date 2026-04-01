@@ -59,7 +59,7 @@ const MyPromotion = () => {
                 packageType={promotionContent.packageName}
                 startDate={new Date(promotionContent.startDate).toDateString()}
                 endDate={new Date(promotionContent.endDate).toDateString()}
-                isActive={promotionContent.isActive}
+                promotionStatus={promotionContent.promotionStatus}
                 handleSubmit ={() => handleSubmit(promotionContent._id as string)}
               />
             ))}

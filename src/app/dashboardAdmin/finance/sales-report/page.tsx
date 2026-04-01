@@ -1,11 +1,11 @@
-"use client"
-import Link from 'next/link'
-import React from 'react'
+"use client";
+import Link from "next/link";
+import React from "react";
 
 const Page = () => {
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
-              <div className="flex gap-3 mt-5">
+      <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboardAdmin/music/all-releases/single"}
           className={
@@ -22,8 +22,9 @@ const Page = () => {
         >
           Albums
         </Link>
-      </div></div>
-  )
-}
+      </div>
+    </div>
+  );
+};
 
-export default Page
+export default Page;

@@ -1,6 +1,14 @@
-import { genderList, priorityList, promotionCategory, timeList, typeOfRelease } from "@/app/constant";
+import {
+  genderList,
+  priorityList,
+  promotionCategory,
+  timeList,
+  typeOfRelease,
+} from "@/app/constant";
 import mongoose, { Schema, Document, Model } from "mongoose";
 import { featuredArtistSchema } from "./songModel";
+import { Artist } from "@/app/type";
+import { IUser } from "./userModel";
 
 const pitchPlaylistDetails = new mongoose.Schema(
   {
@@ -15,7 +23,7 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: String,
       required: [false, "artist gender is optional"],
       trim: true,
-      enum:[...genderList,""]
+      enum: [...genderList, ""],
     },
     trackLanguage: {
       type: String,
@@ -26,13 +34,13 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: String,
       required: [false, "country is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     location: {
       type: String,
       required: [false, "location is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     releaseDate: {
       type: Date,
@@ -43,12 +51,12 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: String,
       required: [false, "release time is optional"],
       trim: true,
-      enum:[...timeList,""]
+      enum: [...timeList, ""],
     },
     priority: {
       type: String,
       required: [true, "priority is required"],
-      enum:priorityList,
+      enum: priorityList,
       trim: true,
     },
     configuration: {
@@ -66,9 +74,11 @@ const pitchPlaylistDetails = new mongoose.Schema(
     focusTrack: {
       type: String,
       required: [
-        function (this:any) {
-        return this.get("configuration") === "album"
-      }, "focus track is required"],
+        function (this: any) {
+          return this.get("configuration") === "album";
+        },
+        "focus track is required",
+      ],
       trim: true,
     },
     focusTrackIsrc: {
@@ -85,14 +95,14 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: [String],
       required: [false, "subgenres is optional"],
       trim: true,
-      default:[]
+      default: [],
     },
-    mood: { 
-      type: String, 
-      required: [false, "mood is optional"], 
+    mood: {
+      type: String,
+      required: [false, "mood is optional"],
       trim: true,
-      default:""
-     },
+      default: "",
+    },
     editorialTeams: {
       type: String,
       required: [true, "editorial teams is required"],
@@ -102,31 +112,31 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: String,
       required: [false, "facebook profile link is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     instagramProfileLink: {
       type: String,
       required: [false, "instagram profile link is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     twitterProfileLink: {
       type: String,
       required: [false, "twitter profile link is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     youtubeProfileLink: {
       type: String,
       required: [false, "youtube profile link is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     tiktokProfileLink: {
       type: String,
       required: [false, "tiktok profile link is optional"],
       trim: true,
-      default:""
+      default: "",
     },
     marketingDetail: {
       type: String,
@@ -138,28 +148,29 @@ const pitchPlaylistDetails = new mongoose.Schema(
       type: String,
       required: [false, "comment is optional"],
       trim: true,
-      default:""
+      default: "",
     },
   },
   { _id: false, strict: "throw" },
 );
 // Define Promotion interface
 export interface IPromotion extends Document {
+  _id: string;
   packageName: string;
   transactionReference: string;
   category: promotionCategory;
   promotionImage: string;
   releaseTitle: string;
   releaseDescription: string;
-  artist: mongoose.Types.ObjectId;
+  artist: Artist;
   artistName: string;
-  user: mongoose.Types.ObjectId;
+  user: IUser;
   createdAt: Date;
   updatedAt: Date;
   startDate: Date;
   endDate: Date;
-  isActive: boolean;
-  amount: string;
+  promotionStatus: "pending" | "approved" | "completed";
+  amount: number;
   pitchPlayListDetails: typeof pitchPlaylistDetails;
 }
 
@@ -223,12 +234,16 @@ const PromotionSchema = new Schema<IPromotion>(
       type: Date,
       required: [true, "Please provide an end date for the promotion!"],
     },
-    isActive: {
-      type: Boolean,
-      required: [true, "Please provide an active status for the promotion!"],
+    promotionStatus: {
+      type: String,
+      enum: {
+        values: ["pending", "approved", "completed"],
+        message: "{VALUE} is not a valid type",
+      },
+      default: "pending",
     },
     amount: {
-      type: String,
+      type: Number,
       required: [true, "Please provide an amount for the promotion!"],
       trim: true,
     },
@@ -236,7 +251,7 @@ const PromotionSchema = new Schema<IPromotion>(
       type: pitchPlaylistDetails,
       required: [
         function (this: any) {
-          return this.get("releaseStatus") === promotionCategory.playlistPitch;
+          return this.get("category") === promotionCategory.playlistPitch;
         },
         "please provide playlist details is required",
       ],
@@ -267,20 +282,3 @@ const Promotion: Model<IPromotion> =
   mongoose.models?.Promotion ||
   mongoose.model<IPromotion>("Promotion", PromotionSchema);
 export default Promotion;
-
-//example 1
-// Find the 10 most recently created artists for a specific user
-// Artist.find({ user: someUserId })
-//   .sort({ createdAt: -1 })  // Descending (newest first)
-//   .limit(10);
-
-//example 2
-// Find artists for a user, sorted by most recent updates
-// Artist.find({ user: someUserId })
-//   .sort({ updatedAt: -1 })  // Descending (most recent first)
-//   .limit(5);
-
-//example 3
-// Find artists for a user whose name starts with "A", sorted alphabetically
-// Artist.find({ user: someUserId, artistName: { $regex: /^A/ } })
-//   .sort({ artistName: 1 });  // Ascending (A-Z)

@@ -103,6 +103,23 @@ const sidebarComponents = [
       },
     ],
   },
+  {
+    title: "More",
+    list: [
+      {
+        title: "Promotions",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/more/promotions?promotionStatus=all",
+        query: "sales_report",
+      },
+      {
+        title: "withdrawal requests",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/finance/withdrawal-requests?withdrawalStatus=all",
+        query: "sales_report",
+      },
+    ],
+  },
 ];
 const profileLinks = [
   {

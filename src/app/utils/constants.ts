@@ -1,5 +1,5 @@
 import { Props } from "../dashboard/finance/salesReport/history/withdrawalLine";
-import { LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type";
+import { AdminRelease, LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type";
 
 export const navigationLinks = [
   { name: "Home", link: "/" },
@@ -1038,3 +1038,24 @@ export const adminNotifyUserReasons = [
   "Other",
 
 ];
+export const ReleaseMock:AdminRelease[] = [
+  {
+    releaseTitle: "Falling Skies",
+    releaseStatus: "pending",
+    artistName: "TomBaggz",
+    releaseDate: "2026-01-19T10:23:01.128+00:00",
+      _id: "string",
+      catalogNumber: "string",
+      isrc: "string",
+      upc: "string",
+      releaseImage: "string",
+      genre: "string",
+      featuredArtist: [],
+      songWriter: [],
+      producer: [],
+      artist: {
+        appleId: "string",
+        spotifyId: "string",
+      },
+  },
+]

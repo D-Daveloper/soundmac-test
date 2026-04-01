@@ -9,22 +9,32 @@ const PromotionCard = ({
   packageType,
   startDate,
   endDate,
-  isActive,
-  handleSubmit
+  promotionStatus,
+  handleSubmit,
 }: {
   category: promotionCategory;
   songtitle: string;
   packageType: string;
   startDate: string;
   endDate: string;
-  isActive: boolean;
+  promotionStatus: "pending" | "approved" | "completed";
   handleSubmit: () => void;
 }) => {
   return (
     <div className="border-1 border-neutral-100 bg-neutral-50 rounded-lg max-w-[550px] w-full max-mobile:max-w-full h-fit flex flex-col gap-5 p-5">
       <div className="flex gap-3">
         <Image
-          src={ category === "Radio-Promotion"? "/radio.png" : category === "Boomplay"? "/boomplay.jpg" : category === "Playlist-Pitch"? "/pitchplay.jpg": category === "Online-Press"? "/onlinepress.png" : "/boomplay.jpg"}
+          src={
+            category === "Radio-Promotion"
+              ? "/radio.png"
+              : category === "Boomplay"
+                ? "/boomplay.jpg"
+                : category === "Playlist-Pitch"
+                  ? "/pitchplay.jpg"
+                  : category === "Online-Press"
+                    ? "/onlinepress.png"
+                    : "/boomplay.jpg"
+          }
           alt="Promotion image"
           width={80}
           height={80}
@@ -53,16 +63,20 @@ const PromotionCard = ({
             </span>
             {new Date(startDate).toLocaleDateString()}
           </p>
-          <p className=" font-medium text-lg leading-[20px] text-warning-600 -tracking-[0.5px]">
-            <span className="font-semibold">Start Date: </span>
-            {new Date(endDate).toLocaleDateString()}
-          </p>
+          {(promotionStatus != "pending" || category === "Online-Press") && (
+            <p className=" font-medium text-lg leading-[20px] text-warning-600 -tracking-[0.5px]">
+              <span className="font-semibold">End Date: </span>
+              {category === promotionCategory.onlinePress
+                ? "N/A"
+                : new Date(endDate).toLocaleDateString()}
+            </p>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-3">
         <div className="flex justify-between gap-2 flex-wrap">
           <button
-            disabled={isActive === false? false : true}
+            disabled={promotionStatus === "completed" ? false : true}
             onClick={() => {
               // setIsExplorePage(true);
               handleSubmit();
@@ -70,7 +84,7 @@ const PromotionCard = ({
             type="button"
             className={
               "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm flex gap-3 text-main-white " +
-              (!isActive
+              (promotionStatus === "completed"
                 ? " bg-primary hover:bg-btn-hover "
                 : " bg-btn-disabled")
             }
@@ -82,13 +96,16 @@ const PromotionCard = ({
           </button>
           <p
             className={
-              " rounded-lg font-medium text-lg leading-[20px] -tracking-[0.5px] flex items-center " +
-              (isActive
-                ? " bg-success-100 text-success-500 px-3 py-1"
-                : " text-error-500 bg-error-50 px-3 py-1")
+              " rounded-lg font-medium text-lg leading-[20px] -tracking-[0.5px] flex items-center p-2 " +
+              (promotionStatus === "pending"
+                ? " text-warning-500 bg-warning-100"
+                : promotionStatus === "approved"
+                  ? " text-success-500 bg-success-100"
+                  : promotionStatus === "completed" &&
+                    " text-primary-500 bg-primary-50")
             }
           >
-            {isActive ? "Active" : "Inactive"}
+            {promotionStatus}
           </p>
         </div>
       </div>

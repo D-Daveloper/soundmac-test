@@ -315,3 +315,21 @@ export const getAllSupportRequests = async (
   const res = await api.get<Promise<AllSupportRequestsResponse>>("admin/users/support-requests",{params});
   return res.data;
 };
+
+export const getAllPromotions = async (
+  api: AxiosInstance,
+  params:{ page:number,sort:string,releaseTitle:string,limit:string,promotionType:string,promotionStatus:string }
+): Promise<PAGINATION<IPromotion>> => {
+  const res = await api.get<Promise<PAGINATION<IPromotion>>>("admin/more/promotions", {
+    params:params,
+  });
+  return res.data;
+};
+
+export const getPromotionDetails = async (
+  api: AxiosInstance,
+  params:{promotionId:string}
+): Promise<IPromotion> => {
+  const res = await api.get<Promise<IPromotion>>("admin/more/promotions/"+params.promotionId,);
+  return res.data;
+};

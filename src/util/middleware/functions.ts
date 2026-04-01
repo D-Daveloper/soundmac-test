@@ -1960,7 +1960,6 @@ export async function handlePromotionSuccess(data: any) {
         transactionReference: data.metadata.transactionReference,
         user: user._id,
         amount: (data.amount / 100).toString(),
-        isActive: true,
         releaseTitle: data.metadata.releaseTitle,
         releaseDescription: data.metadata.releaseDescription,
         artistName: data.metadata.artistName,
@@ -3251,6 +3250,531 @@ export const withdrawalRejectionEmail = () => {
                         <td style="padding: 30px 40px 20px 40px;">
                             <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have questions about this decision or need assistance, please contact us at <a href="mailto:{{support_email}}" style="color: #ef4444; text-decoration: none;">{{support_email}}</a> and reference Transaction ID <strong>{{transaction_id}}</strong></p>
                             <p style="margin: 0; color: #6b7280; font-size: 14px;">We're here to help you complete your withdrawal successfully.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const promotionApprovalEmail = () => {
+  return `
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion Approved</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">🎉 Promotion Approved!</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your music is going places</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Success Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #ede9fe; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{artist_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Great news! Your promotion request has been approved and your campaign is ready to launch.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Get ready to reach thousands of new listeners and grow your audience!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Music Info Card -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border: 2px solid #8b5cf6; border-radius: 8px; padding: 25px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #6b21a8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Now Promoting</p>
+                                <h2 style="margin: 0 0 5px 0; color: #7c3aed; font-size: 24px; font-weight: 700;">{{content_title}}</h2>
+                                <p style="margin: 0; color: #7c3aed; font-size: 16px; font-weight: 500;">by {{artist_name}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Promotion Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Promotion Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Promotion Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{promotion_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Content Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{content_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Campaign Start</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{start_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Campaign End</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{end_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Reference ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{promotion_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #e5e7eb;">
+                                        <span style="background-color: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">✓ Active</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- What to Expect -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What to Expect</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                <li style="margin-bottom: 10px;"><strong>Increased Visibility:</strong> Your music will be featured on the platform</li>
+                                <li style="margin-bottom: 10px;"><strong>More Streams:</strong> Expect a boost in plays and engagement</li>
+                                <li style="margin-bottom: 10px;"><strong>New Followers:</strong> Reach potential fans who'll love your sound</li>
+                                <li style="margin-bottom: 10px;"><strong>Extended Reach:</strong> Get discovered by listeners across the platform</li>
+                                <li style="margin-bottom: 0;"><strong>Email Updates:</strong> We'll notify you when your campaign ends</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Timeline -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 15px 0; color: #1e40af; font-size: 16px; font-weight: 600;">📅 Campaign Timeline</h3>
+                                <div style="margin-bottom: 15px;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">{{start_date}}</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">🚀 Campaign launches - Your music goes live!</p>
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">During Campaign</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">📊 Monitor your analytics and watch your numbers grow</p>
+                                </div>
+                                <div style="margin-bottom: 0;">
+                                    <p style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 14px; font-weight: 600;">{{end_date}}</p>
+                                    <p style="margin: 0; color: #1e3a8a; font-size: 14px;">📧 Campaign ends - We'll send you a performance summary</p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Tips for Success -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 20px; border-radius: 6px;">
+                                <h3 style="margin: 0 0 10px 0; color: #92400e; font-size: 16px; font-weight: 600;">💡 Tips to Maximize Your Promotion</h3>
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #92400e; font-size: 14px;">
+                                    <li style="margin-bottom: 8px;">Engage with new listeners in the comments</li>
+                                    <li style="margin-bottom: 8px;">Keep an eye on your analytics dashboard</li>
+                                    <li style="margin-bottom: 8px;">Respond to feedback and build connections</li>
+                                    <li style="margin-bottom: 0;">Plan your next release to keep the momentum going</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                          
+                            <a href="{{promotion_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">View Promotion</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Questions about your promotion? Contact us at <a href="mailto:{{support_email}}" style="color: #8b5cf6; text-decoration: none;">{{support_email}}</a> and reference ID <strong>{{promotion_id}}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Good luck with your campaign! We're excited to see your music reach new fans.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const promotionRejectionEmail = () => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Request - Action Required</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #ef4444; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Withdrawal Request Declined</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Action required on your withdrawal</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fecaca; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ef4444"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{user_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We're writing to inform you that your withdrawal request could not be processed at this time.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Please review the details below and take the necessary action to resubmit your withdrawal request.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Withdrawal Amount -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef2f2; border: 2px solid #ef4444; border-radius: 8px; padding: 25px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #7f1d1d; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Declined Amount</p>
+                                <h2 style="margin: 0; color: #991b1b; font-size: 42px; font-weight: 700;">{{currency}}{{amount}}</h2>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Rejection Details -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Withdrawal Details</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Transaction ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{transaction_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Request Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{request_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Review Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{update_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Reason</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #fecaca;">{{rejection_reason}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #fecaca;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #fecaca;">
+                                        <span style="background-color: #fee2e2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Declined</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Admin Message -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fff7ed; border-left: 4px solid #f97316; padding: 20px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #9a3412; font-size: 16px; font-weight: 600;">Message from our Team:</h3>
+                                <p style="margin: 0; color: #9a3412; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">{{admin_message}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Bank Account Details (for reference) -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Submitted Bank Details</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Bank Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{bank_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Name</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_name}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Account Number</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{account_number}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- What to Do Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What You Need to Do</h2>
+                            <div style="background-color: #dbeafe; border: 1px solid #93c5fd; padding: 20px; border-radius: 6px;">
+                                <ol style="margin: 0; padding: 0 0 0 20px; color: #1e3a8a; font-size: 14px;">
+                                    <li style="margin-bottom: 12px;"><strong>Review the Reason:</strong> Carefully read the rejection reason and our team's message above</li>
+                                    <li style="margin-bottom: 12px;"><strong>Fix the Issue:</strong> Make the necessary corrections to your account or bank details</li>
+                                    <li style="margin-bottom: 12px;"><strong>Verify Your Information:</strong> Ensure all your details are accurate and up to date</li>
+                                    <li style="margin-bottom: 12px;"><strong>Resubmit Your Request:</strong> Once corrected, submit a new withdrawal request</li>
+                                    <li style="margin-bottom: 0;"><strong>Contact Support:</strong> Reach out if you need help or clarification</li>
+                                </ol>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Common Reasons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h3 style="margin: 0 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">Common Issues and Solutions</h3>
+                            <div style="background-color: #f9fafb; padding: 20px; border-radius: 6px;">
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                    <li style="margin-bottom: 10px;"><strong>Incorrect Bank Details:</strong> Verify your account number and bank name are correct</li>
+                                    <li style="margin-bottom: 10px;"><strong>Name Mismatch:</strong> Ensure your account name matches your registered name</li>
+                                    <li style="margin-bottom: 10px;"><strong>Insufficient Balance:</strong> Check that you have enough available balance for withdrawal</li>
+                                    <li style="margin-bottom: 10px;"><strong>Minimum Withdrawal:</strong> Ensure you meet the minimum withdrawal amount</li>
+                                    <li style="margin-bottom: 10px;"><strong>Pending Verification:</strong> Complete any required account verification steps</li>
+                                    <li style="margin-bottom: 0;"><strong>Account Restrictions:</strong> Check if there are any restrictions on your account</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Important Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>💡 Good News:</strong><br>
+                                    Your funds remain safe in your account. You can request a new withdrawal once you've addressed the issues mentioned above.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="{{update_bank_url}}" style="display: inline-block; padding: 14px 32px; background-color: #ef4444; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; margin-right: 10px;">Update Bank Details</a>
+                            <a href="{{support_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Contact Support</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Current Balance -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600;">💰 Your Current Balance</h3>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Available Balance</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{currency}}{{available_balance}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Pending Earnings</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{currency}}{{pending_balance}}</td>
+                                </tr>
+                            </table>
+                            <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 12px; font-style: italic;">
+                                Your declined withdrawal amount has been returned to your available balance.
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you have questions about this decision or need assistance, please contact us at <a href="mailto:{{support_email}}" style="color: #ef4444; text-decoration: none;">{{support_email}}</a> and reference Transaction ID <strong>{{transaction_id}}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">We're here to help you complete your withdrawal successfully.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+export const promotionCompletionEmail = () => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion Campaign Completed</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">🎊 Promotion Complete!</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Here's how your campaign performed</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Success Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #fce7f3; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#ec4899" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{artist_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your promotion campaign has officially ended! Thank you for promoting your music with us.</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Below is a summary of your campaign's performance. We hope you reached many new fans!</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Music Info Card -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%); border: 2px solid #ec4899; border-radius: 8px; padding: 25px; text-align: center;">
+                                <p style="margin: 0 0 10px 0; color: #9f1239; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Promoted Content</p>
+                                <h2 style="margin: 0 0 5px 0; color: #db2777; font-size: 24px; font-weight: 700;">{{content_title}}</h2>
+                                <p style="margin: 0; color: #db2777; font-size: 16px; font-weight: 500;">by {{artist_name}}</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Campaign Summary -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Campaign Summary</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Promotion Type</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{promotion_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Campaign Start</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{start_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Campaign End</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{end_date}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Reference ID</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{promotion_id}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Status</td>
+                                    <td style="padding: 8px 0; text-align: right; border-top: 1px solid #e5e7eb;">
+                                        <span style="background-color: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">Completed</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                  
+                    
+                    
+                    <!-- What's Next -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What's Next?</h2>
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 20px; border-radius: 6px;">
+                                <p style="margin: 0 0 15px 0; color: #92400e; font-size: 14px;">
+                                    <strong>Keep the Momentum Going!</strong>
+                                </p>
+                                <ul style="margin: 0; padding: 0 0 0 20px; color: #92400e; font-size: 14px;">
+                                    <li style="margin-bottom: 10px;"><strong>Engage Your New Fans:</strong> Respond to comments and messages</li>
+                                    <li style="margin-bottom: 10px;"><strong>Release New Content:</strong> Keep your audience interested with fresh music</li>
+                                    <li style="margin-bottom: 10px;"><strong>Run Another Campaign:</strong> Build on this success with more promotions</li>
+                                    <li style="margin-bottom: 10px;"><strong>Analyze Your Data:</strong> Use these insights to improve future releases</li>
+                                    <li style="margin-bottom: 0;"><strong>Cross-Promote:</strong> Share on your social media to maintain visibility</li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- CTA Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            
+                            <a href="{{promotion_url}}" style="display: inline-block; padding: 14px 32px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Start New Promotion</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Thank You Section -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+                            <h3 style="margin: 20px 0 15px 0; color: #111827; font-size: 16px; font-weight: 600; text-align: center;">💜 Thank You!</h3>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px; text-align: center;">
+                                Thank you for choosing us to promote your music. We're proud to support independent artists like you. Keep creating and sharing your amazing music with the world!
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">Questions about your campaign results? Contact us at <a href="mailto:{{support_email}}" style="color: #ec4899; text-decoration: none;">{{support_email}}</a> and reference ID <strong>{{promotion_id}}</strong></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">We'd love to hear your feedback about your promotion experience!</p>
                         </td>
                     </tr>
                     

@@ -3,6 +3,7 @@ import { USER } from "./context/userContext/types";
 import { nextReleases } from "./utils/constants";
 import { accountDetails, IUser } from "@/util/models/userModel";
 import { ISupportRequest } from "@/util/models/supportRequestsModel";
+import { IPromotion } from "@/util/models/promotionModel";
 
 export interface AYNCardProps {
   index: number;
@@ -132,6 +133,12 @@ export interface PAGINATION<T> {
   hasNextPage: boolean;
   totalCount: number;
   totalPages: number;
+  totalBoomplay: number;
+  totalPromotions: number;
+  totalActivePromotions: number;
+  totalPromotionsAmount: number;
+  totalOnlinePress: number;
+  totalRadioPromotion: number;
   msg: string;
 }
 
@@ -471,10 +478,26 @@ export type WithdrawalEmailBody = {
   processing_time: string;
 };
 
-
 export type AllSupportRequestsResponse = {
   data: ISupportRequest[];
   nextCursor?: string;
   hasMore: boolean;
   msg: string;
+};
+
+export type PromotionEmailBody = {
+  artist_name: string;
+  content_title: string;
+  content_type: string;
+  promotion_type: string;
+  rejection_reason: string;
+  admin_message: string;
+  submission_date: string;
+  rejection_date: string;
+  promotion_id: string;
+  resubmit_url: string;
+  guidelines_url: string;
+  start_date: string;
+  end_date: string;
+  promotion_url:string;
 };
