@@ -13,6 +13,7 @@ import Link from "next/link";
 import { IPromotion } from "@/util/models/promotionModel";
 import { genreList } from "@/app/utils/constants";
 import Select from "@/components/Select";
+import { promotionCategory } from "@/app/constant";
 
 export default function Page({
   params,
@@ -298,98 +299,538 @@ export default function Page({
                       </div>
                     </div>
                   </div>
+
+                  {/* pitch play list */}
+                  {promotionDetails.category ===
+                    promotionCategory.playlistPitch && (
+                    <div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Label
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.label}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            UPC
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {promotionDetails.pitchPlayListDetails.upc}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Artist Gender
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.artistGender}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Track Langauge
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .trackLanguage
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Country
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.country}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Location
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {promotionDetails.pitchPlayListDetails.location}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Release Date
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {new Date(
+                              promotionDetails.pitchPlayListDetails.releaseDate,
+                            ).toDateString()}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Release Time
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .releaseTime
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Priority
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.priority}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Configuration
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .configuration
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Type Of Release
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .typeOfRelease
+                            }
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Focus Track
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {promotionDetails.pitchPlayListDetails.focusTrack}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Focus Track ISRC
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .focusTrackIsrc
+                            }
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Genre
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {promotionDetails.pitchPlayListDetails.genre}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            SubGenre
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.subgenres.join(
+                              ", ",
+                            )}
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Mood
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {promotionDetails.pitchPlayListDetails.mood}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Editorial Teams
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .editorialTeams
+                            }
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Facebook Profile Link
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .facebookProfileLink
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Instagram Profile Link
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .instagramProfileLink
+                            }
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Twitter Profile Link
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .twitterProfileLink
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex ">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Youtube Profile Link
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .youtubeProfileLink
+                            }
+                          </p>
+                        </div>
+
+                        {/* Artist */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Tik Tok
+                          </p>
+                          <div>
+                            <p className="text-gray-900 text-lg font-medium mb-1">
+                              {
+                                promotionDetails.pitchPlayListDetails
+                                  .tiktokProfileLink
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border border-neutral-100 mb-6"></div>
+                      <div className="flex flex-col gap-5">
+                        {/* Song Name */}
+                        <div className="flex-1">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Comment
+                          </p>
+                          <p className="text-gray-900 text-lg font-medium">
+                            {promotionDetails.pitchPlayListDetails.comment}
+                          </p>
+                        </div>
+
+                        {/* Song Name */}
+                        <div className="min-h-60 bg-neutral-50 rounded-lg p-4 border border-neutral-100 mb-5">
+                          <p className="text-text-disable font-bold text-sm mb-1">
+                            Market Detail
+                          </p>
+                          <p className="text-text-body text-md font-normal text-wrap break-all">
+                            {
+                              promotionDetails.pitchPlayListDetails
+                                .marketingDetail
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* border line */}
                   <div className="border border-neutral-100 mb-6"></div>
 
                   {/* Song Name */}
-                  <div className="min-h-60 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
-                    <p className="text-text-disable font-bold text-sm mb-1">
-                      Release Description
-                    </p>
-                    <p className="text-text-body text-md font-normal ">
-                      {promotionDetails.releaseDescription}
-                    </p>
-                  </div>
-                  {/* cover art */}
+                  {promotionDetails.category !==
+                    promotionCategory.playlistPitch && (
+                    <div className="min-h-60 bg-neutral-50 rounded-lg p-4 border border-neutral-100">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        Release Description
+                      </p>
+                      <p className="text-text-body text-md font-normal ">
+                        {promotionDetails.releaseDescription}
+                      </p>
+                    </div>
+                  )}
+                  <div className="flex gap-10">
+                    {/* cover art */}
 
-                  <div className="flex items-center justify-center w-60">
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
-                      <div className="flex flex-col max-sm:w-full gap-2">
-                        <div className="flex gap-1">
+                    <div className="flex items-center justify-center w-60">
+                      <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                        <div className="flex flex-col max-sm:w-full gap-2">
                           <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                             Artwork File
                           </h4>
-                          <Image
-                            priority={false}
-                            loading="lazy"
-                            src="/required.svg"
-                            alt="a star marking this field as required"
-                            width={0}
-                            height={0}
-                            className="w-2 -mt-3 "
-                          />
-                        </div>
-                        <div className="flex items-center justify-center w-60">
-                          <label
-                            htmlFor="music_image"
-                            className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
-                          >
-                            <div
-                              className={
-                                "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100"
-                              }
+                          <div className="flex items-center justify-center w-60">
+                            <label
+                              htmlFor="music_image"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
-                              <Image
-                                src={promotionDetails.artist.artistImage}
-                                width={60}
-                                height={60}
-                                alt="music note icon"
+                              <div
                                 className={
-                                  promotionDetails.artist.artistImage
-                                    ? " w-full object-cover min-w-15 h-15"
-                                    : undefined
+                                  "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100"
                                 }
+                              >
+                                <Image
+                                  src={promotionDetails.artist.artistImage}
+                                  width={60}
+                                  height={60}
+                                  alt="music note icon"
+                                  className={
+                                    promotionDetails.artist.artistImage
+                                      ? " w-full object-cover min-w-15 h-15"
+                                      : undefined
+                                  }
+                                />
+                              </div>
+                              <div className="w-[50%]">
+                                {!promotionDetails.artist.artistImage ? (
+                                  <p className="mb-2 text-sm text-gray-500">
+                                    <span className="font-bold text-text-body">
+                                      Supported Files:
+                                    </span>{" "}
+                                    JPG, PNG
+                                    <br />
+                                    3000 x 3000px minimum
+                                  </p>
+                                ) : (
+                                  <p className="font-bold text-[16px] text-[#494949] truncate">
+                                    <span className="font-semibold">
+                                      {promotionDetails.artist.artistName}
+                                    </span>
+                                    <a
+                                      aria-label="download address image"
+                                      href={promotionDetails.artist.artistImage}
+                                      target="_blank"
+                                      className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
+                                    >
+                                      view
+                                    </a>
+                                  </p>
+                                )}
+                              </div>
+                              <input
+                                id="music_image"
+                                name="music_image"
+                                type="file"
+                                accept="image/png,image/jpeg"
+                                className="hidden"
+                                readOnly
+                                disabled={true}
                               />
-                            </div>
-                            <div className="w-[50%]">
-                              {!promotionDetails.artist.artistImage ? (
-                                <p className="mb-2 text-sm text-gray-500">
-                                  <span className="font-bold text-text-body">
-                                    Supported Files:
-                                  </span>{" "}
-                                  JPG, PNG
-                                  <br />
-                                  3000 x 3000px minimum
-                                </p>
-                              ) : (
-                                <p className="font-bold text-[16px] text-[#494949] truncate">
-                                  <span className="font-semibold">
-                                    {promotionDetails.artist.artistName}
-                                  </span>
-                                  <a
-                                    aria-label="download address image"
-                                    href={promotionDetails.artist.artistImage}
-                                    target="_blank"
-                                    className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
-                                  >
-                                    view
-                                  </a>
-                                </p>
-                              )}
-                            </div>
-                            <input
-                              id="music_image"
-                              name="music_image"
-                              type="file"
-                              accept="image/png,image/jpeg"
-                              className="hidden"
-                              readOnly
-                              disabled={true}
-                            />
-                          </label>
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>
+                    {/* cover art */}
+
+                    {promotionDetails.category ===
+                      promotionCategory.playlistPitch &&
+                      promotionDetails.promotionImage && (
+                        <div className="flex items-center justify-center w-60">
+                          <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                            <div className="flex flex-col max-sm:w-full gap-2">
+                              <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                                PlayList Pitch Image
+                              </h4>
+                              <div className="flex items-center justify-center w-60">
+                                <label
+                                  htmlFor="music_image"
+                                  className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
+                                >
+                                  <div
+                                    className={
+                                      "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100"
+                                    }
+                                  >
+                                    <Image
+                                      src={promotionDetails.promotionImage}
+                                      width={60}
+                                      height={60}
+                                      alt="music note icon"
+                                      className={
+                                        " w-full object-cover min-w-15 h-15"
+                                      }
+                                    />
+                                  </div>
+                                  <div className="w-[50%]">
+                                    <p className="font-bold text-[16px] text-[#494949] truncate">
+                                      <a
+                                        aria-label="download address image"
+                                        href={promotionDetails.promotionImage}
+                                        target="_blank"
+                                        className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
+                                      >
+                                        view
+                                      </a>
+                                    </p>
+                                  </div>
+                                  <input
+                                    id="music_image"
+                                    name="music_image"
+                                    type="file"
+                                    accept="image/png,image/jpeg"
+                                    className="hidden"
+                                    readOnly
+                                    disabled={true}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    {promotionDetails.category ===
+                      promotionCategory.onlinePress && (
+                      <div className="flex items-center justify-center w-60">
+                        <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                          <div className="flex flex-col max-sm:w-full gap-2">
+                            <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                              Online Press Image
+                            </h4>
+                            <div className="flex items-center justify-center w-60">
+                              <label
+                                htmlFor="music_image"
+                                className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
+                              >
+                                <div
+                                  className={
+                                    "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100"
+                                  }
+                                >
+                                  <Image
+                                    src={promotionDetails.promotionImage}
+                                    width={60}
+                                    height={60}
+                                    alt="music note icon"
+                                    className={
+                                      " w-full object-cover min-w-15 h-15"
+                                    }
+                                  />
+                                </div>
+                                <div className="w-[50%]">
+                                  <p className="font-bold text-[16px] text-[#494949] truncate">
+                                    <a
+                                      aria-label="download address image"
+                                      href={promotionDetails.promotionImage}
+                                      target="_blank"
+                                      className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
+                                    >
+                                      view
+                                    </a>
+                                  </p>
+                                </div>
+                                <input
+                                  id="music_image"
+                                  name="music_image"
+                                  type="file"
+                                  accept="image/png,image/jpeg"
+                                  className="hidden"
+                                  readOnly
+                                  disabled={true}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -455,8 +896,8 @@ export default function Page({
                 {/* Reject Modal Content */}
                 <div className="p-6">
                   <p className="text-gray-600 mb-4">
-                    Please select a rejectReason for rejecting this promotion and
-                    add any additional details to help the artist make
+                    Please select a reason for rejecting this promotion
+                    and add any additional details to help the artist make
                     corrections.
                   </p>
                   <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
@@ -532,7 +973,9 @@ export default function Page({
                     </button>
                     <button
                       onClick={handleRejectPromotion}
-                      disabled={!rejectForm.rejectMessage || !rejectForm.rejectReason}
+                      disabled={
+                        !rejectForm.rejectMessage || !rejectForm.rejectReason
+                      }
                       className="px-5 py-2.5 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                     >
                       Reject Request

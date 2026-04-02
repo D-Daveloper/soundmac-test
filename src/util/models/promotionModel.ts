@@ -171,7 +171,33 @@ export interface IPromotion extends Document {
   endDate: Date;
   promotionStatus: "pending" | "approved" | "completed";
   amount: number;
-  pitchPlayListDetails: typeof pitchPlaylistDetails;
+  pitchPlayListDetails: {
+    label: string;
+    upc: string;
+    featuredArtist: (typeof featuredArtistSchema)[];
+    artistGender: string;
+    trackLanguage: string;
+    country: string;
+    location: string;
+    releaseDate: string;
+    releaseTime: string;
+    priority: string;
+    configuration: string;
+    typeOfRelease: string;
+    focusTrack: string;
+    focusTrackIsrc: string;
+    genre: string;
+    subgenres: string[];
+    mood: string;
+    editorialTeams: string;
+    facebookProfileLink: string;
+    instagramProfileLink: string;
+    twitterProfileLink: string;
+    youtubeProfileLink: string;
+    tiktokProfileLink: string;
+    marketingDetail: string;
+    comment: string;
+  };
 }
 
 // Schema definition
@@ -196,7 +222,7 @@ const PromotionSchema = new Schema<IPromotion>(
       type: String,
       required: [
         function (this: any) {
-          return this.get("category") === "Online-press";
+          return this.get("category") === promotionCategory.onlinePress;
         },
         "Provide the promotion image!",
       ],

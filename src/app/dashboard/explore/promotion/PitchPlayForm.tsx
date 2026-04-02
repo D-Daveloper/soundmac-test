@@ -35,9 +35,9 @@ type pitchPlayFormType = {
   // Required fields
   artist: string;
   // release_date: Date | undefined;
-  promotion_package: string;
-  promotion_type: string;
-  release_title: string;
+  promotionPackage: string;
+  promotionType: string;
+  releaseTitle: string;
   priority: string;
   configuration: string;
   type_of_release: string;
@@ -54,7 +54,7 @@ type pitchPlayFormType = {
   release_time: string;
   subgenres: string[];
   moods: string;
-  promotion_image?: File | null;
+  promotionImage?: File | null;
   comment?: string;
   facebook_profile_link?: string;
   instagram_profile_link?: string;
@@ -242,9 +242,9 @@ const PitchPlayForm = () => {
   const [image, setImage] = useState("");
   const [promotionForm, setPromotionForm] = React.useState<pitchPlayFormType>({
     artist: "",
-    promotion_package: "",
-    promotion_type: "",
-    release_title: "",
+    promotionPackage: "",
+    promotionType: "",
+    releaseTitle: "",
     priority: "",
     configuration: "",
     type_of_release: "",
@@ -256,7 +256,7 @@ const PitchPlayForm = () => {
     release_time: "",
     subgenres: [],
     moods: "",
-    promotion_image: null,
+    promotionImage: null,
     comment: "",
     facebook_profile_link: "",
     instagram_profile_link: "",
@@ -291,9 +291,9 @@ const PitchPlayForm = () => {
     isError: releaseTrackNamesIsError,
     refetch: releaseTrackNamesRefetch,
   } = useGetUserReleaseTrackNames(
-    { release_title: promotionForm.release_title },
+    { release_title: promotionForm.releaseTitle },
     {
-      enabled: !!promotionForm.release_title, // ✅ only run if artist exists
+      enabled: !!promotionForm.releaseTitle, // ✅ only run if artist exists
     },
   );
 
@@ -310,14 +310,14 @@ const PitchPlayForm = () => {
     try {
       setIsSubmittingForm(true);
       console.log(promotionForm);
-      promotionForm.promotion_type = promotionCategory.playlistPitch;
+      promotionForm.promotionType = promotionCategory.playlistPitch;
       if (!promotionForm.artist) {
         toast.warn("Artist is required.");
         return;
-      } else if (!promotionForm.release_title) {
+      } else if (!promotionForm.releaseTitle) {
         toast.warn("Release Title is required.");
         return;
-      } else if (!promotionForm.promotion_type) {
+      } else if (!promotionForm.promotionType) {
         toast.warn("Please select a package type.");
         return;
       } else if (!promotionForm.priority) {
@@ -361,9 +361,9 @@ const PitchPlayForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, files } = e.target;
-    if (name === "promotion_image") {
+    if (name === "promotionImage") {
       const file = files && files.length ? files[0] : null;
-      setPromotionForm((prev) => ({ ...prev, promotion_image: file }));
+      setPromotionForm((prev) => ({ ...prev, promotionImage: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -385,7 +385,7 @@ const PitchPlayForm = () => {
                 <button
                   aria-label="go back"
                   onClick={() => {
-                    deleteParam("promotion_type");
+                    deleteParam("promotionType");
                   }}
                 >
                   <Image
@@ -432,13 +432,13 @@ const PitchPlayForm = () => {
                         </div>
                         <div className="flex items-center justify-center w-80">
                           <label
-                            htmlFor="promotion_image"
+                            htmlFor="promotionImage"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                           >
                             <div
                               className={
                                 "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                                (!promotionForm.promotion_image &&
+                                (!promotionForm.promotionImage &&
                                   " bg-neutral-50 ")
                               }
                             >
@@ -448,14 +448,14 @@ const PitchPlayForm = () => {
                                 height={60}
                                 alt="music note icon"
                                 className={
-                                  promotionForm.promotion_image
+                                  promotionForm.promotionImage
                                     ? " w-full object-cover min-w-15 h-15"
                                     : undefined
                                 }
                               />
                             </div>
                             <div className="w-[50%]">
-                              {!promotionForm.promotion_image ? (
+                              {!promotionForm.promotionImage ? (
                                 <p className="mb-2 text-sm text-gray-500">
                                   <span className="font-bold text-text-body">
                                     Supported Files:
@@ -467,14 +467,14 @@ const PitchPlayForm = () => {
                               ) : (
                                 <p className="font-bold text-[16px] text-[#494949] truncate">
                                   <span className="font-semibold">
-                                    {promotionForm.promotion_image?.name}
+                                    {promotionForm.promotionImage?.name}
                                   </span>
                                 </p>
                               )}
                             </div>
                             <input
-                              id="promotion_image"
-                              name="promotion_image"
+                              id="promotionImage"
+                              name="promotionImage"
                               type="file"
                               accept="image/png,image/jpeg"
                               className="hidden"
@@ -529,16 +529,16 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        selected={promotionForm.release_title}
+                        selected={promotionForm.releaseTitle}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
                             ...prev,
-                            release_title: t,
+                            releaseTitle: t,
                           }))
                         }
                         placeholder="Select Release..."
                         options={releaseNamesData || []}
-                        name="release_title"
+                        name="releaseTitle"
                       />
                     </div>
                   </div>
@@ -558,7 +558,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        // isDisabled={!promotionForm.release_title}
+                        // isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.type_of_release}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
@@ -588,7 +588,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        isDisabled={!promotionForm.release_title}
+                        isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.focus_track}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
@@ -618,7 +618,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        // isDisabled={!promotionForm.release_title}
+                        // isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.priority}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
@@ -648,7 +648,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        // isDisabled={!promotionForm.release_title}
+                        // isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.editorial_teams}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
@@ -678,7 +678,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        // isDisabled={!promotionForm.release_title}
+                        // isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.moods}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({
@@ -708,7 +708,7 @@ const PitchPlayForm = () => {
                     </p>
                     <div className="w-full">
                       <Select
-                        // isDisabled={!promotionForm.release_title}
+                        // isDisabled={!promotionForm.releaseTitle}
                         selected={promotionForm.artist_gender || ""}
                         setSelected={(t) =>
                           setPromotionForm((prev) => ({

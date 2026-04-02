@@ -126,8 +126,17 @@ const RadioPromotionForm = () => {
               <div className="mt-10 flex flex-col gap-5 mb-10">
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Artist
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select
@@ -142,8 +151,17 @@ const RadioPromotionForm = () => {
                     </div>
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Release
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select
@@ -163,8 +181,17 @@ const RadioPromotionForm = () => {
                 </div>
                 <div>
                   <div className="flex gap-1 sm:text-sm text-lg">
-                    <p className=" capitalize font-medium">
+                    <p className=" capitalize font-medium flex gap-2">
                       Music Description{" "}
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                   </div>
 
@@ -182,8 +209,17 @@ const RadioPromotionForm = () => {
                 </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Package
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select

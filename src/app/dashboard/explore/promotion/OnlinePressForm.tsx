@@ -149,8 +149,17 @@ const OnlinePressForm = () => {
               <div className="mt-10 flex flex-col gap-5 mb-10">
                 {/* cover art */}
                 <div>
-                  <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                  <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading flex gap-2">
                     Upload an Image of the Artist
+                    <Image
+                      priority={false}
+                      loading="lazy"
+                      src="/required.svg"
+                      alt="a star marking this field as required"
+                      width={0}
+                      height={0}
+                      className="w-2 -mt-3"
+                    />
                   </h1>
                   <div className="flex items-center justify-center w-60">
                     <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
@@ -213,8 +222,17 @@ const OnlinePressForm = () => {
                 </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Artist
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select
@@ -229,8 +247,17 @@ const OnlinePressForm = () => {
                     </div>
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Release
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select
@@ -250,8 +277,17 @@ const OnlinePressForm = () => {
                 </div>
                 <div>
                   <div className="flex gap-1 sm:text-sm text-lg">
-                    <p className=" capitalize font-medium">
+                    <p className=" capitalize font-medium flex gap-2">
                       Music Description{" "}
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                   </div>
 
@@ -269,8 +305,17 @@ const OnlinePressForm = () => {
                 </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg">
+                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
                       Package
+                      <Image
+                        priority={false}
+                        loading="lazy"
+                        src="/required.svg"
+                        alt="a star marking this field as required"
+                        width={0}
+                        height={0}
+                        className="w-2 -mt-3"
+                      />
                     </p>
                     <div className="w-full">
                       <Select

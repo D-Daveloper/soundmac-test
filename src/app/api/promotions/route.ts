@@ -81,16 +81,22 @@ export async function POST(req: Request) {
       releaseTitle == null ||
       promotionType == null
     ) {
+      console.log("1");
+      
       Uploaderror = { msg: "Please provide all required fields", status: 400 };
     } else if (
       (priority == null || editorialTeams == null || marketingDetail == null) &&
       promotionType === promotionCategory.playlistPitch
     ) {
+      console.log("2");
+      
       Uploaderror = { msg: "Please provide all required fields", status: 400 };
     } else if (
       releaseDescription == null &&
       promotionType != promotionCategory.playlistPitch
     ) {
+      console.log("3");
+      
       Uploaderror = { msg: "Please provide all required fields", status: 400 };
     } else if (typeof artist != "string") {
       Uploaderror = { msg: "Artist must be a string", status: 400 };
@@ -214,25 +220,20 @@ export async function POST(req: Request) {
       error: "Failed to upload image",
     };
     if (
-      promotionType === promotionCategory.onlinePress ||
-      (promotionType === promotionCategory.playlistPitch && promotionImage)
+      (promotionType === promotionCategory.onlinePress ||
+      promotionType === promotionCategory.playlistPitch) && promotionImage
     ) {
       try {
-        const buffer = Buffer.from(await promotionImage!.arrayBuffer());
+        const buffer = Buffer.from(await promotionImage.arrayBuffer());
         // ---- Resize to distributor standard ----
-        const resized = await sharp(buffer)
-          .resize(3000, 3000, { fit: "cover" })
-          .jpeg({ quality: 90 })
-          .toBuffer(); //resize the image for dpm
-        console.log("buffer", resized);
 
-        const imageType = promotionImage!.type.split("/")[1]; //get the image extension
+        const imageType = promotionImage.type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `$${promotionType}/${user!.email}/${userArtist.artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const imageStorageLocation = `promotions/$${promotionType}/${user!.email}/${userArtist.artistName}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
         imageUrl = await uploadImage(
           imageType,
-          resized as Buffer<ArrayBuffer>,
+          buffer,
           imageStorageLocation,
         ); //send image to aws
         console.log(imageUrl);
