@@ -151,11 +151,11 @@ const UserInfo = ({ userId }: { userId: string }) => {
             <div className="flex gap-15 mt-10">
               <div className="flex flex-col w-[30%] max-sm:w-full">
                 <Input
-                  value={userDetails.label}
+                  value={userDetails.data.label}
                   title={"Label name"}
                   type={"text"}
-                  name={"artist"}
-                  placeholder={"Enter Artist Name"}
+                  name={"label"}
+                  placeholder={"Enter Label Name"}
                   updateValue={(e) => {}}
                   required={false}
                   disabled={true}

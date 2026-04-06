@@ -154,7 +154,7 @@ export const verificationDetails = new mongoose.Schema(
       default: "pending",
     },
   },
-  { _id: false, strict: "throw", timestamps:true },
+  { _id: false, strict: "throw", timestamps: true },
 );
 
 export interface IUser extends mongoose.Document {
@@ -171,13 +171,14 @@ export interface IUser extends mongoose.Document {
   warning: number;
   banned: boolean;
   type:
-    | "EMERGING_ARTIST"
-    | "MAJOR_LABEL"
-    | "FREE_ARTIST"
-    | "INDEPENDENT_ARTIST"
-    | "INDIE_LABEL";
+  | "EMERGING_ARTIST"
+  | "MAJOR_LABEL"
+  | "FREE_ARTIST"
+  | "INDEPENDENT_ARTIST"
+  | "INDIE_LABEL";
   role: "user" | "admin" | "super_admin";
-  label: string | null;
+  label: string;
+  labelId: string | null;
   refreshToken: string | null;
   refreshTokenExpires: Date | null;
   isrc_count: number | null;
@@ -256,7 +257,7 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
     },
-    userStatus:{
+    userStatus: {
       type: String,
       enum: ["active", "inactive"],
       default: "active",
@@ -343,7 +344,17 @@ const UserSchema = new mongoose.Schema(
       type: String,
       minlength: 2,
       maxlength: 32,
-      default: null,
+      default: "Independent Artist",
+    },
+    labelId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Label",
+      required: [
+        function (this: any) {
+          return this.get("label") !== "Independent Artist";
+        },
+        "Label ID is required",
+      ],
     },
     refreshToken: {
       type: String,

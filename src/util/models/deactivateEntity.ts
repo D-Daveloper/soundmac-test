@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 interface IEntityDeactivation extends Document {
-  entityType: "user" | "artist",
+  entityType: "user" | "artist" | "label",
   entityId: mongoose.Schema.Types.ObjectId;
   deactivationType: string;
   deactivationReason: string;
@@ -22,11 +22,11 @@ const entityDeactivationSchema: Schema = new Schema<IEntityDeactivation>(
     entityType: {
       type: String,
       enum: {
-        values: ["user", "artist"],
+        values: ["user", "artist", "label"],
         message: "{VALUE} is not a valid entry",
       },
       required: [true, "add the entity type is required"],
-      maxlength: [50, "the entity type cannot exceed 50 characters"],
+      maxlength: [10, "the entity type cannot exceed 50 characters"],
     },
     entityId: {
       type: mongoose.Schema.Types.ObjectId,

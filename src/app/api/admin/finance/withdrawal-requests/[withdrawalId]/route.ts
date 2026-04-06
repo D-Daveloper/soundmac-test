@@ -76,7 +76,7 @@ export async function POST(
     if (body.requestType == "approved") {
       withdrawalUpdate = withDrawalModel.findByIdAndUpdate(
         withdrawalId,
-        { withdrawalStatus: body.requestType },
+        { withdrawalStatus: body.requestType,approvedBy: admin._id, paidAt: new Date() },
         { runValidators: true },
       );
 
@@ -100,7 +100,7 @@ export async function POST(
     } else if (body.requestType == "rejected") {
       withdrawalUpdate = withDrawalModel.findByIdAndUpdate(
         withdrawalId,
-        { withdrawalStatus: body.requestType },
+        { withdrawalStatus: body.requestType,approvedBy: admin._id },
         { runValidators: true },
       );
 

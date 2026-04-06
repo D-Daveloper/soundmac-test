@@ -643,7 +643,7 @@ const limit = parseInt(process.env.SONG_LIMIT || "6", 10);
 
 export async function GET(req: Request) {
   try {
-    let songs: songFromApi[] = [];
+    let songs: any[] = [];
     let totalCount = 0;
     await dbConnect();
     const userData = await verifyJWT();
@@ -679,7 +679,9 @@ export async function GET(req: Request) {
       .collation({ locale: "en", strength: 2 })
       .sort(sortQuery)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit)
+      .populate("user","label")
+      .lean();
     // const exec = await SongModel.find(query)
     //   .collation({ locale: "en", strength: 2 })
     //   .sort(sortQuery)

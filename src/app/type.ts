@@ -1,9 +1,9 @@
 import { IArtist } from "@/util/models/artistModel";
 import { USER } from "./context/userContext/types";
 import { nextReleases } from "./utils/constants";
-import { accountDetails, IUser } from "@/util/models/userModel";
+import { IUser } from "@/util/models/userModel";
 import { ISupportRequest } from "@/util/models/supportRequestsModel";
-import { IPromotion } from "@/util/models/promotionModel";
+import { ILabel } from "@/util/models/labelModel";
 
 export interface AYNCardProps {
   index: number;
@@ -175,6 +175,9 @@ interface BaseApiResponseForRelease {
   createdAt: Date;
   updatedAt: Date;
   catalogNumber: string;
+  user:{
+    label:string;
+  };
 }
 
 export interface songFromApi extends BaseApiResponseForRelease {
@@ -499,5 +502,34 @@ export type PromotionEmailBody = {
   guidelines_url: string;
   start_date: string;
   end_date: string;
-  promotion_url:string;
+  promotion_url: string;
+};
+
+export type CreateLabelForm = {
+  label_name: string;
+  first_name: string;
+  last_name: string;
+  instagram_profile_link: string;
+  twitter_profile_link: string;
+  linkedin_profile_link: string;
+  tiktok_profile_link: string;
+  label_logo: null | File;
+  wants_to_change_name: boolean;
+};
+
+type AllLabel = ILabel & { artistCount: number } & {
+  user: { email: string; firstName: string; lastName: string };
+};
+
+export type AllLabelResponse = {
+  data: AllLabel[];
+  nextCursor?: string;
+  hasMore: boolean;
+  msg: string;
+};
+
+export type labelResponse = {
+  data: ILabel & { artists: Artist[] } & { user: { email: string; firstName: string; lastName: string } };
+  nextCursor?: string;
+  hasMore: boolean;
 };

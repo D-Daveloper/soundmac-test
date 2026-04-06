@@ -6,7 +6,7 @@ import React, { useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import { useAuthUser } from "@/util/customHooks/useQueries";
@@ -19,7 +19,7 @@ const sidebarComponents = [
         title: "upload release",
         icon: "/add.svg",
         href: "/dashboard/music/uploadMusic",
-        query: "upload",
+        query: "uploadMusic",
       },
       {
         title: "manage release",
@@ -38,7 +38,13 @@ const sidebarComponents = [
         title: "create artist",
         icon: "/add.svg",
         href: "/dashboard/artist/createArtist",
-        query: "create",
+        query: "createArtist",
+      },
+      {
+        title: "create label",
+        icon: "/add.svg",
+        href: "/dashboard/artist/createLabel",
+        query: "createlabel",
       },
       {
         title: "manage artist",
@@ -46,12 +52,12 @@ const sidebarComponents = [
         href: "/dashboard/artist/manageArtist",
         query: "manageArtist",
       },
-      {
-        title: "collaborations",
-        icon: "/likeshapes.svg",
-        href: "",
-        query: "collaboration",
-      },
+      // {
+      //   title: "collaborations",
+      //   icon: "/likeshapes.svg",
+      //   href: "",
+      //   query: "collaboration",
+      // },
     ],
     // isActive: "",
     // setIsActive: () => setIsActive("artists"),
@@ -63,7 +69,7 @@ const sidebarComponents = [
         title: "song performance",
         icon: "/musicplay.svg",
         href: "",
-        query: "song",
+        query: "songPerformance",
       },
     ],
     // isActive: "",
@@ -76,7 +82,7 @@ const sidebarComponents = [
         title: "sales report",
         icon: "/musicplay.svg",
         href: "/dashboard/finance/salesReport",
-        query: "sales_report",
+        query: "salesReport",
       },
     ],
     // isActive: "",
@@ -117,7 +123,8 @@ const profileLinks = [
   },
 ];
 
-const layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const router = useRouter();
   const { data, isLoading } = useAuthUser();
   const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
@@ -243,7 +250,10 @@ const layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
+                onClick={() => {
+                  dashboardContext?.setOpenUpgradePopUp(false);
+                  router.push("/dashboard");
+                }}
                 className={
                   "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm  bg-transparent border-2 border-primary-500 text-[#494949]"
                 }
@@ -326,4 +336,4 @@ const layout = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export default layout;
+export default Layout;

@@ -494,21 +494,28 @@ const Album = () => {
                       </span>
                       {new Date(song.releaseDate).toLocaleDateString()}
                     </p>
-                    <p
-                      className={
-                        "font-bold leading-[18px] tracking-tighter text-xs capitalize w-fit px-4 py-1 rounded-full " +
-                        (song.releaseStatus === "pending" ||
-                        song.releaseStatus === "completed"
-                          ? " text-warning-500 bg-warning-100"
-                          : song.releaseStatus === "approved"
-                            ? " text-success-500 bg-success-100"
-                            : song.releaseStatus === "draft"
-                              ? " text-primary-500 bg-primary-50"
-                              : " text-error-500 bg-error-100")
-                      }
-                    >
-                      {song.releaseStatus}
-                    </p>
+                   <div className="flex items-end">
+                      <p className="">
+                        <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
+                          Label:{" "}
+                        </span>
+                        {song.user.label}
+                      </p>
+                      <p
+                        className={
+                          "ml-auto font-bold leading-[18px] tracking-tighter text-xs capitalize w-fit px-4 py-1 rounded-full h-fit " +
+                          (song.releaseStatus === "pending"
+                            ? " text-warning-500 bg-warning-100"
+                            : song.releaseStatus === "approved"
+                              ? " text-success-500 bg-success-100"
+                              : song.releaseStatus === "draft"
+                                ? " text-primary-500 bg-primary-50"
+                                : " text-error-500 bg-error-100")
+                        }
+                      >
+                        {song.releaseStatus}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleArtistOptionChange(index)}

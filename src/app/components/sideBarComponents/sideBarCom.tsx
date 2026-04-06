@@ -41,7 +41,7 @@ const sideBarCom = (props: Props) => {
         <div
           className={
             " transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (pathname.includes(props.title.toLocaleLowerCase()) || open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[100px] h-[100px]": props.title === "artist"? " max-h-[160px] h-[160px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
+            (pathname.includes(props.title.toLocaleLowerCase()) || open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[100px] h-[100px]": props.title === "artist"? " max-h-[200px] h-[200px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
           }
         >
           {props.list.map((section, index) => (
@@ -57,8 +57,7 @@ const sideBarCom = (props: Props) => {
                 " transition-all duration-300 flex gap-5 font-extralight capitalize h-auto w-full px-3 py-2 rounded-lg " +
                 ((pathname.includes(props.title.toLocaleLowerCase()) || open)
                   ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99 "
-                  : " opacity-0 pointer-events-none ") + (pathname.includes(props.title.toLocaleLowerCase()
-                  +"/"+section.title.split(" ")[0].toLocaleLowerCase())? "bg-primary-500/90" : "bg-transparent")
+                  : " opacity-0 pointer-events-none ") + (pathname.toLocaleLowerCase().includes(section.query.toLocaleLowerCase())? "bg-primary-500/90" : "bg-transparent")
               }
             >
               <Image

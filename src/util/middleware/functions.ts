@@ -3821,3 +3821,16 @@ export function replaceTemplatePlaceholders(
   
   return result;
 }
+
+export function parseLabelFormData(formData: FormData) {
+  return {
+    label_name: formData.get("label_name") as string | null,
+    first_name: formData.get("first_name") as string | null, 
+    last_name: formData.get("last_name") as string | null, 
+    linkedin_profile_link: formData.get("linkedin_profile_link") as string | null, 
+    twitter_profile_link: formData.get("twitter_profile_link") as string | null, 
+    tiktok_profile_link: formData.get("tiktok_profile_link") as string | null, 
+    instagram_profile_link: formData.get("instagram_profile_link") as string | null, 
+    label_logo: formData.get("label_logo") as File | null,
+  };
+}

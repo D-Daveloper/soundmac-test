@@ -15,7 +15,6 @@ import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
 import Artist from "@/util/models/artistModel";
 import AlbumModel from "@/util/models/AlbumModel";
-import ArtistDeactivation from "@/util/models/deactivateEntity";
 import UserNotification from "@/util/models/userNotification";
 import EntityDeactivation from "@/util/models/deactivateEntity";
 
@@ -150,14 +149,7 @@ export async function PATCH(
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-    await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
-    if (!user) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (user.role != "admin" && user.role != "super_admin") {
-      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
-    }
     if (!artistId || !Types.ObjectId.isValid(artistId)) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body) {
@@ -166,6 +158,15 @@ export async function PATCH(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (typeof body.spotifyId != "string" && body.spotifyId) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    }
+    
+    await dbConnect();
+
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    if (!user) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    } else if (user.role != "admin" && user.role != "super_admin") {
+      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
     const artist = await Artist.findById(artistId).lean();
 
@@ -235,7 +236,7 @@ export async function PUT(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const admin = userJwt.user ? await User.findById(userJwt.user) : null;
+    const admin = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!admin) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (admin.role != "admin" && admin.role != "super_admin") {
@@ -260,7 +261,7 @@ export async function PUT(
     });
     const deactivateEmail: DetactivateEmail = {
       artist_name: artist.artistName, // "Artist Name"
-      first_name:"",
+      first_name: "",
       deactivation_type: body.deactivateOption, // Dropdown: "Temporary Suspension", etc.
       deactivation_reason: body.deactivateReason, // Dropdown: "Copyright Infringement", etc.
       additional_notes: body.deactivateMessage, // Text area content
@@ -278,7 +279,8 @@ export async function PUT(
       sendEmail(artist.user.email!, "Artist Deactivation", deactivationHtml),
       deactivateArtist,
       EntityDeactivation.create({
-        entityIdId: artist._id,
+        entityType: "artist",
+        entityId: artist._id,
         deactivationType: body.deactivateOption,
         deactivationReason: body.deactivateReason,
         additionalNotes: body.deactivateMessage,
@@ -346,7 +348,7 @@ export async function POST(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (user.role != "admin" && user.role != "super_admin") {

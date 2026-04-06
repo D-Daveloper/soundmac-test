@@ -191,7 +191,7 @@ const limit = parseInt(process.env.SONG_LIMIT || "6", 10);
 
 export async function GET(req: Request) {
   try {
-    let albums: albumFromApi[] = [];
+    let albums: any[] = [];
     let totalCount = 0;
     await dbConnect();
     const userData = await verifyJWT();
@@ -224,7 +224,8 @@ export async function GET(req: Request) {
       .collation({ locale: "en", strength: 2 })
       .sort(sortQuery)
       .skip((page - 1) * limit)
-      .limit(limit);
+      .limit(limit).populate("user", "label")
+      .lean();
     totalCount = await AlbumModel.countDocuments(query);
 
     return NextResponse.json(

@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -331,5 +331,22 @@ export const getPromotionDetails = async (
   params:{promotionId:string}
 ): Promise<IPromotion> => {
   const res = await api.get<Promise<IPromotion>>("admin/more/promotions/"+params.promotionId,);
+  return res.data;
+};
+export const getAlllabels = async (
+  api: AxiosInstance,
+    params:{ cursor:string,labelName:string,limit:string,labelStatus:string}
+
+): Promise<AllLabelResponse> => {
+  const res = await api.get<Promise<AllLabelResponse>>("admin/artist/all-labels",{params});
+  return res.data;
+};
+
+export const getlabel = async (
+  api: AxiosInstance,
+  params:{labelId:string }
+
+): Promise<labelResponse> => {
+  const res = await api.get<Promise<labelResponse>>("admin/artist/all-labels/" + params.labelId);
   return res.data;
 };

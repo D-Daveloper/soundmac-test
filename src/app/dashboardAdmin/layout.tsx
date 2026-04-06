@@ -40,7 +40,7 @@ const sidebarComponents = [
       {
         title: "All Labels",
         icon: "/profile2user.svg",
-        href: "/dashboardAdmin/artist/manageArtist",
+        href: "/dashboardAdmin/artist/all-labels?labelStatus=active",
         query: "manageArtist",
       },
       {

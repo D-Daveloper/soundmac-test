@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 export const WithDrawalSchema = new mongoose.Schema(
   {
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Provide an admin!"],
+    },
     amount: { type: String, required: [true, "Please Provide an amount"] },
     withdrawalStatus: {
       type: String,
@@ -33,6 +38,7 @@ WithDrawalSchema.index({
   user: 1,
   createdAt: -1,
 });
+const withDrawalModel = mongoose.models?.withdrawals ||
+  mongoose.model("withdrawals", WithDrawalSchema);
 
-export default mongoose.models?.withDrawalModel ||
-  mongoose.model("withDrawalModel", WithDrawalSchema);
+export default withDrawalModel;

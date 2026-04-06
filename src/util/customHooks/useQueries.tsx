@@ -12,6 +12,7 @@ import {
   getAlbums,
   getAlbumTracks,
   getAllArtists,
+  getAlllabels,
   getAllPromotions,
   getAllReleases,
   getAllSupportRequests,
@@ -23,6 +24,7 @@ import {
   getArtistStats,
   getCurrentUser,
   getDashboard,
+  getlabel,
   getListOfBanksFromPaystack,
   getPromotionData,
   getPromotionDetails,
@@ -43,10 +45,12 @@ import {
   AdminWithdrawalDetailsResponse,
   albumFromApi,
   AllArtistResponse,
+  AllLabelResponse,
   AllSupportRequestsResponse,
   Artist,
   ArtistDetails,
   ArtistStat,
+  labelResponse,
   PAGINATION,
   PayStackBankListResponse,
   ReleaseRequestResponse,
@@ -587,6 +591,35 @@ export function useGetPromotionDetails(params: { promotionId: string }) {
   return useQuery<IPromotion, Error>({
     queryKey: ["promotionDetails", params.promotionId],
     queryFn: async () => getPromotionDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+export const useGetAllLabels = (params: { labelName: string,limit:string,labelStatus:string }) => {
+  const api = UseAxios();
+
+  return useInfiniteQuery<AllLabelResponse, Error>({
+    queryKey: ["admin-all-labels", params.labelName,params.labelStatus],
+    queryFn: async ({ pageParam }) =>
+      getAlllabels(api, { ...params, cursor: pageParam as string }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+};
+export function useGetLabelDetails(params: { labelId: string }) {
+  const api = UseAxios();
+  return useQuery<labelResponse, Error>({
+    queryKey: ["labelDetails", params.labelId],
+    queryFn: async () => getlabel(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),

@@ -1,99 +1,88 @@
+import {
+  DetactivateEmail,
+  sendUserNotificationEmailType,
+} from "@/app/type";
 import dbConnect from "@/util/db";
+import {
+  artistDeactivationEmail,
+  sendUserNotificationEmail,
+} from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
+import sendEmail from "@/util/sendMail/sendEmail";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
-import SongModel from "@/util/models/songModel";
 import Artist from "@/util/models/artistModel";
 import UserNotification from "@/util/models/userNotification";
-import { DetactivateEmail, sendUserNotificationEmailType } from "@/app/type";
-import {  sendUserNotificationEmail, userDeactivationEmail } from "@/util/middleware/functions";
-import sendEmail from "@/util/sendMail/sendEmail";
 import EntityDeactivation from "@/util/models/deactivateEntity";
+import Label from "@/util/models/labelModel";
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ userId: string }> },
+export async function GET(req: Request, { params }: { params: Promise<{ labelId: string }> },
 ) {
   try {
-    const { userId } = await params;
+    const { labelId } = await params;
 
     // Validate input before hitting auth/DB
-    if (!userId || !Types.ObjectId.isValid(userId)) {
+    if (!labelId || !Types.ObjectId.isValid(labelId)) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
 
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
     await dbConnect();
 
-    const admin = userJwt.user
-      ? await User.findById(userJwt.user).lean()
-      : null;
+    const admin = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!admin) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    }
-    if (admin.role !== "admin" && admin.role !== "super_admin") {
+    } else if (admin.role != "admin" && admin.role != "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    const userProjection = {
-      firstName: 1,
-      lastName: 1,
-      email: 1,
-      profilePic: 1,
-      type: 1,
-      referral_code: 1, // Optional field
-      country: 1,
-      updatedAt: 1,
-      accountDetails: 1,
-      verificationDetails: 1,
-      subscriptionDetails: 1,
-      label: 1,
-      createdAt: 1,
-    };
+    const label = await Label.findById(labelId)
+      .populate("user", "email firstName lastName")
+      .lean();
 
-    const user = User.findById(userId, userProjection).lean();
-    const allArtists = Artist.find(
-      { user: userId },
-      { artistImage: 1, artistName: 1 },
-    ).lean();
-    const songCount = SongModel.countDocuments({ user: userId });
-    const totalEarnings = 100000;
+    let labelWithArtists: any = { ...label };
+    if (label) {
+      const artists = await Artist.find({ user: label.user }).lean();
+      labelWithArtists = { ...label, artists }
 
-    const [userResult, allArtistsResult, SongCountResult] = await Promise.all([
-      user,
-      allArtists,
-      songCount,
-    ]);
-    return NextResponse.json({
-      data: userResult,
-      artists: allArtistsResult,
-      songCount: SongCountResult,
-      totalEarnings,
-      msg: "User data fetched successfully.",
-    });
-  } catch (error) {
-    console.error("Error fetching user data:", error);
+    }
+    // console.log(labelWithArtists);
+
     return NextResponse.json(
-      { msg: "Failed to fetch user data." },
-      { status: 500 },
+      {
+        data: labelWithArtists,
+        msg: label ? "Successful" : "No labels found",
+      },
+      { status: 200 },
     );
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return NextResponse.json({ msg: error.message }, { status: 500 });
+    } else {
+      return NextResponse.json(
+        { msg: "An unknown error occurred" },
+        { status: 500 },
+      );
+    }
   }
 }
 
 export async function PATCH(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: Promise<{ labelId: string }> },
 ) {
-  const { userId } = await params; // Access the dynamic 'id' parameter
+  const { labelId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
-      userType: string;
+      appleId: string;
+      spotifyId: string;
     } = await req.json();
     console.log(body);
 
@@ -104,57 +93,35 @@ export async function PATCH(
     }
     await dbConnect();
 
-    if (!userId || !Types.ObjectId.isValid(userId)) {
-      console.log("no userId");
-
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (!body) {
-      console.log("no request body");
-
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (!body.userType) {
-      console.log("no user type from client");
-
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    }
-
-    const admin = userJwt.user ? await User.findById(userJwt.user) : null;
-    if (!admin) {
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (admin.role != "super_admin") {
+    } else if (user.role != "admin" && user.role != "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
-
-    const user: any = await User.findById(userId).lean();
-    console.log(user);
-
-    if (!user) {
+    if (!labelId || !Types.ObjectId.isValid(labelId)) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (!body) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (typeof body.appleId != "string" && body.appleId) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else if (typeof body.spotifyId != "string" && body.spotifyId) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
+    const artist = await Artist.findById(labelId).lean();
 
-    await Promise.all([
-      User.findByIdAndUpdate(userId, {
-        role: body.userType,
-      }),
-      UserNotification.create({
-        userId: user._id,
-        adminId: admin._id,
-        reason: "User Type Changed",
-        message: "Your User Type have been to " + body.userType,
-        status: "delivered",
-      }),
-    ]).catch((error) => {
-      console.error("Failed to change user role User ", error);
-
+    if (!artist) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
+    } else {
+      await Artist.findByIdAndUpdate(labelId, {
+        appleId: body.appleId,
+        spotifyId: body.spotifyId,
+      });
       return NextResponse.json(
-        { msg: "Failed to change user role User." },
-        { status: 400 },
+        { msg: "Artist details updated successfully" },
+        { status: 201 },
       );
-    });
-    return NextResponse.json(
-      { msg: "User role changed successfully." },
-      { status: 201 },
-    );
+    }
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
@@ -169,9 +136,9 @@ export async function PATCH(
 
 export async function PUT(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: Promise<{ labelId: string }> },
 ) {
-  const { userId } = await params; // Access the dynamic 'id' parameter
+  const { labelId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
       deactivateReason: string;
@@ -187,8 +154,8 @@ export async function PUT(
     }
     await dbConnect();
 
-    if (!userId || !Types.ObjectId.isValid(userId)) {
-      console.log("no userId");
+    if (!labelId || !Types.ObjectId.isValid(labelId)) {
+      console.log("no labelId");
 
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body) {
@@ -209,34 +176,32 @@ export async function PUT(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const admin = userJwt.user ? await User.findById(userJwt.user) : null;
+    const admin = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!admin) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (admin.role != "super_admin") {
+    } else if (admin.role != "admin" && admin.role != "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    const user = await User.findById(userId)
+    const label: any = await Label.findById(labelId)
+      .populate("user", "email")
       .lean();
-    console.log(user);
+    // console.log(label);
 
-    if (!user) {
-      console.log("no user found to deactivate");
-      
+    if (!label) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    if (user.userStatus == "inactive") {
-      console.log("user already deactivated");
+    if (label.labelStatus == "inactive") {
+      console.log("label already deactivated");
       NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const deactivateArtist = User.findByIdAndUpdate(userId, {
-      userStatus: "inactive",
+    const deactivateArtist = Label.findByIdAndUpdate(labelId, {
+      artistStatus: "inactive",
     });
-
     const deactivateEmail: DetactivateEmail = {
-      artist_name: "not applicable", // "Artist Name"
-      first_name: user.firstName, // "user Name"
+      artist_name: label.firstName, // "Artist Name"
+      first_name: "",
       deactivation_type: body.deactivateOption, // Dropdown: "Temporary Suspension", etc.
       deactivation_reason: body.deactivateReason, // Dropdown: "Copyright Infringement", etc.
       additional_notes: body.deactivateMessage, // Text area content
@@ -249,12 +214,13 @@ export async function PUT(
     };
 
     //send mail here
-    const deactivationHtml = userDeactivationEmail(deactivateEmail);
+    const deactivationHtml = artistDeactivationEmail(deactivateEmail);
     await Promise.all([
-      sendEmail(user.email!, "User Deactivation", deactivationHtml),
+      sendEmail(label.user.email!, "Label Deactivation", deactivationHtml),
       deactivateArtist,
       EntityDeactivation.create({
-        entityIdId: user._id,
+        entityType:"label",
+        entityId: label._id,
         deactivationType: body.deactivateOption,
         deactivationReason: body.deactivateReason,
         additionalNotes: body.deactivateMessage,
@@ -287,9 +253,9 @@ export async function PUT(
 
 export async function POST(
   req: Request,
-  { params }: { params: Promise<{ userId: string }> },
+  { params }: { params: Promise<{ labelId: string }> },
 ) {
-  const { userId } = await params; // Access the dynamic 'id' parameter
+  const { labelId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
       notifyUserReason: string;
@@ -304,8 +270,8 @@ export async function POST(
     }
     await dbConnect();
 
-    if (!userId || !Types.ObjectId.isValid(userId)) {
-      console.log("no userId");
+    if (!labelId || !Types.ObjectId.isValid(labelId)) {
+      console.log("no labelId");
 
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body) {
@@ -322,24 +288,25 @@ export async function POST(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const admin = userJwt.user ? await User.findById(userJwt.user) : null;
-    if (!admin) {
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (admin.role != "admin" && admin.role != "super_admin") {
+    } else if (user.role != "admin" && user.role != "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-    const user: any = await User.findById(userId)
+    const label: any = await Label.findById(labelId)
+      .populate("user", "email")
       .lean();
-    console.log(user);
+    console.log(label);
 
-    if (!user) {
+    if (!label) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
     const notificationEmail: sendUserNotificationEmailType = {
-      user_name: user.firstName, // "John Doe"
-      user_email: user.email, // "john@example.com"
+      user_name: label.firstName, // "John Doe"
+      user_email: label.user.email!, // "john@example.com"
       notification_reason: body.notifyUserReason, // Dropdown selection
       additional_message: body.notifyUserMessage, // Text area content
       dashboard_url: "string", // Link to user dashboard
@@ -349,10 +316,10 @@ export async function POST(
     //send mail here
     const notificationHtml = sendUserNotificationEmail(notificationEmail);
     await Promise.all([
-      sendEmail(user.email!, body.notifyUserReason, notificationHtml),
+      sendEmail(label.user.email!, body.notifyUserReason, notificationHtml),
       UserNotification.create({
-        userId: user._id,
-        adminId: admin._id,
+        userId: label.user._id!,
+        adminId: user._id,
         reason: body.notifyUserReason,
         message: body.notifyUserMessage,
         status: "delivered",
