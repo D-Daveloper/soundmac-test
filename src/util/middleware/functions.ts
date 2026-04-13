@@ -1,17 +1,17 @@
 import {
-  AlbumForm,
-  CreateArtistForm,
-  DetactivateEmail,
-  FeaturedArtist,
-  NonRetryableErrorCode,
-  PaymentEmailData,
-  Performer,
-  Producer,
-  rejectEmailProps,
-  sendUserNotificationEmailType,
-  SongForm,
-  SongWriter,
-  TrackForm,
+    AlbumForm,
+    CreateArtistForm,
+    DetactivateEmail,
+    FeaturedArtist,
+    NonRetryableErrorCode,
+    PaymentEmailData,
+    Performer,
+    Producer,
+    rejectEmailProps,
+    sendUserNotificationEmailType,
+    SongForm,
+    SongWriter,
+    TrackForm,
 } from "@/app/type";
 import axios, { AxiosInstance, isAxiosError } from "axios";
 import { addWeeks, subWeeks } from "date-fns";
@@ -37,309 +37,317 @@ import dbConnect from "../db";
 const OtpCharacters = (process.env.OTP_CHARACTERS as string) || "1234567890";
 const otpLength = process.env.OTP_LENGTH as unknown as number;
 export const generateOtp = () => {
-  let otp = "";
-  for (let i = 0; i < otpLength; i++) {
-    const randomIndex = Math.floor(Math.random() * OtpCharacters.length);
-    otp += OtpCharacters.charAt(randomIndex);
-  }
-  return otp;
+    let otp = "";
+    for (let i = 0; i < otpLength; i++) {
+        const randomIndex = Math.floor(Math.random() * OtpCharacters.length);
+        otp += OtpCharacters.charAt(randomIndex);
+    }
+    return otp;
 };
-
-export const isSongFormValid = (form: SongForm): string => {
-  console.log(form);
-  const twoWeeks = addWeeks(new Date(), 2);
-  let oneWeek = null;
-
-  if (form.release_date != undefined)
-    oneWeek = subWeeks(new Date(form.release_date), 1);
-  if (form.title.length < 3 || form.title.length > 32) {
-    return "Song title must be longer than 3 not more than 32";
-  } else if (containsEmoji(form.title)) {
-    return "Song title can not contain emojis";
-  } else if (form.genre === "") {
-    return "Genre is required";
-  } else if (form.language === "") {
-    return "language is required";
-  } else if (
-    form.featured_artist.length > 1 &&
-    form.featured_artist.some((artist) => artist.artistName === "")
-  ) {
-    return "Invalid featured artist.";
-  } else if (
-    form.song_writer.some((artist) => artist.first_name === "") ||
-    form.song_writer.some((artist) => artist.last_name === "")
-  ) {
-    return "song writer is required";
-  } else if (
-    form.performer.some((artist) => artist.name === "") ||
-    form.performer.some((artist) => artist.role === "")
-  ) {
-    return "performer is required";
-  } else if (form.producer.some((artist) => artist.name === "")) {
-    return "producer is required";
-  } else if (form.release_date === undefined) {
-    return "Release date is required";
-  } else if (new Date(form.release_date) < twoWeeks) {
-    return "Release date must be at least two weeks ahead of the upload date";
-  } else if (form.territories.length <= 0) {
-    return "Territories is required";
-  } else if (form.pre_order_check && form.preOrderDate === undefined) {
-    return "Pre order date is required";
-  } else if (oneWeek && form.preOrderDate! > oneWeek) {
-    return "Pre order date must be at least one week before the release date";
-  } else if (form.dsp.length <= 0) {
-    return "DSP is required";
-  } else if (
-    form.old_audio === null &&
-    (form.song_audio == null || !(form.song_audio instanceof File))
-  ) {
-    return "Audio is required";
-  } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
-    return "Starting Clip is required and must be a valid number";
-  } else if (
-    form.old_image === null &&
-    (form.music_image == null || !(form.music_image instanceof File))
-  ) {
-    return "Image is required";
-  } else if (
-    form.another_distribution_check &&
-    (form.isrc === "" || form.upc === "")
-  ) {
-    return "ISRC and UPC is required";
-  } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
-    return "Copy right holder and year is required";
-  } else {
-    return "true";
+// normalize helper
+export const normalize = (str: string) =>
+    str?.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
+// strip quotes helper
+export const stripQuotes = (str: string) =>
+    str?.replace(/["']/g, "");
+export const formatAmount = (amount:string|number)=>{
+    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
   }
+export const isSongFormValid = (form: SongForm): string => {
+    console.log(form);
+    const twoWeeks = addWeeks(new Date(), 2);
+    let oneWeek = null;
+
+    if (form.release_date != undefined)
+        oneWeek = subWeeks(new Date(form.release_date), 1);
+    if (form.title.length < 3 || form.title.length > 32) {
+        return "Song title must be longer than 3 not more than 32";
+    } else if (containsEmoji(form.title)) {
+        return "Song title can not contain emojis";
+    } else if (form.genre === "") {
+        return "Genre is required";
+    } else if (form.language === "") {
+        return "language is required";
+    } else if (
+        form.featured_artist.length > 1 &&
+        form.featured_artist.some((artist) => artist.artistName === "")
+    ) {
+        return "Invalid featured artist.";
+    } else if (
+        form.song_writer.some((artist) => artist.first_name === "") ||
+        form.song_writer.some((artist) => artist.last_name === "")
+    ) {
+        return "song writer is required";
+    } else if (
+        form.performer.some((artist) => artist.name === "") ||
+        form.performer.some((artist) => artist.role === "")
+    ) {
+        return "performer is required";
+    } else if (form.producer.some((artist) => artist.name === "")) {
+        return "producer is required";
+    } else if (form.release_date === undefined) {
+        return "Release date is required";
+    } else if (new Date(form.release_date) < twoWeeks) {
+        return "Release date must be at least two weeks ahead of the upload date";
+    } else if (form.territories.length <= 0) {
+        return "Territories is required";
+    } else if (form.pre_order_check && form.preOrderDate === undefined) {
+        return "Pre order date is required";
+    } else if (oneWeek && form.preOrderDate! > oneWeek) {
+        return "Pre order date must be at least one week before the release date";
+    } else if (form.dsp.length <= 0) {
+        return "DSP is required";
+    } else if (
+        form.old_audio === null &&
+        (form.song_audio == null || !(form.song_audio instanceof File))
+    ) {
+        return "Audio is required";
+    } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+        return "Starting Clip is required and must be a valid number";
+    } else if (
+        form.old_image === null &&
+        (form.music_image == null || !(form.music_image instanceof File))
+    ) {
+        return "Image is required";
+    } else if (
+        form.another_distribution_check &&
+        (form.isrc === "" || form.upc === "")
+    ) {
+        return "ISRC and UPC is required";
+    } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
+        return "Copy right holder and year is required";
+    } else {
+        return "true";
+    }
 };
 
 export const isAlbumFormValid = (form: AlbumForm): string => {
-  console.log(form);
-  const twoWeeks = addWeeks(new Date(), 2);
-  let oneWeek = null;
+    console.log(form);
+    const twoWeeks = addWeeks(new Date(), 2);
+    let oneWeek = null;
 
-  if (form.release_date != undefined)
-    oneWeek = subWeeks(new Date(form.release_date), 1);
-  if (form.title === "") {
-    return "Album title is required";
-  } else if (form.title.length < 3 || form.title.length > 32) {
-    return "Album title must be longer than 3 not more than 32";
-  } else if (form.genre === "") {
-    return "Genre is required";
-  } else if (form.language === "") {
-    return "language is required";
-  } else if (form.artist === "") {
-    return "artist is required";
-  } else if (form.release_date === undefined) {
-    return "Release date is required";
-  } else if (new Date(form.release_date) < twoWeeks) {
-    return "Release date must be at least two weeks ahead of the upload date";
-  } else if (form.territories.length <= 0) {
-    return "Territories is required";
-  } else if (form.pre_order_check && form.preOrderDate === undefined) {
-    return "Pre order date is required";
-  } else if (oneWeek && form.preOrderDate! > oneWeek) {
-    return "Pre order date must be at least one week before the release date";
-  } else if (form.dsp.length <= 0) {
-    return "DSP is required";
-  } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
-    return "Copy right holder and year is required";
-  } else if (
-    (form.old_image === null || form.old_image === undefined) &&
-    (form.music_image == null || !(form.music_image instanceof File))
-  ) {
-    return "Image is required";
-  } else {
-    return "true";
-  }
+    if (form.release_date != undefined)
+        oneWeek = subWeeks(new Date(form.release_date), 1);
+    if (form.title === "") {
+        return "Album title is required";
+    } else if (form.title.length < 3 || form.title.length > 32) {
+        return "Album title must be longer than 3 not more than 32";
+    } else if (form.genre === "") {
+        return "Genre is required";
+    } else if (form.language === "") {
+        return "language is required";
+    } else if (form.artist === "") {
+        return "artist is required";
+    } else if (form.release_date === undefined) {
+        return "Release date is required";
+    } else if (new Date(form.release_date) < twoWeeks) {
+        return "Release date must be at least two weeks ahead of the upload date";
+    } else if (form.territories.length <= 0) {
+        return "Territories is required";
+    } else if (form.pre_order_check && form.preOrderDate === undefined) {
+        return "Pre order date is required";
+    } else if (oneWeek && form.preOrderDate! > oneWeek) {
+        return "Pre order date must be at least one week before the release date";
+    } else if (form.dsp.length <= 0) {
+        return "DSP is required";
+    } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
+        return "Copy right holder and year is required";
+    } else if (
+        (form.old_image === null || form.old_image === undefined) &&
+        (form.music_image == null || !(form.music_image instanceof File))
+    ) {
+        return "Image is required";
+    } else {
+        return "true";
+    }
 };
 
 export const isArtistFormValid = (form: CreateArtistForm): string => {
-  console.log(form);
+    console.log(form);
 
-  if (!form.artist_name) {
-    return "Artist name is required";
-  } else if (form.artist_name.length < 3 || form.artist_name.length > 32) {
-    return "Artist name must be longer than 3 not more than 32";
-  } else if (
-    form.hasPlatformId &&
-    (form.apple_id === "" || form.spotify_id === "")
-  ) {
-    return "Apple ID and or Spotify ID is required";
-  } else if (form.artist_image == null) {
-    return "Image is required";
-  } else {
-    return "true";
-  }
+    if (!form.artist_name) {
+        return "Artist name is required";
+    } else if (form.artist_name.length < 3 || form.artist_name.length > 32) {
+        return "Artist name must be longer than 3 not more than 32";
+    } else if (
+        form.hasPlatformId &&
+        (form.apple_id === "" || form.spotify_id === "")
+    ) {
+        return "Apple ID and or Spotify ID is required";
+    } else if (form.artist_image == null) {
+        return "Image is required";
+    } else {
+        return "true";
+    }
 };
 
 export const isTrackFormValid = (form: TrackForm): string => {
-  console.log(form);
+    console.log(form);
 
-  if (form.artist === "") {
-    return "Artist is is required";
-  } else if (form.genre === "") {
-    return "Genre is required";
-  } else if (form.language === "") {
-    return "language is required";
-  } else if (
-    form.song_writer.some((artist) => artist.first_name === "") ||
-    form.song_writer.some((artist) => artist.last_name === "")
-  ) {
-    return "song writer is required";
-  } else if (
-    form.featured_artist.length > 1 &&
-    form.featured_artist.some((artist) => artist.artistName === "")
-  ) {
-    return "Invalid featured artist.";
-  } else if (
-    form.performer.some((artist) => artist.name === "") ||
-    form.performer.some((artist) => artist.role === "")
-  ) {
-    return "performer is required";
-  } else if (form.producer.some((artist) => artist.name === "")) {
-    return "producer is required";
-  } else if (form.old_audio === null && !form.s3key) {
-    return "Audio is required";
-  } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
-    return "Starting Clip is required and must be a valid number";
-  } else if (
-    form.another_distribution_check &&
-    (form.isrc === "" || form.upc === "")
-  ) {
-    return "ISRC and UPC is required";
-  } else {
-    return "true";
-  }
+    if (form.artist === "") {
+        return "Artist is is required";
+    } else if (form.genre === "") {
+        return "Genre is required";
+    } else if (form.language === "") {
+        return "language is required";
+    } else if (
+        form.song_writer.some((artist) => artist.first_name === "") ||
+        form.song_writer.some((artist) => artist.last_name === "")
+    ) {
+        return "song writer is required";
+    } else if (
+        form.featured_artist.length > 1 &&
+        form.featured_artist.some((artist) => artist.artistName === "")
+    ) {
+        return "Invalid featured artist.";
+    } else if (
+        form.performer.some((artist) => artist.name === "") ||
+        form.performer.some((artist) => artist.role === "")
+    ) {
+        return "performer is required";
+    } else if (form.producer.some((artist) => artist.name === "")) {
+        return "producer is required";
+    } else if (form.old_audio === null && !form.s3key) {
+        return "Audio is required";
+    } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+        return "Starting Clip is required and must be a valid number";
+    } else if (
+        form.another_distribution_check &&
+        (form.isrc === "" || form.upc === "")
+    ) {
+        return "ISRC and UPC is required";
+    } else {
+        return "true";
+    }
 };
 
 export function formatTime(seconds: number) {
-  const minutes = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
 export const buildSort = (sort: string) => {
-  if (sort.startsWith("-")) {
-    return { [sort.substring(1)]: -1 }; // descending
-  }
-  return { [sort]: 1 }; // ascending
+    if (sort.startsWith("-")) {
+        return { [sort.substring(1)]: -1 }; // descending
+    }
+    return { [sort]: 1 }; // ascending
 };
 
 export const handleCopy = async (text: string) => {
-  await navigator.clipboard.writeText(text);
-  toast.info("copied");
+    await navigator.clipboard.writeText(text);
+    toast.info("copied");
 };
 
 export const uploadTrack = async (
-  file: File,
-  upc: string,
-  artist: string,
-  isFromAnotherDistributor: boolean,
-  api: AxiosInstance,
+    file: File,
+    upc: string,
+    artist: string,
+    isFromAnotherDistributor: boolean,
+    api: AxiosInstance,
 ) => {
-  try {
-    // 1. Ask for permission
-    const res = await api.post("/createawssignedurl", {
-      fileType: file.type,
-      fileSize: file.size,
-      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
-      artist,
-      isFromAnotherDistributor,
-    });
+    try {
+        // 1. Ask for permission
+        const res = await api.post("/createawssignedurl", {
+            fileType: file.type,
+            fileSize: file.size,
+            upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+            artist,
+            isFromAnotherDistributor,
+        });
 
-    const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.data;
+        const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.data;
 
-    // 2. Upload directly to S3
-    await axios.put(uploadUrl, file, {
-      headers: { "Content-Type": file.type },
-    });
-    return { upc: upcFromServer, songS3Key: s3Key, error: null, uploadId };
-  } catch (error) {
-    console.log("upload track error function line 181", error);
+        // 2. Upload directly to S3
+        await axios.put(uploadUrl, file, {
+            headers: { "Content-Type": file.type },
+        });
+        return { upc: upcFromServer, songS3Key: s3Key, error: null, uploadId };
+    } catch (error) {
+        console.log("upload track error function line 181", error);
 
-    return {
-      upc: null,
-      songS3Key: null,
-      error: "Something went wrong please try again later!",
-    };
-  }
+        return {
+            upc: null,
+            songS3Key: null,
+            error: "Something went wrong please try again later!",
+        };
+    }
 };
 
 export const uploadAlbumTrack = async (
-  file: File,
-  upc: string,
-  artist: string,
-  api: AxiosInstance,
-  track_number: string,
+    file: File,
+    upc: string,
+    artist: string,
+    api: AxiosInstance,
+    track_number: string,
 ) => {
-  try {
-    // 1. Ask for permission
-    const res = await api.put("/createawssignedurl", {
-      fileType: file.type,
-      fileSize: file.size,
-      upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
-      artist,
-      track_number,
-    });
+    try {
+        // 1. Ask for permission
+        const res = await api.put("/createawssignedurl", {
+            fileType: file.type,
+            fileSize: file.size,
+            upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
+            artist,
+            track_number,
+        });
 
-    const { uploadUrl, s3key, upcFromServer, uploadId } = await res.data;
+        const { uploadUrl, s3key, upcFromServer, uploadId } = await res.data;
 
-    // 2. Upload directly to S3
-    await axios.put(uploadUrl, file, {
-      headers: { "Content-Type": file.type },
-    });
-    console.log("ressss", res);
+        // 2. Upload directly to S3
+        await axios.put(uploadUrl, file, {
+            headers: { "Content-Type": file.type },
+        });
+        console.log("ressss", res);
 
-    return { upc: upcFromServer, songS3Key: s3key, error: null, uploadId };
-  } catch (error) {
-    if (isAxiosError(error)) {
-      return {
-        upc: null,
-        songS3Key: null,
-        error: "Something went wrong please try again later!",
-      };
+        return { upc: upcFromServer, songS3Key: s3key, error: null, uploadId };
+    } catch (error) {
+        if (isAxiosError(error)) {
+            return {
+                upc: null,
+                songS3Key: null,
+                error: "Something went wrong please try again later!",
+            };
+        }
+        console.log("upload track error function line 181", error);
+        toast.error("Something went wrong please try again later!");
+        return {
+            upc: null,
+            songS3Key: null,
+            error: "Something went wrong please try again later!",
+        };
     }
-    console.log("upload track error function line 181", error);
-    toast.error("Something went wrong please try again later!");
-    return {
-      upc: null,
-      songS3Key: null,
-      error: "Something went wrong please try again later!",
-    };
-  }
 };
 
 export const uploadImage = async (
-  fileType: string,
-  buffer: Buffer<ArrayBuffer>,
-  key: string,
+    fileType: string,
+    buffer: Buffer<ArrayBuffer>,
+    key: string,
 ): Promise<{ error: string | null; coverUrl: string | null }> => {
-  try {
-    // const buffer = Buffer.from(await file.arrayBuffer());
+    try {
+        // const buffer = Buffer.from(await file.arrayBuffer());
 
-    // const key = `soundmac4/${folderName}/${fileName}.${
-    //   file.type.split('/')[1]
-    // }`;
+        // const key = `soundmac4/${folderName}/${fileName}.${
+        //   file.type.split('/')[1]
+        // }`;
 
-    await s3.send(
-      new PutObjectCommand({
-        Bucket: process.env.AWS_S3_BUCKET!,
-        Key: key,
-        Body: buffer,
-        ContentType: fileType,
-        ACL: "public-read", // OK for Images
-      }),
-    );
-    return {
-      error: null,
-      coverUrl: `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
-    };
-  } catch (error) {
-    console.log("upload image error", error);
+        await s3.send(
+            new PutObjectCommand({
+                Bucket: process.env.AWS_S3_BUCKET!,
+                Key: key,
+                Body: buffer,
+                ContentType: fileType,
+                ACL: "public-read", // OK for Images
+            }),
+        );
+        return {
+            error: null,
+            coverUrl: `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`,
+        };
+    } catch (error) {
+        console.log("upload image error", error);
 
-    return { error: "Internal Server Error", coverUrl: null };
-  }
+        return { error: "Internal Server Error", coverUrl: null };
+    }
 };
 // import { S3Client } from "@aws-sdk/client-s3";
 // import { Upload } from "@aws-sdk/lib-storage"; // Recommended for multipart uploads
@@ -392,1000 +400,1000 @@ export const uploadImage = async (
 export const numRegex = /^\d+$/;
 
 export function containsEmoji(text: any) {
-  const textToCheck = String(text);
-  return /[\p{Emoji}]/u.test(textToCheck);
+    const textToCheck = String(text);
+    return /[\p{Emoji}]/u.test(textToCheck);
 }
 /**
  * Main function to delete artist and associated songs
  */
 export async function deleteArtistAndSongs(artistId: string, userId: string) {
-  // Validate inputs
-  if (!artistId || !userId) {
-    throw new Error("Artist ID and User ID are required");
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(artistId)) {
-    throw new Error("Invalid artist ID format");
-  }
-
-  try {
-    // 1. Verify artist exists and belongs to user
-    const artist = await Artist.findOne({
-      _id: artistId,
-      user: userId,
-    });
-
-    if (!artist) {
-      throw new Error(
-        "Artist not found or you do not have permission to delete it",
-      );
+    // Validate inputs
+    if (!artistId || !userId) {
+        throw new Error("Artist ID and User ID are required");
     }
 
-    // 2. Get all songs BEFORE deleting (need S3 keys)
-    const songs = await SongModel.find({ artist: artistId });
-
-    console.log(
-      `Found ${songs.length} songs to delete for artist: ${artist.artistName}`,
-    );
-
-    // 3. Delete from S3 FIRST with retry logic
-    let s3DeletedCount = 0;
-    if (songs.length > 0) {
-      s3DeletedCount = await deleteSongsFromS3WithRetry(songs);
-      console.log(`Successfully deleted ${s3DeletedCount} files from S3`);
+    if (!mongoose.Types.ObjectId.isValid(artistId)) {
+        throw new Error("Invalid artist ID format");
     }
 
-    // 4. Delete from database (only after S3 success)
-    const deleteArtistResult = await Artist.deleteOne({
-      _id: artistId,
-      user: userId,
-    });
+    try {
+        // 1. Verify artist exists and belongs to user
+        const artist = await Artist.findOne({
+            _id: artistId,
+            user: userId,
+        });
 
-    if (deleteArtistResult.deletedCount === 0) {
-      throw new Error("Failed to delete artist from database");
+        if (!artist) {
+            throw new Error(
+                "Artist not found or you do not have permission to delete it",
+            );
+        }
+
+        // 2. Get all songs BEFORE deleting (need S3 keys)
+        const songs = await SongModel.find({ artist: artistId });
+
+        console.log(
+            `Found ${songs.length} songs to delete for artist: ${artist.artistName}`,
+        );
+
+        // 3. Delete from S3 FIRST with retry logic
+        let s3DeletedCount = 0;
+        if (songs.length > 0) {
+            s3DeletedCount = await deleteSongsFromS3WithRetry(songs);
+            console.log(`Successfully deleted ${s3DeletedCount} files from S3`);
+        }
+
+        // 4. Delete from database (only after S3 success)
+        const deleteArtistResult = await Artist.deleteOne({
+            _id: artistId,
+            user: userId,
+        });
+
+        if (deleteArtistResult.deletedCount === 0) {
+            throw new Error("Failed to delete artist from database");
+        }
+
+        const deleteSongsResult = await SongModel.deleteMany({ artist: artistId });
+
+        return {
+            success: true,
+            message: "Artist, songs, and files deleted successfully",
+            data: {
+                artistId: artist._id,
+                artistName: artist.artistName,
+                songsDeleted: deleteSongsResult.deletedCount,
+                filesDeleted: s3DeletedCount,
+            },
+        };
+    } catch (error) {
+        console.error("Error deleting artist and songs:", error);
+        throw error;
     }
-
-    const deleteSongsResult = await SongModel.deleteMany({ artist: artistId });
-
-    return {
-      success: true,
-      message: "Artist, songs, and files deleted successfully",
-      data: {
-        artistId: artist._id,
-        artistName: artist.artistName,
-        songsDeleted: deleteSongsResult.deletedCount,
-        filesDeleted: s3DeletedCount,
-      },
-    };
-  } catch (error) {
-    console.error("Error deleting artist and songs:", error);
-    throw error;
-  }
 }
 
 export async function retryWithBackoff(
-  operation: () => Promise<any>,
-  config = RETRY_CONFIG,
-  operationName = "Operation",
+    operation: () => Promise<any>,
+    config = RETRY_CONFIG,
+    operationName = "Operation",
 ) {
-  let lastError;
-  let delay = config.initialDelayMs;
+    let lastError;
+    let delay = config.initialDelayMs;
 
-  for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
-    try {
-      console.log(
-        `${operationName} - Attempt ${attempt}/${config.maxAttempts}`,
-      );
+    for (let attempt = 1; attempt <= config.maxAttempts; attempt++) {
+        try {
+            console.log(
+                `${operationName} - Attempt ${attempt}/${config.maxAttempts}`,
+            );
 
-      const result = await operation();
+            const result = await operation();
 
-      if (attempt > 1) {
-        console.log(`${operationName} succeeded on attempt ${attempt}`);
-      }
+            if (attempt > 1) {
+                console.log(`${operationName} succeeded on attempt ${attempt}`);
+            }
 
-      return result;
-    } catch (error: any) {
-      lastError = error;
+            return result;
+        } catch (error: any) {
+            lastError = error;
 
-      console.error(
-        `${operationName} - Attempt ${attempt}/${config.maxAttempts} failed:`,
-        error?.message,
-      );
+            console.error(
+                `${operationName} - Attempt ${attempt}/${config.maxAttempts} failed:`,
+                error?.message,
+            );
 
-      // Don't retry on certain errors
-      if (isNonRetryableError(error)) {
-        console.error(`${operationName} - Non-retryable error, aborting`);
-        throw error;
-      }
+            // Don't retry on certain errors
+            if (isNonRetryableError(error)) {
+                console.error(`${operationName} - Non-retryable error, aborting`);
+                throw error;
+            }
 
-      // If this was the last attempt, throw the error
-      if (attempt === config.maxAttempts) {
-        console.error(
-          `${operationName} - All ${config.maxAttempts} attempts failed`,
-        );
-        throw new Error(
-          `${operationName} failed after ${config.maxAttempts} attempts. Last error: ${error?.message}`,
-        );
-      }
+            // If this was the last attempt, throw the error
+            if (attempt === config.maxAttempts) {
+                console.error(
+                    `${operationName} - All ${config.maxAttempts} attempts failed`,
+                );
+                throw new Error(
+                    `${operationName} failed after ${config.maxAttempts} attempts. Last error: ${error?.message}`,
+                );
+            }
 
-      // Wait before retrying with exponential backoff
-      console.log(`${operationName} - Waiting ${delay}ms before retry...`);
-      await sleep(delay);
+            // Wait before retrying with exponential backoff
+            console.log(`${operationName} - Waiting ${delay}ms before retry...`);
+            await sleep(delay);
 
-      // Increase delay for next attempt (exponential backoff)
-      delay = Math.min(delay * config.backoffMultiplier, config.maxDelayMs);
+            // Increase delay for next attempt (exponential backoff)
+            delay = Math.min(delay * config.backoffMultiplier, config.maxDelayMs);
+        }
     }
-  }
 
-  throw lastError;
+    throw lastError;
 }
 
 function isNonRetryableError(error: NonRetryableErrorCode): boolean {
-  // Don't retry on these error codes
-  const nonRetryableCodes: string[] = [
-    "NoSuchBucket",
-    "AccessDenied",
-    "InvalidAccessKeyId",
-    "SignatureDoesNotMatch",
-    "NoSuchKey", // File doesn't exist (already deleted is OK)
-  ];
+    // Don't retry on these error codes
+    const nonRetryableCodes: string[] = [
+        "NoSuchBucket",
+        "AccessDenied",
+        "InvalidAccessKeyId",
+        "SignatureDoesNotMatch",
+        "NoSuchKey", // File doesn't exist (already deleted is OK)
+    ];
 
-  if (error.name && nonRetryableCodes.includes(error.name)) {
-    return true;
-  }
-
-  if (error.Code && nonRetryableCodes.includes(error.Code)) {
-    return true;
-  }
-
-  // Don't retry on 4xx errors (except 429 - rate limit)
-  if (error.$metadata?.httpStatusCode) {
-    const statusCode: number = error.$metadata.httpStatusCode;
-    if (statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
-      return true;
+    if (error.name && nonRetryableCodes.includes(error.name)) {
+        return true;
     }
-  }
 
-  return false;
+    if (error.Code && nonRetryableCodes.includes(error.Code)) {
+        return true;
+    }
+
+    // Don't retry on 4xx errors (except 429 - rate limit)
+    if (error.$metadata?.httpStatusCode) {
+        const statusCode: number = error.$metadata.httpStatusCode;
+        if (statusCode >= 400 && statusCode < 500 && statusCode !== 429) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
  * Sleep utility
  */
 function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function safeJsonParse<T>(value: any): T | null {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
+    try {
+        return JSON.parse(value);
+    } catch {
+        return null;
+    }
 }
 
 function getArray<T>(formData: FormData, key: string): T[] {
-  return formData
-    .getAll(key)
-    .map((v) => safeJsonParse<T>(v))
-    .filter(Boolean) as T[];
+    return formData
+        .getAll(key)
+        .map((v) => safeJsonParse<T>(v))
+        .filter(Boolean) as T[];
 }
 
 export function parseSongFormData(formData: FormData) {
-  return {
-    uploadId: formData.get("uploadId") as string | null,
-    actionType: formData.get("action") as "upload" | "draft" | null,
+    return {
+        uploadId: formData.get("uploadId") as string | null,
+        actionType: formData.get("action") as "upload" | "draft" | null,
 
-    title: formData.get("title") as string | null,
-    genre: formData.get("genre") as string | null,
-    language: formData.get("language") as string | null,
+        title: formData.get("title") as string | null,
+        genre: formData.get("genre") as string | null,
+        language: formData.get("language") as string | null,
 
-    artist: formData.get("artist") as string | null,
+        artist: formData.get("artist") as string | null,
 
-    featured_artist: getArray<FeaturedArtist>(formData, "featured_artist"),
-    performer: getArray<Performer>(formData, "performer"),
-    song_writer: getArray<SongWriter>(formData, "song_writer"),
-    producer: getArray<Producer>(formData, "producer"),
+        featured_artist: getArray<FeaturedArtist>(formData, "featured_artist"),
+        performer: getArray<Performer>(formData, "performer"),
+        song_writer: getArray<SongWriter>(formData, "song_writer"),
+        producer: getArray<Producer>(formData, "producer"),
 
-    territories: getArray<string>(formData, "territories"),
-    dsp: getArray<string>(formData, "dsp"),
+        territories: getArray<string>(formData, "territories"),
+        dsp: getArray<string>(formData, "dsp"),
 
-    lyrics: formData.get("lyrics") as string | null,
-    startClip: formData.get("start_clip") as string | null,
+        lyrics: formData.get("lyrics") as string | null,
+        startClip: formData.get("start_clip") as string | null,
 
-    isrc: formData.get("isrc") as string | null,
-    upc: formData.get("upc") as string | null,
+        isrc: formData.get("isrc") as string | null,
+        upc: formData.get("upc") as string | null,
 
-    releaseDate: formData.get("release_date") as string | null,
-    preOrderDate: formData.get("preOrderDate") as string | null,
+        releaseDate: formData.get("release_date") as string | null,
+        preOrderDate: formData.get("preOrderDate") as string | null,
 
-    preOrderCheck: formData.get("pre_order_check") === "true",
-    anotherDistributionCheck:
-      formData.get("another_distribution_check") === "true",
+        preOrderCheck: formData.get("pre_order_check") === "true",
+        anotherDistributionCheck:
+            formData.get("another_distribution_check") === "true",
 
-    explicitContent: formData.get("explicit_content") === "true",
+        explicitContent: formData.get("explicit_content") === "true",
 
-    s3KeyAudio: formData.get("s3keyAudio") as string | null,
-    musicImage: formData.get("music_image") as File | null,
-    oldImage: formData.get("old_image") as string | null,
-    oldAudio: formData.get("old_audio") as string | null,
+        s3KeyAudio: formData.get("s3keyAudio") as string | null,
+        musicImage: formData.get("music_image") as File | null,
+        oldImage: formData.get("old_image") as string | null,
+        oldAudio: formData.get("old_audio") as string | null,
 
-    copyRightYear: formData.get("copyRightYear") as string | null,
-    copyRightHolder: formData.get("copyRightHolder") as string | null,
-  };
+        copyRightYear: formData.get("copyRightYear") as string | null,
+        copyRightHolder: formData.get("copyRightHolder") as string | null,
+    };
 }
 
 export function parseAlbumFormData(formData: FormData) {
-  return {
-    actionType: formData.get("action") as "upload" | "draft" | null,
+    return {
+        actionType: formData.get("action") as "upload" | "draft" | null,
 
-    title: formData.get("title") as string | null,
-    genre: formData.get("genre") as string | null,
-    language: formData.get("language") as string | null,
+        title: formData.get("title") as string | null,
+        genre: formData.get("genre") as string | null,
+        language: formData.get("language") as string | null,
 
-    artist: formData.get("artist") as string | null,
+        artist: formData.get("artist") as string | null,
 
-    territories: getArray<string>(formData, "territories"),
-    dsp: getArray<string>(formData, "dsp"),
+        territories: getArray<string>(formData, "territories"),
+        dsp: getArray<string>(formData, "dsp"),
 
-    isrc: formData.get("isrc") as string | null,
-    upc: formData.get("upc") as string | null,
+        isrc: formData.get("isrc") as string | null,
+        upc: formData.get("upc") as string | null,
 
-    releaseDate: formData.get("release_date") as string | null,
-    preOrderDate: formData.get("preOrderDate") as string | null,
+        releaseDate: formData.get("release_date") as string | null,
+        preOrderDate: formData.get("preOrderDate") as string | null,
 
-    preOrderCheck: formData.get("pre_order_check") === "true",
-    anotherDistributionCheck:
-      formData.get("another_distribution_check") === "true",
+        preOrderCheck: formData.get("pre_order_check") === "true",
+        anotherDistributionCheck:
+            formData.get("another_distribution_check") === "true",
 
-    musicImage: formData.get("music_image") as File | null,
-    oldImage: formData.get("old_image") as string | null,
+        musicImage: formData.get("music_image") as File | null,
+        oldImage: formData.get("old_image") as string | null,
 
-    copyRightYear: formData.get("copyRightYear") as string | null,
-    copyRightHolder: formData.get("copyRightHolder") as string | null,
-    numberOfTracks: formData.get("number_of_track") as string | null,
-  };
+        copyRightYear: formData.get("copyRightYear") as string | null,
+        copyRightHolder: formData.get("copyRightHolder") as string | null,
+        numberOfTracks: formData.get("number_of_track") as string | null,
+    };
 }
 export function parseTrackFormData(formData: FormData) {
-  return {
-    title: formData.get("title") as string | null,
-    genre: formData.get("genre") as string | null,
-    language: formData.get("language") as string | null,
+    return {
+        title: formData.get("title") as string | null,
+        genre: formData.get("genre") as string | null,
+        language: formData.get("language") as string | null,
 
-    artist: formData.get("artist") as string | null,
+        artist: formData.get("artist") as string | null,
 
-    isrc: formData.get("isrc") as string | null,
-    upc: formData.get("upc") as string | null,
+        isrc: formData.get("isrc") as string | null,
+        upc: formData.get("upc") as string | null,
 
-    anotherDistributionCheck:
-      formData.get("another_distribution_check") === "true",
+        anotherDistributionCheck:
+            formData.get("another_distribution_check") === "true",
 
-    trackNumber: formData.get("trackNumber") as string | null,
-    uploadId: formData.get("uploadId") as string | null,
-    actionType: formData.get("action") as "upload" | "draft" | null,
+        trackNumber: formData.get("trackNumber") as string | null,
+        uploadId: formData.get("uploadId") as string | null,
+        actionType: formData.get("action") as "upload" | "draft" | null,
 
-    featured_artist: getArray<FeaturedArtist>(formData, "featured_artist"),
-    performer: getArray<Performer>(formData, "performer"),
-    song_writer: getArray<SongWriter>(formData, "song_writer"),
-    producer: getArray<Producer>(formData, "producer"),
+        featured_artist: getArray<FeaturedArtist>(formData, "featured_artist"),
+        performer: getArray<Performer>(formData, "performer"),
+        song_writer: getArray<SongWriter>(formData, "song_writer"),
+        producer: getArray<Producer>(formData, "producer"),
 
-    lyrics: formData.get("lyrics") as string | null,
-    startClip: formData.get("start_clip") as string | null,
+        lyrics: formData.get("lyrics") as string | null,
+        startClip: formData.get("start_clip") as string | null,
 
-    explicitContent: formData.get("explicit_content") === "true",
+        explicitContent: formData.get("explicit_content") === "true",
 
-    s3KeyAudio: formData.get("s3keyAudio") as string | null,
+        s3KeyAudio: formData.get("s3keyAudio") as string | null,
 
-    oldAudio: formData.get("old_audio") as string | null,
-  };
+        oldAudio: formData.get("old_audio") as string | null,
+    };
 }
 
 export function validateNonDraftSongs(
-  payload: ReturnType<typeof parseSongFormData>,
+    payload: ReturnType<typeof parseSongFormData>,
 ) {
-  const twoWeeksFromNow = addWeeks(new Date(), 2);
-  let oneWeek = null;
+    const twoWeeksFromNow = addWeeks(new Date(), 2);
+    let oneWeek = null;
 
-  if (!payload.oldAudio && !payload.uploadId) {
-    return "uploadId is required when old audio is not present.";
-  }
-
-  if (payload.uploadId && typeof payload.uploadId != "string") {
-    return "uploadId is required.";
-  }
-
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Song title is required and must be longer than 3 letters.";
-  }
-
-  if (!payload.genre || !genreList.includes(payload.genre)) {
-    return "Invalid genre";
-  }
-
-  if (!payload.language || !languagesList.includes(payload.language)) {
-    return "Invalid language";
-  }
-
-  if (!payload.releaseDate || typeof payload.releaseDate != "string") {
-    return "Release date is required";
-  }
-
-  oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-
-  if (new Date(payload.releaseDate) < twoWeeksFromNow) {
-    return "Release date must be at least 2 weeks ahead";
-  }
-
-  if (
-    (payload.featured_artist && !(payload.featured_artist instanceof Array)) ||
-    payload.featured_artist.some((artist) => artist.artistName === "")
-  ) {
-    return "Invalid featured artist.";
-  }
-
-  if (
-    !payload.song_writer ||
-    !(payload.song_writer instanceof Array) ||
-    payload.song_writer.some((artist) => artist.first_name === "") ||
-    payload.song_writer.some((artist) => artist.last_name === "")
-  ) {
-    return "Song writer is required";
-  }
-
-  if (
-    !payload.producer ||
-    !(payload.producer instanceof Array) ||
-    payload.producer.some((artist) => artist.name === "")
-  ) {
-    return "Producer is required";
-  }
-
-  if (
-    !payload.performer ||
-    !(payload.performer instanceof Array) ||
-    payload.performer.some((artist) => artist.name === "" || artist.role === "")
-  ) {
-    return "Performer is required";
-  }
-
-  if (
-    !(payload.territories instanceof Array) ||
-    payload.territories.length <= 0
-  ) {
-    return "Please Select Territories.";
-  }
-
-  if (
-    (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-    typeof payload.preOrderDate != "string"
-  ) {
-    return "Pre order Date is required";
-  }
-
-  if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
-    return "Pre order Date must be 1 week from the release date.";
-  }
-
-  if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
-    return "Please Select a Dsp.";
-  }
-
-  if (
-    !payload.startClip ||
-    typeof payload.startClip != "string" ||
-    !numRegex.test(payload.startClip)
-  ) {
-    return "Start Clip is required.";
-  }
-
-  if (payload.anotherDistributionCheck && payload.isrc === "") {
-    return "ISRC is required when transferring from another distributor.";
-  }
-
-  if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
-    return "Copy write year and Copy write holder is required";
-  }
-
-  if (!payload.musicImage && !payload.oldImage) {
-    return "Release image is required";
-  }
-
-  if (payload.musicImage != null && payload.musicImage instanceof File) {
-    const allowed = new Set(["image/jpeg", "image/png"]);
-    if (!allowed.has(payload.musicImage.type)) {
-      console.log("music image", payload.musicImage);
-      return "Invalid image format";
+    if (!payload.oldAudio && !payload.uploadId) {
+        return "uploadId is required when old audio is not present.";
     }
-  }
 
-  if (!payload.oldAudio && !payload.s3KeyAudio) {
-    return "Audio upload is required";
-  }
+    if (payload.uploadId && typeof payload.uploadId != "string") {
+        return "uploadId is required.";
+    }
 
-  return null;
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Song title is required and must be longer than 3 letters.";
+    }
+
+    if (!payload.genre || !genreList.includes(payload.genre)) {
+        return "Invalid genre";
+    }
+
+    if (!payload.language || !languagesList.includes(payload.language)) {
+        return "Invalid language";
+    }
+
+    if (!payload.releaseDate || typeof payload.releaseDate != "string") {
+        return "Release date is required";
+    }
+
+    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
+
+    if (new Date(payload.releaseDate) < twoWeeksFromNow) {
+        return "Release date must be at least 2 weeks ahead";
+    }
+
+    if (
+        (payload.featured_artist && !(payload.featured_artist instanceof Array)) ||
+        payload.featured_artist.some((artist) => artist.artistName === "")
+    ) {
+        return "Invalid featured artist.";
+    }
+
+    if (
+        !payload.song_writer ||
+        !(payload.song_writer instanceof Array) ||
+        payload.song_writer.some((artist) => artist.first_name === "") ||
+        payload.song_writer.some((artist) => artist.last_name === "")
+    ) {
+        return "Song writer is required";
+    }
+
+    if (
+        !payload.producer ||
+        !(payload.producer instanceof Array) ||
+        payload.producer.some((artist) => artist.name === "")
+    ) {
+        return "Producer is required";
+    }
+
+    if (
+        !payload.performer ||
+        !(payload.performer instanceof Array) ||
+        payload.performer.some((artist) => artist.name === "" || artist.role === "")
+    ) {
+        return "Performer is required";
+    }
+
+    if (
+        !(payload.territories instanceof Array) ||
+        payload.territories.length <= 0
+    ) {
+        return "Please Select Territories.";
+    }
+
+    if (
+        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
+        typeof payload.preOrderDate != "string"
+    ) {
+        return "Pre order Date is required";
+    }
+
+    if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
+        return "Pre order Date must be 1 week from the release date.";
+    }
+
+    if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
+        return "Please Select a Dsp.";
+    }
+
+    if (
+        !payload.startClip ||
+        typeof payload.startClip != "string" ||
+        !numRegex.test(payload.startClip)
+    ) {
+        return "Start Clip is required.";
+    }
+
+    if (payload.anotherDistributionCheck && payload.isrc === "") {
+        return "ISRC is required when transferring from another distributor.";
+    }
+
+    if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
+        return "Copy write year and Copy write holder is required";
+    }
+
+    if (!payload.musicImage && !payload.oldImage) {
+        return "Release image is required";
+    }
+
+    if (payload.musicImage != null && payload.musicImage instanceof File) {
+        const allowed = new Set(["image/jpeg", "image/png"]);
+        if (!allowed.has(payload.musicImage.type)) {
+            console.log("music image", payload.musicImage);
+            return "Invalid image format";
+        }
+    }
+
+    if (!payload.oldAudio && !payload.s3KeyAudio) {
+        return "Audio upload is required";
+    }
+
+    return null;
 }
 
 export function validateNonDraftAlbums(
-  payload: ReturnType<typeof parseAlbumFormData>,
+    payload: ReturnType<typeof parseAlbumFormData>,
 ) {
-  const twoWeeksFromNow = addWeeks(new Date(), 2);
-  let oneWeek = null;
+    const twoWeeksFromNow = addWeeks(new Date(), 2);
+    let oneWeek = null;
 
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Song title is required and must be longer than 3 letters.";
-  }
-
-  if (!payload.genre || !genreList.includes(payload.genre)) {
-    return "Invalid genre";
-  }
-
-  if (!payload.language || !languagesList.includes(payload.language)) {
-    return "Invalid language";
-  }
-
-  if (!payload.releaseDate || typeof payload.releaseDate != "string") {
-    return "Release date is required";
-  }
-
-  oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-
-  if (new Date(payload.releaseDate) < twoWeeksFromNow) {
-    return "Release date must be at least 2 weeks ahead";
-  }
-
-  if (
-    !(payload.territories instanceof Array) ||
-    payload.territories.length <= 0
-  ) {
-    return "Please Select Territories.";
-  }
-
-  if (
-    (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-    typeof payload.preOrderDate != "string"
-  ) {
-    return "Pre order Date is required";
-  }
-
-  if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
-    return "Pre order Date must be 1 week from the release date.";
-  }
-
-  if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
-    return "Please Select a Dsp.";
-  }
-
-  if (payload.anotherDistributionCheck && payload.upc === "") {
-    return "UPC is required when transferring from another distributor.";
-  }
-
-  if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
-    return "Copy write year and Copy write holder is required";
-  }
-
-  if (!payload.musicImage && !payload.oldImage) {
-    return "Release image is required";
-  }
-
-  if (payload.musicImage != null && payload.musicImage instanceof File) {
-    const allowed = new Set(["image/jpeg", "image/png"]);
-    if (!allowed.has(payload.musicImage.type)) {
-      console.log("music image", payload.musicImage);
-      return "Invalid image format";
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Song title is required and must be longer than 3 letters.";
     }
-  }
 
-  if (
-    !payload.numberOfTracks ||
-    !numRegex.test(payload.numberOfTracks as string)
-  ) {
-    return "No. of tracks is required and must be a positive number";
-  }
+    if (!payload.genre || !genreList.includes(payload.genre)) {
+        return "Invalid genre";
+    }
 
-  return null;
+    if (!payload.language || !languagesList.includes(payload.language)) {
+        return "Invalid language";
+    }
+
+    if (!payload.releaseDate || typeof payload.releaseDate != "string") {
+        return "Release date is required";
+    }
+
+    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
+
+    if (new Date(payload.releaseDate) < twoWeeksFromNow) {
+        return "Release date must be at least 2 weeks ahead";
+    }
+
+    if (
+        !(payload.territories instanceof Array) ||
+        payload.territories.length <= 0
+    ) {
+        return "Please Select Territories.";
+    }
+
+    if (
+        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
+        typeof payload.preOrderDate != "string"
+    ) {
+        return "Pre order Date is required";
+    }
+
+    if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
+        return "Pre order Date must be 1 week from the release date.";
+    }
+
+    if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
+        return "Please Select a Dsp.";
+    }
+
+    if (payload.anotherDistributionCheck && payload.upc === "") {
+        return "UPC is required when transferring from another distributor.";
+    }
+
+    if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
+        return "Copy write year and Copy write holder is required";
+    }
+
+    if (!payload.musicImage && !payload.oldImage) {
+        return "Release image is required";
+    }
+
+    if (payload.musicImage != null && payload.musicImage instanceof File) {
+        const allowed = new Set(["image/jpeg", "image/png"]);
+        if (!allowed.has(payload.musicImage.type)) {
+            console.log("music image", payload.musicImage);
+            return "Invalid image format";
+        }
+    }
+
+    if (
+        !payload.numberOfTracks ||
+        !numRegex.test(payload.numberOfTracks as string)
+    ) {
+        return "No. of tracks is required and must be a positive number";
+    }
+
+    return null;
 }
 
 export function validateDraftSongs(
-  payload: ReturnType<typeof parseSongFormData>,
+    payload: ReturnType<typeof parseSongFormData>,
 ) {
-  const twoWeeksFromNow = addWeeks(new Date(), 2);
-  let oneWeek = null;
+    const twoWeeksFromNow = addWeeks(new Date(), 2);
+    let oneWeek = null;
 
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Song title is required and must be longer than 3 letters.";
-  }
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Song title is required and must be longer than 3 letters.";
+    }
 
-  if (payload.releaseDate && typeof payload.releaseDate != "string") {
-    return "Release date is required";
-  }
+    if (payload.releaseDate && typeof payload.releaseDate != "string") {
+        return "Release date is required";
+    }
 
-  if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
-    return "Release date must be at least 2 weeks ahead of upload date";
-  }
+    if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
+        return "Release date must be at least 2 weeks ahead of upload date";
+    }
 
-  if (payload.releaseDate && payload.preOrderDate) {
-    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-  }
+    if (payload.releaseDate && payload.preOrderDate) {
+        oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
+    }
 
-  if (
-    payload.song_writer &&
-    (!(payload.song_writer instanceof Array) ||
-      payload.song_writer.some((artist) => artist.first_name === "") ||
-      payload.song_writer.some((artist) => artist.last_name === ""))
-  ) {
-    return "Song writer is required";
-  }
+    if (
+        payload.song_writer &&
+        (!(payload.song_writer instanceof Array) ||
+            payload.song_writer.some((artist) => artist.first_name === "") ||
+            payload.song_writer.some((artist) => artist.last_name === ""))
+    ) {
+        return "Song writer is required";
+    }
 
-  if (
-    payload.producer &&
-    (!(payload.producer instanceof Array) ||
-      payload.producer.some((artist) => artist.name === ""))
-  ) {
-    return "Producer is required";
-  }
+    if (
+        payload.producer &&
+        (!(payload.producer instanceof Array) ||
+            payload.producer.some((artist) => artist.name === ""))
+    ) {
+        return "Producer is required";
+    }
 
-  if (
-    payload.performer &&
-    (!(payload.performer instanceof Array) ||
-      payload.performer.some(
-        (artist) => artist.name === "" || artist.role === "",
-      ))
-  ) {
-    return "Performer is required";
-  }
+    if (
+        payload.performer &&
+        (!(payload.performer instanceof Array) ||
+            payload.performer.some(
+                (artist) => artist.name === "" || artist.role === "",
+            ))
+    ) {
+        return "Performer is required";
+    }
 
-  if (
-    payload.territories &&
-    (!(payload.territories instanceof Array) ||
-      payload.territories.some((territory) => typeof territory !== "string"))
-  ) {
-    return "Please Select Territories.";
-  }
+    if (
+        payload.territories &&
+        (!(payload.territories instanceof Array) ||
+            payload.territories.some((territory) => typeof territory !== "string"))
+    ) {
+        return "Please Select Territories.";
+    }
 
-  if (
-    (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-    typeof payload.preOrderDate != "string"
-  ) {
-    return "Pre order Date is required";
-  }
+    if (
+        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
+        typeof payload.preOrderDate != "string"
+    ) {
+        return "Pre order Date is required";
+    }
 
-  if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
-    return "Pre order Date must be 1 week from the release date.";
-  }
+    if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
+        return "Pre order Date must be 1 week from the release date.";
+    }
 
-  if (payload.dsp && !(payload.dsp instanceof Array)) {
-    return "Please Select a Dsp.";
-  }
+    if (payload.dsp && !(payload.dsp instanceof Array)) {
+        return "Please Select a Dsp.";
+    }
 
-  if (
-    (payload.startClip && typeof payload.startClip != "string") ||
-    (payload.startClip &&
-      payload.startClip.length > 0 &&
-      !numRegex.test(payload.startClip))
-  ) {
-    return "Start Clip is required.";
-  }
+    if (
+        (payload.startClip && typeof payload.startClip != "string") ||
+        (payload.startClip &&
+            payload.startClip.length > 0 &&
+            !numRegex.test(payload.startClip))
+    ) {
+        return "Start Clip is required.";
+    }
 
-  if (payload.anotherDistributionCheck && payload.isrc === "") {
-    return "ISRC is required when transferring from another distributor.";
-  }
-  if (payload.anotherDistributionCheck && payload.upc === "") {
-    return "UPC is required when transferring from another distributor.";
-  }
+    if (payload.anotherDistributionCheck && payload.isrc === "") {
+        return "ISRC is required when transferring from another distributor.";
+    }
+    if (payload.anotherDistributionCheck && payload.upc === "") {
+        return "UPC is required when transferring from another distributor.";
+    }
 
-  // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
-  //   return "Copy write year and Copy write holder is required";
-  // }
+    // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
+    //   return "Copy write year and Copy write holder is required";
+    // }
 
-  // if (!payload.musicImage) {
-  //   return "Release image is required";
-  // }
+    // if (!payload.musicImage) {
+    //   return "Release image is required";
+    // }
 
-  // if (
-  //   payload.musicImage &&
-  //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
-  // ) {
-  //   return "Invalid image format";
-  // }
+    // if (
+    //   payload.musicImage &&
+    //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
+    // ) {
+    //   return "Invalid image format";
+    // }
 
-  // if (!payload.s3KeyAudio) {
-  //   return "Audio upload is required";
-  // }
+    // if (!payload.s3KeyAudio) {
+    //   return "Audio upload is required";
+    // }
 
-  return null;
+    return null;
 }
 
 export function validateDraftAlbums(
-  payload: ReturnType<typeof parseAlbumFormData>,
+    payload: ReturnType<typeof parseAlbumFormData>,
 ) {
-  const twoWeeksFromNow = addWeeks(new Date(), 2);
-  let oneWeek = null;
+    const twoWeeksFromNow = addWeeks(new Date(), 2);
+    let oneWeek = null;
 
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Album title is required and must be longer than 3 letters.";
-  }
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Album title is required and must be longer than 3 letters.";
+    }
 
-  if (payload.releaseDate && typeof payload.releaseDate != "string") {
-    return "Release date is required";
-  }
+    if (payload.releaseDate && typeof payload.releaseDate != "string") {
+        return "Release date is required";
+    }
 
-  if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
-    return "Release date must be at least 2 weeks ahead of upload date";
-  }
+    if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
+        return "Release date must be at least 2 weeks ahead of upload date";
+    }
 
-  if (payload.releaseDate && payload.preOrderDate) {
-    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-  }
+    if (payload.releaseDate && payload.preOrderDate) {
+        oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
+    }
 
-  if (
-    payload.territories &&
-    (!(payload.territories instanceof Array) ||
-      payload.territories.some((territory) => typeof territory !== "string"))
-  ) {
-    return "Please Select valid Territories.";
-  }
+    if (
+        payload.territories &&
+        (!(payload.territories instanceof Array) ||
+            payload.territories.some((territory) => typeof territory !== "string"))
+    ) {
+        return "Please Select valid Territories.";
+    }
 
-  if (
-    (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-    typeof payload.preOrderDate != "string"
-  ) {
-    return "Pre order Date is required";
-  }
+    if (
+        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
+        typeof payload.preOrderDate != "string"
+    ) {
+        return "Pre order Date is required";
+    }
 
-  if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
-    return "Pre order Date must be 1 week from the release date.";
-  }
+    if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
+        return "Pre order Date must be 1 week from the release date.";
+    }
 
-  if (payload.dsp && !(payload.dsp instanceof Array)) {
-    return "Please Select a Dsp.";
-  }
+    if (payload.dsp && !(payload.dsp instanceof Array)) {
+        return "Please Select a Dsp.";
+    }
 
-  if (payload.anotherDistributionCheck && payload.upc === "") {
-    return "UPC is required when transferring from another distributor.";
-  }
+    if (payload.anotherDistributionCheck && payload.upc === "") {
+        return "UPC is required when transferring from another distributor.";
+    }
 
-  if (
-    payload.numberOfTracks &&
-    (!numRegex.test(payload.numberOfTracks) ||
-      parseInt(payload.numberOfTracks, 10) <= 0)
-  ) {
-    return "Number of tracks must be a valid number greater than 0.";
-  }
+    if (
+        payload.numberOfTracks &&
+        (!numRegex.test(payload.numberOfTracks) ||
+            parseInt(payload.numberOfTracks, 10) <= 0)
+    ) {
+        return "Number of tracks must be a valid number greater than 0.";
+    }
 
-  return null;
+    return null;
 }
 
 export function validateDraftTracks(
-  payload: TrackForm,
-  listOfTrackNumbers: string[],
+    payload: TrackForm,
+    listOfTrackNumbers: string[],
 ) {
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Song title is required and must be longer than 3 letters.";
-  }
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Song title is required and must be longer than 3 letters.";
+    }
 
-  if (
-    payload.featured_artist &&
-    payload.featured_artist.length > 0 &&
-    (!(payload.featured_artist instanceof Array) ||
-      payload.featured_artist.some((artist) => artist.artistName === ""))
-  ) {
-    return "Invalid featured.";
-  }
-  if (
-    payload.song_writer &&
-    (!(payload.song_writer instanceof Array) ||
-      payload.song_writer.some((artist) => artist.first_name === "") ||
-      payload.song_writer.some((artist) => artist.last_name === ""))
-  ) {
-    return "Song writer is required";
-  }
+    if (
+        payload.featured_artist &&
+        payload.featured_artist.length > 0 &&
+        (!(payload.featured_artist instanceof Array) ||
+            payload.featured_artist.some((artist) => artist.artistName === ""))
+    ) {
+        return "Invalid featured.";
+    }
+    if (
+        payload.song_writer &&
+        (!(payload.song_writer instanceof Array) ||
+            payload.song_writer.some((artist) => artist.first_name === "") ||
+            payload.song_writer.some((artist) => artist.last_name === ""))
+    ) {
+        return "Song writer is required";
+    }
 
-  if (
-    payload.producer &&
-    (!(payload.producer instanceof Array) ||
-      payload.producer.some((artist) => artist.name === ""))
-  ) {
-    return "Producer is required";
-  }
+    if (
+        payload.producer &&
+        (!(payload.producer instanceof Array) ||
+            payload.producer.some((artist) => artist.name === ""))
+    ) {
+        return "Producer is required";
+    }
 
-  if (
-    payload.performer &&
-    (!(payload.performer instanceof Array) ||
-      payload.performer.some(
-        (artist) => artist.name === "" || artist.role === "",
-      ))
-  ) {
-    return "Performer is required";
-  }
+    if (
+        payload.performer &&
+        (!(payload.performer instanceof Array) ||
+            payload.performer.some(
+                (artist) => artist.name === "" || artist.role === "",
+            ))
+    ) {
+        return "Performer is required";
+    }
 
-  if (
-    (payload.start_clip && typeof payload.start_clip != "string") ||
-    (payload.start_clip &&
-      payload.start_clip.length > 0 &&
-      !numRegex.test(payload.start_clip))
-  ) {
-    return "Start Clip is required.";
-  }
+    if (
+        (payload.start_clip && typeof payload.start_clip != "string") ||
+        (payload.start_clip &&
+            payload.start_clip.length > 0 &&
+            !numRegex.test(payload.start_clip))
+    ) {
+        return "Start Clip is required.";
+    }
 
-  if (payload.another_distribution_check && payload.isrc === "") {
-    return "ISRC is required when transferring from another distributor.";
-  }
-  if (payload.upc === "") {
-    return "UPC is required when transferring from another distributor.";
-  }
-  if (!payload.track_number || !numRegex.test(payload.track_number)) {
-    return "Track number is required.";
-  }
-  if (!listOfTrackNumbers.includes(payload.track_number)) {
-    return "Invalid Track number or Track number already used.";
-  }
-  // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
-  //   return "Copy write year and Copy write holder is required";
-  // }
+    if (payload.another_distribution_check && payload.isrc === "") {
+        return "ISRC is required when transferring from another distributor.";
+    }
+    if (payload.upc === "") {
+        return "UPC is required when transferring from another distributor.";
+    }
+    if (!payload.track_number || !numRegex.test(payload.track_number)) {
+        return "Track number is required.";
+    }
+    if (!listOfTrackNumbers.includes(payload.track_number)) {
+        return "Invalid Track number or Track number already used.";
+    }
+    // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
+    //   return "Copy write year and Copy write holder is required";
+    // }
 
-  // if (!payload.musicImage) {
-  //   return "Release image is required";
-  // }
+    // if (!payload.musicImage) {
+    //   return "Release image is required";
+    // }
 
-  // if (
-  //   payload.musicImage &&
-  //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
-  // ) {
-  //   return "Invalid image format";
-  // }
+    // if (
+    //   payload.musicImage &&
+    //   !["image/jpeg", "image/png"].includes(payload.musicImage.type)
+    // ) {
+    //   return "Invalid image format";
+    // }
 
-  // if (!payload.s3KeyAudio) {
-  //   return "Audio upload is required";
-  // }
+    // if (!payload.s3KeyAudio) {
+    //   return "Audio upload is required";
+    // }
 
-  return null;
+    return null;
 }
 
 export function validateNonDraftTracks(
-  payload: TrackForm,
-  listOfTrackNumbers: string[],
+    payload: TrackForm,
+    listOfTrackNumbers: string[],
 ) {
-  if (
-    !payload.title ||
-    typeof payload.title !== "string" ||
-    payload.title.length <= 3 ||
-    containsEmoji(payload.title)
-  ) {
-    return "Song title is required and must be longer than 3 letters.";
-  }
+    if (
+        !payload.title ||
+        typeof payload.title !== "string" ||
+        payload.title.length <= 3 ||
+        containsEmoji(payload.title)
+    ) {
+        return "Song title is required and must be longer than 3 letters.";
+    }
 
-  if (!payload.genre || !genreList.includes(payload.genre)) {
-    return "Invalid genre";
-  }
+    if (!payload.genre || !genreList.includes(payload.genre)) {
+        return "Invalid genre";
+    }
 
-  if (!payload.language || !languagesList.includes(payload.language)) {
-    return "Invalid language";
-  }
+    if (!payload.language || !languagesList.includes(payload.language)) {
+        return "Invalid language";
+    }
 
-  if (
-    (payload.featured_artist &&
-      payload.featured_artist.length > 0 &&
-      !(payload.featured_artist instanceof Array)) ||
-    payload.featured_artist.some((artist) => artist.artistName === "")
-  ) {
-    return "invalid featured artist.";
-  }
+    if (
+        (payload.featured_artist &&
+            payload.featured_artist.length > 0 &&
+            !(payload.featured_artist instanceof Array)) ||
+        payload.featured_artist.some((artist) => artist.artistName === "")
+    ) {
+        return "invalid featured artist.";
+    }
 
-  if (
-    !payload.song_writer ||
-    !(payload.song_writer instanceof Array) ||
-    payload.song_writer.some((artist) => artist.first_name === "") ||
-    payload.song_writer.some((artist) => artist.last_name === "")
-  ) {
-    return "Song writer is required";
-  }
+    if (
+        !payload.song_writer ||
+        !(payload.song_writer instanceof Array) ||
+        payload.song_writer.some((artist) => artist.first_name === "") ||
+        payload.song_writer.some((artist) => artist.last_name === "")
+    ) {
+        return "Song writer is required";
+    }
 
-  if (
-    !payload.producer ||
-    !(payload.producer instanceof Array) ||
-    payload.producer.some((artist) => artist.name === "")
-  ) {
-    return "Producer is required";
-  }
+    if (
+        !payload.producer ||
+        !(payload.producer instanceof Array) ||
+        payload.producer.some((artist) => artist.name === "")
+    ) {
+        return "Producer is required";
+    }
 
-  if (
-    !payload.performer ||
-    !(payload.performer instanceof Array) ||
-    payload.performer.some((artist) => artist.name === "" || artist.role === "")
-  ) {
-    return "Performer is required";
-  }
+    if (
+        !payload.performer ||
+        !(payload.performer instanceof Array) ||
+        payload.performer.some((artist) => artist.name === "" || artist.role === "")
+    ) {
+        return "Performer is required";
+    }
 
-  if (
-    !payload.start_clip ||
-    typeof payload.start_clip != "string" ||
-    !numRegex.test(payload.start_clip)
-  ) {
-    return "Start Clip is required.";
-  }
+    if (
+        !payload.start_clip ||
+        typeof payload.start_clip != "string" ||
+        !numRegex.test(payload.start_clip)
+    ) {
+        return "Start Clip is required.";
+    }
 
-  if (payload.another_distribution_check && payload.isrc === "") {
-    return "ISRC is required when transferring from another distributor.";
-  }
+    if (payload.another_distribution_check && payload.isrc === "") {
+        return "ISRC is required when transferring from another distributor.";
+    }
 
-  if (!payload.track_number || !numRegex.test(payload.track_number)) {
-    return "Track number is required.";
-  }
-  if (!listOfTrackNumbers.includes(payload.track_number)) {
-    return "Invalid Track number or Track number already used.";
-  }
+    if (!payload.track_number || !numRegex.test(payload.track_number)) {
+        return "Track number is required.";
+    }
+    if (!listOfTrackNumbers.includes(payload.track_number)) {
+        return "Invalid Track number or Track number already used.";
+    }
 
-  if (!payload.old_audio && !payload.s3key) {
-    return "Audio upload is required";
-  }
+    if (!payload.old_audio && !payload.s3key) {
+        return "Audio upload is required";
+    }
 
-  return null;
+    return null;
 }
 
 export const handleReactQueryApiCallError = (
-  errorCount: number,
-  error: Error,
+    errorCount: number,
+    error: Error,
 ): boolean => {
-  if (isAxiosError(error) && error.status === 401) {
+    if (isAxiosError(error) && error.status === 401) {
+        return false;
+    } else if (errorCount < 2) {
+        return true;
+    }
     return false;
-  } else if (errorCount < 2) {
-    return true;
-  }
-  return false;
 };
 
 export const createEmptyTrack = (): TrackForm => ({
-  id: crypto.randomUUID(),
-  title: "",
-  genre: "",
-  track_number: "",
-  uploadStatus: "idle",
-  language: "",
-  artist: "",
-  release_date: undefined,
-  preOrderDate: undefined,
-  featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
-  performer: [{ name: "", role: "" }],
-  song_writer: [{ first_name: "", last_name: "" }],
-  producer: [{ name: "" }],
-  pre_order_check: false,
-  another_distribution_check: false,
-  territories: [],
-  song_audio: null,
-  music_image: null,
-  dsp: [],
-  lyrics: "",
-  start_clip: "",
-  isrc: "",
-  upc: "",
-  copyRightHolder: "",
-  copyRightYear: "",
-  explicit_content: false,
-  old_audio: null,
-  old_image: null,
-  validationError: null,
-  s3key: "",
+    id: crypto.randomUUID(),
+    title: "",
+    genre: "",
+    track_number: "",
+    uploadStatus: "idle",
+    language: "",
+    artist: "",
+    release_date: undefined,
+    preOrderDate: undefined,
+    featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+    performer: [{ name: "", role: "" }],
+    song_writer: [{ first_name: "", last_name: "" }],
+    producer: [{ name: "" }],
+    pre_order_check: false,
+    another_distribution_check: false,
+    territories: [],
+    song_audio: null,
+    music_image: null,
+    dsp: [],
+    lyrics: "",
+    start_clip: "",
+    isrc: "",
+    upc: "",
+    copyRightHolder: "",
+    copyRightYear: "",
+    explicit_content: false,
+    old_audio: null,
+    old_image: null,
+    validationError: null,
+    s3key: "",
 });
 
 export async function handleChargeSuccess(data: any) {
-  const email = data.customer.email;
+    const email = data.customer.email;
 
-  // Idempotency check
-  const existing = await transactionModel.findOne({
-    reference: data.reference,
-  });
+    // Idempotency check
+    const existing = await transactionModel.findOne({
+        reference: data.reference,
+    });
 
-  if (existing) return;
+    if (existing) return;
 
-  await User.updateOne(
-    { email },
-    {
-      $set: {
-        premium: true,
-        type: data.plan.name,
-        premiumExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-        "subscriptionDetails.customerCode": data.customer.customer_code,
-        "subscriptionDetails.authorizationCode":
-          data.authorization.authorization_code,
-        "subscriptionDetails.subscriptionStatus": "active",
-        "subscriptionDetails.cardType": data.authorization?.card_type || "",
-        "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
-      },
-    },
-  );
+    await User.updateOne(
+        { email },
+        {
+            $set: {
+                premium: true,
+                type: data.plan.name,
+                premiumExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+                "subscriptionDetails.customerCode": data.customer.customer_code,
+                "subscriptionDetails.authorizationCode":
+                    data.authorization.authorization_code,
+                "subscriptionDetails.subscriptionStatus": "active",
+                "subscriptionDetails.cardType": data.authorization?.card_type || "",
+                "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
+            },
+        },
+    );
 
-  await transactionModel.create({
-    reference: data.reference,
-    userEmail: email,
-    amount: data.amount / 100,
-    status: "success",
-    planName: data.plan.name,
-    planCode: data.plan.plan_code,
-    paidAt: new Date(),
-  });
+    await transactionModel.create({
+        reference: data.reference,
+        userEmail: email,
+        amount: data.amount / 100,
+        status: "success",
+        planName: data.plan.name,
+        planCode: data.plan.plan_code,
+        paidAt: new Date(),
+    });
 }
 
 export async function handleSubscriptionCreate(data: any) {
-  const email = data.customer.email;
+    const email = data.customer.email;
 
-  await User.updateOne(
-    { email },
-    {
-      $set: {
-        "subscriptionDetails.subscriptionCode": data.subscription_code,
-        "subscriptionDetails.emailToken": data.email_token,
-      },
-    },
-  );
+    await User.updateOne(
+        { email },
+        {
+            $set: {
+                "subscriptionDetails.subscriptionCode": data.subscription_code,
+                "subscriptionDetails.emailToken": data.email_token,
+            },
+        },
+    );
 }
 
 export async function handleSubscriptionDisabled(data: any) {
-  const email = data.customer.email;
+    const email = data.customer.email;
 
-  await User.updateOne(
-    { email },
-    {
-      $set: {
-        "subscriptionDetails.subscriptionStatus": "cancelled",
-      },
-    },
-  );
+    await User.updateOne(
+        { email },
+        {
+            $set: {
+                "subscriptionDetails.subscriptionStatus": "cancelled",
+            },
+        },
+    );
 }
 
 export async function handleSubscriptionCardUpdate(data: any) {
-  const email = data.customer.email;
+    const email = data.customer.email;
 
-  await User.updateOne(
-    { email },
-    {
-      $set: {
-        "subscriptionDetails.subscriptionStatus": data.status,
-        "subscriptionDetails.authorizationCode":
-          data.authorization.authorization_code,
-      },
-    },
-  );
+    await User.updateOne(
+        { email },
+        {
+            $set: {
+                "subscriptionDetails.subscriptionStatus": data.status,
+                "subscriptionDetails.authorizationCode":
+                    data.authorization.authorization_code,
+            },
+        },
+    );
 }
 
 export async function handleFailedPayment(data: any) {
-  const email = data.customer.email;
+    const email = data.customer.email;
 
-  await User.updateOne(
-    { email },
-    {
-      premium: false,
-      premiumExpiration: null,
-    },
-  );
+    await User.updateOne(
+        { email },
+        {
+            premium: false,
+            premiumExpiration: null,
+        },
+    );
 }
 
 export const subSuccessEmail = (props: PaymentEmailData) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1484,7 +1492,7 @@ export const subSuccessEmail = (props: PaymentEmailData) => {
 </html>`;
 };
 export const subCancelEmail = (props: PaymentEmailData) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1605,142 +1613,148 @@ export const subCancelEmail = (props: PaymentEmailData) => {
 };
 
 export function getYearRange() {
-  const now = new Date();
+    const now = new Date();
 
-  const startOfYear = new Date(now.getFullYear(), 0, 1);
-  const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
+    const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const endOfYear = new Date(now.getFullYear() + 1, 0, 1);
 
-  return { startOfYear, endOfYear };
+    return { startOfYear, endOfYear };
 }
 
 export function isPaymentformValid(form: PaymentForm): string {
-  console.log(form);
+    console.log(form);
 
-  if (form.account_name === "") {
-    return "Account name is required";
-  } else if (form.bankName === "") {
-    return "Bank name is required";
-  } else if (
-    form.account_number === "" ||
-    !/^\d{10}$/.test(form.account_number)
-  ) {
-    return "Account number is required and must be numbers of length 10";
-  } else if (form.country === "") {
-    return "Country is required";
-  } else if (form.bankCode === "") {
-    return "Bank code is required";
-  } else {
-    return "true";
-  }
+    if (form.account_name === "") {
+        return "Account name is required";
+    } else if (form.bankName === "") {
+        return "Bank name is required";
+    } else if (
+        form.account_number === "" ||
+        !/^\d{10}$/.test(form.account_number)
+    ) {
+        return "Account number is required and must be numbers of length 10";
+    } else if (form.country === "") {
+        return "Country is required";
+    } else if (form.bankCode === "") {
+        return "Bank code is required";
+    } else {
+        return "true";
+    }
 }
 
 export function isVerificationformValid(form: VerificationForm): string {
-  console.log(form);
+    console.log(form);
 
-  if (form.id_type === "") {
-    return "ID type is required";
-  } else if (
-    (!form.id_image || !(form.id_image instanceof File)) &&
-    !form.old_id_image
-  ) {
-    return "ID image is required";
-  } else if (
-    (!form.address_image || !(form.address_image instanceof File)) &&
-    !form.old_address_image
-  ) {
-    return "Address image is required";
-  } else if (form.id_number === "" || !/^\d{13}$/.test(form.id_number)) {
-    return "ID number is required and must be numbers of length 13";
-  } else if (form.middle_name === "") {
-    return "Middle name is required";
-  } else if (form.dob === undefined || !(form.dob instanceof Date)) {
-    return "Date of birth is required";
-  } else {
-    return "true";
-  }
+    if (form.id_type === "") {
+        return "ID type is required";
+    } else if (
+        (!form.id_image || !(form.id_image instanceof File)) &&
+        !form.old_id_image
+    ) {
+        return "ID image is required";
+    } else if (
+        (!form.address_image || !(form.address_image instanceof File)) &&
+        !form.old_address_image
+    ) {
+        return "Address image is required";
+    } else if (form.id_number === "" || !/^\d{13}$/.test(form.id_number)) {
+        return "ID number is required and must be numbers of length 13";
+    } else if (form.middle_name === "") {
+        return "Middle name is required";
+    } else if (form.dob === undefined || !(form.dob instanceof Date)) {
+        return "Date of birth is required";
+    } else {
+        return "true";
+    }
 }
 
 export function parseVerificationFormData(formData: FormData) {
-  return {
-    id_type: (formData.get("id_type") as string) || null,
-    id_number: (formData.get("id_number") as string) || null,
-    middle_name: (formData.get("middle_name") as string) || null,
-    dob: (formData.get("dob") as string) || undefined,
-    id_image: (formData.get("id_image") as File) || null,
-    address_image: (formData.get("address_image") as File) || null,
-    old_id_image: (formData.get("old_id_image") as string) || null,
-    old_address_image: (formData.get("old_address_image") as string) || null,
-  };
+    return {
+        id_type: (formData.get("id_type") as string) || null,
+        id_number: (formData.get("id_number") as string) || null,
+        middle_name: (formData.get("middle_name") as string) || null,
+        dob: (formData.get("dob") as string) || undefined,
+        id_image: (formData.get("id_image") as File) || null,
+        address_image: (formData.get("address_image") as File) || null,
+        old_id_image: (formData.get("old_id_image") as string) || null,
+        old_address_image: (formData.get("old_address_image") as string) || null,
+    };
 }
 
 export function validateVerificationForm(
-  payload: ReturnType<typeof parseVerificationFormData>,
+    payload: ReturnType<typeof parseVerificationFormData>,
 ) {
-  const allowedIdTypes = new Set(["NIN"]);
-  const allowedImageTypes = new Set(["image/jpeg", "image/png"]);
+    const allowedIdTypes = new Set(["NIN"]);
+    const allowedImageTypes = new Set(["image/jpeg", "image/png"]);
 
-  if (
-    !payload.middle_name ||
-    typeof payload.middle_name !== "string" ||
-    containsEmoji(payload.middle_name)
-  ) {
-    return "Middle name is required.";
-  }
+    if (
+        !payload.middle_name ||
+        typeof payload.middle_name !== "string" ||
+        containsEmoji(payload.middle_name)
+    ) {
+        return "Middle name is required.";
+    }
 
-  if (!payload.dob || typeof payload.dob != "string") {
-    return "Date of birth is required and must be a valid date.";
-  }
+    if (!payload.dob || typeof payload.dob != "string") {
+        return "Date of birth is required and must be a valid date.";
+    }
+    const age = Math.floor(
+        (Date.now() - new Date(payload.dob).getTime()) / (365.25 * 24 * 60 * 60 * 1000),
+    );
+    if (age <= 17) {
+        return "You must be at least 18 to Verify.";
+    }
 
-  if (
-    !payload.id_number ||
-    typeof payload.id_number != "string" ||
-    !numRegex.test(payload.id_number) ||
-    payload.id_number.length !== 13
-  ) {
-    return "ID number is required and must be a number of length 13.";
-  }
+    if (
+        !payload.id_number ||
+        typeof payload.id_number != "string" ||
+        !numRegex.test(payload.id_number) ||
+        payload.id_number.length !== 13
+    ) {
+        return "ID number is required and must be a number of length 13.";
+    }
 
-  if (
-    !payload.id_type ||
-    typeof payload.id_type != "string" ||
-    !allowedIdTypes.has(payload.id_type)
-  ) {
-    return "ID Type is required or Invalid ID Type.";
-  }
+    if (
+        !payload.id_type ||
+        typeof payload.id_type != "string" ||
+        !allowedIdTypes.has(payload.id_type)
+    ) {
+        return "ID Type is required or Invalid ID Type.";
+    }
 
-  if (
-    (!payload.id_image || !(payload.id_image instanceof File)) &&
-    !payload.old_id_image
-  ) {
-    return "ID Image is required.";
-  } else if (
-    payload.id_image &&
-    !allowedImageTypes.has(payload.id_image.type)
-  ) {
-    console.log("id image", payload.id_image);
-    return "Invalid ID image format";
-  }
+    if (
+        (!payload.id_image || !(payload.id_image instanceof File)) &&
+        !payload.old_id_image
+    ) {
+        return "ID Image is required.";
+    } else if (
+        payload.id_image &&
+        !allowedImageTypes.has(payload.id_image.type)
+    ) {
+        console.log("id image", payload.id_image);
+        return "Invalid ID image format";
+    }
 
-  if (
-    (!payload.address_image || !(payload.address_image instanceof File)) &&
-    !payload.old_address_image
-  ) {
-    return "Address Image is required.";
-  } else if (
-    payload.address_image &&
-    !allowedImageTypes.has(payload.address_image.type)
-  ) {
-    console.log("address image", payload.address_image);
-    return "Invalid image format";
-  }
+    if (
+        (!payload.address_image || !(payload.address_image instanceof File)) &&
+        !payload.old_address_image
+    ) {
+        return "Address Image is required.";
+    } else if (
+        payload.address_image &&
+        !allowedImageTypes.has(payload.address_image.type)
+    ) {
+        console.log("address image", payload.address_image);
+        return "Invalid image format";
+    }
 
-  return null;
+    return null;
 }
 
 export const accountdeactivationacknowledgementEmail = (
-  props: PaymentEmailData,
+    props: PaymentEmailData,
 ) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1888,20 +1902,20 @@ export const accountdeactivationacknowledgementEmail = (
  * @returns {number} - The extracted amount (e.g., "300,000")
  */
 export const extractAmount = (packageString: string): number | null => {
-  // Split by the pipe symbol
-  const parts = packageString.split("|");
+    // Split by the pipe symbol
+    const parts = packageString.split("|");
 
-  if (parts.length < 2) {
-    return null; // Invalid format
-  }
+    if (parts.length < 2) {
+        return null; // Invalid format
+    }
 
-  // Get the price part (after the pipe) and trim whitespace
-  const pricePart = parts[1].trim();
+    // Get the price part (after the pipe) and trim whitespace
+    const pricePart = parts[1].trim();
 
-  // Remove the "N" prefix and get the amount
-  const amount = pricePart.replace(/^N/, "");
+    // Remove the "N" prefix and get the amount
+    const amount = pricePart.replace(/^N/, "");
 
-  return parseFloat(amount.replace(/,/g, ""));
+    return parseFloat(amount.replace(/,/g, ""));
 };
 
 /**
@@ -1910,114 +1924,114 @@ export const extractAmount = (packageString: string): number | null => {
  * @returns {object} - Object with name and amount
  */
 export const parsePackage = (packageString: string): object => {
-  const parts = packageString.split("|");
+    const parts = packageString.split("|");
 
-  return {
-    name: parts[0].trim(),
-    amount: parts[1].trim().replace(/^N/, ""),
-  };
+    return {
+        name: parts[0].trim(),
+        amount: parts[1].trim().replace(/^N/, ""),
+    };
 };
 
 export async function handlePromotionSuccess(data: any) {
-  try {
-    const email = data.metadata.email;
-    await dbConnect();
-    const user = await User.findOne({ email });
-    if (!user) return;
+    try {
+        const email = data.metadata.email;
+        await dbConnect();
+        const user = await User.findOne({ email });
+        if (!user) return;
 
-    const existing = await Promotion.find({
-      transactionReference: data.metadata.transactionReference,
-    });
+        const existing = await Promotion.find({
+            transactionReference: data.metadata.transactionReference,
+        });
 
-    let endDate = null;
-    switch (data.metadata.promotionType) {
-      case "Boomplay":
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
-        break;
-      case "Deezer":
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
-        break;
-      case "Online-Press":
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
-        break;
-      case "Shazam":
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
-        break;
-      case "Radio-Promotion":
-        endDate = new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
-        break;
-      case "Playlist-Pitch":
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
-        break;
-      default:
-        endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+        let endDate = null;
+        switch (data.metadata.promotionType) {
+            case "Boomplay":
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+                break;
+            case "Deezer":
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+                break;
+            case "Online-Press":
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+                break;
+            case "Shazam":
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+                break;
+            case "Radio-Promotion":
+                endDate = new Date(new Date().getTime() + 30 * 24 * 60 * 60 * 1000);
+                break;
+            case "Playlist-Pitch":
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
+                break;
+            default:
+                endDate = new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000);
 
-        break;
+                break;
+        }
+        if (!existing || existing.length === 0) {
+            console.log("entered here pplease work ");
+            await Promotion.create({
+                transactionReference: data.metadata.transactionReference,
+                user: user._id,
+                amount: (data.amount / 100).toString(),
+                releaseTitle: data.metadata.releaseTitle,
+                releaseDescription: data.metadata.releaseDescription,
+                artistName: data.metadata.artistName,
+                artist: data.metadata.artistId,
+                packageName: data.metadata.promotionPackage,
+                category: data.metadata.promotionType,
+                promotionImage: data.metadata.promotionImage,
+                startDate: new Date(),
+                endDate,
+            });
+        } else {
+            await Promotion.findOneAndUpdate(
+                { transactionReference: data.metadata.transactionReference },
+                {
+                    isActive: true,
+                    endDate,
+                },
+                { new: true },
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        return handleMongooseValidationError(error);
     }
-    if (!existing || existing.length === 0) {
-      console.log("entered here pplease work ");
-      await Promotion.create({
-        transactionReference: data.metadata.transactionReference,
-        user: user._id,
-        amount: (data.amount / 100).toString(),
-        releaseTitle: data.metadata.releaseTitle,
-        releaseDescription: data.metadata.releaseDescription,
-        artistName: data.metadata.artistName,
-        artist: data.metadata.artistId,
-        packageName: data.metadata.promotionPackage,
-        category: data.metadata.promotionType,
-        promotionImage: data.metadata.promotionImage,
-        startDate: new Date(),
-        endDate,
-      });
-    } else {
-      await Promotion.findOneAndUpdate(
-        { transactionReference: data.metadata.transactionReference },
-        {
-          isActive: true,
-          endDate,
-        },
-        { new: true },
-      );
-    }
-  } catch (error) {
-    console.error(error);
-    return handleMongooseValidationError(error);
-  }
 }
 
 export function parsePromotionFormData(formData: FormData) {
-  return {
-    artist: formData.get("artist") as string | null,
-    country: formData.get("country") as string | null,
-    promotionType: formData.get("promotionType") as string | null,
-    promotionImage: formData.get("promotionImage") as File | null,
-    promotionPackage: formData.get("promotionPackage") as string | null,
-    releaseDescription: formData.get("releaseDescription") as string | null,
-    releaseTitle: formData.get("releaseTitle") as string | null,
-    priority: formData.get("priority") as string | null,
-    configuration: formData.get("configuration") as string | null,
-    typeOfRelease: formData.get("type_of_release") as string | null,
-    editorialTeams: formData.get("editorial_teams") as string | null,
-    marketingDetail: formData.get("marketing_detail") as string | null,
-    artistGender: formData.get("artist_gender") as string | null,
-    location: formData.get("location") as string | null,
-    releaseTime: formData.get("release_time") as string | null,
-    subgenres: getArray<string>(formData, "subgenres") as string[],
-    moods: formData.get("moods") as string | null,
-    comment: formData.get("comment") as string | null,
-    facebookProfileLink: formData.get("facebook_profile_link") as string | null,
-    instagramProfileLink: formData.get("instagram_profile_link") as
-      | string
-      | null,
-    twitterProfileLink: formData.get("twitter_profile_link") as string | null,
-    youtubeProfileLink: formData.get("youtube_profile_link") as string | null,
-    tiktokProfileLink: formData.get("tiktok_profile_link") as string | null,
-    focusTrack: formData.get("focus_track") as string | null,
-  };
+    return {
+        artist: formData.get("artist") as string | null,
+        country: formData.get("country") as string | null,
+        promotionType: formData.get("promotionType") as string | null,
+        promotionImage: formData.get("promotionImage") as File | null,
+        promotionPackage: formData.get("promotionPackage") as string | null,
+        releaseDescription: formData.get("releaseDescription") as string | null,
+        releaseTitle: formData.get("releaseTitle") as string | null,
+        priority: formData.get("priority") as string | null,
+        configuration: formData.get("configuration") as string | null,
+        typeOfRelease: formData.get("type_of_release") as string | null,
+        editorialTeams: formData.get("editorial_teams") as string | null,
+        marketingDetail: formData.get("marketing_detail") as string | null,
+        artistGender: formData.get("artist_gender") as string | null,
+        location: formData.get("location") as string | null,
+        releaseTime: formData.get("release_time") as string | null,
+        subgenres: getArray<string>(formData, "subgenres") as string[],
+        moods: formData.get("moods") as string | null,
+        comment: formData.get("comment") as string | null,
+        facebookProfileLink: formData.get("facebook_profile_link") as string | null,
+        instagramProfileLink: formData.get("instagram_profile_link") as
+            | string
+            | null,
+        twitterProfileLink: formData.get("twitter_profile_link") as string | null,
+        youtubeProfileLink: formData.get("youtube_profile_link") as string | null,
+        tiktokProfileLink: formData.get("tiktok_profile_link") as string | null,
+        focusTrack: formData.get("focus_track") as string | null,
+    };
 }
 export const releaseRejectionEmail = (props: rejectEmailProps) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2152,7 +2166,7 @@ export const releaseRejectionEmail = (props: rejectEmailProps) => {
 </html>`;
 };
 export const artistDeactivationEmail = (props: DetactivateEmail) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2319,7 +2333,7 @@ export const artistDeactivationEmail = (props: DetactivateEmail) => {
 </html>`;
 };
 export const userDeactivationEmail = (props: DetactivateEmail) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2483,7 +2497,7 @@ export const userDeactivationEmail = (props: DetactivateEmail) => {
 </html>`;
 };
 export const sendUserNotificationEmail = (props: sendUserNotificationEmailType) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2583,7 +2597,7 @@ export const sendUserNotificationEmail = (props: sendUserNotificationEmailType) 
 };
 
 export const userVerifictaionRejectionEmail = (props: DetactivateEmail) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2752,7 +2766,7 @@ export const userVerifictaionRejectionEmail = (props: DetactivateEmail) => {
 };
 
 export const userVerifictaionApprovalEmail = (props: DetactivateEmail) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -2894,7 +2908,7 @@ export const userVerifictaionApprovalEmail = (props: DetactivateEmail) => {
 </html>`;
 };
 export const withdrawalApprovalEmail = () => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3059,7 +3073,7 @@ export const withdrawalApprovalEmail = () => {
 </html>`;
 };
 export const withdrawalRejectionEmail = () => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3269,7 +3283,7 @@ export const withdrawalRejectionEmail = () => {
 </html>`;
 };
 export const promotionApprovalEmail = () => {
-  return `
+    return `
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3438,7 +3452,7 @@ export const promotionApprovalEmail = () => {
 </html>`;
 };
 export const promotionRejectionEmail = () => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3648,7 +3662,7 @@ export const promotionRejectionEmail = () => {
 </html>`;
 };
 export const promotionCompletionEmail = () => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -3796,41 +3810,41 @@ export const promotionCompletionEmail = () => {
 
 // Helper function to replace placeholders
 export function replaceTemplatePlaceholders(
-  html: string,
-  data: Record<string, string>
+    html: string,
+    data: Record<string, string>
 ): string {
-  let result = html;
-  
-  Object.keys(data).forEach((key) => {
-    const placeholder = `{{${key}}}`;
-    result = result.replace(new RegExp(placeholder, 'g'), data[key]);
-  });
-  
-  // Add common fields
-  const commonData: Record<string, string> = {
-    year: new Date().getFullYear().toString(),
-    company_name: process.env.COMPANY_NAME || 'Your Company',
-    company_address: process.env.COMPANY_ADDRESS || '123 Business St, City, State 12345',
-    support_email: process.env.SUPPORT_EMAIL || 'support@yourcompany.com',
-  };
-  
-  Object.keys(commonData).forEach((key) => {
-    const placeholder = `{{${key}}}`;
-    result = result.replace(new RegExp(placeholder, 'g'), commonData[key]);
-  });
-  
-  return result;
+    let result = html;
+
+    Object.keys(data).forEach((key) => {
+        const placeholder = `{{${key}}}`;
+        result = result.replace(new RegExp(placeholder, 'g'), data[key]);
+    });
+
+    // Add common fields
+    const commonData: Record<string, string> = {
+        year: new Date().getFullYear().toString(),
+        company_name: process.env.COMPANY_NAME || 'Your Company',
+        company_address: process.env.COMPANY_ADDRESS || '123 Business St, City, State 12345',
+        support_email: process.env.SUPPORT_EMAIL || 'support@yourcompany.com',
+    };
+
+    Object.keys(commonData).forEach((key) => {
+        const placeholder = `{{${key}}}`;
+        result = result.replace(new RegExp(placeholder, 'g'), commonData[key]);
+    });
+
+    return result;
 }
 
 export function parseLabelFormData(formData: FormData) {
-  return {
-    label_name: formData.get("label_name") as string | null,
-    first_name: formData.get("first_name") as string | null, 
-    last_name: formData.get("last_name") as string | null, 
-    linkedin_profile_link: formData.get("linkedin_profile_link") as string | null, 
-    twitter_profile_link: formData.get("twitter_profile_link") as string | null, 
-    tiktok_profile_link: formData.get("tiktok_profile_link") as string | null, 
-    instagram_profile_link: formData.get("instagram_profile_link") as string | null, 
-    label_logo: formData.get("label_logo") as File | null,
-  };
+    return {
+        label_name: formData.get("label_name") as string | null,
+        first_name: formData.get("first_name") as string | null,
+        last_name: formData.get("last_name") as string | null,
+        linkedin_profile_link: formData.get("linkedin_profile_link") as string | null,
+        twitter_profile_link: formData.get("twitter_profile_link") as string | null,
+        tiktok_profile_link: formData.get("tiktok_profile_link") as string | null,
+        instagram_profile_link: formData.get("instagram_profile_link") as string | null,
+        label_logo: formData.get("label_logo") as File | null,
+    };
 }

@@ -175,8 +175,8 @@ interface BaseApiResponseForRelease {
   createdAt: Date;
   updatedAt: Date;
   catalogNumber: string;
-  user:{
-    label:string;
+  user: {
+    label: string;
   };
 }
 
@@ -533,3 +533,25 @@ export type labelResponse = {
   nextCursor?: string;
   hasMore: boolean;
 };
+
+export type salesReportDashboardResponse = {
+  totalWithdrawn: {
+    totalWithdrawals: number
+  }[],
+  totals: {
+    totalDocuments: number;
+    totalNetAmount: number;
+  }[],
+  topSongs: {
+    totalRevenue: number;
+    song: songFromApi;
+  }[],
+  topArtists: {
+    totalRevenue: number;
+    artist: Artist;
+  }[],
+  topLabels: {
+    totalRevenue: number;
+    label: ILabel
+  }[]
+}

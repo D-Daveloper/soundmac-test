@@ -3,13 +3,24 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import { top_performing_artist } from "@/app/utils/constants";
 import Select from "@/components/Select";
-import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
-import { CircleDollarSign, Clock4, Coins, FileDown, Music4, Users } from "lucide-react";
+import {
+  useGetUserArtistsNames,
+  useGetUserSalesReportDashboardDetailsNames,
+} from "@/util/customHooks/useQueries";
+import { formatAmount } from "@/util/middleware/functions";
+import {
+  CircleDollarSign,
+  Clock4,
+  Coins,
+  FileDown,
+  Music4,
+  Users,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 
-const page = () => {
+const Page = () => {
   const dashboardContext = useContext(DashboardContext);
   const [salesReportForm, setsalesReportForm] = useState({
     artist: "",
@@ -21,10 +32,12 @@ const page = () => {
   }, []);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+  const { isLoading: isLoadingSalesReport, data: salesReport } =
+    useGetUserSalesReportDashboardDetailsNames();
 
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
-      {isLoading || !data ? (
+      {isLoading || !data || isLoadingSalesReport || !salesReport ? (
         <InlineLoadingScreen />
       ) : (
         <div className="mt-5 flex flex-col gap-5 mb-10">
@@ -74,7 +87,7 @@ const page = () => {
           <div className="flex justify-between flex-wrap">
             <div className="w-full flex gap-5 max-w-[600px] mb-5 max-sm:flex-wrap">
               <Link
-              href={"salesReport/withdrawal"}
+                href={"salesReport/withdrawal"}
                 className={
                   "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/90 border-2 text-white! border-primary flex bg-primary-500 text-xs max-sm:w-fit"
                 }
@@ -83,7 +96,7 @@ const page = () => {
                 <CircleDollarSign strokeWidth={1} size={20} />
               </Link>
               <Link
-              href={"salesReport/history"}
+                href={"salesReport/history"}
                 className={
                   "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
                 }
@@ -109,7 +122,7 @@ const page = () => {
                   <Coins color="#103958" /> Total Earnings
                 </h1>
                 <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-                  ₦34,998.68
+                  ${formatAmount(salesReport.totals[0]?.totalNetAmount) || 0}
                 </p>
               </div>
               <div className="bg-neutral-50 border-1 border-neutral-100 rounded-2xl">
@@ -118,26 +131,34 @@ const page = () => {
                   Top Performing Artists
                 </p>
                 <div className="grid grid-cols-3 max-md:grid-cols-2 items-center place-items-center">
-                  {top_performing_artist.map((item, index) => (
-                    <div
-                      key={index}
-                      className={"flex justify-center items-center flex-col " + (index== 2 && " max-md:col-span-2")}
-                    >
-                      <div className="min-w-[80px] max-w-[80px] min-h-[80px] max-h-[80px] relative">
-                        <Image
-                          priority={true}
-                          loading="eager"
-                          src={"/radio.png"}
-                          alt="Profile picture"
-                          fill
-                          className="object-cover rounded-full "
-                        />
+                  {salesReport?.topArtists.length > 0 &&
+                    salesReport.topArtists.map((item, index) => (
+                      <div
+                        key={index}
+                        className={
+                          "flex justify-center items-center flex-col " +
+                          (index == 2 && " max-md:col-span-2")
+                        }
+                      >
+                        <div className="min-w-[80px] max-w-[80px] min-h-[80px] max-h-[80px] relative">
+                          <Image
+                            priority={true}
+                            loading="eager"
+                            src={item.artist.artistImage ?? "/radio.png"}
+                            alt="Profile picture"
+                            fill
+                            className="object-cover rounded-full "
+                          />
+                        </div>
+                        <p
+                          className={
+                            "font-semibold text-xl flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-5 text-center! "
+                          }
+                        >
+                          {item.artist.artistName}
+                        </p>
                       </div>
-                      <p className={"font-semibold text-xl flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-5 text-center! " }>
-                        {item.name}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </div>
             </div>
@@ -147,36 +168,37 @@ const page = () => {
                 Top Performing Songs
               </p>
               <div className="p-5 flex flex-col gap-5">
-                {top_performing_artist.map((item, index) => (
-                  <div
-                    key={index}
-                    className="bg-neutral-50 border-2 border-neutral-100 rounded-lg flex gap-3 h-fit relative "
-                  >
-                    <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
-                      <Image
-                        priority={true}
-                        src={"/signinimage.png"}
-                        alt="an image depicting the song image"
-                        fill
-                        className="object-cover rounded-lg shadow-md max-h-[80px] "
-                      />
+                {salesReport.topSongs.length > 0 &&
+                  salesReport.topSongs.map((item, index) => (
+                    <div
+                      key={index}
+                      className="bg-neutral-50 border-2 border-neutral-100 rounded-lg flex gap-3 h-fit relative "
+                    >
+                      <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
+                        <Image
+                          priority={true}
+                          src={item.song.releaseImage ?? "/signinimage.png"}
+                          alt="an image depicting the song image"
+                          fill
+                          className="object-cover rounded-lg shadow-md max-h-[80px] "
+                        />
+                      </div>
+                      <div className="flex flex-col flex-2">
+                        <h1 className="text-lg font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-1">
+                          {item.song.releaseTitle}
+                        </h1>
+                        <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
+                          feat. {item.song.featuredArtist[0].artistName}
+                        </p>
+                        <p className="mt-2">
+                          <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
+                            Revenue:{" "}
+                          </span>
+                          ${item.totalRevenue}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col flex-2">
-                      <h1 className="text-lg font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-1">
-                        {item.name}
-                      </h1>
-                      <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
-                        feat. {item.featuredArtist}
-                      </p>
-                      <p className="mt-2">
-                        <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
-                          Release Date:{" "}
-                        </span>
-                        {item.amount}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </div>
           </div>
@@ -186,4 +208,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

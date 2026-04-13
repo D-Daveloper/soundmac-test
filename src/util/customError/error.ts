@@ -22,13 +22,13 @@ console.log(error);
       { status: 400 }
     );
   }
-  if (error.code && error.code === 11000) {
+  if ((error.code && error.code === 11000) || (error.cause && error.cause.code === 11000)) {
     // Regular Error object (includes .message)
     return NextResponse.json({ msg: error.message }, { status: 400 });
   }
 
   return NextResponse.json(
-    { success: false, message: "Internal server error" },
+    { success: false, msg: "Internal server error" },
     { status: 500 }
   );
 };

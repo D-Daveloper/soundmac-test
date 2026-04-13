@@ -5,6 +5,7 @@ import {
   getAdminAlbumDetails,
   getAdminArtistsNames,
   getAdminDashboard,
+  getAdminSalesReportDashboardDetails,
   getAdminSingleDetails,
   getAdminUserDetails,
   getAdminWithdrawalDetails,
@@ -16,6 +17,7 @@ import {
   getAllPromotions,
   getAllReleases,
   getAllSupportRequests,
+  getAllUnmatchedSalesreport,
   getAllUsers,
   getAllVerificationRequests,
   getAllWithdrawalRequests,
@@ -33,6 +35,7 @@ import {
   getUserArtistsNames,
   getUserReleaseNames,
   getUserReleaseTrackNames,
+  getUserSalesReportDashboardDetails,
   getUserWithdrawalHistory,
   getWithdrawalHistory,
 } from "../axios/axiosInstance";
@@ -54,6 +57,7 @@ import {
   PAGINATION,
   PayStackBankListResponse,
   ReleaseRequestResponse,
+  salesReportDashboardResponse,
   songFromApi,
   WithdrawalResponse,
   withdrawals,
@@ -61,6 +65,7 @@ import {
 import { handleReactQueryApiCallError } from "../middleware/functions";
 import { IPromotion } from "../models/promotionModel";
 import { IUser } from "../models/userModel";
+import { ISalesReport } from "../models/salesReportModel";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -627,5 +632,52 @@ export function useGetLabelDetails(params: { labelId: string }) {
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+  });
+}
+export function useGetUserSalesReportDashboardDetailsNames() {
+  const api = UseAxios();
+  return useQuery<salesReportDashboardResponse, Error>({
+    queryKey: ["salesReportDashboard"],
+    queryFn: async () => getUserSalesReportDashboardDetails(api),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+export function useGetAdminSalesReportDashboardDetails() {
+  const api = UseAxios();
+  return useQuery<salesReportDashboardResponse, Error>({
+    queryKey: ["salesReportDashboard"],
+    queryFn: async () => getAdminSalesReportDashboardDetails(api),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
+
+export function useGetPaginatedUnmatchedSalesReport(params: { page:number,releaseTitle:string,limit:string,productType:string,}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<ISalesReport>, Error>({
+    queryKey: [
+      "unmatchedSalesReport",
+      params.page,
+      // params.sort,
+      params.releaseTitle,
+      params.productType,
+      // params.promotionStatus,
+    ],
+    queryFn: async () => getAllUnmatchedSalesreport(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

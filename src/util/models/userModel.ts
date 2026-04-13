@@ -123,9 +123,9 @@ export const verificationDetails = new mongoose.Schema(
           const age = Math.floor(
             (Date.now() - value.getTime()) / (365.25 * 24 * 60 * 60 * 1000),
           );
-          return age >= 13;
+          return age >= 18;
         },
-        message: "you must be at least 13 years old",
+        message: "you must be at least 18 years old",
       },
     },
     idType: {

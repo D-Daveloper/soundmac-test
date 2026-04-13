@@ -1,9 +1,10 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
+import { ISalesReport } from "../models/salesReportModel";
 
 export async function getDashboard(api: AxiosInstance) {
   const res = await api.get("dashboard");
@@ -348,5 +349,27 @@ export const getlabel = async (
 
 ): Promise<labelResponse> => {
   const res = await api.get<Promise<labelResponse>>("admin/artist/all-labels/" + params.labelId);
+  return res.data;
+};
+export const getUserSalesReportDashboardDetails = async (
+  api: AxiosInstance,
+): Promise<salesReportDashboardResponse> => {
+  const res = await api.get<Promise<salesReportDashboardResponse>>("/finance/sales-report");
+  return res.data;
+};
+export const getAdminSalesReportDashboardDetails = async (
+  api: AxiosInstance,
+): Promise<salesReportDashboardResponse> => {
+  const res = await api.get<Promise<salesReportDashboardResponse>>("admin/finance/sales-report");
+  return res.data;
+};
+
+export const getAllUnmatchedSalesreport = async (
+  api: AxiosInstance,
+  params:{ page:number,releaseTitle:string,limit:string,productType:string, }
+): Promise<PAGINATION<ISalesReport>> => {
+  const res = await api.get<Promise<PAGINATION<ISalesReport>>>("admin/finance/sales-report/pending", {
+    params:params,
+  });
   return res.data;
 };

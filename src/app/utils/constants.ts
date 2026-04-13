@@ -1059,3 +1059,10 @@ export const ReleaseMock:AdminRelease[] = [
       },
   },
 ]
+
+export const royaltySource = [
+  "DPM Network"
+]
+export const matchParameter = [
+  "upc","isrc"
+]

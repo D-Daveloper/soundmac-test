@@ -9,7 +9,6 @@ export async function GET(req: Request) {
   try {
     let Withdrawals: any[] = [];
     let totalCount = 0;
-    await dbConnect();
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
 
@@ -18,7 +17,7 @@ export async function GET(req: Request) {
     }
     await dbConnect();
 
-    const admin = userJwt.user ? await User.findById(userJwt.user) : null;
+    const admin = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!admin) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (admin.role != "admin" && admin.role != "super_admin") {
