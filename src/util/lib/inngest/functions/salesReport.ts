@@ -1,4 +1,3 @@
-
 import sendEmail from "@/util/sendMail/sendEmail";
 import { inngest } from "../inngest";
 import salesReport from "@/util/models/salesReportModel";
@@ -9,8 +8,7 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import mongoose from "mongoose";
 import salesReportBatch from "@/util/models/saleReportBatchModel";
-import { stripQuotes } from "@/util/middleware/functions";
-import { normalize } from "path";
+import { stripQuotes, normalize } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
@@ -24,11 +22,9 @@ export const uploadSalesReport = inngest.createFunction(
         console.log(event);
         const { batchId, sales_period, data } = event.data;
 
-        await dbConnect();
         await step.run("parse-sales-report", async () => {
+            await dbConnect();
 
-            const session = await mongoose.startSession();
-            session.startTransaction();
 
             // console.log(data);
             let sales = [];
@@ -147,7 +143,11 @@ export const uploadSalesReport = inngest.createFunction(
                     });
                 }
             }
+            const session = await mongoose.startSession();
             try {
+
+                session.startTransaction();
+
                 // Pass the session to every operation
                 await Promise.all([
                     salesReport.insertMany(sales, { session }),
@@ -157,7 +157,7 @@ export const uploadSalesReport = inngest.createFunction(
                             status: "completed",
                             totalRows: data.length
                         }
-                    }),
+                    }, { session }),
                 ])
 
                 await session.commitTransaction();

@@ -140,6 +140,7 @@ export interface PAGINATION<T> {
   totalOnlinePress: number;
   totalRadioPromotion: number;
   msg: string;
+  totalRevenue:string;
 }
 
 export interface ARTIST_TABLE extends Artist {
