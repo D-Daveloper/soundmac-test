@@ -50,9 +50,13 @@ export const normalize = (str: string) =>
 // strip quotes helper
 export const stripQuotes = (str: string) =>
     str?.replace(/["']/g, "");
-export const formatAmount = (amount:string|number)=>{
-    return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  }
+export const formatAmount = (amount: string | number) => {
+    return Number(amount).toLocaleString('en-US', {
+        style: 'currency', currency: 'USD', maximumFractionDigits: 4,
+        roundingMode: 'trunc'
+    });
+    // return Number(amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
 export const isSongFormValid = (form: SongForm): string => {
     console.log(form);
     const twoWeeks = addWeeks(new Date(), 2);

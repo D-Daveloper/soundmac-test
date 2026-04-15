@@ -122,13 +122,13 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Invalid Request", status: 401 };
     } else if (!user.confirmed) {
       Uploaderror = { msg: "Please verify your email address", status: 401 };
-    // } else if (user.otp === null) {
-    //   Uploaderror = { msg: "Invalid otp", status: 400 };
-    // } else if (user.otpExpires === null) {
-    //   Uploaderror = { msg: "Invalid otp", status: 400 };
-    // } else if (user.otp != formData.otp || new Date() > user.otpExpires) {
-    //   Uploaderror = { msg: "Invalid otp or Expired otp", status: 400 };
-    } 
+    } else if (user.otp === null) {
+      Uploaderror = { msg: "Invalid otp", status: 400 };
+    } else if (user.otpExpires === null) {
+      Uploaderror = { msg: "Invalid otp", status: 400 };
+    } else if (user.otp != formData.otp || new Date() > user.otpExpires) {
+      Uploaderror = { msg: "Invalid otp or Expired otp", status: 400 };
+    }
     else if (
       !formData.amount ||
       !numRegex.test(formData.amount) ||
@@ -148,32 +148,14 @@ export async function POST(req: Request) {
     if (parseInt(formData.amount, 10) > availableBalance) {
       return NextResponse.json({ msg: "Insufficient available balance" }, { status: 400 });
     }
-    // return;
-    const session = await mongoose.startSession();
-    try {
 
-      session.startTransaction();
-      const [withdrawal] = await withDrawalModel.create([{
-        amount: formData.amount,
-        withdrawalStatus: "pending",
-        user: user?._id,
-        accountNumber: user?.accountDetails.accountNumber,
-        paidAt: null,
-      }], { session });
-      await salesReportLedger.create([{
-        user: user?._id,
-        type: "withdrawal",
-        amountUsd: formData.amount,
-        direction: "debit",
-        reference: withdrawal._id,
-      }], { session })
-      await session.commitTransaction();
-    } catch (error) {
-      await session.abortTransaction();
-      throw error;
-    } finally {
-      session.endSession();
-    }
+    await withDrawalModel.create({
+      amount: formData.amount,
+      withdrawalStatus: "pending",
+      user: user?._id,
+      accountNumber: user?.accountDetails.accountNumber,
+      paidAt: null,
+    });
 
     user!.otp = null;
     user!.otpExpires = null;
@@ -271,7 +253,7 @@ export async function PUT(req: Request) {
   }
 }
 
-export async function getUserFinancials(userId: string) {
+async function getUserFinancials(userId: string) {
   await dbConnect();
   const [ledgerAgg, pendingWithdrawals] = await Promise.all([
     salesReportLedger.aggregate([
@@ -305,7 +287,7 @@ export async function getUserFinancials(userId: string) {
 
   const balance = ledgerAgg[0]?.balance || 0;
   const pending = pendingWithdrawals[0]?.total || 0;
-  console.log(balance,pending,balance-pending);
+  console.log(balance, pending, balance - pending);
 
   return {
     ledgerBalance: balance,

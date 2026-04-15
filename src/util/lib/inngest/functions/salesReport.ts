@@ -165,7 +165,7 @@ export const uploadSalesReport = inngest.createFunction(
                 await session.abortTransaction();
                 throw error;
             } finally {
-                session.endSession();
+                await session.endSession();
             }
         });
 

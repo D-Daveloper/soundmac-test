@@ -278,7 +278,7 @@ const page = () => {
                 <Coins color="#103958" /> Total Earnings
               </h1>
               <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-                  $ {salesReport.totals.length > 0 ? formatAmount(salesReport.totals[0]?.totalNetAmount) : 0}
+                  {salesReport.totals.length > 0 ? formatAmount(salesReport.totals[0]?.totalNetAmount) : "$ "+0}
               </p>
             </div>
             </div>

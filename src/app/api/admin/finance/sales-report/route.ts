@@ -484,7 +484,7 @@ export async function GET(req: Request) {
 //             await session.abortTransaction();
 //             throw error;
 //         } finally {
-//             session.endSession();
+//             await session.endSession();
 //         }
 
 

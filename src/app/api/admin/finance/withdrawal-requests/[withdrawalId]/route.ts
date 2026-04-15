@@ -1,4 +1,4 @@
-import {WithdrawalEmailBody, withdrawals } from "@/app/type";
+import { WithdrawalEmailBody, withdrawals } from "@/app/type";
 import dbConnect from "@/util/db";
 import {
   replaceTemplatePlaceholders,
@@ -8,9 +8,10 @@ import {
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import withDrawalModel from "@/util/models/withDrawalModel";
+import salesReportLedger from "@/util/models/saleReportLedgerModel";
 
 export async function POST(
   req: Request,
@@ -74,11 +75,31 @@ export async function POST(
     let withdrawalUpdate;
 
     if (body.requestType == "approved") {
-      withdrawalUpdate = withDrawalModel.findByIdAndUpdate(
-        withdrawalId,
-        { withdrawalStatus: body.requestType,approvedBy: admin._id, paidAt: new Date() },
-        { runValidators: true },
-      );
+      const session = await mongoose.startSession();
+
+      try {
+        session.startTransaction();
+
+        withdrawalUpdate = await withDrawalModel.findByIdAndUpdate(
+          withdrawalId,
+          { withdrawalStatus: body.requestType, approvedBy: admin._id, paidAt: new Date() },
+          { runValidators: true, session },
+        );
+        await salesReportLedger.create([{
+          user: withdrawal.user,
+          type: "withdrawal",
+          amountUsd: withdrawal.amount,
+          direction: "debit",
+          reference: withdrawal._id,
+        }], { session })
+        await session.commitTransaction();
+
+      } catch (error) {
+        await session.abortTransaction();
+        throw error;
+      } finally {
+        await session.endSession();
+      }
 
       const withdrawalEmailData: WithdrawalEmailBody = {
         user_name: withdrawal.user.firstName,
@@ -97,10 +118,15 @@ export async function POST(
         withdrawalApprovalEmail(),
         withdrawalEmailData,
       );
+      // await sendEmail(
+      //   withdrawal.user.email,
+      //   "Withdrawal " + body.requestType,
+      //   withdrawalEmailhtml,
+      // )
     } else if (body.requestType == "rejected") {
       withdrawalUpdate = withDrawalModel.findByIdAndUpdate(
         withdrawalId,
-        { withdrawalStatus: body.requestType,approvedBy: admin._id },
+        { withdrawalStatus: body.requestType, approvedBy: admin._id },
         { runValidators: true },
       );
 
@@ -124,23 +150,22 @@ export async function POST(
         withdrawalRejectionEmail(),
         withdrawalEmailData,
       );
+      await Promise.all([
+        sendEmail(
+          withdrawal.user.email,
+          "Withdrawal " + body.requestType,
+          withdrawalEmailhtml,
+        ),
+        withdrawalUpdate,
+      ]).catch((error) => {
+        console.error("failed to reject withdrawal request", error);
+
+        return NextResponse.json(
+          { msg: "Failed to reject withdrawal request." },
+          { status: 400 },
+        );
+      });
     }
-
-    await Promise.all([
-      sendEmail(
-        withdrawal.user.email,
-        "Withdrawal " + body.requestType,
-        withdrawalEmailhtml,
-      ),
-      withdrawalUpdate,
-    ]).catch((error) => {
-      console.error("failed to reject withdrawal request", error);
-
-      return NextResponse.json(
-        { msg: "Failed to reject withdrawal request." },
-        { status: 400 },
-      );
-    });
 
     return NextResponse.json(
       { msg: "Withdrawal request has been" + " " + body.requestType + "." },
@@ -170,7 +195,7 @@ export async function GET(
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-    
+
     if (!withdrawalId || !Types.ObjectId.isValid(withdrawalId)) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }

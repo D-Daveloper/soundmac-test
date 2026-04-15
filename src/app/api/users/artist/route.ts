@@ -215,7 +215,7 @@ export async function DELETE(req: Request) {
   //   return handleMongooseValidationError(error);
   // } finally {
   //   // Always end the session
-  //   session.endSession();
+  //   await session.endSession();
   // }
 }
 // export async function PATCH(req: Request) {

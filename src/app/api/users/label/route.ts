@@ -115,9 +115,9 @@ export async function POST(req: Request) {
     }
 
     const session = await mongoose.startSession();
-    session.startTransaction();
-
+    
     try {
+      session.startTransaction();
       // Pass the session to every operation
       const [newLabel] = await Label.create([labelDetails], { session });
 
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
       await session.abortTransaction();
       throw error;
     } finally {
-      session.endSession();
+      await session.endSession();
     }
 
     return NextResponse.json({ msg: "Label succesfully created" }, { status: 201 });
