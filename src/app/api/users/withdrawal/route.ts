@@ -7,6 +7,8 @@ import { generateOtp, numRegex } from "@/util/middleware/functions";
 import PaymentForm from "@/app/dashboard/profile/Payment_Billlings";
 import withDrawalModel from "@/util/models/withDrawalModel";
 import sendEmail from "@/util/sendMail/sendEmail";
+import salesReportLedger from "@/util/models/saleReportLedgerModel";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
@@ -120,20 +122,20 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Invalid Request", status: 401 };
     } else if (!user.confirmed) {
       Uploaderror = { msg: "Please verify your email address", status: 401 };
-    } else if (user.otp === null) {
-      Uploaderror = { msg: "Invalid otp", status: 400 };
-    } else if (user.otpExpires === null) {
-      Uploaderror = { msg: "Invalid otp", status: 400 };
-    } else if (user.otp != formData.otp || new Date() > user.otpExpires) {
-      Uploaderror = { msg: "Invalid otp or Expired otp", status: 400 };
-    } else if (
+    // } else if (user.otp === null) {
+    //   Uploaderror = { msg: "Invalid otp", status: 400 };
+    // } else if (user.otpExpires === null) {
+    //   Uploaderror = { msg: "Invalid otp", status: 400 };
+    // } else if (user.otp != formData.otp || new Date() > user.otpExpires) {
+    //   Uploaderror = { msg: "Invalid otp or Expired otp", status: 400 };
+    } 
+    else if (
       !formData.amount ||
       !numRegex.test(formData.amount) ||
       parseInt(formData.amount, 10) < 1000
     ) {
       Uploaderror = { msg: "Invalid amount.", status: 400 };
     }
-    // else if (parseInt(formData.amount) > userBalance - 1000)
 
     if (Uploaderror != null) {
       return NextResponse.json(
@@ -141,13 +143,37 @@ export async function POST(req: Request) {
         { status: Uploaderror.status },
       );
     } // return any errors up to this point and delete the song
-    await withDrawalModel.create({
-      amount: formData.amount,
-      withdrawalStatus: "pending",
-      user: user?._id,
-      accountNumber: user?.accountDetails.accountNumber,
-      paidAt: null,
-    });
+    const { availableBalance } = await getUserFinancials(user!._id?.toString());
+
+    if (parseInt(formData.amount, 10) > availableBalance) {
+      return NextResponse.json({ msg: "Insufficient available balance" }, { status: 400 });
+    }
+    // return;
+    const session = await mongoose.startSession();
+    try {
+
+      session.startTransaction();
+      const [withdrawal] = await withDrawalModel.create([{
+        amount: formData.amount,
+        withdrawalStatus: "pending",
+        user: user?._id,
+        accountNumber: user?.accountDetails.accountNumber,
+        paidAt: null,
+      }], { session });
+      await salesReportLedger.create([{
+        user: user?._id,
+        type: "withdrawal",
+        amountUsd: formData.amount,
+        direction: "debit",
+        reference: withdrawal._id,
+      }], { session })
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
 
     user!.otp = null;
     user!.otpExpires = null;
@@ -243,4 +269,47 @@ export async function PUT(req: Request) {
 
     return handleMongooseValidationError(error);
   }
+}
+
+export async function getUserFinancials(userId: string) {
+  await dbConnect();
+  const [ledgerAgg, pendingWithdrawals] = await Promise.all([
+    salesReportLedger.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
+      {
+        $group: {
+          _id: null,
+          balance: {
+            $sum: {
+              $cond: [
+                { $eq: ["$direction", "credit"] },
+                { $toDouble: "$amountUsd" },
+                { $multiply: [{ $toDouble: "$amountUsd" }, -1] }
+              ]
+            }
+          },
+          totalDocuments: { $sum: 1 }
+        }
+      }
+    ]),
+    withDrawalModel.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId), withdrawalStatus: "pending" } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: { $toDouble: "$amount" } }
+        }
+      }
+    ])
+  ]);
+
+  const balance = ledgerAgg[0]?.balance || 0;
+  const pending = pendingWithdrawals[0]?.total || 0;
+  console.log(balance,pending,balance-pending);
+
+  return {
+    ledgerBalance: balance,
+    pendingWithdrawals: pending,
+    availableBalance: balance - pending
+  };
 }

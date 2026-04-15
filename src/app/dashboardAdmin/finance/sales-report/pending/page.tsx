@@ -198,7 +198,7 @@ const Page = () => {
                 Total Revenue
               </p>
               <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
-                ₦{allSalesReport?.totalRevenue || 0}
+                ${allSalesReport?.totalRevenue || 0}
               </h2>
             </div>
           </div>

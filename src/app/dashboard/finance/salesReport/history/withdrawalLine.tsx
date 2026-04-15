@@ -27,7 +27,7 @@ const WithdrawalLine = (Props: Props) => {
           {Props.status}
         </p>
         <p className="font-bold leading-[30px] -tracking-[1px] text-2xl text-primary-500 flex-1">
-          ₦{Props.amount}
+          ${Props.amount}
         </p>
       </div>
       {/* account number */}

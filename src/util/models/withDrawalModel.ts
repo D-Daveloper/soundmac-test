@@ -5,7 +5,9 @@ export const WithDrawalSchema = new mongoose.Schema(
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Provide an admin!"],
+      required: [function (this: any) {
+        return this.get("withdrawalStatus") !== "pending";
+      }, "Provide an admin!"],
     },
     amount: { type: String, required: [true, "Please Provide an amount"] },
     withdrawalStatus: {

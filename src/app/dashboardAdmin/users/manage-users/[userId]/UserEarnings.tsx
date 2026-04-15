@@ -113,7 +113,7 @@ export default function UserEarnings({ userId }: { userId: string }) {
           <Coins color="#103958" /> Total Earnings
         </h1>
         <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-          ₦34,998.68
+          $34,998.68
         </p>
       </div>
       {!artistDetails || artistDetails.data.length < 1 ? (

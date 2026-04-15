@@ -95,7 +95,7 @@ const router = useRouter()
                         {withdrawal.user.email}
                       </td>
                       <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        ₦{withdrawal.amount}
+                        ${withdrawal.amount}
                       </td>
                       <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
                         {new Date(withdrawal.createdAt).toDateString()}

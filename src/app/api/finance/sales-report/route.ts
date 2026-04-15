@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import salesReport from "@/util/models/salesReportModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
-
+import salesReportLedger from "@/util/models/saleReportLedgerModel";
 
 export async function GET(req: Request) {
     try {
@@ -22,17 +22,22 @@ export async function GET(req: Request) {
             return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
         }
 
-
         const [totals, songs, artists] = await Promise.all([
 
             //total net amount
-            salesReport.aggregate([
-                { $match: { matchStatus: "matched", user: user._id } },
+            salesReportLedger.aggregate([
+                { $match: { user: user._id } },
                 {
                     $group: {
                         _id: null,
                         totalNetAmount: {
-                            $sum: { $toDouble: "$netAmountUsd" }
+                            $sum: {
+                                $cond: [
+                                    { $eq: ["$direction", "credit"] },
+                                    { $toDouble: "$amountUsd" },
+                                    { $multiply: [{ $toDouble: "$amountUsd" }, -1] }
+                                ]
+                            }
                         },
                         totalDocuments: { $sum: 1 }
                     }
@@ -40,7 +45,7 @@ export async function GET(req: Request) {
             ]),
             // 🎵 Songs
             salesReport.aggregate([
-                 { $match: { matchStatus: "matched", user: user._id } },
+                { $match: { matchStatus: "matched", user: user._id } },
                 {
                     $group: {
                         _id: "$upc",// explaination we use the upc to track the songs so say 10 songs with the same upc appear in the sales report maybe the song was streamed in different places, what we are saying here is give me that song with the same upc let me calculate the total revenue it has generated so kinda like arranging the sales report by upc and getting the top 3 most performing by revenue
@@ -63,10 +68,9 @@ export async function GET(req: Request) {
 
                 { $unwind: "$song" }
             ]),
-
             // 🎤 Artists
             salesReport.aggregate([
-                { $match: { matchStatus: "matched", user:user._id } },
+                { $match: { matchStatus: "matched", user: user._id } },
 
                 {
                     $group: {

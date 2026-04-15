@@ -7,8 +7,8 @@ import { BankObject } from "@/app/type";
 import Select from "@/components/Select";
 import { OTP } from "@/util/classes/OtpClass";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useAuthUser, useGetBankList } from "@/util/customHooks/useQueries";
-import { formatTime, numRegex } from "@/util/middleware/functions";
+import { useAuthUser, useGetBankList, useGetUserSalesReportDashboardDetailsNames } from "@/util/customHooks/useQueries";
+import { formatAmount, formatTime, numRegex } from "@/util/middleware/functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { Coins } from "lucide-react";
@@ -31,7 +31,8 @@ const page = () => {
   const otpClass = new OTP(otp, setOtp, inputsRef);
   const router = useRouter();
   const api = UseAxios();
-
+  const { isLoading: isLoadingSalesReport, data: salesReport,refetch:refetchBalance } =
+    useGetUserSalesReportDashboardDetailsNames();
   const [withdrawalForm, setwithdrawalForm] = useState({
     amount: "",
     bankName: "",
@@ -127,6 +128,7 @@ const page = () => {
         (Date.now() - OTP_EXPIRY_SECONDS * 1000).toString(),
       );
       await refetchUser();
+      await refetchBalance();
       setOtp(["", "", "", "", "", ""]);
       setwantsEditAccountForm(false);
       setwithdrawalForm({
@@ -264,7 +266,7 @@ const page = () => {
           alt="arrow left"
         />
       </Link>
-      {isLoading || !data || isSumbittingForm || bankLoading ? (
+      {isLoading || !data || isSumbittingForm || bankLoading || isLoadingSalesReport || !salesReport ? (
         <InlineLoadingScreen />
       ) : (
         <div className="mt-5 flex flex-col gap-5 mb-10">
@@ -276,7 +278,7 @@ const page = () => {
                 <Coins color="#103958" /> Total Earnings
               </h1>
               <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-                ₦34,998.68
+                  $ {salesReport.totals.length > 0 ? formatAmount(salesReport.totals[0]?.totalNetAmount) : 0}
               </p>
             </div>
             </div>

@@ -140,7 +140,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
                       Total Earnings
                     </p>
                     <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                      ₦{userDetails.totalEarnings}
+                      ${userDetails.totalEarnings}
                     </h2>
                   </div>
                 </div>

@@ -196,7 +196,7 @@ const page = () => {
                       status={item.withdrawalStatus}
                       account_number={item.accountNumber}
                       amount={item.amount}
-                      date={item.createdAt.toDateString()}
+                      date={new Date(item.createdAt).toDateString()}
                     />
                   )),
                 )}

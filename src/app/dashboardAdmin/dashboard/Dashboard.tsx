@@ -130,7 +130,7 @@ const Dashboard = () => {
                 Total Earnings
               </p>
               <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
-                ₦{data?.totalEarnings || 0}
+                ${data?.totalEarnings || 0}
               </h2>
             </div>
           </div>
