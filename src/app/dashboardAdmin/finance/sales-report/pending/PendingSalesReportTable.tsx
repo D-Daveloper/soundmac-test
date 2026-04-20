@@ -83,8 +83,8 @@ const PendingSalesReportTable = ({
                       <td onClick={() => handleCopy(report.productType)} className="w-[10%] min-w-[10%] max-w-[10%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
                         {report.productType}
                       </td>
-                      <td onClick={() => handleCopy(report.upc)} className="w-[10%] min-w-[10%] max-w-[10%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
-                        {report.upc}
+                      <td onClick={() => handleCopy(report.upc.toString())} className="w-[10%] min-w-[10%] max-w-[10%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
+                        {report.upc.toString()}
                       </td>
                       <td onClick={() => handleCopy(report.isrc)} className="w-[10%] min-w-[10%] max-w-[10%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
                         {report.isrc}
@@ -92,8 +92,8 @@ const PendingSalesReportTable = ({
                       <td onClick={() => handleCopy(String(report.netAmountUsd))} className="w-[15%] min-w-[15%] max-w-[15%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
                         {String(report.netAmountUsd)}
                       </td>
-                      <td onClick={() => handleCopy(report.reportBatch)} className="w-[15%] min-w-[15%] max-w-[15%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
-                        {report.reportBatch}
+                      <td onClick={() => handleCopy(report.reportBatch.toString())} className="w-[15%] min-w-[15%] max-w-[15%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">
+                        {report.reportBatch.toString()}
                       </td>
                     </tr>
                   ))}
