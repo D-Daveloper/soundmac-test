@@ -602,9 +602,9 @@ export default function Page({
                       !notifyUserForm.notifyUserMessage ||
                       !notifyUserForm.notifyUserReason
                     }
-                    className="px-5 py-2.5 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    className="px-5 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-500/80 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                   >
-                    Confirm Deactivation
+                    Confirm Notification
                   </button>
                 </div>
               </div>

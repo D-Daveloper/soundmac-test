@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Link from "next/link";
@@ -20,9 +20,11 @@ import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const api = UseAxios();
+  const dashboardContext = useContext(DashboardContext);
   const queryClient = useQueryClient();
   const [isFilterOpen, setisFilterOpen] = useState(false);
   const [isSubmitting, setisSubmitting] = useState(false);
@@ -40,7 +42,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   });
   const { getParam, setParam } = useTabQuery();
   let tab = getParam("tab");
-
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Artist Info");
+  }, []);
   useEffect(() => {
     if (
       !tab ||

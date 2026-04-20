@@ -3,6 +3,7 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import {
   useGetAdminUserDetails,
 } from "@/util/customHooks/useQueries";
+import { formatAmount } from "@/util/middleware/functions";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -140,7 +141,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
                       Total Earnings
                     </p>
                     <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                      ${userDetails.totalEarnings}
+                      {formatAmount(userDetails.totalEarnings)}
                     </h2>
                   </div>
                 </div>

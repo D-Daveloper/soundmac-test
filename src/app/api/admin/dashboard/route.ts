@@ -3,7 +3,9 @@ import dbConnect from "@/util/db";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
+import salesReport from "@/util/models/salesReportModel";
 import SongModel from "@/util/models/songModel";
+import supportRequestsModel from "@/util/models/supportRequestsModel";
 import User from "@/util/models/userModel";
 import { NextResponse } from "next/server";
 
@@ -26,60 +28,101 @@ export async function GET(req: Request) {
       );
     }
 
-    const totalUsers = await User.countDocuments();
-    const totalArtists = await Artist.countDocuments();
-    const totalSingles = await SongModel.countDocuments();
-    const totalApprovedSingles = await SongModel.countDocuments({
+    const totalUsersQuery = User.countDocuments();
+    const totalArtistsQuery = Artist.countDocuments();
+    const totalSinglesQuery = SongModel.countDocuments();
+    const totalApprovedSinglesQuery = SongModel.countDocuments({
       releaseStatus: "approved",
     });
-    const totalRejectedSingles = await SongModel.countDocuments({
+    const totalRejectedSinglesQuery = SongModel.countDocuments({
       releaseStatus: "rejected",
     });
-    const totalPendingSingles = await SongModel.countDocuments({
+    const totalPendingSinglesQuery = SongModel.countDocuments({
       releaseStatus: "pending",
     });
-    const totalAlbums = await AlbumModel.countDocuments();
-    const totalApprovedAlbums = await AlbumModel.countDocuments({
+    const totalAlbumsQuery = AlbumModel.countDocuments();
+    const totalApprovedAlbumsQuery = AlbumModel.countDocuments({
       releaseStatus: "approved",
     });
-    const totalRejectedAlbums = await AlbumModel.countDocuments({
+    const totalRejectedAlbumsQuery = AlbumModel.countDocuments({
       releaseStatus: "rejected",
     });
-    const totalPendingAlbums = await AlbumModel.countDocuments({
+    const totalPendingAlbumsQuery = AlbumModel.countDocuments({
       releaseStatus: "pending",
     });
-    const pendingAlbums = await AlbumModel.find(
+    const pendingAlbumsQuery = AlbumModel.find(
       {
         releaseStatus: "pending",
       },
       { releaseTitle: 1, releaseDate: 1, artistName: 1, featuredArtist: 1 },
     ).limit(2);
-    const pendingSingles = await SongModel.find(
+    const pendingSinglesQuery = SongModel.find(
       {
         releaseStatus: "pending",
       },
       { releaseTitle: 1, releaseDate: 1, artistName: 1 },
     ).limit(2);
-    let upcomingReleases: typeof nextReleases = [...pendingSingles,...pendingAlbums];
+const totalSupportRequestsQuery = supportRequestsModel.countDocuments({})
+
+    const [totalRevenue, totalUsers,
+      totalArtists,
+      totalSingles,
+      totalApprovedSingles,
+      totalRejectedSingles,
+      totalPendingSingles,
+      totalAlbums,
+      totalApprovedAlbums,
+      totalRejectedAlbums,
+      totalPendingAlbums,
+      pendingAlbums,
+      pendingSingles,
+    totalSupportRequests] = await Promise.all([
+        salesReport.aggregate([
+          {
+            $group: {
+              _id: null,
+              totalNetAmount: {
+                $sum: { $toDouble: "$netAmountUsd" }
+              },
+              totalDocuments: { $sum: 1 }
+            }
+          }
+        ]),
+        totalUsersQuery,
+        totalArtistsQuery,
+        totalSinglesQuery,
+        totalApprovedSinglesQuery,
+        totalRejectedSinglesQuery,
+        totalPendingSinglesQuery,
+        totalAlbumsQuery,
+        totalApprovedAlbumsQuery,
+        totalRejectedAlbumsQuery,
+        totalPendingAlbumsQuery,
+        pendingAlbumsQuery,
+        pendingSinglesQuery,
+        totalSupportRequestsQuery
+      ]);
+
+    let upcomingReleases: typeof nextReleases = [...pendingSingles, ...pendingAlbums];
     const totalRelease = totalAlbums + totalSingles;
     const totalApprovedReleases = totalApprovedAlbums + totalApprovedSingles;
     const totalRejectedReleases = totalRejectedAlbums + totalRejectedSingles;
     const totalPendingReleases = totalPendingAlbums + totalPendingSingles;
 
-    const dashboardDate = {
+    const dashboardData = {
       totalRelease,
       totalApprovedReleases,
       totalRejectedReleases,
       totalPendingReleases,
       totalUsers,
       totalArtists,
-      totalSupportRequests: 200,
-      totalEarnings: 40000000,
+      totalSupportRequests,
+      totalEarnings: totalRevenue.length > 0 ? totalRevenue[0].totalNetAmount : 0,
       upcomingReleases,
     };
 
     return NextResponse.json(
-      { ...dashboardDate, msg: "Successful" },
+      { ...dashboardData, msg: "Successful" },
       {
         headers: {
           "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30",

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useContext, useEffect } from "react";
 import DashboardContext from "../../context/dashboardContext/dashboardContext";
 import ReleaseComp from "./ReleaseComp";
+import { formatAmount } from "@/util/middleware/functions";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useGetAdminDashboard();
@@ -130,7 +131,7 @@ const Dashboard = () => {
                 Total Earnings
               </p>
               <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
-                ${data?.totalEarnings || 0}
+               {data && formatAmount(data.totalEarnings)}
               </h2>
             </div>
           </div>

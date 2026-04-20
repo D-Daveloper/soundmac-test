@@ -9,6 +9,7 @@ import useDebounce from "@/app/components/searchBox/searchBox";
 import Pagination from "@/app/components/pagination/Pagination";
 import { allReleaseStatusFilterOptions } from "@/app/constant";
 import ReleaseTable from "./releaseTableArtists";
+import { formatAmount } from "@/util/middleware/functions";
 
 export default function ArtistEarnings({ id }: { id: string }) {
   const [isFilterOpen, setisFilterOpen] = useState(false);
@@ -113,7 +114,7 @@ export default function ArtistEarnings({ id }: { id: string }) {
           <Coins color="#103958" /> Total Earnings
         </h1>
         <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-          $34,998.68
+          {artistDetails && formatAmount(artistDetails.totalRevenue)}
         </p>
       </div>
       {!artistDetails || artistDetails.data.length < 1 ? (

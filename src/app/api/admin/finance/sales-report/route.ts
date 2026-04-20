@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
         }
         const batch: any = await salesReportBatch.findOne({ fileName: file.name }).lean();
         if (batch && batch.status === "processing") {
-            return NextResponse.json({ msg: "Sales report is being processed. Should be done shortly." });
+            return NextResponse.json({ msg: "Sales report is being processed. Should be done shortly." },{status:400});
         } else if (batch && batch.status === "completed") {
-            return NextResponse.json({ msg: "Sales report has been uploaded" });
+            return NextResponse.json({ msg: "Sales report has been uploaded" },{status:400});
         }
         const buffer = Buffer.from(await file.arrayBuffer());
         const workbook = xlsx.read(buffer);

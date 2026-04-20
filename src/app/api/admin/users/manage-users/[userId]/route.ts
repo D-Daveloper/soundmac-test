@@ -7,9 +7,12 @@ import SongModel from "@/util/models/songModel";
 import Artist from "@/util/models/artistModel";
 import UserNotification from "@/util/models/userNotification";
 import { DetactivateEmail, sendUserNotificationEmailType } from "@/app/type";
-import {  sendUserNotificationEmail, userDeactivationEmail } from "@/util/middleware/functions";
+import { sendUserNotificationEmail, userDeactivationEmail } from "@/util/middleware/functions";
 import sendEmail from "@/util/sendMail/sendEmail";
 import EntityDeactivation from "@/util/models/deactivateEntity";
+import salesReportLedger from "@/util/models/saleReportLedgerModel";
+import mongoose from "mongoose";
+import salesReport from "@/util/models/salesReportModel";
 
 export async function GET(
   req: Request,
@@ -63,18 +66,41 @@ export async function GET(
       { artistImage: 1, artistName: 1 },
     ).lean();
     const songCount = SongModel.countDocuments({ user: userId });
-    const totalEarnings = 100000;
 
-    const [userResult, allArtistsResult, SongCountResult] = await Promise.all([
+
+    const [userResult, allArtistsResult, SongCountResult, totalEarnings, earningsArray,totalSales] = await Promise.all([
       user,
       allArtists,
       songCount,
+      //total net amount
+      salesReportLedger.aggregate([
+        { $match: { user: new mongoose.Types.ObjectId(userId) } },
+        {
+          $group: {
+            _id: null,
+            totalNetAmount: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$direction", "credit"] },
+                  { $toDouble: "$amountUsd" },
+                  { $multiply: [{ $toDouble: "$amountUsd" }, -1] }
+                ]
+              }
+            },
+          }
+        }
+      ]),
+      salesReport.find({ user: userId },{trackTitle:1,trackArtistRaw:1,netAmountUsd: 1,upc:1,dsp:1,territory:1,}).lean(),
+      salesReport.countDocuments({ user: userId }),
+      
     ]);
+    console.log(totalEarnings)
     return NextResponse.json({
       data: userResult,
       artists: allArtistsResult,
       songCount: SongCountResult,
-      totalEarnings,
+      totalEarnings: totalEarnings.length > 0 ? totalEarnings[0].totalNetAmount : 0,
+      earningsArray,
       msg: "User data fetched successfully.",
     });
   } catch (error) {
@@ -222,7 +248,7 @@ export async function PUT(
 
     if (!user) {
       console.log("no user found to deactivate");
-      
+
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
     if (user.userStatus == "inactive") {
@@ -331,7 +357,6 @@ export async function POST(
 
     const user: any = await User.findById(userId)
       .lean();
-    console.log(user);
 
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });

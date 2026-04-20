@@ -260,6 +260,15 @@ export const getAdminUserDetails = async (
   const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/"+params.userId,);
   return res.data;
 };
+export const getAdminUserEarnings = async (
+  api: AxiosInstance,
+  params:{userId:string,page:number,limit:string,upc:string}
+): Promise<AdminUserDetailsResponse> => {
+  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/"+params.userId+"/userSalesReportTable",{
+    params:params
+  });
+  return res.data;
+};
 
 export const getUserWithdrawalHistory = async (
   api: AxiosInstance,
@@ -373,3 +382,8 @@ export const getAllUnmatchedSalesreport = async (
   });
   return res.data;
 };
+
+export async function getUserNotification(api: AxiosInstance) {
+  const res = await api.get("users/notification");
+  return res.data;
+}

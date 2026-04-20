@@ -6,6 +6,7 @@ import { royaltySource } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useGetAdminSalesReportDashboardDetails } from "@/util/customHooks/useQueries";
+import { formatAmount } from "@/util/middleware/functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { Clock4, FileChartLine, Music4, Users, X } from "lucide-react";
@@ -136,7 +137,7 @@ const Page = () => {
                 />
                 <div className="mt4 flex flex-col gap-3">
                   <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                    ${data.totals[0]?.totalNetAmount || 0}
+                    {formatAmount(data.totals[0]?.totalNetAmount || 0)}
                   </h2>
                   <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
                     Total Revenue Uploaded
@@ -166,7 +167,7 @@ const Page = () => {
                 />
                 <div className="mt4 flex flex-col gap-3">
                   <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                    ${data.totalWithdrawn[0]?.totalWithdrawals || 0}
+                    {formatAmount(data.totalWithdrawn[0]?.totalWithdrawals || 0)}
                   </h2>
                   <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
                     Total Revenue Withdrawn

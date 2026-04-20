@@ -7,9 +7,14 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
+import { Bell, ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
-import { useAuthUser } from "@/util/customHooks/useQueries";
+import {
+  useAuthUser,
+  useGetUserNotifications,
+} from "@/util/customHooks/useQueries";
+import Notification from "../components/notification/Notification";
+import axios from "axios";
 
 const sidebarComponents = [
   {
@@ -126,11 +131,14 @@ const profileLinks = [
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data, isLoading } = useAuthUser();
+  const { data: notification, isLoading: isLoadingNotification, refetch:refetchNotifications } =
+    useGetUserNotifications();
   const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
   const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
 
   useEffect(() => {
@@ -138,10 +146,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setIsProfilePopUpOpen(false);
   }, [pathname]);
   if (isLoading || !data) return <NormalLoadingScreen />;
+
+  console.log(notification);
+
+  const handleMarkAsRead = async (id?: string) => {
+    try {
+      await axios.patch("api/users/notification", { id });
+      await refetchNotifications();
+    } catch (error) {
+      console.log(error);
+      // toast.warn("")
+    }
+  };
   return (
     <UserRoute>
       <div className="relative">
-        <div className="sticky top-0 z-20">
+        <div className="sticky top-0 z-20 ">
           <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
             <div
               aria-label="side bar nav button"
@@ -158,6 +178,71 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
               {dashboardContext?.layoutHeaderMessage}
             </h1>
+            <button
+              onClick={() => {
+                setIsNotificationOpen(!isNotificationOpen);
+              }}
+              className="ml-auto flex"
+            >
+              <Bell color="#11456B" stroke="#11456B" />
+              {notification && notification.hasNewNotification && (
+                <div className="w-2 h-2 rounded-full bg-error-500 -ml-1 -mt-1"></div>
+              )}
+            </button>
+            <div
+              className={
+                "ml-auto transition-all duration-300 ease-in-out flex h-[90dvh] lg:w-[450px] max-lg:w-[50%] max-sm:w-full absolute top-0 bottom-0 left-0 right-0 " +
+                (isNotificationOpen
+                  ? " -translate-y-0"
+                  : " -translate-y-full ")
+              }
+            >
+              <div className="bg-neutral-100 py-10 w-full text-main-heading rounded-xl ">
+                <div className="flex flex-col gap-12 ml-6 overflow-y-auto h-full remove-scrollbar">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h1 className="font-medium text-2xl ">Notifications</h1>
+                      <button
+                        onClick={() => handleMarkAsRead()}
+                        disabled={
+                          notification && notification.hasNewNotification === false
+                        }
+                        className="text-xs border text-white bg-primary-500 border-primary-500 rounded-sm p-1 hover:bg-primary-500/80 disabled:bg-disable disabled:text-primary-500"
+                      >
+                        mark all as read
+                      </button>
+                    </div>
+
+                    <button
+                      className=" text-black px-5 py-3 rounded-lg "
+                      onClick={() => {
+                        setIsNotificationOpen(false);
+                        setIsProfilePopUpOpen(false);
+
+                        console.log(isOpen);
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
+                  <div className="overflow-y-auto max-h-[99%] h-full flex flex-col gap-5 remove-scrollbar">
+                    {notification &&
+                      notification.notifications.map(
+                        (item: any, index: number) => (
+                          <Notification
+                            key={index}
+                            title={item.reason}
+                            description={item.message}
+                            createdAt={item.createdAt}
+                            statusWeight={item.statusWeight}
+                            onClick={()=>handleMarkAsRead(item._id)}
+                          />
+                        ),
+                      )}
+                  </div>
+                </div>
+              </div>
+            </div>
             <div
               className={
                 " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +

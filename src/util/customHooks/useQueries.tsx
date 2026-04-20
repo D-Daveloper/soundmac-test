@@ -8,6 +8,7 @@ import {
   getAdminSalesReportDashboardDetails,
   getAdminSingleDetails,
   getAdminUserDetails,
+  getAdminUserEarnings,
   getAdminWithdrawalDetails,
   getAlbum,
   getAlbums,
@@ -33,6 +34,7 @@ import {
   getReleaseRequest,
   getSongs,
   getUserArtistsNames,
+  getUserNotification,
   getUserReleaseNames,
   getUserReleaseTrackNames,
   getUserSalesReportDashboardDetails,
@@ -479,6 +481,20 @@ export function useGetAdminUserDetails(params: { userId: string }) {
   });
 }
 
+export function useGetAdminUserEarnings(params: { userId: string,page:number,limit:string ,upc:string}) {
+  const api = UseAxios();
+  return useQuery<AdminUserDetailsResponse, Error>({
+    queryKey: ["adminUserEarnings", params.userId,params.page,params.limit,params.upc],
+    queryFn: async () => getAdminUserEarnings(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
 export const useGetUserWithdrawals = (params: {
   userId: string;
 }) => {
@@ -681,3 +697,16 @@ export function useGetPaginatedUnmatchedSalesReport(params: { page:number,releas
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
+
+export const useGetUserNotifications = () => {
+  const api = UseAxios();
+  return useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => getUserNotification(api),
+    staleTime: 1000 * 60 * 5, // 15 minutes: consider data fresh
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: false,
+  });
+};

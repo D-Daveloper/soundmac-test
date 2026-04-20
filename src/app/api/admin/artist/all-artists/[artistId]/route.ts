@@ -17,6 +17,7 @@ import Artist from "@/util/models/artistModel";
 import AlbumModel from "@/util/models/AlbumModel";
 import UserNotification from "@/util/models/userNotification";
 import EntityDeactivation from "@/util/models/deactivateEntity";
+import salesReport from "@/util/models/salesReportModel";
 
 export async function GET(
   req: Request,
@@ -109,8 +110,26 @@ export async function GET(
         },
       ]),
       Artist.findById(artistId).lean(),
+
     ]);
-    console.log(aggregationResult);
+
+    let artist_earnings =[];
+    if (artist){
+
+       artist_earnings =             
+         //total net amount
+        await salesReport.aggregate([
+          { $match: { matchStatus: "matched", artist: artist._id} },
+          {
+            $group: {
+              _id: null,
+              totalNetAmount: { $sum: { $toDouble: "$netAmountUsd" } },
+              totalDocuments: { $sum: 1 }
+            }
+          }
+        ])
+    }
+    console.log(artist_earnings);
 
     const totalCount = aggregationResult[0]?.totalCount[0]?.count ?? 0;
 
@@ -121,6 +140,7 @@ export async function GET(
       limit,
       totalCount,
       totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
+      totalRevenue: artist_earnings.length > 0 ? artist_earnings[0].totalNetAmount : 0,
       msg: "Artist data fetched successfully.",
     });
   } catch (error) {

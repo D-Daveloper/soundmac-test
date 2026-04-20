@@ -3,6 +3,7 @@ import { useAuthUser, useDashboard } from "@/util/customHooks/useQueries";
 import Image from "next/image";
 import { useContext, useEffect } from "react";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
+import { formatAmount } from "@/util/middleware/functions";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useDashboard();
@@ -30,15 +31,15 @@ const Dashboard = () => {
                     Upcoming Release
                   </p>
                   <h2 className="text-2xl line-clamp-2 capitalize font-normal leading-[30px] tracking-tight text-text-body mt-6">
-                    {data?.pendingRelease.name || "No Release name"}
+                    {data?.pendingRelease.releaseTitle || "No Release name"}
                   </h2>
                   <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
-                    ~{data?.pendingRelease.artist || "No Artist name"}
+                    ~{data?.pendingRelease.artistName || "No Artist name"}
                   </p>
                 </div>
                 <div className="col-span-1 overflow-hidden rounded-3xl">
                   <Image
-                    src={data?.pendingRelease.image}
+                    src={data?.pendingRelease.releaseImage}
                     fetchPriority="high"
                     priority={true}
                     height={100}
@@ -86,11 +87,11 @@ const Dashboard = () => {
                   className="w-auto h-auto"
                 />
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
-                  {data?.streams || 0}
+                  {data?.totalAlbums || 0}
                 </h2>
               </div>
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">
-                total streams
+                total Albums
               </p>
             </div>
           </div>
@@ -120,7 +121,7 @@ const Dashboard = () => {
                 </h2>
               </div>
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">
-                released songs
+                Total Songs
               </p>
             </div>
           </div>
@@ -150,7 +151,7 @@ const Dashboard = () => {
                 Total Earnings
               </p>
               <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                ₦00.00
+                {formatAmount(data.totalEarnings || 0)}
               </h2>
             </div>
           </div>
@@ -165,7 +166,7 @@ const Dashboard = () => {
         >
           {isLoading ? (
             <></>
-          ) : data ? (
+          ) : data && data.lastRelease? (
             <div className="grid grid-rows-3 p-3 gap-5">
               <div className="flex flex-col h-full row-span-2">
                 <div className="w-full">
@@ -174,7 +175,7 @@ const Dashboard = () => {
                   </p>
                   <Image
                     priority={true}
-                    src={data?.lastRelease.image}
+                    src={data?.lastRelease.releaseImage}
                     alt="artist last release cover art"
                     height={0}
                     width={100}
@@ -183,10 +184,10 @@ const Dashboard = () => {
                 </div>
                 <div>
                   <h2 className="text-2xl line-clamp-2 capitalize font-normal leading-[30px] tracking-tight text-text-body mt-2">
-                    {data?.lastRelease.name || "No Release name"}
+                    {data?.lastRelease.releaseTitle || "No Release name"}
                   </h2>
                   <p className="text-text-body font-normal leading-[18px] tracking-tighter text-sm">
-                    ~ {data?.lastRelease.artist || "No Artist name"}
+                    ~ {data?.lastRelease.artistName || "No Artist name"}
                   </p>
                 </div>
               </div>
@@ -243,7 +244,7 @@ const Dashboard = () => {
           ) : (
             <div className="max-w-[80%] text-center flex flex-col justify-center items-center m-auto h-full">
               <h2 className="text-lg font-bold leading-[20px] tracking-tight text-text-body">
-                No Pending Release
+                No Approved Release
               </h2>
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm">
                 Upload your first track and start sharing your sound with the

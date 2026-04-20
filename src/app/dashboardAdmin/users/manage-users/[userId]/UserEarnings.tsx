@@ -3,18 +3,19 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { Coins } from "lucide-react";
-import { usePaginatedAdminArtistDetails } from "@/util/customHooks/useQueries";
+import { useGetAdminUserDetails, useGetAdminUserEarnings, usePaginatedAdminArtistDetails } from "@/util/customHooks/useQueries";
 import Link from "next/link";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Pagination from "@/app/components/pagination/Pagination";
 import { allReleaseStatusFilterOptions } from "@/app/constant";
-import ReleaseTable from "@/app/dashboardAdmin/artist/all-artists/[id]/releaseTableArtists";
+import { formatAmount } from "@/util/middleware/functions";
+import UserEarningsTable from "./UserEarningsTable";
 
 export default function UserEarnings({ userId }: { userId: string }) {
   const [isFilterOpen, setisFilterOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
-  const releaseTitle = useDebounce<string>(query, 500);
+  const upc = useDebounce<string>(query, 500);
   const [filter, setfilter] = useState({
     artist: "none",
     releaseStatusFilter: "all",
@@ -23,14 +24,18 @@ export default function UserEarnings({ userId }: { userId: string }) {
   if (!userId) {
     return <InlineLoadingScreen />;
   }
-  const { isLoading: isLoadingAllReleases, data: artistDetails } =
-    usePaginatedAdminArtistDetails({
-      ...filter,
-      page,
-      limit: "50",
-      releaseTitle,
-      id:userId,
-    });
+  const {
+    isLoading: isLoadinguserDetails,
+    data: userDetails,
+    isFetching,
+    isPending,
+    isRefetching,
+    isError,
+  } = useGetAdminUserDetails({ userId });
+  const {
+    isLoading: isLoadinguserEarnings,
+    data: userEarnings,
+  } = useGetAdminUserEarnings({ userId,page,limit:"50",upc});
   const handleSearchQueryChange = (filter: string) => {
     setPage(1);
     setQuery(filter);
@@ -113,10 +118,10 @@ export default function UserEarnings({ userId }: { userId: string }) {
           <Coins color="#103958" /> Total Earnings
         </h1>
         <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-          $34,998.68
+           {formatAmount(userDetails && userDetails.totalEarnings || 0)}
         </p>
       </div>
-      {!artistDetails || artistDetails.data.length < 1 ? (
+      {!userEarnings || userEarnings.earningsArray?.length === 0 ? (
         <div className="flex flex-col justify-center items-center h-[80dvh] gap-15 ">
           <div>
             <Image
@@ -128,38 +133,30 @@ export default function UserEarnings({ userId }: { userId: string }) {
             />
           </div>
           <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-            No Release.
+            No Earnings.
           </p>
-          <Link
-            href={"/dashboardAdmin/music/all-releases/album"}
-            className={
-              "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white! bg-primary-500 "
-            }
-          >
-            Go To Albums
-          </Link>
         </div>
       ) : (
         <div className="mt-5 flex flex-col mb-10">
-          <ReleaseTable
-            releases={artistDetails.data}
-            isfetching={isLoadingAllReleases}
+          <UserEarningsTable
+            earningsInfo={userEarnings.earningsArray}
+            isfetching={isLoadinguserEarnings}
           />
           {/* Pagination */}
           <div className="px-6">
             <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
               <div className="text-sm text-gray-600">
-                Showing {(page - 1) * artistDetails.limit + 1} to{" "}
+                Showing {(page - 1) * userEarnings.limit + 1} to{" "}
                 {Math.min(
-                  (page - 1) * artistDetails.limit + artistDetails.limit,
-                  artistDetails.totalCount,
+                  (page - 1) * userEarnings.limit + userEarnings.limit,
+                  userEarnings.totalCount,
                 )}{" "}
-                of {artistDetails.totalCount} results
+                of {userEarnings.totalCount} results
               </div>
               <div>
                 <Pagination
                   currentPage={page}
-                  totalPages={artistDetails.totalPages}
+                  totalPages={userEarnings.totalPages}
                   onChange={(page) => setPage(page)}
                 />
               </div>

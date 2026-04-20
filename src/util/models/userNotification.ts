@@ -6,6 +6,7 @@ interface IUserNotification extends Document {
   reason: string;
   message: string;
   status: string;
+  statusWeight: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,9 +35,10 @@ const userNotificationSchema: Schema = new Schema<IUserNotification>(
     },
     status: {
       type: String,
-      default: 'sent',
+      default: 'delivered',
       enum: ['sent', 'delivered', 'read', 'failed']
-    }
+    },
+    statusWeight: Number//1 delivered, 2 read,
   },
   {
     timestamps: true // Automatically handles createdAt
@@ -46,11 +48,26 @@ const userNotificationSchema: Schema = new Schema<IUserNotification>(
 // Indexes for performance
 userNotificationSchema.index({ userId: 1 });
 userNotificationSchema.index({ adminId: 1 });
-userNotificationSchema.index({ status: 1 });
-userNotificationSchema.index({ userId: 1, status: 1 });
+userNotificationSchema.index({ statusWeight: 1 });
+userNotificationSchema.index({ userId: 1, statusWeight: 1 });
 
 // Compound index for unread notifications
-userNotificationSchema.index({ userId: 1, status: 1, createdAt: -1 });
+userNotificationSchema.index({ userId: 1, statusWeight: 1, createdAt: -1 });
+
+const autoWeight = function(this: any, next: any) {
+  const update = this.getUpdate();
+  const weights:Record<string,number> = { 'delivered': 1, 'read': 2, 'pending': 3 };
+  
+  if (update && update.status) {
+    update.statusWeight = weights[update.status as string] || 99;
+  }
+  next();
+};
+
+// The "pre-save" hook
+userNotificationSchema.pre('save', autoWeight);
+userNotificationSchema.pre('findOneAndUpdate', autoWeight);
+userNotificationSchema.pre('updateMany', autoWeight);
 
 const UserNotification: Model<IUserNotification> = mongoose.models?.UserNotification || mongoose.model<IUserNotification>(
   'UserNotification',

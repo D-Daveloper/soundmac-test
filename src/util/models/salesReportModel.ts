@@ -5,7 +5,17 @@ export interface ISalesReport extends mongoose.Document {
   reportperiod : string,
 
   // identifiers
-  upc: string,
+  upc: {
+    type: String, 
+    // This tells Mongoose to look at the 'onModel' field 
+    // to decide which collection to use for population
+    refPath: 'onModel' 
+  },
+  onModel: {
+    type: String,
+    required: true,
+    enum: ['song', 'album'] // The actual names of your models
+  },
   isrc: string,
   productType:string,
   revenueReceivedByDsp: string,
@@ -33,7 +43,7 @@ export interface ISalesReport extends mongoose.Document {
   user: string,
 
   // Upload tracking
-  reportBatch: string,
+  reportBatch: { type: mongoose.Schema.Types.ObjectId, ref: "salesReportBatch" },
   uploadDate: Date,
 
   // status

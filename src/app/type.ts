@@ -140,7 +140,7 @@ export interface PAGINATION<T> {
   totalOnlinePress: number;
   totalRadioPromotion: number;
   msg: string;
-  totalRevenue:string;
+  totalRevenue: string;
 }
 
 export interface ARTIST_TABLE extends Artist {
@@ -458,6 +458,22 @@ export interface AdminUserDetailsResponse {
   artists: Artist[];
   songCount: number;
   totalEarnings: number;
+  earningsArray: {
+
+    "_id": string,
+    "upc": string,
+    "trackTitle": string,
+    "netAmountUsd": {
+      "$numberDecimal": string
+    },
+    "dsp": string,
+    "territory": string,
+label : string
+  }[];
+  totalCount: number;
+  totalPages: number;
+  limit: number;
+  page: number;
   label: string;
   msg: string;
 }
