@@ -4,7 +4,7 @@ import { releaseRejectionEmail } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
 
@@ -25,7 +25,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     }
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (user.role != "admin" && user.role != "super_admin") {
@@ -46,8 +46,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     }
     const release = await SongModel.findById(songId).populate(
       "user",
-      "email",
-    );
+      "email label",
+      
+    ).lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -60,11 +61,40 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
 
     if (body.requestType == "approved") {
       // create the dpm callback here
-      await SongModel.findByIdAndUpdate(
-        songId,
-        { releaseStatus: body.requestType },
-        { runValidators: true },
-      );
+      const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+
+    // Execute the model method passing the session
+    const result = await SongModel.approveAndCreateMetadata(songId,session,release.user.label);
+
+    // If everything is successful, commit the changes
+    await session.commitTransaction();
+
+    // const approveSongQuery = SongModel.findByIdAndUpdate(
+    //   songId,
+    //   { releaseStatus: body.requestType },
+    //   { runValidators: true },
+    // );
+    // const dpmCallBackMetaDataQuery = release.generateDpmCallBackMetaData();
+
+    // await Promise.all([approveSongQuery, dpmCallBackMetaDataQuery]).catch(
+    //   (error) => {
+    //     console.error("failed to approve release ", error);
+    //   }
+    // );
+    
+  } catch (error) {
+    console.error("failed to approve release ", error);
+    await session.abortTransaction();
+    return NextResponse.json(
+      { msg: "Failed to approve release." },
+      { status: 400 },
+    );
+  }finally{
+    session.endSession();
+  }
+
     } else if (body.requestType == "rejected") {
       const updateRelease = SongModel.findByIdAndUpdate(
         songId,
@@ -121,7 +151,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
     }
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (user.role != "admin" && user.role != "super_admin") {

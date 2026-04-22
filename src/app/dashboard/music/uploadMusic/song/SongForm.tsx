@@ -1,10 +1,11 @@
 "use client";
 import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
+import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList } from "@/app/constant";
+import { languagesList, timeZones } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
   FeaturedArtist,
@@ -16,21 +17,25 @@ import type {
 import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import { useGetDPMDsp, useGetUserArtistsNames } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import { Info, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const SongForm = () => {
   const api = UseAxios();
+  const router = useRouter();
   const dashboardContext = useContext(DashboardContext);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+  const { isLoading:isLoadingDsp, data: dspData, isError:isErrorDsp } =
+    useGetDPMDsp();
   const [image, setImage] = useState<string | null>(null);
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
@@ -74,6 +79,7 @@ const SongForm = () => {
     copyRightHolder: "",
     copyRightYear: "",
     explicit_content: false,
+    timeZone: { label: "", value: "", name: "" },
   });
   const { deleteParam } = useTabQuery();
 
@@ -251,13 +257,18 @@ const SongForm = () => {
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+      }else if (key === "timeZone" && typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
       }
     });
-      if (form.featured_artist.length === 1 && form.featured_artist.some((artist) => artist.artistName === "")) {
-       formData.delete("featured_artist");
-      }
+    if (
+      form.featured_artist.length === 1 &&
+      form.featured_artist.some((artist) => artist.artistName === "")
+    ) {
+      formData.delete("featured_artist");
+    }
     formData.append("action", action);
     let res;
     try {
@@ -303,6 +314,7 @@ const SongForm = () => {
         copyRightHolder: "",
         copyRightYear: "",
         explicit_content: false,
+        timeZone: { label: "", value: "", name: "" },
       });
       setImage(null);
     } catch (error) {
@@ -387,13 +399,20 @@ const SongForm = () => {
   useEffect(() => {
     dashboardContext?.setLayoutHeaderMessage("Upload Single");
   }, [dashboardContext]);
+
+  if (isErrorDsp) {
+   toast.error("Failed to load DSP list. Please refresh the page.");
+   router.push("/dashboard/music/uploadMusic");
+   return null;
+  }
+
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
-      {isLoading || isSubmittingForm ? (
+      {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined) && (
+        (!isError || data != undefined || !dspData) && (
           <>
             <button
               aria-label="go back"
@@ -922,6 +941,44 @@ const SongForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
+                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                              Time Zones
+                            </p>
+                            <Image
+                              priority={false}
+                              loading="lazy"
+                              src="/required.svg"
+                              alt="a star marking this field as required"
+                              width={0}
+                              height={0}
+                              className="w-2 -mt-3 "
+                            />
+                          </div>
+                          <div className="w-full">
+                            <Select
+                              selected={songForm.timeZone.label}
+                              setSelected={(t) => {
+                                // Find the timezone object where label matches the selected value (t)
+                                const selectedTimeZone = timeZones.find(
+                                  (item) => item.label === t,
+                                );
+
+                                // Update form with the value (or full object if needed)
+                                setSongForm((prev) => ({
+                                  ...prev,
+                                  timeZone: selectedTimeZone
+                                    ? selectedTimeZone
+                                    : { label: "", value: "", name: "" },
+                                }));
+                              }}
+                              placeholder="Select TimeZone..."
+                              options={timeZones.map((item) => item.label)}
+                              name="timeZone"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                          <div className="flex">
                             <p className=" capitalize font-medium sm:text-sm text-lg">
                               territories{" "}
                             </p>
@@ -1016,11 +1073,11 @@ const SongForm = () => {
                             className="w-2 -mt-3 "
                           />
                         </div>
-                        <CheckboxSelect
+                        <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={territories}
+                          options={dspData ? dspData.map((dsp) => ({ label: dsp.store_name, value: dsp.id })) : []}
                           selected={songForm.dsp}
-                          onChange={(s: string[]) => {
+                          onChange={(s: { label: string; value: number }[]) => {
                             setSongForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

@@ -4,15 +4,16 @@ import Image from "next/image";
 import { useContext, useEffect } from "react";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { formatAmount } from "@/util/middleware/functions";
+import { InlineLoadingScreen } from "../components/Loader/loader";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useDashboard();
-  const {data:user} = useAuthUser();
-    const dashboardContext = useContext(DashboardContext);
-    
-    useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Welcome " +user?.firstName);
-  }, [dashboardContext,data]);
+  const { data: user } = useAuthUser();
+  const dashboardContext = useContext(DashboardContext);
+
+  useEffect(() => {
+    dashboardContext?.setLayoutHeaderMessage("Welcome " + user?.firstName);
+  }, [dashboardContext, data]);
 
   return (
     <div className="flex flex-col gap-5 w-full p-5">
@@ -23,7 +24,7 @@ const Dashboard = () => {
             (isLoading && " shimmer")
           }
         >
-          {(data && data.pendingRelease) ? (
+          {data && data.pendingRelease ? (
             <div className=" flex-2 h-full ">
               <div className=" grid grid-cols-2 w-full h-full">
                 <div className=" flex flex-col p-2 justify-between col-span-1">
@@ -151,7 +152,7 @@ const Dashboard = () => {
                 Total Earnings
               </p>
               <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
-                {formatAmount(data.totalEarnings || 0)}
+                {data && data.totalEarnings && formatAmount(data.totalEarnings || 0)}
               </h2>
             </div>
           </div>
@@ -166,7 +167,7 @@ const Dashboard = () => {
         >
           {isLoading ? (
             <></>
-          ) : data && data.lastRelease? (
+          ) : data && data.lastRelease ? (
             <div className="grid grid-rows-3 p-3 gap-5">
               <div className="flex flex-col h-full row-span-2">
                 <div className="w-full">

@@ -97,7 +97,7 @@ const AlbumSchema = new mongoose.Schema(
       },
     },
     dsp: {
-      type: [String],
+      type: [{ label: String, value: Number }],
       required: [
         function (this: any) {
           return this.get("releaseStatus") !== "draft";
@@ -105,14 +105,15 @@ const AlbumSchema = new mongoose.Schema(
         "DSP (Digital Service Providers) are required",
       ],
       validate: {
-        validator: function (this: any, v: any[]) {
+        validator: function (this: any, v: { label: string; value: number }[]) {
           if (this.get("releaseStatus") === "draft") {
             return true; // Skip validation for draft songs
           }
-          return Array.isArray(v) && v.length > 0;
+          return Array.isArray(v) && v.length > 0 && v.every((d) => typeof d.label === "string" && typeof d.value === "number");
         },
         message: "At least one DSP is required",
       },
+      _id:false
     },
     upc: {
       type: String,
@@ -166,6 +167,20 @@ const AlbumSchema = new mongoose.Schema(
       type: String,
       required: [true, "catalog number is required"],
       unique:true
+    },    
+    timeZone: {
+      type: {
+        label: String,
+        value: String,
+        name: String,
+      },
+      required: [function (this: any) {
+        return this.get("releaseStatus") !== "draft";
+      }, "Time Zone is required"],
+      validate: {
+        validator: (v: any) => typeof v === "object" && v !== null && "value" in v && typeof v.value === "string",
+        message: "Time Zone must be an object",
+      }
     },
   },
   {

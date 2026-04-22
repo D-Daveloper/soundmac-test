@@ -45,6 +45,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
+    const isSongValid = validateNonDraftSongs(payload);
+    if (isSongValid != null) {
+      return NextResponse.json({ msg: isSongValid }, { status: 400 });
+    }
     //  const payload = {uploadId,actionType,title,genre,language,preOrderDate,featured_artist,artist,performer,song_writer,producer,pre_order_check,another_distribution_check,territories,dsp,lyrics,start_clip,isrc,upc,release_date,s3KeyAudio,music_image,copyRightYear,copyRightHolder,explicit_content} = parseSongFormData(formData);
     await dbConnect();
 
@@ -72,7 +76,7 @@ export async function POST(req: Request) {
       userArtist = await Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string)?.trim(),
-      });
+      }).lean();
     }
 
     if (Uploaderror != null) {
@@ -102,10 +106,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const isSongValid = validateNonDraftSongs(payload);
-    if (isSongValid != null) {
-      return NextResponse.json({ msg: isSongValid }, { status: 400 });
-    }
+
     if (!payload.featured_artist) {
       payload.featured_artist = [];
     }
@@ -115,7 +116,7 @@ export async function POST(req: Request) {
       s3Key: payload.s3KeyAudio,
       user: user!._id,
       status: "PENDING",
-    });
+    }).lean();
 
     if (audioTracker == null) {
       // await deleteSingleFromS3(bucketName, (s3KeyAudio as string) || ""); // delete uploaded song if image upload fails
@@ -191,6 +192,7 @@ export async function POST(req: Request) {
       artist: userArtist._id,
       user: user!._id,
       catalogNumber: "SM" + Date.now(),
+      timeZone: payload.timeZone,
     });
     await savedSong.save();
     await AudioUploadTrackerModel.findOneAndUpdate(
@@ -737,7 +739,7 @@ export async function DELETE(req: Request) {
     }
 
     await dbConnect();
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
     } else if (!user.confirmed) {
@@ -846,7 +848,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       Uploaderror = { msg: "Invalid Request", status: 404 };
     } else if (!user.confirmed) {

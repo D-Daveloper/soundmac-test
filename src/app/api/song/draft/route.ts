@@ -179,6 +179,7 @@ export async function POST(req: Request) {
       user: user!._id,
       releaseStatus: "draft",
       catalogNumber: "SM" + Date.now(),
+      timeZone: payload?.timeZone,
     });
 
     await savedSong.save();
@@ -220,7 +221,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
 
     if (!user) {
       Uploaderror = { msg: "Invalid Request", status: 404 };

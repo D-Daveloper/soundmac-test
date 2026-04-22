@@ -1,6 +1,7 @@
 import { albumFromApi } from "@/app/type";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
+import { getUPCs } from "@/util/middleware/dpm";
 import {
   parseAlbumFormData,
   validateDraftAlbums,
@@ -31,6 +32,10 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
+    const isAlbumForValid = validateDraftAlbums(payload);
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
@@ -60,7 +65,7 @@ export async function POST(req: Request) {
       userArtist = await Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
-      });
+      }).lean();
     }
 
     if (!userArtist) {
@@ -72,11 +77,6 @@ export async function POST(req: Request) {
         { msg: "Emerging artists can not upload Album" },
         { status: 403 },
       );
-    }
-    const isAlbumForValid = validateDraftAlbums(payload);
-
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
     let number_of_track_array: number[] = [];
@@ -114,6 +114,7 @@ export async function POST(req: Request) {
       user: user._id,
       catalogNumber: "SM" + Date.now().toString(),
       releaseStatus: "draft",
+      timeZone: payload.timeZone || { label: "", value: "", name: "" },
     });
     await album.save();
 
@@ -152,7 +153,7 @@ export async function PUT(req: Request) {
 
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
     } else if (!user.confirmed) {
@@ -216,7 +217,7 @@ export async function PUT(req: Request) {
         copyRightHolder: payload.copyRightHolder,
         copyRightYear: payload.copyRightYear,
         dsp: payload.dsp,
-        upc: payload.upc,
+        upc: payload.upc ? payload.upc : release.upc,
         territories: payload.territories,
         artistName: userArtist.artistName,
         artist: userArtist._id,
@@ -224,6 +225,7 @@ export async function PUT(req: Request) {
         unassignedNumbers: number_of_track_array,
         user: user._id,
         releaseStatus: "draft",
+        timeZone: payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
       },
       { runValidators: true },
     );

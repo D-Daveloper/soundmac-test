@@ -73,10 +73,13 @@ interface musicFormBase {
   another_distribution_check: boolean;
   music_image: File | null;
   upc: string;
-  dsp: string[];
+  dsp: { label: string; value: number }[];
   copyRightHolder: string;
   copyRightYear: string;
   old_image?: string | null;
+  timeZone: {    label: string;
+    value: string;
+    name: string;};
 }
 
 export interface SongForm extends musicFormBase {
@@ -169,7 +172,7 @@ interface BaseApiResponseForRelease {
   anotherDistributionCheck: boolean;
   territories: string[];
   releaseImage: string;
-  dsp: string[];
+  dsp: { label: string; value: number }[];
   upc: string;
   copyRightHolder: string;
   copyRightYear: string;
@@ -179,6 +182,9 @@ interface BaseApiResponseForRelease {
   user: {
     label: string;
   };
+  timeZone:{    label: string;
+    value: string;
+    name: string;};
 }
 
 export interface songFromApi extends BaseApiResponseForRelease {
@@ -572,3 +578,12 @@ export type salesReportDashboardResponse = {
     label: ILabel
   }[]
 }
+
+export type DPMDsp ={
+  apiuser_id: number
+  id: number
+  store_name: string
+  store_identifier: any
+  dsp: any
+  isSelected: boolean
+}[]

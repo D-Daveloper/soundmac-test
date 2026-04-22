@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -18,10 +18,10 @@ export const getCurrentUser = async (api: AxiosInstance): Promise<IUser> => {
 
 export const getArtists = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,artistName:string }
+  params: { page: number, sort: string, artistName: string }
 ): Promise<PAGINATION<Artist>> => {
   const res = await api.get<Promise<PAGINATION<Artist>>>("users/artist", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
@@ -35,9 +35,9 @@ export const getUserArtistsNames = async (
 
 export const getArtistStats = async (
   api: AxiosInstance,
-  artistName:string 
+  artistName: string
 ): Promise<ArtistStat> => {
-  const res = await api.get<Promise<ArtistStat>>("users/artist/stats/"+artistName);
+  const res = await api.get<Promise<ArtistStat>>("users/artist/stats/" + artistName);
   return res.data;
 };
 
@@ -53,7 +53,7 @@ export const createArtist = async (
 
 export const DeleteArtist = async (
   api: AxiosInstance,
-  form: {artist_name:string}
+  form: { artist_name: string }
 ) => {
   const res = await api.delete("users/artist", {
     data: form,
@@ -64,16 +64,16 @@ export const DeleteArtist = async (
 
 export const getSongs = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,songTitle:string,songStatusFilter:string,artist:string }
+  params: { page: number, sort: string, songTitle: string, songStatusFilter: string, artist: string }
 ): Promise<PAGINATION<songFromApi>> => {
   const res = await api.get<Promise<PAGINATION<songFromApi>>>("song", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 export const DeleteSong = async (
   api: AxiosInstance,
-  form: {artist_name:string,releaseTitle:string}
+  form: { artist_name: string, releaseTitle: string }
 ) => {
   const res = await api.delete("song", {
     data: form,
@@ -84,37 +84,37 @@ export const DeleteSong = async (
 
 export const getAlbums = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,albumTitle:string,albumStatusFilter:string,artist:string }
+  params: { page: number, sort: string, albumTitle: string, albumStatusFilter: string, artist: string }
 ): Promise<PAGINATION<albumFromApi>> => {
   const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const getAlbum = async (
   api: AxiosInstance,
-  params:{ albumTitle:string }
+  params: { albumTitle: string }
 ): Promise<PAGINATION<albumFromApi>> => {
   const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const getAlbumTracks = async (
   api: AxiosInstance,
-  params:{ albumTitle:string }
+  params: { albumTitle: string }
 ): Promise<any> => {
   const res = await api.get<Promise<any>>("album/track", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const MarkAlbumComplete = async (
   api: AxiosInstance,
-  form: {releaseTitle:string}
+  form: { releaseTitle: string }
 ) => {
   const res = await api.patch("album", {
     ...form,
@@ -125,7 +125,7 @@ export const MarkAlbumComplete = async (
 
 export const DeleteAlbum = async (
   api: AxiosInstance,
-  form: {releaseTitle:string}
+  form: { releaseTitle: string }
 ) => {
   const res = await api.delete("album", {
     data: form,
@@ -142,50 +142,50 @@ export const getListOfBanksFromPaystack = async (
 
 export const getUserReleaseNames = async (
   api: AxiosInstance,
-  params:{ artist:string }
+  params: { artist: string }
 ): Promise<string[]> => {
-  const res = await api.get<Promise<string[]>>("promotions/getreleasetitle",{
+  const res = await api.get<Promise<string[]>>("promotions/getreleasetitle", {
     params
   });
   return res.data;
 };
 export const getUserReleaseTrackNames = async (
   api: AxiosInstance,
-  params:{ release_title:string }
+  params: { release_title: string }
 ): Promise<string[]> => {
-  const res = await api.get<Promise<string[]>>("album/track/getusertracknames",{
+  const res = await api.get<Promise<string[]>>("album/track/getusertracknames", {
     params
   });
   return res.data;
 };
 export const getPromotionData = async (
   api: AxiosInstance,
-    params:{ page:number }
+  params: { page: number }
 
 ): Promise<PAGINATION<IPromotion>> => {
-  const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions",{params});
+  const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions", { params });
   return res.data;
 };
 export const getWithdrawalHistory = async (
   api: AxiosInstance,
-    params:{ cursor:string }
+  params: { cursor: string }
 
 ): Promise<WithdrawalResponse> => {
-  const res = await api.get<Promise<WithdrawalResponse>>("users/withdrawal/history",{params});
+  const res = await api.get<Promise<WithdrawalResponse>>("users/withdrawal/history", { params });
   return res.data;
 };
 
-export async function getAdminDashboard(api: AxiosInstance):Promise<adminDashboardType> {
+export async function getAdminDashboard(api: AxiosInstance): Promise<adminDashboardType> {
   const res = await api.get("admin/dashboard");
   return res.data;
 }
 
 export const getAllReleases = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,releaseTitle:string,releaseStatusFilter:string,artist:string,limit:string,releaseType?:string }
+  params: { page: number, sort: string, releaseTitle: string, releaseStatusFilter: string, artist: string, limit: string, releaseType?: string }
 ): Promise<PAGINATION<AdminRelease>> => {
   const res = await api.get<Promise<PAGINATION<AdminRelease>>>("admin/music/all-releases", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
@@ -199,162 +199,162 @@ export const getAdminArtistsNames = async (
 };
 export const getAdminAlbumDetails = async (
   api: AxiosInstance,
-  params:{albumId:string}
+  params: { albumId: string }
 ): Promise<AdminAlbumDetailsResponse> => {
-  const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/music/all-releases/album",{params});
+  const res = await api.get<Promise<AdminAlbumDetailsResponse>>("admin/music/all-releases/album", { params });
   return res.data;
 };
 export const getAdminSingleDetails = async (
   api: AxiosInstance,
-  params:{songId:string}
+  params: { songId: string }
 ): Promise<AdminSingleDetailsResponse> => {
-  const res = await api.get<Promise<AdminSingleDetailsResponse>>("admin/music/request-release/single/"+params.songId,);
+  const res = await api.get<Promise<AdminSingleDetailsResponse>>("admin/music/request-release/single/" + params.songId,);
   return res.data;
 };
 export const getReleaseRequest = async (
   api: AxiosInstance,
-    params:{ cursor:string,releaseTitle:string ,limit:string,releaseType:string}
+  params: { cursor: string, releaseTitle: string, limit: string, releaseType: string }
 
 ): Promise<ReleaseRequestResponse> => {
-  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/music/request-release",{params});
+  const res = await api.get<Promise<ReleaseRequestResponse>>("admin/music/request-release", { params });
   return res.data;
 };
 export const getAllArtists = async (
   api: AxiosInstance,
-    params:{ cursor:string,artistName:string ,limit:string,artistStatus:string}
+  params: { cursor: string, artistName: string, limit: string, artistStatus: string }
 
 ): Promise<AllArtistResponse> => {
-  const res = await api.get<Promise<AllArtistResponse>>("admin/artist/all-artists",{params});
+  const res = await api.get<Promise<AllArtistResponse>>("admin/artist/all-artists", { params });
   return res.data;
 };
 
 export const getArtistDetails = async (
   api: AxiosInstance,
-  params:{ page:number,releaseTitle:string,releaseStatusFilter:string,limit:string,id:string }
+  params: { page: number, releaseTitle: string, releaseStatusFilter: string, limit: string, id: string }
 ): Promise<ArtistDetails> => {
-  const res = await api.get<Promise<ArtistDetails>>("admin/artist/all-artists/"+params.id, {
-    params:params,
+  const res = await api.get<Promise<ArtistDetails>>("admin/artist/all-artists/" + params.id, {
+    params: params,
   });
   return res.data;
 };
 export const getAllUsers = async (
   api: AxiosInstance,
-  params:{ 
-  page: number;
-  sort: string;
-  name: string;
-  limit: string;
-  accountType: string; 
-  userStatus:string
-}
+  params: {
+    page: number;
+    sort: string;
+    name: string;
+    limit: string;
+    accountType: string;
+    userStatus: string
+  }
 ): Promise<PAGINATION<IUser>> => {
   const res = await api.get<Promise<PAGINATION<IUser>>>("admin/users/manage-users", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 export const getAdminUserDetails = async (
   api: AxiosInstance,
-  params:{userId:string}
+  params: { userId: string }
 ): Promise<AdminUserDetailsResponse> => {
-  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/"+params.userId,);
+  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/" + params.userId,);
   return res.data;
 };
 export const getAdminUserEarnings = async (
   api: AxiosInstance,
-  params:{userId:string,page:number,limit:string,upc:string}
+  params: { userId: string, page: number, limit: string, upc: string }
 ): Promise<AdminUserDetailsResponse> => {
-  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/"+params.userId+"/userSalesReportTable",{
-    params:params
+  const res = await api.get<Promise<AdminUserDetailsResponse>>("admin/users/manage-users/" + params.userId + "/userSalesReportTable", {
+    params: params
   });
   return res.data;
 };
 
 export const getUserWithdrawalHistory = async (
   api: AxiosInstance,
-  params:{ cursor:string,userId:string }
+  params: { cursor: string, userId: string }
 
 ): Promise<WithdrawalResponse> => {
-  const res = await api.get<Promise<WithdrawalResponse>>("admin/users/manage-users/" + params.userId +"/history",{params});
+  const res = await api.get<Promise<WithdrawalResponse>>("admin/users/manage-users/" + params.userId + "/history", { params });
   return res.data;
 };
 
 export const getAllVerificationRequests = async (
   api: AxiosInstance,
-  params:{ 
-  page: number;
-  sort: string;
-  limit: string;
-}
+  params: {
+    page: number;
+    sort: string;
+    limit: string;
+  }
 ): Promise<PAGINATION<IUser>> => {
   const res = await api.get<Promise<PAGINATION<IUser>>>("admin/users/verification-requests", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const getAllWithdrawalRequests = async (
   api: AxiosInstance,
-  params:{ 
-  page: number;
-  sort: string;
-  limit: string;
-  withdrawalStatus:string;
-  email:string;
-}
+  params: {
+    page: number;
+    sort: string;
+    limit: string;
+    withdrawalStatus: string;
+    email: string;
+  }
 ): Promise<PAGINATION<withdrawals>> => {
   const res = await api.get<Promise<PAGINATION<withdrawals>>>("admin/finance/withdrawal-requests", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const getAdminWithdrawalDetails = async (
   api: AxiosInstance,
-  params:{withdrawalId:string}
+  params: { withdrawalId: string }
 ): Promise<AdminWithdrawalDetailsResponse> => {
-  const res = await api.get<Promise<AdminWithdrawalDetailsResponse>>("admin/finance/withdrawal-requests/"+params.withdrawalId,{params});
+  const res = await api.get<Promise<AdminWithdrawalDetailsResponse>>("admin/finance/withdrawal-requests/" + params.withdrawalId, { params });
   return res.data;
 };
 
 export const getAllSupportRequests = async (
   api: AxiosInstance,
-    params:{ cursor:string,limit:string,supportStatus:string}
+  params: { cursor: string, limit: string, supportStatus: string }
 
 ): Promise<AllSupportRequestsResponse> => {
-  const res = await api.get<Promise<AllSupportRequestsResponse>>("admin/users/support-requests",{params});
+  const res = await api.get<Promise<AllSupportRequestsResponse>>("admin/users/support-requests", { params });
   return res.data;
 };
 
 export const getAllPromotions = async (
   api: AxiosInstance,
-  params:{ page:number,sort:string,releaseTitle:string,limit:string,promotionType:string,promotionStatus:string }
+  params: { page: number, sort: string, releaseTitle: string, limit: string, promotionType: string, promotionStatus: string }
 ): Promise<PAGINATION<IPromotion>> => {
   const res = await api.get<Promise<PAGINATION<IPromotion>>>("admin/more/promotions", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export const getPromotionDetails = async (
   api: AxiosInstance,
-  params:{promotionId:string}
+  params: { promotionId: string }
 ): Promise<IPromotion> => {
-  const res = await api.get<Promise<IPromotion>>("admin/more/promotions/"+params.promotionId,);
+  const res = await api.get<Promise<IPromotion>>("admin/more/promotions/" + params.promotionId,);
   return res.data;
 };
 export const getAlllabels = async (
   api: AxiosInstance,
-    params:{ cursor:string,labelName:string,limit:string,labelStatus:string}
+  params: { cursor: string, labelName: string, limit: string, labelStatus: string }
 
 ): Promise<AllLabelResponse> => {
-  const res = await api.get<Promise<AllLabelResponse>>("admin/artist/all-labels",{params});
+  const res = await api.get<Promise<AllLabelResponse>>("admin/artist/all-labels", { params });
   return res.data;
 };
 
 export const getlabel = async (
   api: AxiosInstance,
-  params:{labelId:string }
+  params: { labelId: string }
 
 ): Promise<labelResponse> => {
   const res = await api.get<Promise<labelResponse>>("admin/artist/all-labels/" + params.labelId);
@@ -375,15 +375,24 @@ export const getAdminSalesReportDashboardDetails = async (
 
 export const getAllUnmatchedSalesreport = async (
   api: AxiosInstance,
-  params:{ page:number,releaseTitle:string,limit:string,productType:string, }
+  params: { page: number, releaseTitle: string, limit: string, productType: string, }
 ): Promise<PAGINATION<ISalesReport>> => {
   const res = await api.get<Promise<PAGINATION<ISalesReport>>>("admin/finance/sales-report/pending", {
-    params:params,
+    params: params,
   });
   return res.data;
 };
 
 export async function getUserNotification(api: AxiosInstance) {
   const res = await api.get("users/notification");
+  return res.data;
+}
+
+export async function getDPMDsp():Promise<DPMDsp> {
+  const res = await axios.get(process.env.NEXT_PUBLIC_GET_DSPS_URL!, {
+    headers: {
+      Authorization: `Basic ${process.env.NEXT_PUBLIC_GET_DSPS_BASIC_AUTH_PASSWORD}`
+    }
+  });
   return res.data;
 }

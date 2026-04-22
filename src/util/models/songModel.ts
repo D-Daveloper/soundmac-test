@@ -1,4 +1,6 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
+import DpmMetaData from "./DpmCallBackModel";
+import { songFromApi } from "@/app/type";
 
 export const featuredArtistSchema = new mongoose.Schema(
   {
@@ -276,7 +278,7 @@ const SongModelSchema = new mongoose.Schema(
       trim: true,
     },
     dsp: {
-      type: [String],
+      type: [{ label: String, value: Number }],
       required: [
         function (this: any) {
           return this.get("releaseStatus") !== "draft";
@@ -284,14 +286,15 @@ const SongModelSchema = new mongoose.Schema(
         "DSP (Digital Service Providers) are required",
       ],
       validate: {
-        validator: function (this: any, v: any[]) {
+        validator: function (this: any, v: { label: string; value: number }[]) {
           if (this.get("releaseStatus") === "draft") {
             return true; // Skip validation for draft songs
           }
-          return Array.isArray(v) && v.length > 0;
+          return Array.isArray(v) && v.length > 0 && v.every((d) => typeof d.label === "string" && typeof d.value === "number");
         },
         message: "At least one DSP is required",
       },
+      _id:false
     },
     lyrics: {
       type: String,
@@ -369,6 +372,20 @@ const SongModelSchema = new mongoose.Schema(
       required: [true, "catalog number is required"],
       unique: true,
     },
+    timeZone: {
+      type: {
+        label: String,
+        value: String,
+        name: String,
+      },
+      required: [function (this: any) {
+        return this.get("releaseStatus") !== "draft";
+      }, "Time Zone is required"],
+      validate: {
+        validator: (v: any) => typeof v === "object" && v !== null && "value" in v && typeof v.value === "string",
+        message: "Time Zone must be an object",
+      }
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -413,9 +430,64 @@ SongModelSchema.index(
   { collation: { locale: "en", strength: 2 } },
 );
 // delete mongoose.models.Song;
+/**
+ * Static method to approve a song and create metadata atomically
+ * @param {ObjectId} songId - The ID of the song to approve
+ * @param {Object} session - The MongoDB client session
+ * @param {string} label - The user label
+ */
+SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, session: mongoose.mongo.ClientSession, label: string) {
+  // 1. Update the song status
+  const song: songFromApi = await this.findByIdAndUpdate(
+    songId,
+    { status: 'approved' },
+    { session, new: true } // Crucial: pass the session here
+  );
 
-const SongModel =
-  mongoose.models?.Song || mongoose.model("Song", SongModelSchema);
+  if (!song) {
+    throw new Error('Song not found');
+  }
+  console.log(song);
+
+  // 2. Create the metadata object in the other collection
+  const metadata = await DpmMetaData.create(
+    [{
+      label: label,
+      "release-type": "Single",
+      upc: song.upc,
+      "catalog-number": song.catalogNumber,
+      "album-release-id": song.catalogNumber,
+      "album-main-artist": song.artistName,
+      "album-title": song.releaseTitle,
+      "track-title": song.releaseTitle,
+      genre: song.genre,
+      "release-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      "release-date-time": song.releaseDate.toISOString(),
+      "release-date-timezone": song.timeZone.value,
+      "c-line": `© ${song.copyRightYear} ${song.copyRightHolder}`,
+      "disc-number": 1,
+      "track-number": 1,
+      "language-of-performance": "check track",
+      "isrc-code": song.isrc,
+      "track-release-id": "check track",
+      "p-line": `℗ ${song.copyRightYear} ${song.copyRightHolder}`,
+      composer: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
+      lyricist: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
+      "effective-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      "parental-advisory": song.explicitContent ? "Explicit" : "Not Explicit",
+      "track-length": "check track",
+      "album-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
+      "track-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
+      "music-producer": song.producer.length > 0 ? song.producer.map((producer) => producer.name).join("|") : "",
+
+    }],
+    { session } // Note: .create() expects an array when using sessions
+  );
+
+  return { song, metadata: metadata[0] };
+};
+const SongModel: any =
+  mongoose.models?.Song || mongoose.model<any>("Song", SongModelSchema);
 
 export default SongModel;
 // Pre-validation hook to enforce required fields based on releaseStatus

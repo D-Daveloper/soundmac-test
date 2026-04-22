@@ -27,6 +27,7 @@ import {
   getArtistStats,
   getCurrentUser,
   getDashboard,
+  getDPMDsp,
   getlabel,
   getListOfBanksFromPaystack,
   getPromotionData,
@@ -55,6 +56,7 @@ import {
   Artist,
   ArtistDetails,
   ArtistStat,
+  DPMDsp,
   labelResponse,
   PAGINATION,
   PayStackBankListResponse,
@@ -704,6 +706,18 @@ export const useGetUserNotifications = () => {
     queryKey: ["notifications"],
     queryFn: () => getUserNotification(api),
     staleTime: 1000 * 60 * 5, // 15 minutes: consider data fresh
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: false,
+  });
+};
+
+export const useGetDPMDsp = () => {
+  return useQuery<DPMDsp, Error>({
+    queryKey: ["dpm-dsp"],
+    queryFn: () => getDPMDsp(),
+    staleTime: 1000 * 60 * 60 * 24, // 24 hours: consider data fresh
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,

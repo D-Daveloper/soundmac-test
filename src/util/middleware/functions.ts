@@ -600,7 +600,7 @@ export function parseSongFormData(formData: FormData) {
         producer: getArray<Producer>(formData, "producer"),
 
         territories: getArray<string>(formData, "territories"),
-        dsp: getArray<string>(formData, "dsp"),
+        dsp: getArray<{ label: string; value: number }>(formData, "dsp"),
 
         lyrics: formData.get("lyrics") as string | null,
         startClip: formData.get("start_clip") as string | null,
@@ -624,6 +624,9 @@ export function parseSongFormData(formData: FormData) {
 
         copyRightYear: formData.get("copyRightYear") as string | null,
         copyRightHolder: formData.get("copyRightHolder") as string | null,
+        timeZone: formData.get("timeZone")
+            ? JSON.parse(formData.get("timeZone") as string)
+            : { label: "", value: "", name: "" }
     };
 }
 
@@ -638,7 +641,7 @@ export function parseAlbumFormData(formData: FormData) {
         artist: formData.get("artist") as string | null,
 
         territories: getArray<string>(formData, "territories"),
-        dsp: getArray<string>(formData, "dsp"),
+        dsp: getArray<{ label: string; value: number }>(formData, "dsp"),
 
         isrc: formData.get("isrc") as string | null,
         upc: formData.get("upc") as string | null,
@@ -656,6 +659,9 @@ export function parseAlbumFormData(formData: FormData) {
         copyRightYear: formData.get("copyRightYear") as string | null,
         copyRightHolder: formData.get("copyRightHolder") as string | null,
         numberOfTracks: formData.get("number_of_track") as string | null,
+        timeZone: formData.get("timeZone")
+            ? JSON.parse(formData.get("timeZone") as string)
+            : { label: "", value: "", name: "" }
     };
 }
 export function parseTrackFormData(formData: FormData) {
@@ -785,6 +791,8 @@ export function validateNonDraftSongs(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
+    }else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+        return "Invalid Dsp format.";
     }
 
     if (
@@ -817,6 +825,10 @@ export function validateNonDraftSongs(
 
     if (!payload.oldAudio && !payload.s3KeyAudio) {
         return "Audio upload is required";
+    }
+
+    if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
+        return "Time zone is required";
     }
 
     return null;
@@ -875,6 +887,8 @@ export function validateNonDraftAlbums(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
+    }else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+        return "Invalid Dsp format.";
     }
 
     if (payload.anotherDistributionCheck && payload.upc === "") {
@@ -902,6 +916,10 @@ export function validateNonDraftAlbums(
         !numRegex.test(payload.numberOfTracks as string)
     ) {
         return "No. of tracks is required and must be a positive number";
+    }
+    
+    if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
+        return "Time zone is required";
     }
 
     return null;
@@ -982,6 +1000,10 @@ export function validateDraftSongs(
 
     if (payload.dsp && !(payload.dsp instanceof Array)) {
         return "Please Select a Dsp.";
+    }
+
+    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+        return "Invalid Dsp format.";
     }
 
     if (
@@ -1070,6 +1092,10 @@ export function validateDraftAlbums(
 
     if (payload.dsp && !(payload.dsp instanceof Array)) {
         return "Please Select a Dsp.";
+    }
+
+    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+        return "Invalid Dsp format.";
     }
 
     if (payload.anotherDistributionCheck && payload.upc === "") {
@@ -1302,6 +1328,11 @@ export const createEmptyTrack = (): TrackForm => ({
     old_image: null,
     validationError: null,
     s3key: "",
+    timeZone: {
+        label: "",
+        value: "",
+        name: "",
+    },
 });
 
 export async function handleChargeSuccess(data: any) {

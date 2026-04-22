@@ -40,6 +40,12 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
+
+    const isAlbumForValid = validateNonDraftAlbums(payload);
+
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
@@ -69,7 +75,7 @@ export async function POST(req: Request) {
       userArtist = await Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
-      });
+      }).lean();
     }
 
     if (!userArtist) {
@@ -94,12 +100,6 @@ export async function POST(req: Request) {
         },
         { status: 400 },
       );
-    }
-
-    const isAlbumForValid = validateNonDraftAlbums(payload);
-
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
     if (
@@ -176,6 +176,8 @@ export async function POST(req: Request) {
       unassignedNumbers: number_of_track_array,
       user: user._id,
       catalogNumber: "SM" + Date.now(),
+      timeZone: payload.timeZone,
+
     });
     await album.save();
 
@@ -393,6 +395,7 @@ export async function PUT(req: Request) {
         unassignedNumbers: number_of_track_array,
         user: user._id,
         releaseStatus: "pending",
+        timeZone: payload.timeZone || release.timeZone,
       },
       { runValidators: true },
     );

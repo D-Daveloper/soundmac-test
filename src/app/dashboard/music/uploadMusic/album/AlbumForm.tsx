@@ -1,27 +1,31 @@
 "use client";
 import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
+import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList } from "@/app/constant";
+import { languagesList, timeZones } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type { AlbumForm, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import { useGetDPMDsp, useGetUserArtistsNames } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const AlbumForm = () => {
   const dashboardContext = useContext(DashboardContext);
-
+  const router = useRouter();
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+      const { isLoading:isLoadingDsp, data: dspData, isError:isErrorDsp } =
+    useGetDPMDsp();
   const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
@@ -34,10 +38,11 @@ const AlbumForm = () => {
     (new Date().getFullYear() + i).toString(),
   );
   const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - i).toString(),
+    (new Date().getFullYear() - (i + 1)).toString(),
   );
   const years = [
     ...pastYears.reverse().filter((_, i) => _ !== "2025"),
+    "2025",
     ...futureYears,
   ];
   const [preview, setPreview] = useState(false);
@@ -57,6 +62,7 @@ const AlbumForm = () => {
     copyRightHolder: "",
     copyRightYear: "",
     number_of_track: "",
+    timeZone: { label: "", value: "", name: "" },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -87,6 +93,8 @@ const AlbumForm = () => {
       Object.entries(form).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+        } else if (key === "timeZone" && typeof value === "object") {
+          formData.append(key, JSON.stringify(value));
         } else {
           formData.append(key, value);
         }
@@ -106,7 +114,7 @@ const AlbumForm = () => {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
-      toast.success(res?.data?.msg);
+      toast.success("You're getting redirected to add tracks to your album.");
       localStorage.removeItem("albumForm");
       setAlbumForm({
         title: "",
@@ -124,9 +132,16 @@ const AlbumForm = () => {
         copyRightHolder: "",
         copyRightYear: "",
         number_of_track: "",
+        timeZone: { label: "", value: "", name: "" },
       });
+
       setImage(null);
       setPreview(false);
+      if (action === "upload") {
+        router.push(
+          `/dashboard/music/manageRelease/${albumForm.title.trim().replaceAll(" ", "-")}`,
+        );
+      }
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
@@ -169,6 +184,13 @@ const AlbumForm = () => {
   useEffect(() => {
     dashboardContext?.setLayoutHeaderMessage("Upload Album");
   }, [dashboardContext]);
+
+    if (isErrorDsp) {
+     toast.error("Failed to load DSP list. Please refresh the page.");
+     router.push("/dashboard/music/uploadMusic");
+     return null;
+    }
+
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px] px-5">
       {isLoading || isSubmittingForm ? (
@@ -366,6 +388,44 @@ const AlbumForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
+                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                              Time Zones
+                            </p>
+                            <Image
+                              priority={false}
+                              loading="lazy"
+                              src="/required.svg"
+                              alt="a star marking this field as required"
+                              width={0}
+                              height={0}
+                              className="w-2 -mt-3 "
+                            />
+                          </div>
+                          <div className="w-full">
+                            <Select
+                              selected={albumForm.timeZone.label}
+                              setSelected={(t) => {
+                                // Find the timezone object where label matches the selected value (t)
+                                const selectedTimeZone = timeZones.find(
+                                  (item) => item.label === t,
+                                );
+
+                                // Update form with the value (or full object if needed)
+                                setAlbumForm((prev) => ({
+                                  ...prev,
+                                  timeZone: selectedTimeZone
+                                    ? selectedTimeZone
+                                    : { label: "", value: "", name: "" },
+                                }));
+                              }}
+                              placeholder="Select TimeZone..."
+                              options={timeZones.map((item) => item.label)}
+                              name="timeZone"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                          <div className="flex">
                             <p className=" capitalize font-medium sm:text-sm text-lg">
                               territories{" "}
                             </p>
@@ -457,11 +517,11 @@ const AlbumForm = () => {
                             className="w-2 -mt-3 "
                           />
                         </div>
-                        <CheckboxSelect
+                        <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={territories}
+                          options={dspData ? dspData.map((dsp) => ({ label: dsp.store_name, value: dsp.id })) : []}
                           selected={albumForm.dsp}
-                          onChange={(s: string[]) => {
+                          onChange={(s: { label: string; value: number }[]) => {
                             setAlbumForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />
