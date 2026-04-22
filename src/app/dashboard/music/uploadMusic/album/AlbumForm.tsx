@@ -10,7 +10,10 @@ import type { AlbumForm, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetDPMDsp, useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import {
+  useGetDPMDsp,
+  useGetUserArtistsNames,
+} from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
@@ -24,8 +27,11 @@ const AlbumForm = () => {
   const router = useRouter();
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
-      const { isLoading:isLoadingDsp, data: dspData, isError:isErrorDsp } =
-    useGetDPMDsp();
+  const {
+    isLoading: isLoadingDsp,
+    data: dspData,
+    isError: isErrorDsp,
+  } = useGetDPMDsp();
   const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
@@ -185,19 +191,18 @@ const AlbumForm = () => {
     dashboardContext?.setLayoutHeaderMessage("Upload Album");
   }, [dashboardContext]);
 
-    if (isErrorDsp) {
-     toast.error("Failed to load DSP list. Please refresh the page.");
-     router.push("/dashboard/music/uploadMusic");
-     return null;
-    }
+  if (isErrorDsp) {
+    toast.error("Failed to load DSP list. Please refresh the page.");
+    return <InlineLoadingScreen />;
+  }
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px] px-5">
-      {isLoading || isSubmittingForm ? (
+      {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined) && (
+        (!isError || data != undefined || !dspData) && (
           <>
             <button
               onClick={() => {
@@ -519,7 +524,14 @@ const AlbumForm = () => {
                         </div>
                         <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={dspData ? dspData.map((dsp) => ({ label: dsp.store_name, value: dsp.id })) : []}
+                          options={
+                            dspData
+                              ? dspData.map((dsp) => ({
+                                  label: dsp.store_name,
+                                  value: dsp.id,
+                                }))
+                              : []
+                          }
                           selected={albumForm.dsp}
                           onChange={(s: { label: string; value: number }[]) => {
                             setAlbumForm((prev) => ({ ...prev, dsp: s }));

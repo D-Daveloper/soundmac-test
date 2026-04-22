@@ -1,5 +1,6 @@
 "use client";
 import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
+import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
@@ -8,7 +9,10 @@ import type { AlbumForm, albumFromApi, PAGINATION, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import {
+  useGetDPMDsp,
+  useGetUserArtistsNames,
+} from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
 import {
@@ -34,6 +38,11 @@ const ManageAlbumForm = ({
 }) => {
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+  const {
+    isLoading: isLoadingDsp,
+    data: dspData,
+    isError: isErrorDsp,
+  } = useGetDPMDsp();
   const queryClient = useQueryClient();
 
   const api = UseAxios();
@@ -69,6 +78,7 @@ const ManageAlbumForm = ({
     copyRightHolder: "",
     copyRightYear: "",
     number_of_track: "",
+    timeZone: { label: "", value: "", name: "" },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,6 +144,7 @@ const ManageAlbumForm = ({
         copyRightHolder: "",
         copyRightYear: "",
         number_of_track: "",
+        timeZone: { label: "", value: "", name: "" },
       });
       setImage(null);
       await queryClient.invalidateQueries({
@@ -198,17 +209,23 @@ const ManageAlbumForm = ({
       copyRightYear: albumFromApi.copyRightYear,
       number_of_track: albumFromApi.numberOfTracks,
       old_image: albumFromApi.releaseImage,
+      timeZone: albumFromApi.timeZone || { label: "", value: "", name: "" },
     }));
     setImage(albumFromApi?.releaseImage || null);
   }, []);
 
+  if (isErrorDsp) {
+    toast.error("Failed to load DSP list. Please refresh the page.");
+    return <InlineLoadingScreen />;
+  }
+
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
-      {isLoading ? (
+      {isLoading || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined) && (
+        (!isError || data != undefined || !dspData) && (
           <>
             <button
               onClick={() => {
@@ -487,11 +504,18 @@ const ManageAlbumForm = ({
                             className="w-2 -mt-3 "
                           />
                         </div>
-                        <CheckboxSelect
+                        <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={territories}
+                          options={
+                            dspData
+                              ? dspData.map((dsp) => ({
+                                  label: dsp.store_name,
+                                  value: dsp.id,
+                                }))
+                              : []
+                          }
                           selected={albumForm.dsp}
-                          onChange={(s: string[]) => {
+                          onChange={(s: { label: string; value: number }[]) => {
                             setAlbumForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

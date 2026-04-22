@@ -1,5 +1,6 @@
 "use client";
 import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
+import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
@@ -17,7 +18,10 @@ import type {
 import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import {
+  useGetDPMDsp,
+  useGetUserArtistsNames,
+} from "@/util/customHooks/useQueries";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
@@ -41,6 +45,11 @@ const SongForm = ({
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+  const {
+    isLoading: isLoadingDsp,
+    data: dspData,
+    isError: isErrorDsp,
+  } = useGetDPMDsp();
   const [image, setImage] = useState<string | null>(null);
   // const [date, setDate] = useState({
   const fromYear = new Date();
@@ -86,6 +95,7 @@ const SongForm = ({
     copyRightHolder: "",
     copyRightYear: "",
     explicit_content: false,
+    timeZone: { label: "", value: "", name: "" },
   });
 
   const addField = (field: keyof SongForm) => {
@@ -313,6 +323,7 @@ const SongForm = ({
         explicit_content: false,
         old_audio: null,
         old_image: null,
+        timeZone: { label: "", value: "", name: "" },
       });
       setImage(null);
       refetch();
@@ -422,17 +433,23 @@ const SongForm = ({
       explicit_content: songFormFromApi.explicitContent,
       old_audio: songFormFromApi.releaseAudio || null,
       old_image: songFormFromApi.releaseImage || null,
+      timeZone: songFormFromApi.timeZone || { label: "", value: "", name: "" },
     }));
     setImage(songFormFromApi.releaseImage);
   }, []);
 
+  if (isErrorDsp) {
+    toast.error("Failed to load DSP list. Please refresh the page.");
+    return <InlineLoadingScreen />;
+  }
+
   return (
     <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
-      {isLoading || isSubmittingForm ? (
+      {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined) && (
+        (!isError || data != undefined || !dspData) && (
           <>
             <button
               aria-label="go back"
@@ -1055,11 +1072,18 @@ const SongForm = ({
                             className="w-2 -mt-3 "
                           />
                         </div>
-                        <CheckboxSelect
+                        <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={territories}
+                          options={
+                            dspData
+                              ? dspData.map((dsp) => ({
+                                  label: dsp.store_name,
+                                  value: dsp.id,
+                                }))
+                              : []
+                          }
                           selected={songForm.dsp}
-                          onChange={(s: string[]) => {
+                          onChange={(s: { label: string; value: number }[]) => {
                             setSongForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

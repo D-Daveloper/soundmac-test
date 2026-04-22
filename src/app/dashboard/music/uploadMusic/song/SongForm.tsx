@@ -17,7 +17,10 @@ import type {
 import { genreList, performerRoles, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { useGetDPMDsp, useGetUserArtistsNames } from "@/util/customHooks/useQueries";
+import {
+  useGetDPMDsp,
+  useGetUserArtistsNames,
+} from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
@@ -34,8 +37,11 @@ const SongForm = () => {
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
-  const { isLoading:isLoadingDsp, data: dspData, isError:isErrorDsp } =
-    useGetDPMDsp();
+  const {
+    isLoading: isLoadingDsp,
+    data: dspData,
+    isError: isErrorDsp,
+  } = useGetDPMDsp();
   const [image, setImage] = useState<string | null>(null);
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
@@ -257,7 +263,7 @@ const SongForm = () => {
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
-      }else if (key === "timeZone" && typeof value === "object") {
+      } else if (key === "timeZone" && typeof value === "object") {
         formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
@@ -401,9 +407,9 @@ const SongForm = () => {
   }, [dashboardContext]);
 
   if (isErrorDsp) {
-   toast.error("Failed to load DSP list. Please refresh the page.");
-   router.push("/dashboard/music/uploadMusic");
-   return null;
+    toast.error("Failed to load DSP list. Please refresh the page.");
+    router.push("/dashboard/music/uploadMusic");
+    return null;
   }
 
   return (
@@ -1075,7 +1081,14 @@ const SongForm = () => {
                         </div>
                         <CheckboxSelectDsp
                           title="Select DSPs"
-                          options={dspData ? dspData.map((dsp) => ({ label: dsp.store_name, value: dsp.id })) : []}
+                          options={
+                            dspData
+                              ? dspData.map((dsp) => ({
+                                  label: dsp.store_name,
+                                  value: dsp.id,
+                                }))
+                              : []
+                          }
                           selected={songForm.dsp}
                           onChange={(s: { label: string; value: number }[]) => {
                             setSongForm((prev) => ({ ...prev, dsp: s }));
