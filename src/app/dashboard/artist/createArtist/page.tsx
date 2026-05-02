@@ -275,7 +275,7 @@ const CreateArtistForm = () => {
                     required={artistForm.hasPlatformId}
                   />
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                    Don’t have these? Soundmac will generate for you.
+                    Don’t have this? Soundmac will generate for you.
                   </p>
                 </div>
                 <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -289,6 +289,9 @@ const CreateArtistForm = () => {
                     disabled={!artistForm.hasPlatformId}
                     required={artistForm.hasPlatformId}
                   />
+                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                    Don’t have this? Soundmac will generate for you.
+                  </p>
                 </div>
               </div>
             </div>
@@ -375,7 +378,7 @@ const CreateArtistForm = () => {
             )}
           </div>
           <div className="flex-1">
-            <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
+            <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
               {artistForm.artist_name || "Name"}
             </p>
           </div>

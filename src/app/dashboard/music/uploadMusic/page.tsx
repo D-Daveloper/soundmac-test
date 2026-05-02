@@ -49,7 +49,7 @@ const Page = () => {
               onClick={() => setParam("type", "single")}
               className="font-bold text-sm rounded-lg bg-primary text-main-white px-4 py-2.5 hover:bg-primary/80"
             >
-              Upload a Single
+              Upload Single
             </button>
           </div>
           <div className="py-5 h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
@@ -70,7 +70,7 @@ const Page = () => {
               onClick={() => setParam("type", "album")}
               className="font-bold text-sm rounded-lg bg-transparent border-2 border-primary text-text-body px-4 py-2.5 hover:bg-primary/10"
             >
-              Upload an Album
+              Upload Album
             </button>
           </div>
         </div>

@@ -11,6 +11,7 @@ import dbConnect from "@/util/db";
 import AlbumModel from "@/util/models/AlbumModel";
 import { getYearRange } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
+import { generateUPC } from "@/services/dsp/dsp.service";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -85,21 +86,23 @@ export async function POST(req: Request) {
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
-    const { startOfYear, endOfYear } = getYearRange();
-
-    const releasesThisYear = await SongModel.countDocuments({
-      user: user!._id,
-      createdAt: {
-        $gte: startOfYear,
-        $lt: endOfYear,
-      },
-    });
-
-    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
-      return NextResponse.json(
-        { msg: "Emerging artists can only upload 2 releases per year" },
-        { status: 403 },
-      );
+    if(user!.type === "EMERGING_ARTIST"){
+      const { startOfYear, endOfYear } = getYearRange();
+  
+      const releasesThisYear = await SongModel.countDocuments({
+        user: user!._id,
+        createdAt: {
+          $gte: startOfYear,
+          $lt: endOfYear,
+        },
+      });
+  
+      if (releasesThisYear >= 2) {
+        return NextResponse.json(
+          { msg: "Emerging artists can only upload 2 releases per year" },
+          { status: 403 },
+        );
+      }
     }
 
     if (isFromAnotherDistributor && !upcFromClient) {
@@ -127,7 +130,7 @@ export async function POST(req: Request) {
     }
 
     if (!upc) {
-      upc = await getUPCs();
+      upc = await generateUPC();
     }
 
     // ---- 2. Generate S3 key ----

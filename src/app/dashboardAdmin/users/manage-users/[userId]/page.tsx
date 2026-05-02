@@ -590,7 +590,7 @@ export default function Page({
                 <div className="flex items-center justify-end gap-3 mt-6">
                   <button
                     onClick={() => {
-                      setshowDeactivateModal(false);
+                      setshowSendNotificationModal(false);
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >

@@ -1,4 +1,5 @@
 import { songFromApi } from "@/app/type";
+import { generateISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import {
@@ -89,23 +90,24 @@ export async function POST(req: Request) {
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
-    const { startOfYear, endOfYear } = getYearRange();
+    if (user!.type === "EMERGING_ARTIST") {
+      const { startOfYear, endOfYear } = getYearRange();
 
-    const releasesThisYear = await SongModel.countDocuments({
-      user: user!._id,
-      createdAt: {
-        $gte: startOfYear,
-        $lt: endOfYear,
-      },
-    });
+      const releasesThisYear = await SongModel.countDocuments({
+        user: user!._id,
+        createdAt: {
+          $gte: startOfYear,
+          $lt: endOfYear,
+        },
+      });
 
-    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
-      return NextResponse.json(
-        { msg: "Emerging artists can only upload 2 releases per year" },
-        { status: 403 },
-      );
+      if (releasesThisYear >= 2) {
+        return NextResponse.json(
+          { msg: "Emerging artists can only upload 2 releases per year" },
+          { status: 403 },
+        );
+      }
     }
-
 
     if (!payload.featured_artist) {
       payload.featured_artist = [];
@@ -186,7 +188,7 @@ export async function POST(req: Request) {
       startClip: payload.startClip,
       dsp: payload.dsp,
       upc: payload.upc,
-      isrc: payload.isrc || "isrc" + Date.now(),
+      isrc: payload.isrc || await generateISRC(),
       territories: payload.territories,
       artistName: userArtist.artistName,
       artist: userArtist._id,
@@ -682,7 +684,7 @@ export async function GET(req: Request) {
       .sort(sortQuery)
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user","label")
+      .populate("user", "label")
       .lean();
     // const exec = await SongModel.find(query)
     //   .collation({ locale: "en", strength: 2 })
@@ -880,7 +882,7 @@ export async function PUT(req: Request) {
     if (!payload.featured_artist) {
       payload.featured_artist = [];
     }
-    
+
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }

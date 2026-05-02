@@ -219,7 +219,7 @@ const AlbumForm = () => {
             </button>
             <div className="flex gap-8 px-5 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-30 min-h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-30 min-h-[64dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -229,7 +229,7 @@ const AlbumForm = () => {
                       Provide the main details about your album to ensure it is
                       properly identified and distributed.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.title}
@@ -358,7 +358,7 @@ const AlbumForm = () => {
                     </p>
 
                     <div>
-                      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-15">
+                      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <div className="flex">
                             <p className=" capitalize font-medium sm:text-sm text-lg">
@@ -457,7 +457,7 @@ const AlbumForm = () => {
                             }}
                           />
                         </div>
-                        <div className="mt-5 justify-between w-full flex max-sm:flex-col">
+                        <div className="justify-between w-full flex max-sm:flex-col">
                           <div className="flex w-fit gap-2 items-center">
                             <input
                               type="checkbox"
@@ -506,7 +506,7 @@ const AlbumForm = () => {
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
                       Choose the platforms where your release will be available.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg">
@@ -553,7 +553,7 @@ const AlbumForm = () => {
                       Add eye-catching artwork that represents your single.{" "}
                     </p>
                     <div className="flex items-center justify-center w-60">
-                      <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
                             <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -572,7 +572,7 @@ const AlbumForm = () => {
                           <div className="flex items-center justify-center w-60">
                             <label
                               htmlFor="music_image"
-                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
                             >
                               <div
                                 className={
@@ -664,7 +664,7 @@ const AlbumForm = () => {
                         Transferring from another distributor?
                       </p>
                     </div>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.upc}
@@ -678,7 +678,7 @@ const AlbumForm = () => {
                           required={albumForm.another_distribution_check}
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Unique code for tracking sales/streams.
+                          Don’t have this? Soundmac will generate for you.
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -868,10 +868,10 @@ const AlbumForm = () => {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
+                  <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
                     {albumForm.title || "Title"}
                   </p>
-                  <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-[16px]">
+                  <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-[16px]">
                     {albumForm.artist || "Artist"}
                   </p>
                 </div>

@@ -303,12 +303,12 @@ const SongModelSchema = new mongoose.Schema(
     },
     startClip: {
       type: String,
-      required: [
-        function (this: any) {
-          return this.get("releaseStatus") !== "draft";
-        },
-        "Start clip is required",
-      ],
+      // required: [
+      //   function (this: any) {
+      //     return this.get("releaseStatus") !== "draft";
+      //   },
+      //   "Start clip is required",
+      // ],
       trim: true,
     },
     isrc: {

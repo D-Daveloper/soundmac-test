@@ -1,4 +1,5 @@
 import { albumFromApi } from "@/app/type";
+import { generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { deleteSingleFromS3 } from "@/util/middleware/aws";
@@ -133,7 +134,7 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    payload.upc = payload.upc || "upc" + Date.now(); //incase they dont have a upc, generate one for them
+    payload.upc = payload.upc || await generateUPC(); //incase they dont have a upc, generate one for them
     const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
     const buffer = Buffer.from(
@@ -167,7 +168,7 @@ export async function POST(req: Request) {
       copyRightHolder: payload.copyRightHolder,
       copyRightYear: payload.copyRightYear,
       dsp: payload.dsp,
-      upc: payload.upc || "upc" + Date.now(),
+      upc: payload.upc,
       territories: payload.territories,
       releaseImage: imageUrl.coverUrl,
       artistName: userArtist.artistName,

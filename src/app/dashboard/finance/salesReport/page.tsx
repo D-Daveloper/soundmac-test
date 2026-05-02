@@ -80,7 +80,7 @@ const Page = () => {
                 "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
               }
             >
-              Download Full History
+              Download Sales Report
               <Clock4 strokeWidth={1} size={20} />
             </button>
           </div>
@@ -108,7 +108,7 @@ const Page = () => {
             <Link
               href={"/"}
               className={
-                "font-bold gap-2 text-primary-500! flex text-sm min-w-fit"
+                "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
               }
             >
               Advance Royalties
@@ -122,7 +122,9 @@ const Page = () => {
                   <Coins color="#103958" /> Total Earnings
                 </h1>
                 <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-                  {salesReport.totals.length > 0 ? formatAmount(salesReport.totals[0]?.totalNetAmount) : "$ "+0}
+                  {salesReport.totals.length > 0
+                    ? formatAmount(salesReport.totals[0]?.totalNetAmount)
+                    : "$ " + 0}
                 </p>
               </div>
               <div className="bg-neutral-50 border-1 border-neutral-100 rounded-2xl">

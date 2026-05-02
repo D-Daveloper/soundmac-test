@@ -106,8 +106,8 @@ export const isSongFormValid = (form: SongForm): string => {
         (form.song_audio == null || !(form.song_audio instanceof File))
     ) {
         return "Audio is required";
-    } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
-        return "Starting Clip is required and must be a valid number";
+    // } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+    //     return "Starting Clip is required and must be a valid number";
     } else if (
         form.old_image === null &&
         (form.music_image == null || !(form.music_image instanceof File))
@@ -795,13 +795,13 @@ export function validateNonDraftSongs(
         return "Invalid Dsp format.";
     }
 
-    if (
-        !payload.startClip ||
-        typeof payload.startClip != "string" ||
-        !numRegex.test(payload.startClip)
-    ) {
-        return "Start Clip is required.";
-    }
+    // if (
+    //     !payload.startClip ||
+    //     typeof payload.startClip != "string" ||
+    //     !numRegex.test(payload.startClip)
+    // ) {
+    //     return "Start Clip is required.";
+    // }
 
     if (payload.anotherDistributionCheck && payload.isrc === "") {
         return "ISRC is required when transferring from another distributor.";

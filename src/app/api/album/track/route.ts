@@ -1,4 +1,5 @@
 import { albumFromApi, TrackForm } from "@/app/type";
+import { generateISRC, generateMultipleISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { validateNonDraftTracks } from "@/util/middleware/functions";
@@ -7,6 +8,7 @@ import AlbumModel from "@/util/models/AlbumModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
@@ -137,13 +139,16 @@ export async function POST(req: Request) {
       );
     }
     // console.log("first",userAlbum.unassignedNumbers);
-
+    const array_of_tracks_dont_have_isrc = [];
     for (let i = 0; i < tracks.length; i++) {
       if (
         tracks[i].featured_artist.length === 1 &&
         tracks[i].featured_artist.some((artist) => artist.artistName === "")
       ) {
         tracks[i].featured_artist = [];
+      }
+      if (!tracks[i].isrc) {
+        array_of_tracks_dont_have_isrc.push(1)
       }
       const err = validateNonDraftTracks(
         tracks[i],
@@ -160,20 +165,23 @@ export async function POST(req: Request) {
       }
     }
 
+    const multipleIsrc: string[] = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length);
+    console.log(multipleIsrc);
+
     const docs = tracks.map((track, index) => ({
       releaseTitle: track.title,
       genre: track.genre,
       releaseLanguage: track.language,
       releaseAudio: track.s3key,
-      songWriter: track.song_writer || [],
-      producer: track.producer || [],
-      performer: track.performer || [],
+      songWriter: track.song_writer,
+      producer: track.producer,
+      performer: track.performer,
       featuredArtist: track.featured_artist || [],
       explicitContent: track.explicit_content,
       lyrics: track.lyrics,
       startClip: track.start_clip,
       upc: userAlbum.upc,
-      isrc: track.isrc || Date.now() + index,
+      isrc: track.isrc || multipleIsrc[index],
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
       albumName: userAlbum.releaseTitle,
@@ -185,17 +193,34 @@ export async function POST(req: Request) {
       catalogNumber: "SM" + Date.now() + index,
     }));
 
-    await AudioUploadTrackerModel.updateMany(
-      {
-        upc: userAlbum.upc,
-        status: "PENDING",
-      },
-      { $set: { status: "ACTIVE" } },
-    );
-    await TrackModel.insertMany(docs);
-    await AlbumModel.findByIdAndUpdate(userAlbum._id, {
-      unassignedNumbers: userAlbum.unassignedNumbers,
-    });
+
+    console.log(docs);
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+      await Promise.all([
+        AudioUploadTrackerModel.updateMany(
+          {
+            upc: userAlbum.upc,
+            status: "PENDING",
+          },
+          { $set: { status: "ACTIVE" } },
+          { session },
+        ),
+        TrackModel.insertMany(docs, { session }),
+        AlbumModel.findByIdAndUpdate(userAlbum._id, {
+          unassignedNumbers: userAlbum.unassignedNumbers,
+        }, { session })
+      ]);
+      await session.commitTransaction();
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      await session.endSession();
+    }
+
 
     return NextResponse.json({ msg: "Tracks saved" }, { status: 200 });
   } catch (error) {
@@ -222,7 +247,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-    const user = await User.findById(userJwt.user);
+    const user = await User.findById(userJwt.user).lean();
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     }
@@ -230,7 +255,7 @@ export async function PUT(req: Request) {
     const userAlbum = await AlbumModel.findOne<albumFromApi>({
       user: userJwt.user,
       releaseTitle: album,
-    });
+    }).lean();
 
     if (!userAlbum || userAlbum.releaseStatus === "approved") {
       return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
@@ -259,15 +284,15 @@ export async function PUT(req: Request) {
       genre: track.genre,
       releaseLanguage: track.language,
       releaseAudio: track.s3key,
-      songWriter: track.song_writer || [],
-      producer: track.producer || [],
-      performer: track.performer || [],
+      songWriter: track.song_writer,
+      producer: track.producer,
+      performer: track.performer,
       featuredArtist: track.featured_artist || [],
       explicitContent: track.explicit_content,
       lyrics: track.lyrics,
       startClip: track.start_clip,
-      upc: userAlbum.upc,
-      isrc: track.isrc || Date.now() + index,
+      // upc: userAlbum.upc,
+      // isrc: track.isrc || Date.now() + index,
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
       albumName: userAlbum.releaseTitle,
