@@ -106,8 +106,8 @@ const sidebarComponents = [
       {
         title: "cover license",
         icon: "/musiclibrary2.svg",
-        href: "",
-        query: "manageRelease",
+        href: "/dashboard/explore/coverLicense",
+        query: "coverLicense",
       },
     ],
     // isActive: "",
