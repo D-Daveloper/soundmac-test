@@ -5,6 +5,7 @@ import UseAxios from "@/util/customHooks/UseAxios";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import { isAxiosError } from "axios";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -151,9 +152,9 @@ const page = () => {
                 ${details.amount}
                 <span className="text-text-disable text-sm ">/yr</span>
               </p>
-              <p className="text-primary-500 font-bold leading-[20px] tracking-tighter text-sm">
+              <Link href={"/pricing"} className="text-primary-500! font-bold leading-[20px] tracking-tighter text-sm">
                 Learn more about your plan
-              </p>
+              </Link> 
             </div>
           </div>
           <div className="border-2 border-neutral-100 w-120 max-lg:w-full max-h-55 p-3 rounded-lg bg-neutral-50 flex items-center justify-center gap-8 flex-col flex-2">

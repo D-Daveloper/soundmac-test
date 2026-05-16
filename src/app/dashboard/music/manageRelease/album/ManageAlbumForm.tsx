@@ -654,10 +654,10 @@ const ManageAlbumForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.copyRightHolder}
-                          title={"Copy Right Holder"}
+                          title={"Copyright Holder"}
                           type={"text"}
                           name={"copyRightHolder"}
-                          placeholder={"Enter Copy Right Holder"}
+                          placeholder={"Enter Copyright Holder"}
                           updateValue={handleChange}
                           disabled={false}
                           uppercase={false}
@@ -667,7 +667,7 @@ const ManageAlbumForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                            Copy Right Year
+                            Copyright Year
                           </p>
                           <Image
                             priority={false}
@@ -688,7 +688,7 @@ const ManageAlbumForm = ({
                                 copyRightYear: t,
                               }))
                             }
-                            placeholder="Select Copy right year..."
+                            placeholder="Select Copyright Year..."
                             options={years}
                             name="copyRightYear"
                           />
@@ -801,7 +801,7 @@ const ManageAlbumForm = ({
                       <div className="border border-neutral-100"></div>
                     </div>
                     <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copy Right Holder</h2>
+                      <h2>Copyright Holder</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                         {albumForm.copyRightHolder}
                       </p>
@@ -809,7 +809,7 @@ const ManageAlbumForm = ({
                       <div className="border border-neutral-100"></div>
                     </div>
                     <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copy Right Year</h2>
+                      <h2>Copyright Year</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                         {albumForm.copyRightYear}
                       </p>

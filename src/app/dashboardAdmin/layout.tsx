@@ -9,6 +9,7 @@ import { ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import AdminRoute from "../protectedRoute/AdminProtectedRoute";
+import LogoutButton from "../logout/Logout";
 
 const sidebarComponents = [
   {
@@ -201,7 +202,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                     <Link
                       className={
                         "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer focus:bg-neutral-700/90 hover:bg-neutral-700/90 transition-all duration-300 " +
-                        (pathname.endsWith("dashboardAdmin") && " bg-neutral-700")
+                        (pathname.endsWith("dashboardAdmin") &&
+                          " bg-neutral-700")
                       }
                       href={"/dashboardAdmin"}
                     >
@@ -315,14 +317,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               {link.title}
             </Link>
           ))}
-          <button
-            // onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
-            className={
-              "px-2 py-2 font-bold rounded-lg max-w-full hover:cursor-pointer text-sm hover:bg-error-400/90 bg-error-400 border-2 border-error-400 text-white text-start"
-            }
-          >
-            Log Out
-          </button>
+          <LogoutButton />
         </div>
         {children}
       </div>

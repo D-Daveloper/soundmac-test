@@ -1,7 +1,6 @@
 "use client";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import { top_performing_artist } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import {
   useGetUserArtistsNames,
@@ -47,11 +46,11 @@ const Page = () => {
                 <p className="font-medium mb-2 sm:text-sm text-lg">Period</p>
                 <div className="w-full">
                   <Select
-                    selected={salesReportForm.artist}
+                    selected={salesReportForm.timeLine}
                     setSelected={(t) =>
-                      setsalesReportForm((prev) => ({ ...prev, artist: t }))
+                      setsalesReportForm((prev) => ({ ...prev, timeLine: t }))
                     }
-                    placeholder="Select Artist..."
+                    placeholder="Select Period..."
                     options={[]}
                     name="artist"
                   />
@@ -106,10 +105,10 @@ const Page = () => {
               </Link>
             </div>
             <Link
-              href={"/"}
+              href={"salesReport/advancedRoyalty"}
               className={
                 "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
-              }
+              } 
             >
               Advance Royalties
               <FileDown strokeWidth={1} size={20} />

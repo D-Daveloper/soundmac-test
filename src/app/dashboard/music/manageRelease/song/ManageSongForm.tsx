@@ -1439,10 +1439,10 @@ const SongForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={songForm.copyRightHolder}
-                          title={"Copy Right Holder"}
+                          title={"Copyright Holder"}
                           type={"text"}
                           name={"copyRightHolder"}
-                          placeholder={"Enter Copy Right Holder"}
+                          placeholder={"Enter Copyright Holder"}
                           updateValue={handleChange}
                           disabled={false}
                           uppercase={false}
@@ -1452,7 +1452,7 @@ const SongForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                            Copy Right Year
+                            Copyright Year
                           </p>
                           <Image
                             priority={false}
@@ -1473,7 +1473,7 @@ const SongForm = ({
                                 copyRightYear: t,
                               }))
                             }
-                            placeholder="Select Copy right year..."
+                            placeholder="Select Copyright Year..."
                             options={years}
                             name="copyRightYear"
                           />

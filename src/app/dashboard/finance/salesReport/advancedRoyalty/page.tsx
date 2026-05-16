@@ -13,18 +13,18 @@ import {
   useGetUserSalesReportDashboardDetailsNames,
 } from "@/util/customHooks/useQueries";
 import {
-  formatAmount,
   formatTime,
   numRegex,
 } from "@/util/middleware/functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { Coins } from "lucide-react";
+import { CircleDollarSign, Coins, Info, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { eligibiltyRules, rules } from "./contants";
 
 const Page = () => {
   const dashboardContext = useContext(DashboardContext);
@@ -56,6 +56,9 @@ const Page = () => {
   const queryClient = useQueryClient();
   const [selectedBank, setSelectedBank] = useState<BankObject>();
   const [showSuccessPage, setshowSuccessPage] = useState(false);
+  const [showEligibilityModal, setshowEligibilityModal] = useState(false);
+  const [showRoyaltyUnavaliableModal, setshowRoyaltyUnavaliableModal] =
+    useState(false);
 
   const {
     data: bankData,
@@ -74,7 +77,7 @@ const Page = () => {
   } = useAuthUser();
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Withdraw Royalties");
+    dashboardContext?.setLayoutHeaderMessage("Advance Royalties");
   }, []);
 
   useEffect(() => {
@@ -103,7 +106,6 @@ const Page = () => {
 
     return () => clearInterval(interval);
   }, [canResend, timer]);
-  console.log(timer);
 
   const handleSubmit = async () => {
     try {
@@ -279,6 +281,13 @@ const Page = () => {
           alt="arrow left"
         />
       </Link>
+      <div className="md:max-w-[50%] my-5">
+        <p className="text-text-body font-light ">
+          Get early access to a portion of your future earnings. If eligible,
+          you can request an advance and repay it automatically from upcoming
+          royalty payouts.
+        </p>
+      </div>
       {isLoading ||
       !data ||
       isSumbittingForm ||
@@ -290,20 +299,27 @@ const Page = () => {
         <div className="mt-5 flex flex-col gap-5 mb-10">
           <div className="flex max-lg:flex-col gap-5">
             <div className=" w-full flex-1">
-              <div className="bg-warning-50 flex flex-col w-full gap-5 p-5 rounded-2xl flex-1 h-fit">
+              <div className="bg-warning-50 flex flex-col w-full gap-3 p-5 rounded-2xl flex-1 h-fit">
                 <h1 className="font-semibold text-[16px] flex gap-1 leading-[20px] tracking-tighter text-primary-500">
-                  <Coins color="#103958" /> Total Earnings
+                  <Coins color="#103958" /> Eligible Amount
                 </h1>
                 <p className="font-bold leading-[60px] -tracking-widest text-4xl text-primary-500">
-                  {salesReport.totals.length > 0
-                    ? formatAmount(salesReport.totals[0]?.totalNetAmount)
-                    : "$ " + 0}
+                  $ *********
                 </p>
+                <button
+                  onClick={() => setshowEligibilityModal(true)}
+                  type="button"
+                  className={
+                    "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
+                  }
+                >
+                  Check Eligibility
+                </button>
               </div>
             </div>
             <div className="flex-1">
               {!wantsEditAccountForm && (
-                <div className="border-1 border-neutral-100 bg-neutral-50 flex flex-col gap-5  rounded-lg p-5">
+                <div className="border-1 border-neutral-100 bg-neutral-50 flex flex-col gap-3 rounded-lg p-5">
                   <h2 className="text-text-disable font-semibold text-md">
                     Payment Method
                   </h2>
@@ -402,13 +418,13 @@ const Page = () => {
                     : "Account not found"}
                 </p>
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-3 w-[40%] mt-auto">
                 <button
                   type="button"
                   onClick={handleVerifyAccountNumber}
                   disabled={withdrawalForm.is_verified}
                   className={
-                    "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white"
+                    "px-10 p-3 font-bold rounded-xl text-center max-w-fit h-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white"
                   }
                 >
                   Verify
@@ -418,7 +434,7 @@ const Page = () => {
                   disabled={withdrawalForm.is_verified}
                   onClick={() => setwantsEditAccountForm(false)}
                   className={
-                    "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
+                    "px-10 py-3 font-bold rounded-xl text-center max-w-fit h-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
                   }
                 >
                   Cancel
@@ -429,22 +445,25 @@ const Page = () => {
 
           {/* border line */}
           <div className="border border-neutral-100"></div>
-          {true && (
-            <div className="flex flex-col w-[40%] max-sm:w-full">
-              <Input
-                value={withdrawalForm.amount}
-                title={"Amount"}
-                type={"text"}
-                name={"amount"}
-                placeholder={"Enter Amount"}
-                updateValue={handleChange}
-                required={true}
-              />
-            </div>
-          )}
+
+          {/* amount */}
+          <div className="flex flex-col w-[40%] max-sm:w-full">
+            <Input
+              value={withdrawalForm.amount}
+              title={"Amount"}
+              type={"text"}
+              name={"amount"}
+              placeholder={"Enter Amount"}
+              updateValue={handleChange}
+              required={true}
+              disabled={true}
+            />
+          </div>
 
           {/* border line */}
           <div className="border border-neutral-100"></div>
+
+          {/* otp */}
           <div className="flex flex-col gap-5">
             <div className="flex gap-4">
               {otp.map((digit, index) => (
@@ -453,7 +472,7 @@ const Page = () => {
                   ref={(el) => {
                     inputsRef.current[index] = el;
                   }}
-                  //   disabled={loading || isPending}
+                  disabled={true}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
@@ -466,10 +485,7 @@ const Page = () => {
             </div>
             <div className="flex gap-6 items-center">
               <button
-                disabled={
-                  isSendingOtp ||
-                  (canResend === false && otpText.includes("Resend"))
-                }
+                disabled={true}
                 onClick={handleSendOtp}
                 className={
                   "text-sm w-fit px-2 font-semibold py-1 rounded-lg transition hover:cursor-pointer border-1 border-primary-500" +
@@ -485,8 +501,9 @@ const Page = () => {
               </p>
             </div>
           </div>
-          <button
-            disabled={isSumbittingForm}
+
+          {/* <button
+            disabled={true}
             onClick={() => handleSubmit()}
             className={
               "text-md w-fit px-4 font-semibold py-2 rounded-lg transition hover:cursor-pointer border-1 border-primary-500 text-white " +
@@ -494,7 +511,20 @@ const Page = () => {
             }
           >
             Submit
-          </button>
+          </button> */}
+          <div className="bg-warning-50 sm:max-w-[60%] rounded-2xl p-3 mt-10">
+            <div className="flex gap-2">
+              <span>
+                <Info color="#C58629" />
+              </span>
+              <p className="text-text-disable">Rules of Payment</p>
+            </div>
+            <ul className="list-disc mt-4 ml-5 text-caption-one flex flex-col gap-1">
+              {rules.map((rule, index) => (
+                <li key={index}>{rule}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       ) : (
         <div className="flex justify-center items-center min-h-full w-full h-full mt-[15%]">
@@ -526,6 +556,89 @@ const Page = () => {
           </div>
         </div>
       )}
+      {/* eligibiltity Modal */}
+      {showEligibilityModal && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-30">
+          {isSumbittingForm ? (
+            <InlineLoadingScreen />
+          ) : (
+            <div className="bg-white rounded-2xl lg:w-[700px] w-[500px] m-5 shadow-2xl h-fit">
+              {/* Reject Modal Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="lg:text-xl text-lg font-semibold text-gray-900">
+                  Eligibilty for Advanced Royalties
+                </h3>
+                <button
+                  onClick={() => {
+                    setshowEligibilityModal(false);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <ul className="list-disc my-4 ml-5 text-caption-one flex flex-col gap-1 px-2">
+                {eligibiltyRules.map((rule, index) => (
+                  <li key={index} className="text-text-body lg:text-lg text-sm">
+                    <span className="font-extrabold ">{rule.title}: </span>
+                    <span className="font-light">{rule.body}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="bg-[#F0F0E7] rounded-b-2xl border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 w-full">
+                <button
+                  onClick={() => {
+                    setshowRoyaltyUnavaliableModal(true)
+                  }}
+                  className={
+                    "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 "
+                  }
+                >
+                  Apply Now
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+        {/*info pop up */}
+        <div
+          className={
+            showRoyaltyUnavaliableModal
+              ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
+              : " hidden"
+          }
+        >
+          <div className="max-w-[400px] h-[400px]">
+            <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
+              <div className="flex flex-col gap-2 mb-2">
+                <div className="flex justify-center my-5">
+                  <CircleDollarSign size={50} color="#103958" strokeWidth={1} />
+                </div>
+                <h3 className="lg:text-xl text-lg font-normal leading-[30px] tracking-[-1px] text-main-heading text-center">
+                  Advance Royalties Unavailable
+                </h3>
+                <p className="text-body-two-regular text-text-body text-center">
+                 Your account is not currently eligible for an advance royalty request at this time.
+                </p>
+              </div>
+              <div className="flex gap-5 mt-5">
+
+                <button
+                  aria-label="Approve Payout "
+                  onClick={() => {
+                    setshowRoyaltyUnavaliableModal(false);
+                  }}
+                  className={
+                    "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/20 bg-primary-500 flex text-white outline-2 outline-primary-500 "
+                  }
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   );
 };

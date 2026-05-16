@@ -1,4 +1,5 @@
 import { OtpForm } from "@/app/type";
+import { otpType } from "@/app/utils/constants";
 import { UseMutateAsyncFunction } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useRef } from "react";
@@ -37,7 +38,7 @@ export class OTP {
     }
   };
 
- handleSubmit = async (
+  handleSubmit = async (
     mutateAsync: UseMutateAsyncFunction<
       unknown,
       unknown,
@@ -45,34 +46,34 @@ export class OTP {
       unknown
     >,
     email: string,
-    type:"login" | "register" | "forgotPassword",
-    password?:string
+    type: otpType,
+    password?: string
   ) => {
-      const finalOtp = this.otp.join("");
-      if (this.otp.some((digit) => digit === "" || finalOtp.length < 6)) {
-        toast.error("Please enter the complete 6-digit OTP.");
+    const finalOtp = this.otp.join("");
+    if (this.otp.some((digit) => digit === "" || finalOtp.length < 6)) {
+      toast.error("Please enter the complete 6-digit OTP.");
+      return;
+    }
+    if (type === "forgotPassword" && !password) {
+      toast.error("Password is required.");
+      return;
+    }
+    if (!email) {
+      toast.error("Email is required.");
+      return;
+    }
+    console.log("OTP submitted:", finalOtp);
+    try {
+      const body = { email, otp: finalOtp, type, password };
+      await mutateAsync(body);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        console.log(error);
         return;
       }
-      if(type==="forgotPassword" && !password){
-        toast.error("Password is required.");
-        return;
-      }
-      if(!email){
-        toast.error("Email is required.");
-        return;
-      }
-      console.log("OTP submitted:", finalOtp);
-      try {
-        const body = { email, otp: finalOtp, type,password };
-        await mutateAsync(body);
-      } catch (error) {
-        if (isAxiosError(error)) {
-          console.log(error);
-          return;
-        }
-        toast.error(error as string);
-      }
-    };
+      toast.error(error as string);
+    }
+  };
 
-    
+
 }

@@ -13,8 +13,9 @@ import {
   DeleteSong,
   MarkAlbumComplete,
 } from "../axios/axiosInstance";
+import { SetStateAction } from "react";
 
-export const useOtpMutation = () => {
+export const useOtpMutation = (setisSuccessfulRegistration?: React.Dispatch<SetStateAction<boolean>>) => {
   const queryClient = useQueryClient();
   const router = useRouter();
   const api = useAxios();
@@ -34,9 +35,14 @@ export const useOtpMutation = () => {
       );
       const sessionExpiry = Date.now() + session * 1000;
       const redirect = localStorage.getItem("soundmacRedirectAfterOtp"); //incase their session ends and they get redirected to login page after  login pick up the redirect link
-      localStorage.clear();
-      localStorage.removeItem("soundmacotpExpiry");
       localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
+      const isRegister = localStorage.getItem("soundmacRegistration");
+      localStorage.clear();
+      if (isRegister && setisSuccessfulRegistration) {
+        setisSuccessfulRegistration(true);
+        return;
+      }
+
       router.push(
         redirect
           ? redirect

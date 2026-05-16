@@ -15,6 +15,7 @@ import {
 } from "@/util/customHooks/useQueries";
 import Notification from "../components/notification/Notification";
 import axios from "axios";
+import LogoutButton from "../logout/Logout";
 
 const sidebarComponents = [
   {
@@ -131,8 +132,11 @@ const profileLinks = [
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { data, isLoading } = useAuthUser();
-  const { data: notification, isLoading: isLoadingNotification, refetch:refetchNotifications } =
-    useGetUserNotifications();
+  const {
+    data: notification,
+    isLoading: isLoadingNotification,
+    refetch: refetchNotifications,
+  } = useGetUserNotifications();
   const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
@@ -175,7 +179,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <div className="bg-primary w-5 h-1"></div>
               <div className="bg-primary w-5 h-1"></div>
             </div>
-            <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
+            <h1 className="font-extralight text-xl text-main-heading tracking-[-1px] leading-6 capitalize ml-5 h-4">
               {dashboardContext?.layoutHeaderMessage}
             </h1>
             <button
@@ -192,9 +196,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <div
               className={
                 "ml-auto transition-all duration-300 ease-in-out flex h-[90dvh] lg:w-[450px] max-lg:w-[50%] max-sm:w-full absolute top-0 bottom-0 left-0 right-0 " +
-                (isNotificationOpen
-                  ? " -translate-y-0"
-                  : " -translate-y-full ")
+                (isNotificationOpen ? " -translate-y-0" : " -translate-y-full ")
               }
             >
               <div className="bg-neutral-100 py-10 w-full text-main-heading rounded-xl ">
@@ -205,7 +207,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       <button
                         onClick={() => handleMarkAsRead()}
                         disabled={
-                          notification && notification.hasNewNotification === false
+                          notification &&
+                          notification.hasNewNotification === false
                         }
                         className="text-xs border text-white bg-primary-500 border-primary-500 rounded-sm p-1 hover:bg-primary-500/80 disabled:bg-disable disabled:text-primary-500"
                       >
@@ -235,7 +238,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                             description={item.message}
                             createdAt={item.createdAt}
                             statusWeight={item.statusWeight}
-                            onClick={()=>handleMarkAsRead(item._id)}
+                            onClick={() => handleMarkAsRead(item._id)}
                           />
                         ),
                       )}
@@ -406,14 +409,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               {link.title}
             </Link>
           ))}
-          <button
-            // onClick={() => dashboardContext?.setOpenUpgradePopUp(false)}
-            className={
-              "px-2 py-2 font-bold rounded-lg max-w-full hover:cursor-pointer text-sm hover:bg-error-400/90 bg-error-400 border-2 border-error-400 text-white text-start"
-            }
-          >
-            Log Out
-          </button>
+          <LogoutButton />
         </div>
         {children}
       </div>

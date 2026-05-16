@@ -1066,3 +1066,5 @@ export const royaltySource = [
 export const matchParameter = [
   "upc","isrc"
 ]
+
+export type otpType = "login" | "register" | "forgotPassword";

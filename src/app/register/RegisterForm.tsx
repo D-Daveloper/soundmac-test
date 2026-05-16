@@ -102,6 +102,7 @@ const RegisterForm = () => {
       if (res.status === 200) {
         toast.success(res.data.msg);
         localStorage.setItem("soundmacPendingEmail", res.data.email);
+        localStorage.setItem("soundmacRegistration", "true");
         router.push("/otp");
       }
     } catch (error) {
