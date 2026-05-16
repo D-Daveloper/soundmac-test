@@ -5,7 +5,6 @@ import Root from "./root";
 import InformationState from "./context/informationContext/informationState";
 import UserState from "./context/userContext/userState";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
-import DashboardState from "./context/dashboardContext/dashboardState";
 
 const figtree = Figtree({
   subsets: ["latin"],

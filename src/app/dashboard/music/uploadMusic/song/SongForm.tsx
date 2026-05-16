@@ -1530,28 +1530,28 @@ const SongForm = () => {
                         height={100}
                         src={"/tick-circle2.svg"}
                       />
-                      <p className="text-main-heading font-normal text-xl leading-5 tracking-[0.5px] mt-3 text-center">
+                      <p className="text-main-heading font-normal text-xl leading-5 tracking-[0.5px] mt-3 text-center lg:w-[70%]">
                         Your single has been submitted for review. We&apos;ll
                         notify you once approved.
                       </p>
-                      <div className="bg-neutral-50 border border-neutral-100 p-2 rounded-lg flex gap-3 md:max-w-[30%] max-md:max-w-[70%] w-full">
+                      <div className="bg-neutral-50 border border-neutral-100 p-2 rounded-lg flex gap-3 md:max-w-[40%] max-md:max-w-[70%] w-full">
                         <Image
                           alt="release image"
-                          width={60}
-                          height={60}
+                          width={80}
+                          height={80}
                           src={image ?? "/document-upload.svg"}
-                          className="object-cover w-15 h-15 rounded-lg"
+                          className="object-cover w-20 h-20 rounded-lg"
                         />
                         <div className="text-main-heading flex-1 line-clamp-1 ">
                           <p className="text-xl font-normal">
-                            {songForm.title}
+                            {"songForm.title"}
                           </p>
                           <p className="text-sm font-light">
-                            {songForm.artist}
+                            {"songForm.artist"}
                           </p>
                         </div>
                       </div>
-                      <div className="flex gap-3 mt-5">
+                      <div className="flex gap-3 mt-8">
                         <button
                           type="button"
                           onClick={createAnother}

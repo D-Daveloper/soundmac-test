@@ -418,7 +418,7 @@ const CreateArtistForm = () => {
             </div>
           </div>
         )}
-        <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
+        {!showSuccessPage && (<div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
           <div className="w-full h-[80%] flex-2">
             {artistForm.artist_image ? (
               <Image
@@ -441,7 +441,7 @@ const CreateArtistForm = () => {
               {artistForm.artist_name || "Name"}
             </p>
           </div>
-        </div>
+        </div>)}
       </div>
 
       {!showSuccessPage && (

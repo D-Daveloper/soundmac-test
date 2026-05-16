@@ -248,7 +248,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div
               className={
-                " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
+                " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-[70%] absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
                 (isOpen
                   ? " max-lg:-translate-x-0"
                   : " max-lg:-translate-x-full")

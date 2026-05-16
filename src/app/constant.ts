@@ -934,6 +934,11 @@ export const timeZones = [
         "name": "Nairobi"
     },
     {
+        "label": "Africa/Lagos",
+        "value": "(GMT+01:00)",
+        "name": "Lagos"
+    },
+    {
         "label": "Asia/Riyadh",
         "value": "(UTC+03:00)",
         "name": "Riyadh"
