@@ -65,15 +65,16 @@ export const uploadSalesReport = inngest.createFunction(
                         { catalogNumber },
                     ]
                 }).lean();
-                // 🔍 fallback artist search
-                const artistPromise: any = Artist.findOne({
-                    artistName: normalizedArtist, // 🔥 see note below
-                }).lean();
 
-                const [songResult, albumResult, artistResult] = await Promise.all([
+                // 🔍 fallback artist search
+                // const artistPromise: any = Artist.findOne({
+                //     artistName: normalizedArtist, // 🔥 see note below
+                // }).lean();// doesnt make sense to search the artist collection when two artist can have the same name, artist name is only unique per user
+
+                const [songResult, albumResult] = await Promise.all([
                     songPromise,
                     albumPromise,
-                    artistPromise,
+                    // artistPromise,
                 ]);
 
                 // 🎯 resolve user
@@ -83,8 +84,10 @@ export const uploadSalesReport = inngest.createFunction(
                 let userTrackTitle = trackTitle;
                 let userTrackArtist = normalizedArtist;
                 let artistId = null;
-                let userCatalogNumber = catalogNumber
+                let userCatalogNumber = catalogNumber;
+                let onModel: string | undefined = undefined;  // ← undefined, never ''
                 if (songResult?.user) {
+                    onModel= 'song';
                     userId = songResult.user;
                     userUpc = songResult.upc
                     userIsrc = songResult.isrc
@@ -93,6 +96,10 @@ export const uploadSalesReport = inngest.createFunction(
                     artistId = songResult.artist
                     userCatalogNumber = songResult.catalogNumber
                 } else if (albumResult?.user) {
+                    console.log("cat before",userCatalogNumber);
+                    console.log("found album",albumResult);
+                    
+                    onModel = "album";
                     userId = albumResult.user;
                     userUpc = albumResult.upc
                     userIsrc = albumResult.isrc
@@ -100,11 +107,16 @@ export const uploadSalesReport = inngest.createFunction(
                     userTrackArtist = albumResult.artistName
                     artistId = albumResult.artist
                     userCatalogNumber = albumResult.catalogNumber
-                } else if (artistResult?.user) {
-                    userId = artistResult.user;
-                    artistId = artistResult.artist
-                    userTrackArtist = artistResult.artistName
-                }
+                } 
+                // else if (artistResult?.user) {
+                //     const [realSong,realAlbum] = await Promise.all([
+                //         SongModel.find({user: artistResult.user}).lean(),
+                //         AlbumModel.find({user: artistResult.user}).lean()
+                //     ])
+                //     userId = artistResult.user;
+                //     artistId = artistResult.artist
+                //     userTrackArtist = artistResult.artistName
+                // }
                 const saleId = new mongoose.Types.ObjectId(); // Generate ID locally
                 sales.push({
                     _id: saleId,
@@ -130,6 +142,7 @@ export const uploadSalesReport = inngest.createFunction(
                     user: userId,
                     reportBatch: batchId,
                     matchStatus: userId ? "matched" : "unmatched",
+                    ...(onModel ? { onModel } : {}), 
                 });
 
                 // 💰 create ledger entry ONLY if matched
@@ -155,7 +168,9 @@ export const uploadSalesReport = inngest.createFunction(
                     salesReportBatch.findByIdAndUpdate({ _id: batchId }, {
                         $set: {
                             status: "completed",
-                            totalRows: data.length
+                            totalRows: data.length,
+                            processedRows: ledgers.length,
+                            unProcessedRows: sales.length - ledgers.length
                         }
                     }, { session }),
                 ])

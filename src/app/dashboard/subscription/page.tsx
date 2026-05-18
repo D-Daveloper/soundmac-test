@@ -91,7 +91,7 @@ const page = () => {
     }
   }
   return (
-    <div className="bg-main-white h-screen w-full flex flex-col lg:pl-[260px] px-5">
+    <div className="bg-main-white h-screen w-full flex flex-col lg:pl-[300px] px-5">
       <div className="flex gap-3 mt-5 flex-wrap mb-10">
         {profileInfoButtons.map((button, index) => (
           <button

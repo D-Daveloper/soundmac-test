@@ -96,6 +96,8 @@ const SongForm = ({
     copyRightYear: "",
     explicit_content: false,
     timeZone: { label: "", value: "", name: "" },
+    cover_song: false,
+    license: null,
   });
 
   const addField = (field: keyof SongForm) => {
@@ -324,6 +326,8 @@ const SongForm = ({
         old_audio: null,
         old_image: null,
         timeZone: { label: "", value: "", name: "" },
+        cover_song: false,
+        license: null,
       });
       setImage(null);
       refetch();
@@ -402,6 +406,8 @@ const SongForm = ({
           : undefined,
         music_image: null,
         song_audio: null,
+        cover_song:false,
+        license:null
       });
     }
   }, []);
@@ -434,6 +440,9 @@ const SongForm = ({
       old_audio: songFormFromApi.releaseAudio || null,
       old_image: songFormFromApi.releaseImage || null,
       timeZone: songFormFromApi.timeZone || { label: "", value: "", name: "" },
+      cover_song: songFormFromApi.isCoverSong,
+      license: null,
+      old_license:songFormFromApi.license || null,
     }));
     setImage(songFormFromApi.releaseImage);
   }, []);
@@ -444,7 +453,7 @@ const SongForm = ({
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (

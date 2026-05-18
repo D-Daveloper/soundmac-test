@@ -5,6 +5,8 @@ import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
 import { ISalesReport } from "../models/salesReportModel";
+import { songPerformanceData } from "@/app/dashboard/insights/songPerformance/song/constants";
+import { albumPerformanceData } from "@/app/dashboard/insights/songPerformance/album/constants";
 
 export async function getDashboard(api: AxiosInstance) {
   const res = await api.get("dashboard");
@@ -388,7 +390,7 @@ export async function getUserNotification(api: AxiosInstance) {
   return res.data;
 }
 
-export async function getDPMDsp():Promise<DPMDsp> {
+export async function getDPMDsp(): Promise<DPMDsp> {
   const res = await axios.get(process.env.NEXT_PUBLIC_GET_DSPS_URL!, {
     headers: {
       Authorization: `Basic ${process.env.NEXT_PUBLIC_GET_DSPS_BASIC_AUTH_PASSWORD}`
@@ -396,3 +398,30 @@ export async function getDPMDsp():Promise<DPMDsp> {
   });
   return res.data;
 }
+
+export const getSongPerformanceData = async (
+  api: AxiosInstance,
+  params: { page: number, 
+    // sort: string,
+     songTitle: string,
+      // songStatusFilter: string,
+      artist: string, limit: string; }
+): Promise<PAGINATION<songPerformanceData>> => {
+  const res = await api.get<Promise<PAGINATION<songPerformanceData>>>("insights/song-performance/song", {
+    params: params,
+  });
+  return res.data;
+};
+export const getAlbumPerformanceData = async (
+  api: AxiosInstance,
+  params: { page: number, 
+    // sort: string,
+     albumTitle: string,
+      // songStatusFilter: string,
+      artist: string, limit: string; }
+): Promise<PAGINATION<albumPerformanceData>> => {
+  const res = await api.get<Promise<PAGINATION<albumPerformanceData>>>("insights/song-performance/album", {
+    params: params,
+  });
+  return res.data;
+};

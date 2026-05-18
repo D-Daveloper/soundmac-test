@@ -277,6 +277,22 @@ const SongModelSchema = new mongoose.Schema(
       ],
       trim: true,
     },
+    isCoverSong: {
+      type: Boolean,
+      required: [true,
+        "Cover song is required",
+      ],
+    },
+    license: {
+      type: String,
+      required: [
+        function (this: any) {
+          return this.get("releaseStatus") !== "draft" && this.get("isCoverSong") != false;
+        },
+        "License URL is required",
+      ],
+      trim: true,
+    },
     dsp: {
       type: [{ label: String, value: Number }],
       required: [
@@ -294,7 +310,7 @@ const SongModelSchema = new mongoose.Schema(
         },
         message: "At least one DSP is required",
       },
-      _id:false
+      _id: false
     },
     lyrics: {
       type: String,
@@ -436,55 +452,70 @@ SongModelSchema.index(
  * @param {Object} session - The MongoDB client session
  * @param {string} label - The user label
  */
-SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, session: mongoose.mongo.ClientSession, label: string) {
-  // 1. Update the song status
-  const song: songFromApi = await this.findByIdAndUpdate(
-    songId,
-    { status: 'approved' },
-    { session, new: true } // Crucial: pass the session here
-  );
+SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, label: string) {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    // 1. Update the song status
+    const song: songFromApi = await this.findByIdAndUpdate(
+      songId,
+      { releaseStatus: 'approved' },
+      { session, new: true } // Crucial: pass the session here
+    );
 
-  if (!song) {
-    throw new Error('Song not found');
+    if (!song) {
+      throw new Error('Song not found');
+    }
+    console.log("approve", song);
+
+    // 2. Create the metadata object in the other collection
+    const metadata = await DpmMetaData.create(
+      [{
+        label: label,
+        "release-type": "Single",
+        upc: song.upc,
+        "catalog-number": song.catalogNumber,
+        "album-release-id": song.catalogNumber,
+        "album-main-artist": song.artistName,
+        "album-title": song.releaseTitle,
+        "track-title": song.releaseTitle,
+        genre: song.genre,
+        "release-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+        "release-date-time": song.releaseDate.toISOString(),
+        "release-date-timezone": song.timeZone.value,
+        "c-line": `© ${song.copyRightYear} ${song.copyRightHolder}`,
+        "disc-number": 1,
+        "track-number": 1,
+        "language-of-performance": "check track",
+        "isrc-code": song.isrc,
+        "track-release-id": "check track",
+        "p-line": `℗ ${song.copyRightYear} ${song.copyRightHolder}`,
+        composer: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
+        lyricist: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
+        "effective-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+        "parental-advisory": song.explicitContent ? "Explicit" : "Not Explicit",
+        "track-length": "check track",
+        "album-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
+        "track-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
+        "music-producer": song.producer.length > 0 ? song.producer.map((producer) => producer.name).join("|") : "",
+
+      }],
+      { session } // Note: .create() expects an array when using sessions
+    );
+
+    // return { song, metadata: metadata[0] };
+    await session.commitTransaction();
+    return { error: false, msg: "Release Approved" }
+  } catch (error) {
+    console.error("failed to approve release ", error);
+    // ✅ Only abort if a transaction is actually open
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
+    return { error: true, msg: "Failed to approve release" }
+  } finally {
+    session.endSession();
   }
-  console.log(song);
-
-  // 2. Create the metadata object in the other collection
-  const metadata = await DpmMetaData.create(
-    [{
-      label: label,
-      "release-type": "Single",
-      upc: song.upc,
-      "catalog-number": song.catalogNumber,
-      "album-release-id": song.catalogNumber,
-      "album-main-artist": song.artistName,
-      "album-title": song.releaseTitle,
-      "track-title": song.releaseTitle,
-      genre: song.genre,
-      "release-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
-      "release-date-time": song.releaseDate.toISOString(),
-      "release-date-timezone": song.timeZone.value,
-      "c-line": `© ${song.copyRightYear} ${song.copyRightHolder}`,
-      "disc-number": 1,
-      "track-number": 1,
-      "language-of-performance": "check track",
-      "isrc-code": song.isrc,
-      "track-release-id": "check track",
-      "p-line": `℗ ${song.copyRightYear} ${song.copyRightHolder}`,
-      composer: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
-      lyricist: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
-      "effective-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
-      "parental-advisory": song.explicitContent ? "Explicit" : "Not Explicit",
-      "track-length": "check track",
-      "album-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
-      "track-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
-      "music-producer": song.producer.length > 0 ? song.producer.map((producer) => producer.name).join("|") : "",
-
-    }],
-    { session } // Note: .create() expects an array when using sessions
-  );
-
-  return { song, metadata: metadata[0] };
 };
 const SongModel: any =
   mongoose.models?.Song || mongoose.model<any>("Song", SongModelSchema);

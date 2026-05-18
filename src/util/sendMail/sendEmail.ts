@@ -19,7 +19,9 @@ const transporter = nodemailer.createTransport({
 // Function to send an email
 const sendEmail = async (email:string, subject:string, html:string) => {
   try {
-
+    if (process.env.NODE_ENV === "development") {
+    return "info.messageId";
+    }
     const info = await transporter.sendMail({
       from: `"SOUNDMAC" <noreply@soundmac.co>`, // Must be verified in Brevo
       to: email,

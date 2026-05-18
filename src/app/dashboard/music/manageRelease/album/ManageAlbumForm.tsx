@@ -220,7 +220,7 @@ const ManageAlbumForm = ({
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
       {isLoading || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (

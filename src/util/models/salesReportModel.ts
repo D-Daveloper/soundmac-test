@@ -1,23 +1,14 @@
 import mongoose from "mongoose";
 export interface ISalesReport extends mongoose.Document {
-  _id:string
+  _id: string
   saleMonth: string,
-  reportperiod : string,
+  reportperiod: string,
 
   // identifiers
-  upc: {
-    type: String, 
-    // This tells Mongoose to look at the 'onModel' field 
-    // to decide which collection to use for population
-    refPath: 'onModel' 
-  },
-  onModel: {
-    type: String,
-    required: true,
-    enum: ['song', 'album'] // The actual names of your models
-  },
+  upc: string,
+  onModel: "song" | "album" | null,
   isrc: string,
-  productType:string,
+  productType: string,
   revenueReceivedByDsp: string,
   contentType: string,
   catalogNumber: string,
@@ -54,12 +45,24 @@ export interface ISalesReport extends mongoose.Document {
 
 const salesReportSchema = new mongoose.Schema({
   saleMonth: { type: Date, required: true },
-  reportperiod : { type: Date, required: true },
+  reportperiod: { type: Date, required: true },
 
   // identifiers
-  upc: { type: String, index: true },
+  upc: {
+    type: String, index: true, refPath: 'onModel'
+  },
+  onModel: {
+    type: String,
+    required: [
+      function (this: any) {
+        return this.get("user") !== null;
+      },
+      "onModel is required when a user is matched",
+    ],
+    enum: ['song', 'album'] // The actual names of your models
+  },
   isrc: { type: String, index: true },
-  productType:{type:String},
+  productType: { type: String },
   revenueReceivedByDsp: { type: String },
   contentType: { type: String },
   catalogNumber: { type: String },

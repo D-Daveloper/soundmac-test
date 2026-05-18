@@ -42,12 +42,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     } else if (body.requestType == "rejected" && !body.message) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!songId || !Types.ObjectId.isValid(songId)) {
-      return NextResponse.json({ msg: "Invalid Request." },{status:400});
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
     const release = await SongModel.findById(songId).populate(
       "user",
       "email label",
-      
+
     ).lean();
 
     if (!release) {
@@ -61,39 +61,49 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
 
     if (body.requestType == "approved") {
       // create the dpm callback here
-      const session = await mongoose.startSession();
-  session.startTransaction();
-  try {
+      //     const session = await mongoose.startSession();
+      // session.startTransaction();
+      // try {
 
-    // Execute the model method passing the session
-    const result = await SongModel.approveAndCreateMetadata(songId,session,release.user.label);
+      // Execute the model method passing the session
+      const result = await SongModel.approveAndCreateMetadata(songId, release.user.label);
+      if (result.error) {
+        return NextResponse.json(
+          { msg: result.msg },
+          { status: 400 },
+        );
+      } else {
+        return NextResponse.json(
+          { msg: result.msg },
+          { status: 201 },
+        );
+      }
+      // If everything is successful, commit the changes
+      //   await session.commitTransaction();
 
-    // If everything is successful, commit the changes
-    await session.commitTransaction();
+      //   // const approveSongQuery = SongModel.findByIdAndUpdate(
+      //   //   songId,
+      //   //   { releaseStatus: body.requestType },
+      //   //   { runValidators: true },
+      //   // );
+      //   // const dpmCallBackMetaDataQuery = release.generateDpmCallBackMetaData();
 
-    // const approveSongQuery = SongModel.findByIdAndUpdate(
-    //   songId,
-    //   { releaseStatus: body.requestType },
-    //   { runValidators: true },
-    // );
-    // const dpmCallBackMetaDataQuery = release.generateDpmCallBackMetaData();
+      //   // await Promise.all([approveSongQuery, dpmCallBackMetaDataQuery]).catch(
+      //   //   (error) => {
+      //   //     console.error("failed to approve release ", error);
+      //   //   }
+      //   // );
 
-    // await Promise.all([approveSongQuery, dpmCallBackMetaDataQuery]).catch(
-    //   (error) => {
-    //     console.error("failed to approve release ", error);
-    //   }
-    // );
-    
-  } catch (error) {
-    console.error("failed to approve release ", error);
-    await session.abortTransaction();
-    return NextResponse.json(
-      { msg: "Failed to approve release." },
-      { status: 400 },
-    );
-  }finally{
-    session.endSession();
-  }
+      // } catch (error) {
+      //   console.error("failed to approve release ", error);
+      //   await session.abortTransaction();
+      //   return NextResponse.json(
+      //     { msg: "Failed to approve release." },
+      //     { status: 400 },
+      //   );
+      // }finally{
+      //   session.endSession();
+      // }
 
     } else if (body.requestType == "rejected") {
       const updateRelease = SongModel.findByIdAndUpdate(
@@ -162,22 +172,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
     const projection = {
-        releaseTitle: 1,
-        releaseAudio: 1,
-        releaseStatus: 1,
-        artistName: 1,
-        genre: 1,
-        releaseDate: 1,
-        upc: 1,
-        isrc: 1,
-        featuredArtist: 1,
-        songWriter: 1,
-        producer: 1,
-        catalogNumber: 1,
-        explicitContent: 1,
-      }
+      releaseTitle: 1,
+      releaseAudio: 1,
+      releaseStatus: 1,
+      artistName: 1,
+      genre: 1,
+      releaseDate: 1,
+      upc: 1,
+      isrc: 1,
+      featuredArtist: 1,
+      songWriter: 1,
+      producer: 1,
+      catalogNumber: 1,
+      explicitContent: 1,
+    }
     // Get audio record from database
-    const release = await SongModel.findById(songId,projection).populate("artist", "spotifyId appleId -_id").lean();
+    const release = await SongModel.findById(songId, projection).populate("artist", "spotifyId appleId -_id").lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });

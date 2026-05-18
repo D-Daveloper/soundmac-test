@@ -93,6 +93,9 @@ export interface SongForm extends musicFormBase {
   isrc: string;
   explicit_content: boolean;
   old_audio?: string | null;
+  cover_song: boolean;
+  license: File | null;
+  old_license?:string|null;
 }
 
 export interface AlbumForm extends musicFormBase {
@@ -198,6 +201,8 @@ export interface songFromApi extends BaseApiResponseForRelease {
   isrc: string;
   explicitContent: boolean;
   releaseStatus: "pending" | "approved" | "rejected" | "draft";
+  isCoverSong:boolean;
+  license:string;
 }
 export interface albumFromApi extends BaseApiResponseForRelease {
   numberOfTracks: string;
@@ -212,8 +217,7 @@ export interface NonRetryableErrorCode {
     httpStatusCode: number;
   };
 }
-// Mock data based on the provided schema for songFromApi
-// Assuming Artist is an object with basic properties (since not fully defined in schema, using a simple structure)
+
 export interface TrackForm extends SongForm {
   id: string; // frontend-only (uuid)
   track_number: string;

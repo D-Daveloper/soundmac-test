@@ -82,7 +82,7 @@ const Page = () => {
       {isSubmitting ? (
         <InlineLoadingScreen />
       ) : (
-        <div className="flex justify-between lg:pl-[260px] max-md:flex-col-reverse">
+        <div className="flex justify-between lg:pl-[300px] max-md:flex-col-reverse">
           <div className="">
             <div className="flex flex-col gap-5 w-[70%] max-sm:w-full sm:text-sm text-lg">
               <p className="font-medium flex">

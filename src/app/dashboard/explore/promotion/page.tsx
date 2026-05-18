@@ -60,7 +60,7 @@ const Page = () => {
   //     return <ViewStats artistToViewStats={viewStats} setArtistToViewStats={setViewStats}/>;
   //   }
   return (
-    <div className="lg:pl-[260px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10 ">
+    <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10 ">
       <div className="flex gap-3 mt-5">
         <button
           onClick={() => {

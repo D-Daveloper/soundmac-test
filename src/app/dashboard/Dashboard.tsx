@@ -118,7 +118,7 @@ const Dashboard = () => {
                   className="w-auto h-auto"
                 />
                 <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
-                  {data?.totalSongs || 0}
+                  {data?.totalSingles || 0}
                 </h2>
               </div>
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">

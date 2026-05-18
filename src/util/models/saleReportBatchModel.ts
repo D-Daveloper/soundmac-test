@@ -6,6 +6,7 @@ const ReportBatchSchema = new mongoose.Schema({
   fileSource: { type: String, required: [true, " Please provide the source of the sales report"] },
   totalRows: Number,
   processedRows: Number,
+  unProcessedRows: Number,
 
   totalAmountUsd: mongoose.Schema.Types.Decimal128,
 

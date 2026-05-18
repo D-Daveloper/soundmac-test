@@ -3,7 +3,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div className="flex gap-8 px-5 py-5 bg-[#F9F9F9] lg:ml-[250px] h-screen">
+    <div className="flex gap-8 px-5 py-5 bg-[#F9F9F9] lg:ml-[300px] h-screen">
       <div className="flex-3 overflow-auto flex flex-col gap-20 px-1 pb-3 h-full">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">

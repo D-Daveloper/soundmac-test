@@ -74,7 +74,7 @@ const sidebarComponents = [
       {
         title: "song performance",
         icon: "/musicplay.svg",
-        href: "",
+        href: "/dashboard/insights/songPerformance/song",
         query: "songPerformance",
       },
     ],
@@ -166,7 +166,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <UserRoute>
       <div className="relative">
         <div className="sticky top-0 z-20 ">
-          <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[250px]">
+          <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[300px]">
             <div
               aria-label="side bar nav button"
               role="button"
@@ -248,7 +248,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
             <div
               className={
-                " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-[70%] absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
+                " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[300px] max-lg:w-[50%] max-sm:w-[70%] absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
                 (isOpen
                   ? " max-lg:-translate-x-0"
                   : " max-lg:-translate-x-full")

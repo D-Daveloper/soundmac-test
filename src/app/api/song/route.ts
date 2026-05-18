@@ -1,4 +1,3 @@
-import { songFromApi } from "@/app/type";
 import { generateISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
@@ -132,32 +131,49 @@ export async function POST(req: Request) {
       coverUrl: null,
       error: "Failed to upload image",
     };
+    let licenseUrl: { error: string | null; coverUrl: string | null } = {
+      coverUrl: null,
+      error: "Failed to upload license",
+    };
     try {
-      const buffer = Buffer.from(await payload.musicImage!.arrayBuffer());
+      const musicBuffer = Buffer.from(await payload.musicImage!.arrayBuffer());
+      const licenseBuffer = Buffer.from(await payload.license!.arrayBuffer());
       // ---- Resize to distributor standard ----
-      const resized = await sharp(buffer)
+      const resized = await sharp(musicBuffer)
         .resize(3000, 3000, { fit: "cover" })
         .jpeg({ quality: 90 })
         .toBuffer(); //resize the image for dpm
       console.log("buffer", resized);
 
       const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
+      const licenseType = payload.license!.type.split("/")[1]; //get the image extension
 
       const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const licenseLocation = `testing/${payload.upc}/cover_license_${payload.upc}.${licenseType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
       imageUrl = await uploadImage(
         imageType,
         resized as Buffer<ArrayBuffer>,
         imageStorageLocation,
       ); //send image to aws
+      licenseUrl = await uploadImage(
+        "application/pdf",
+        licenseBuffer,
+        licenseLocation,
+      ); //send license to aws
       console.log(imageUrl);
+      console.log(licenseUrl);
 
       if (imageUrl.coverUrl == null) {
         await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
         return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
+      } else if (licenseUrl.coverUrl == null) {
+        await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+        return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
       }
     } catch (error) {
-      console.log("upload image error", error);
+      console.log("upload image or license error", error);
+      throw error;
     }
 
     const savedSong = new SongModel({
@@ -195,17 +211,20 @@ export async function POST(req: Request) {
       user: user!._id,
       catalogNumber: "SM" + Date.now(),
       timeZone: payload.timeZone,
+      isCoverSong: payload.isCoverSong,
+      license: licenseUrl.coverUrl
     });
-    await savedSong.save();
-    await AudioUploadTrackerModel.findOneAndUpdate(
-      {
-        _id: payload.uploadId,
-        s3Key: payload.s3KeyAudio,
-        user: user!._id,
-        status: "PENDING",
-      },
-      { status: "ACTIVE" },
-    );
+    await Promise.all([
+      savedSong.save(),
+      AudioUploadTrackerModel.findOneAndUpdate(
+        {
+          _id: payload.uploadId,
+          s3Key: payload.s3KeyAudio,
+          user: user!._id,
+          status: "PENDING",
+        },
+        { status: "ACTIVE" },
+      )]);
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);

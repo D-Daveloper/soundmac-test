@@ -89,28 +89,28 @@ export const isSongFormValid = (form: SongForm): string => {
         return "performer is required";
     } else if (form.producer.some((artist) => artist.name === "")) {
         return "producer is required";
-    } else if (form.release_date === undefined) {
+    } else if (!form.release_date) {
         return "Release date is required";
     } else if (new Date(form.release_date) < twoWeeks) {
         return "Release date must be at least two weeks ahead of the upload date";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
-    } else if (form.pre_order_check && form.preOrderDate === undefined) {
+    } else if (form.pre_order_check && !form.preOrderDate) {
         return "Pre order date is required";
     } else if (oneWeek && form.preOrderDate! > oneWeek) {
         return "Pre order date must be at least one week before the release date";
     } else if (form.dsp.length <= 0) {
         return "DSP is required";
     } else if (
-        form.old_audio === null &&
-        (form.song_audio == null || !(form.song_audio instanceof File))
+        !form.old_audio &&
+        (!form.song_audio || !(form.song_audio instanceof File))
     ) {
         return "Audio is required";
-    // } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
-    //     return "Starting Clip is required and must be a valid number";
+        // } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+        //     return "Starting Clip is required and must be a valid number";
     } else if (
-        form.old_image === null &&
-        (form.music_image == null || !(form.music_image instanceof File))
+        !form.old_image &&
+        (!form.music_image || !(form.music_image instanceof File))
     ) {
         return "Image is required";
     } else if (
@@ -120,6 +120,10 @@ export const isSongFormValid = (form: SongForm): string => {
         return "ISRC and UPC is required";
     } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
         return "Copy right holder and year is required";
+    } else if (form.cover_song && !form.license) {
+        return "License is required";
+    } else if (form.license && form.license.type != "application/pdf") {
+        return "License is must be a PDF";
     } else {
         return "true";
     }
@@ -626,7 +630,9 @@ export function parseSongFormData(formData: FormData) {
         copyRightHolder: formData.get("copyRightHolder") as string | null,
         timeZone: formData.get("timeZone")
             ? JSON.parse(formData.get("timeZone") as string)
-            : { label: "", value: "", name: "" }
+            : { label: "", value: "", name: "" },
+        isCoverSong: formData.get("cover_song") === "true",
+        license: formData.get("license") as File || null
     };
 }
 
@@ -791,7 +797,7 @@ export function validateNonDraftSongs(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
-    }else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
         return "Invalid Dsp format.";
     }
 
@@ -830,7 +836,12 @@ export function validateNonDraftSongs(
     if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
         return "Time zone is required";
     }
-
+    if (payload.isCoverSong && !payload.license || !(payload.license instanceof File)) {
+        return "License is required."
+    }
+    if (payload.license && payload.license.type != "application/pdf") {
+        return "License is must be a PDF";
+    }
     return null;
 }
 
@@ -887,7 +898,7 @@ export function validateNonDraftAlbums(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
-    }else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
         return "Invalid Dsp format.";
     }
 
@@ -917,7 +928,7 @@ export function validateNonDraftAlbums(
     ) {
         return "No. of tracks is required and must be a positive number";
     }
-    
+
     if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
         return "Time zone is required";
     }
@@ -1020,6 +1031,13 @@ export function validateDraftSongs(
     }
     if (payload.anotherDistributionCheck && payload.upc === "") {
         return "UPC is required when transferring from another distributor.";
+    }
+
+    if(payload.license && !(payload.license instanceof File)){
+        return "License must be a PDF file."
+    }
+    if(payload.license && payload.license.type != "application/pdf"){
+        return "License must be a PDF file."
     }
 
     // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
@@ -1333,6 +1351,8 @@ export const createEmptyTrack = (): TrackForm => ({
         value: "",
         name: "",
     },
+    cover_song: false,
+    license: null
 });
 
 export async function handleChargeSuccess(data: any) {
@@ -3883,3 +3903,9 @@ export function parseLabelFormData(formData: FormData) {
         label_logo: formData.get("label_logo") as File | null,
     };
 }
+
+//used to format numbers like 1000 = 1k, 1200 = 1.2k so on
+export const formatNumber = (numString:string) => {
+    const numInt = parseInt(numString,10);
+  return new Intl.NumberFormat('en', { notation: 'compact' }).format(numInt);
+};

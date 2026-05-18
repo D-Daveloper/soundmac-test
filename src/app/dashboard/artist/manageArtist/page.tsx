@@ -79,7 +79,7 @@ const Page = () => {
     );
   }
   return (
-    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-8 lg:pl-[260px] ">
+    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-8 lg:pl-[300px] ">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : !isLoading &&

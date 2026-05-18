@@ -113,7 +113,7 @@ const CreateArtistForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[260px]">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[300px]">
       <button
         aria-label="go back"
         onClick={() => {

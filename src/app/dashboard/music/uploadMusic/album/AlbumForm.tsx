@@ -197,7 +197,7 @@ const AlbumForm = () => {
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px] px-5">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px] px-5">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (

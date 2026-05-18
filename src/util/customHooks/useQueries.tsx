@@ -11,6 +11,7 @@ import {
   getAdminUserEarnings,
   getAdminWithdrawalDetails,
   getAlbum,
+  getAlbumPerformanceData,
   getAlbums,
   getAlbumTracks,
   getAllArtists,
@@ -33,6 +34,7 @@ import {
   getPromotionData,
   getPromotionDetails,
   getReleaseRequest,
+  getSongPerformanceData,
   getSongs,
   getUserArtistsNames,
   getUserNotification,
@@ -70,6 +72,8 @@ import { handleReactQueryApiCallError } from "../middleware/functions";
 import { IPromotion } from "../models/promotionModel";
 import { IUser } from "../models/userModel";
 import { ISalesReport } from "../models/salesReportModel";
+import { songPerformanceData } from "@/app/dashboard/insights/songPerformance/song/constants";
+import { albumPerformanceData } from "@/app/dashboard/insights/songPerformance/album/constants";
 
 export const useAuthUser = () => {
   const api = UseAxios();
@@ -724,3 +728,55 @@ export const useGetDPMDsp = () => {
     retry: false,
   });
 };
+
+export function useGetPaginatedSongPerformance(params: {
+  page: number;
+  // sort: string;
+  songTitle: string;
+  // songStatusFilter: string;
+  artist: string;
+  limit:string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<songPerformanceData>, Error>({
+    queryKey: [
+      "songPerformance",
+      params.page,
+      // params.sort,
+      params.songTitle,
+      // params.songStatusFilter,
+      params.artist,
+    ],
+    queryFn: async () => getSongPerformanceData(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetPaginatedAlbumPerformance(params: {
+  page: number;
+  // sort: string;
+  albumTitle: string;
+  // songStatusFilter: string;
+  artist: string;
+  limit:string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<albumPerformanceData>, Error>({
+    queryKey: [
+      "albumPerformance",
+      params.page,
+      // params.sort,
+      params.albumTitle,
+      // params.songStatusFilter,
+      params.artist,
+    ],
+    queryFn: async () => getAlbumPerformanceData(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
