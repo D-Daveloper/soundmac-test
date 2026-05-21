@@ -14,6 +14,7 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import PerformanceCard from "./PerformanceCard";
 import Link from "next/link";
+import { Info } from "lucide-react";
 
 const Page = () => {
   const dashboardContext = useContext(DashboardContext);
@@ -159,31 +160,77 @@ const Page = () => {
           </div>
           {/* main body */}
 
-          <div className="grid grid-cols-2 max-lg:grid-cols-1 mt-20 gap-10 sm:m-5 ">
-            {songs.data.map((item, index) => (
-              <Link
-                key={index}
-                href={"/dashboard/insights/songPerformance/album/" + item._id}
-              >
-                <PerformanceCard
-                  title={item.trackTitle}
-                  numOfTracks={item.numberOfTracks}
-                  date={new Date(item.releaseDate).toDateString()}
-                  streams={item.totalStreams.toString()}
-                  downloads={item.totalDownloads.toString()}
-                  likes={item.totalLikes.toString()}
-                  image={item.releaseImage}
+          {songs.data.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 max-lg:grid-cols-1 mt-20 gap-10 sm:m-5 ">
+                {songs.data.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={
+                      "/dashboard/insights/songPerformance/album/" + item._id
+                    }
+                  >
+                    <PerformanceCard
+                      title={item.trackTitle}
+                      numOfTracks={item.numberOfTracks}
+                      date={new Date(item.releaseDate).toDateString()}
+                      streams={item.totalStreams.toString()}
+                      downloads={item.totalDownloads.toString()}
+                      likes={item.totalLikes.toString()}
+                      image={item.releaseImage}
+                    />
+                  </Link>
+                ))}
+              </div>
+              <div>
+                <Pagination
+                  currentPage={page}
+                  totalPages={songs ? songs.totalPages : 0}
+                  onChange={(page) => setPage(page)}
                 />
-              </Link>
-            ))}
-          </div>
-          <div>
-            <Pagination
-              currentPage={page}
-              totalPages={songs ? songs.totalPages : 0}
-              onChange={(page) => setPage(page)}
-            />
-          </div>
+              </div>
+            </>
+          ) : (
+            <div
+              className={
+                " fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-sm  "
+              }
+            >
+              <div className="flex flex-col gap-5 w-fit py-5 px-5 justify-center items-center bg-neutral-100  rounded-xl shadow-2xl max-w-[350px]">
+                <div className="flex flex-col gap-2 mb-2 justify-center items-center">
+                  <Info size={80} color="#999" strokeWidth={2} />
+                  <h3 className="text-xl font-semibold tracking-[-0.5px] text-main-heading">
+                    Nothing here yet
+                  </h3>
+                  <p className="text-p font-normal text-sm leading-4 -tracking-[0.5px] text-center">
+                    No analytics data is currently available for this release.
+                    Streaming platforms may take a some days to begin reporting
+                    streams, downloads, and audience insights.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <Link
+                    href={"/dashboard"}
+                    aria-label="go to pricing page"
+                    className={
+                      "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm  bg-transparent border-2 border-primary-500 text-[#494949]"
+                    }
+                  >
+                    Okay
+                  </Link>
+                  <Link
+                    href={"/dashboard/insights/songPerformance/song"}
+                    aria-label="go to pricing page"
+                    className={
+                      "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
+                    }
+                  >
+                    Go to Song
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
