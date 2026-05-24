@@ -1,7 +1,7 @@
 import mongoose, { Model } from "mongoose";
 
 export interface ILabel extends mongoose.Document {
-  _id:string
+  _id:mongoose.Types.ObjectId;
   labelName: string;
   firstName: string;
   lastName: string;

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 export interface ISalesReport extends mongoose.Document {
-  _id: string
+  _id: mongoose.Types.ObjectId,
+
   saleMonth: string,
   reportperiod: string,
 

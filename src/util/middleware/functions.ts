@@ -2055,6 +2055,13 @@ export async function handlePromotionSuccess(data: any) {
     }
 }
 
+export function parseChartRegistrationFormData(formData: FormData) {
+    return {
+        artist: formData.get("artist") as string | null,
+        releaseTitle: formData.get("releaseTitle") as string | null,
+        chartSlug: formData.get("chartSlug") as string | null,
+    };
+}
 export function parsePromotionFormData(formData: FormData) {
     return {
         artist: formData.get("artist") as string | null,

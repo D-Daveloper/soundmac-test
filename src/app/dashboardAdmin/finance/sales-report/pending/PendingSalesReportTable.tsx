@@ -68,7 +68,7 @@ const PendingSalesReportTable = ({
                     <tr
                       // onClick={() => router.push(`/dashboardAdmin/more/reports/${report._id}`)}
                       // tabIndex={1}
-                      key={report._id}
+                      key={report._id.toString()}
                       className=" transition-colors"
                     >
                       <td onClick={() => handleCopy(report.trackTitle)} className="w-[15%] min-w-[15%] max-w-[15%] py-4 whitespace-nowrap cursor-pointer hover:bg-gray-200 truncate">

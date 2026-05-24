@@ -41,7 +41,7 @@ const sideBarCom = (props: Props) => {
         <div
           className={
             " transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (pathname.includes(props.title.toLocaleLowerCase()) || open ? (props.title === 'music'||props.title === 'explore'? " flex max-h-[100px] h-[100px]": props.title === "artist"? " max-h-[200px] h-[200px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
+            (pathname.includes(props.title.toLocaleLowerCase()) || open ? (props.title === 'music'? " flex max-h-[100px] h-[100px]": props.title === "artist"||props.title === 'explore'? " max-h-[200px] h-[200px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
           }
         >
           {props.list.map((section, index) => (

@@ -37,6 +37,7 @@ import {
   getSongPerformanceData,
   getSongs,
   getUserArtistsNames,
+  getUserChartData,
   getUserNotification,
   getUserReleaseNames,
   getUserReleaseTrackNames,
@@ -58,6 +59,7 @@ import {
   Artist,
   ArtistDetails,
   ArtistStat,
+  ChartRegistration,
   DPMDsp,
   labelResponse,
   PAGINATION,
@@ -278,6 +280,17 @@ export function useGetPromotionData(params: { page: number }) {
   return useQuery<PAGINATION<IPromotion>, Error>({
     queryKey: ["promotionData", params.page],
     queryFn: async () => getPromotionData(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30,
+  });
+}
+export function useGetUserChartData(params: { page: number,limit:string, releaseTitle:string,artist:string,chartStatus:string }) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<ChartRegistration>, Error>({
+    queryKey: ["userChartData", params.page, params.releaseTitle, params.artist, params.chartStatus],
+    queryFn: async () => getUserChartData(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),

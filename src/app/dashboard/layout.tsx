@@ -109,6 +109,12 @@ const sidebarComponents = [
         href: "/dashboard/explore/coverLicense",
         query: "coverLicense",
       },
+      {
+        title: "Chart Registration",
+        icon: "/musiclibrary2.svg",
+        href: "/dashboard/explore/chartRegistration",
+        query: "chartRegistration",
+      },
     ],
     // isActive: "",
     // setIsActive: () => setIsActive("explore"),

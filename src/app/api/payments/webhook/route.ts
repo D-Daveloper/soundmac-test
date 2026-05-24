@@ -10,6 +10,7 @@ import {
   subCancelEmail,
   subSuccessEmail,
 } from "@/util/middleware/functions";
+import ChartRegistrationModel from "@/util/models/chartRegistrationModel";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import crypto from "crypto";
@@ -41,6 +42,12 @@ export async function POST(req: Request) {
       if (event.data.metadata && event.data.metadata.isPromotion) {
         await handlePromotionSuccess(event.data);
         console.log("event handled");
+      } else if (event.data.metadata && event.data.metadata.isChartRegistration) {
+        console.log("chart registration payment successful");
+        await ChartRegistrationModel.findByIdAndUpdate(
+          event.data.metadata.chartId,
+          { $set: { chartStatus: "pending", transactionId: event.data.reference } }
+        );
       } else {
         const user = await User.findOne({ email: event.data.customer.email });
         if (!user) return;
@@ -107,6 +114,12 @@ export async function POST(req: Request) {
     if (event.event === "invoice.payment_failed") {
       if (event.data.metadata && event.data.metadata.isPromotion) {
         // Handle promotion payment failure if needed
+      } else if (event.data.metadata && event.data.metadata.isChartRegistration) {
+        console.log("chart registration payment failed");
+        await ChartRegistrationModel.findByIdAndUpdate(
+          event.data.metadata.chartId,
+          { $set: { chartStatus: "payment_failed", transactionId: event.data.reference } }
+        );
       } else {
         await handleFailedPayment(event.data);
       }

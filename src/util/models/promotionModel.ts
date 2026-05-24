@@ -5,7 +5,7 @@ import {
   timeList,
   typeOfRelease,
 } from "@/app/constant";
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Model, ObjectId } from "mongoose";
 import { featuredArtistSchema } from "./songModel";
 import { Artist } from "@/app/type";
 import { IUser } from "./userModel";
@@ -155,7 +155,7 @@ const pitchPlaylistDetails = new mongoose.Schema(
 );
 // Define Promotion interface
 export interface IPromotion extends Document {
-  _id: string;
+  _id: any;
   packageName: string;
   transactionReference: string;
   category: promotionCategory;

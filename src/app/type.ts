@@ -77,9 +77,11 @@ interface musicFormBase {
   copyRightHolder: string;
   copyRightYear: string;
   old_image?: string | null;
-  timeZone: {    label: string;
+  timeZone: {
+    label: string;
     value: string;
-    name: string;};
+    name: string;
+  };
 }
 
 export interface SongForm extends musicFormBase {
@@ -95,7 +97,7 @@ export interface SongForm extends musicFormBase {
   old_audio?: string | null;
   cover_song: boolean;
   license: File | null;
-  old_license?:string|null;
+  old_license?: string | null;
 }
 
 export interface AlbumForm extends musicFormBase {
@@ -185,9 +187,11 @@ interface BaseApiResponseForRelease {
   user: {
     label: string;
   };
-  timeZone:{    label: string;
+  timeZone: {
+    label: string;
     value: string;
-    name: string;};
+    name: string;
+  };
 }
 
 export interface songFromApi extends BaseApiResponseForRelease {
@@ -201,8 +205,8 @@ export interface songFromApi extends BaseApiResponseForRelease {
   isrc: string;
   explicitContent: boolean;
   releaseStatus: "pending" | "approved" | "rejected" | "draft";
-  isCoverSong:boolean;
-  license:string;
+  isCoverSong: boolean;
+  license: string;
 }
 export interface albumFromApi extends BaseApiResponseForRelease {
   numberOfTracks: string;
@@ -478,7 +482,7 @@ export interface AdminUserDetailsResponse {
     },
     "dsp": string,
     "territory": string,
-label : string
+    label: string
   }[];
   totalCount: number;
   totalPages: number;
@@ -583,7 +587,7 @@ export type salesReportDashboardResponse = {
   }[]
 }
 
-export type DPMDsp ={
+export type DPMDsp = {
   apiuser_id: number
   id: number
   store_name: string
@@ -591,3 +595,23 @@ export type DPMDsp ={
   dsp: any
   isSelected: boolean
 }[]
+
+export type ChartRegistration = {
+  _id: string
+  user: string
+  chartName: string
+  artist: string
+  releaseTitle: string
+  chartStatus: string
+  createdAt: string
+  onModel: string
+  updatedAt: string
+  transactionId: string
+  countryCode: string
+  releaseId: {
+    _id: string
+    releaseTitle: string
+    featuredArtist: FeaturedArtist[]
+    releaseImage: string
+  }
+}

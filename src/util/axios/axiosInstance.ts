@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -166,6 +166,13 @@ export const getPromotionData = async (
 
 ): Promise<PAGINATION<IPromotion>> => {
   const res = await api.get<Promise<PAGINATION<IPromotion>>>("promotions", { params });
+  return res.data;
+};
+export const getUserChartData = async (
+  api: AxiosInstance,
+  params: { page: number, limit:string }
+): Promise<PAGINATION<ChartRegistration>> => {
+  const res = await api.get<Promise<PAGINATION<ChartRegistration>>>("explore/chart-registration", { params });
   return res.data;
 };
 export const getWithdrawalHistory = async (

@@ -5,6 +5,7 @@ import Root from "./root";
 import InformationState from "./context/informationContext/informationState";
 import UserState from "./context/userContext/userState";
 import ReactQueryProvider from "./providers/ReactQueryProvider";
+import "../../node_modules/flag-icons/css/flag-icons.min.css";
 
 const figtree = Figtree({
   subsets: ["latin"],

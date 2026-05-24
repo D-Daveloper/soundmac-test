@@ -155,6 +155,7 @@ a {
   }
 }
 @theme {
+  --color-main-black: #1C1C1C;
   --color-primary: #11456B;
   --color-primary-red: #D91B1B;
   --color-primary-700:#0E2E44;
@@ -194,6 +195,7 @@ a {
   --color-success-800: #18461C;
   --color-success-50: #EAF5EB;
   --color-secondary-50: #F0F0E7;
+  --color-secondary-600: #585810;
   --text-md: 16px;
   --breakpoint-mobile: 850px;
   --breakpoint-xs: 500px;
