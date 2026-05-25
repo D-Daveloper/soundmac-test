@@ -600,9 +600,9 @@ export type ChartRegistration = {
   _id: string
   user: string
   chartName: string
-  artist: string
+  artist: Artist;
   releaseTitle: string
-  chartStatus: string
+  chartStatus: "awaiting_payment"| "pending"| "approved"| "payment_failed"
   createdAt: string
   onModel: string
   updatedAt: string
@@ -613,5 +613,7 @@ export type ChartRegistration = {
     releaseTitle: string
     featuredArtist: FeaturedArtist[]
     releaseImage: string
+    upc: string
+    isrc: string
   }
 }

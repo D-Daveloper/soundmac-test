@@ -4,6 +4,7 @@ import UseAxios from "./UseAxios";
 import {
   getAdminAlbumDetails,
   getAdminArtistsNames,
+  getAdminChartDetails,
   getAdminDashboard,
   getAdminSalesReportDashboardDetails,
   getAdminSingleDetails,
@@ -15,6 +16,7 @@ import {
   getAlbums,
   getAlbumTracks,
   getAllArtists,
+  getAllChartRegistrations,
   getAlllabels,
   getAllPromotions,
   getAllReleases,
@@ -791,5 +793,39 @@ export function useGetPaginatedAlbumPerformance(params: {
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
     staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetPaginatedCharts(params: { page:number,sort:string,releaseTitle:string,limit:string,chartName:string,chartStatus:string }) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<ChartRegistration>, Error>({
+    queryKey: [
+      "allcharts",
+      params.page,
+      params.sort,
+      params.releaseTitle,
+      params.chartName,
+      params.chartStatus,
+    ],
+    queryFn: async () => getAllChartRegistrations(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+export function useGetAdminChartDetails(params: { chartId: string }) {
+  const api = UseAxios();
+  return useQuery<ChartRegistration, Error>({
+    queryKey: ["adminChartDetails", params.chartId],
+    queryFn: async () => getAdminChartDetails(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 30, // 5 minutes
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 }

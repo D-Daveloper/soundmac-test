@@ -1164,12 +1164,35 @@ export const chartFilter = [
     label: "Pending",
     value: "pending",
   },
-  // {
-  //   label: "Rejected",
-  //   value: "rejected",
-  // },
-  // {
-  //   label: "Draft",
-  //   value: "draft",
-  // },
+];
+
+export const adminChartFilter = [
+  {
+    label: "All",
+    value: "all",
+  },
+  {
+    label: "France – SNEP Charts",
+    value: "france-s nep -charts",
+  },
+  {
+    label: "Germany – GfK Entertainment Charts",
+    value: "germany-gfk-entertainment-charts",
+  },
+  {
+    label: "Nigeria – TurnTable Charts",
+    value: "nigeria-turntable-charts",
+  },
+  {
+    label: "Australia – ARIA Charts",
+    value: "australia-aria-charts",
+  },
+  {
+    label: "United Kingdom – Official Charts",
+    value: "united-kingdom-official-charts",
+  },
+  {
+    label: "United States – Billboard Charts",
+    value: "united-states-billboard-charts",
+  },
 ];

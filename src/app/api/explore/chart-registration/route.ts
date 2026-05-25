@@ -1,10 +1,3 @@
-import {
-    boomplayPackages,
-    deezerPackages,
-    onlinePressPackages,
-    radioPromotionPackages,
-    shazamPackages,
-} from "@/app/constant";
 import dbConnect from "@/util/db";
 import {
     parseChartRegistrationFormData,
@@ -13,10 +6,8 @@ import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import ChartRegistrationModel from "@/util/models/chartRegistrationModel";
-import Promotion, { IPromotion } from "@/util/models/promotionModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
-import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 
 const chartRegistrationConstants = [
@@ -181,6 +172,7 @@ export async function POST(req: Request) {
                     releaseTitle: (releaseTitle as string)?.trim(),
                     artist: userArtist._id,
                     chartName: chartInfo.title,
+                    chartSlug: chartInfo.slug,
                     releaseId: userAlbum ? userAlbum._id : userSong!._id,
                     onModel: releaseType,
                     chartStatus: "awaiting_payment"
@@ -207,6 +199,7 @@ export async function POST(req: Request) {
                         artistName: artist,
                         artistId: userArtist._id.toString(),
                         releaseTitle,
+                        chartSlug: chartInfo.slug,
                         isChartRegistration: true,
                         chartId: newChartRegistration._id.toString(),
                     },
@@ -234,200 +227,200 @@ export async function POST(req: Request) {
     }
 }
 
-export async function PUT(req: Request) {
-    try {
-        const { promotionId } = await req.json();
+// export async function PUT(req: Request) {
+//     try {
+//         const { promotionId } = await req.json();
 
-        await dbConnect();
-        let promotion = null;
-        let userSong = null;
-        let userAlbum = null;
-        let userArtist = null;
-        let Uploaderror: { msg: string; status: number } | null = null;
-        const userData = await verifyJWT();
-        const userJwt = verifyUser(userData);
-        if (userJwt.msg) {
-            return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-        }
-        const user = userJwt.user ? await User.findById(userJwt.user) : null;
-        if (!user) {
-            Uploaderror = { msg: "Invalid Request", status: 401 };
-        } else if (!user.confirmed) {
-            Uploaderror = { msg: "Please verify your email address", status: 400 };
-        } else if (user.otp !== null) {
-            Uploaderror = { msg: "Please login", status: 400 };
-        } else if (!promotionId || !Types.ObjectId.isValid(promotionId)) {
-            Uploaderror = {
-                msg: "Promotion ID must be a valid ObjectId",
-                status: 400,
-            };
-        } else {
-            promotion = await Promotion.findById(promotionId);
-        }
-        if (!promotion) {
-            Uploaderror = { msg: "Promotion not found", status: 404 };
-        }
+//         await dbConnect();
+//         let promotion = null;
+//         let userSong = null;
+//         let userAlbum = null;
+//         let userArtist = null;
+//         let Uploaderror: { msg: string; status: number } | null = null;
+//         const userData = await verifyJWT();
+//         const userJwt = verifyUser(userData);
+//         if (userJwt.msg) {
+//             return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+//         }
+//         const user = userJwt.user ? await User.findById(userJwt.user) : null;
+//         if (!user) {
+//             Uploaderror = { msg: "Invalid Request", status: 401 };
+//         } else if (!user.confirmed) {
+//             Uploaderror = { msg: "Please verify your email address", status: 400 };
+//         } else if (user.otp !== null) {
+//             Uploaderror = { msg: "Please login", status: 400 };
+//         } else if (!promotionId || !Types.ObjectId.isValid(promotionId)) {
+//             Uploaderror = {
+//                 msg: "Promotion ID must be a valid ObjectId",
+//                 status: 400,
+//             };
+//         } else {
+//             promotion = await Promotion.findById(promotionId);
+//         }
+//         if (!promotion) {
+//             Uploaderror = { msg: "Promotion not found", status: 404 };
+//         }
 
-        if (Uploaderror != null) {
-            return NextResponse.json(
-                { msg: Uploaderror.msg },
-                { status: Uploaderror.status },
-            );
-        }
-        if (
-            promotion!.artist == null ||
-            promotion!.releaseTitle == null ||
-            promotion!.releaseDescription == null ||
-            promotion!.packageName == null ||
-            promotion!.category == null
-        ) {
-            Uploaderror = { msg: "Please provide all required fields", status: 400 };
-        } else if (typeof promotion!.artistName != "string") {
-            Uploaderror = { msg: "Artist must be a string", status: 400 };
-        } else if (typeof promotion!.releaseTitle != "string") {
-            Uploaderror = { msg: "Release title must be a string", status: 400 };
-        } else if (typeof promotion!.releaseDescription != "string") {
-            Uploaderror = {
-                msg: "Release description must be a string",
-                status: 400,
-            };
-        } else if (typeof promotion!.packageName != "string") {
-            Uploaderror = { msg: "Promotion package must be a string", status: 400 };
-        } else if (
-            typeof promotion!.category != "string" ||
-            ![
-                "Online-Press",
-                "Playlist-Pitch",
-                "Radio-Promotion",
-                "Shazam",
-                "Deezer",
-                "Boomplay",
-            ].includes(promotion!.category)
-        ) {
-            Uploaderror = { msg: "Promotion type must be a string", status: 400 };
-        } else {
-            userArtist = (await Artist.findOne({
-                user: userJwt.user,
-                artistName: promotion!.artistName?.trim(),
-            })) as any;
-            userSong = await SongModel.findOne({
-                release: promotion!.releaseTitle?.trim(),
-                user: userJwt.user,
-            });
-            userAlbum = await AlbumModel.findOne({
-                release: promotion!.releaseTitle?.trim(),
-                user: userJwt.user,
-            });
-        }
+//         if (Uploaderror != null) {
+//             return NextResponse.json(
+//                 { msg: Uploaderror.msg },
+//                 { status: Uploaderror.status },
+//             );
+//         }
+//         if (
+//             promotion!.artist == null ||
+//             promotion!.releaseTitle == null ||
+//             promotion!.releaseDescription == null ||
+//             promotion!.packageName == null ||
+//             promotion!.category == null
+//         ) {
+//             Uploaderror = { msg: "Please provide all required fields", status: 400 };
+//         } else if (typeof promotion!.artistName != "string") {
+//             Uploaderror = { msg: "Artist must be a string", status: 400 };
+//         } else if (typeof promotion!.releaseTitle != "string") {
+//             Uploaderror = { msg: "Release title must be a string", status: 400 };
+//         } else if (typeof promotion!.releaseDescription != "string") {
+//             Uploaderror = {
+//                 msg: "Release description must be a string",
+//                 status: 400,
+//             };
+//         } else if (typeof promotion!.packageName != "string") {
+//             Uploaderror = { msg: "Promotion package must be a string", status: 400 };
+//         } else if (
+//             typeof promotion!.category != "string" ||
+//             ![
+//                 "Online-Press",
+//                 "Playlist-Pitch",
+//                 "Radio-Promotion",
+//                 "Shazam",
+//                 "Deezer",
+//                 "Boomplay",
+//             ].includes(promotion!.category)
+//         ) {
+//             Uploaderror = { msg: "Promotion type must be a string", status: 400 };
+//         } else {
+//             userArtist = (await Artist.findOne({
+//                 user: userJwt.user,
+//                 artistName: promotion!.artistName?.trim(),
+//             })) as any;
+//             userSong = await SongModel.findOne({
+//                 release: promotion!.releaseTitle?.trim(),
+//                 user: userJwt.user,
+//             });
+//             userAlbum = await AlbumModel.findOne({
+//                 release: promotion!.releaseTitle?.trim(),
+//                 user: userJwt.user,
+//             });
+//         }
 
-        if (!userArtist) {
-            return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-        }
+//         if (!userArtist) {
+//             return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+//         }
 
-        switch (promotion!.category) {
-            case "Boomplay":
-                if (!boomplayPackages.includes(promotion!.packageName)) {
-                    return NextResponse.json(
-                        { msg: "Invalid Boomplay Package" },
-                        { status: 400 },
-                    );
-                }
-                break;
-            case "Deezer":
-                if (!deezerPackages.includes(promotion!.packageName)) {
-                    return NextResponse.json(
-                        { msg: "Invalid Deezer Package" },
-                        { status: 400 },
-                    );
-                }
-                break;
-            case "Online-Press":
-                if (!onlinePressPackages.includes(promotion!.packageName)) {
-                    return NextResponse.json(
-                        { msg: "Invalid Online Press Package" },
-                        { status: 400 },
-                    );
-                }
-            case "Shazam":
-                if (!shazamPackages.includes(promotion!.packageName)) {
-                    return NextResponse.json(
-                        { msg: "Invalid Shazam Package" },
-                        { status: 400 },
-                    );
-                }
-                break;
-            case "Radio-Promotion":
-                if (!radioPromotionPackages.includes(promotion!.packageName)) {
-                    return NextResponse.json(
-                        { msg: "Invalid Radio Promotion Package" },
-                        { status: 400 },
-                    );
-                }
-                break;
+//         switch (promotion!.category) {
+//             case "Boomplay":
+//                 if (!boomplayPackages.includes(promotion!.packageName)) {
+//                     return NextResponse.json(
+//                         { msg: "Invalid Boomplay Package" },
+//                         { status: 400 },
+//                     );
+//                 }
+//                 break;
+//             case "Deezer":
+//                 if (!deezerPackages.includes(promotion!.packageName)) {
+//                     return NextResponse.json(
+//                         { msg: "Invalid Deezer Package" },
+//                         { status: 400 },
+//                     );
+//                 }
+//                 break;
+//             case "Online-Press":
+//                 if (!onlinePressPackages.includes(promotion!.packageName)) {
+//                     return NextResponse.json(
+//                         { msg: "Invalid Online Press Package" },
+//                         { status: 400 },
+//                     );
+//                 }
+//             case "Shazam":
+//                 if (!shazamPackages.includes(promotion!.packageName)) {
+//                     return NextResponse.json(
+//                         { msg: "Invalid Shazam Package" },
+//                         { status: 400 },
+//                     );
+//                 }
+//                 break;
+//             case "Radio-Promotion":
+//                 if (!radioPromotionPackages.includes(promotion!.packageName)) {
+//                     return NextResponse.json(
+//                         { msg: "Invalid Radio Promotion Package" },
+//                         { status: 400 },
+//                     );
+//                 }
+//                 break;
 
-            default:
-                return NextResponse.json(
-                    { msg: "Invalid Pr5omotion Type" },
-                    { status: 400 },
-                );
-                break;
-        }
+//             default:
+//                 return NextResponse.json(
+//                     { msg: "Invalid Pr5omotion Type" },
+//                     { status: 400 },
+//                 );
+//                 break;
+//         }
 
-        if (Uploaderror != null) {
-            return NextResponse.json(
-                { msg: Uploaderror.msg },
-                { status: Uploaderror.status },
-            );
-        }
+//         if (Uploaderror != null) {
+//             return NextResponse.json(
+//                 { msg: Uploaderror.msg },
+//                 { status: Uploaderror.status },
+//             );
+//         }
 
-        // const reference = `promo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}` // generate a unique transaction reference for this promotion.
+//         // const reference = `promo_${Date.now()}_${Math.random().toString(36).substring(2, 15)}` // generate a unique transaction reference for this promotion.
 
-        const res = await fetch("https://api.paystack.co/transaction/initialize", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: user!.email,
-                amount: promotion!.amount * 100,
-                callback_url: `${process.env.FRONTEND_URL}/dashboard/explore/promotion/payment-callback`,
-                channels: ["card", "bank", "ussd"],
-                // reference: reference, // use the generated unique transaction reference
-                metadata: {
-                    email: user!.email,
-                    first_name: user!.firstName,
-                    last_name: user!.lastName,
-                    artistName: promotion?.artistName,
-                    artistId: promotion?.artist.toString(),
-                    releaseTitle: promotion?.releaseTitle,
-                    releaseDescription: promotion?.releaseDescription,
-                    promotionPackage: promotion?.packageName,
-                    promotionType: promotion?.category,
-                    isPromotion: true,
-                    transactionReference: promotion!.transactionReference,
-                },
-            }),
-        });
+//         const res = await fetch("https://api.paystack.co/transaction/initialize", {
+//             method: "POST",
+//             headers: {
+//                 Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+//                 "Content-Type": "application/json",
+//             },
+//             body: JSON.stringify({
+//                 email: user!.email,
+//                 amount: promotion!.amount * 100,
+//                 callback_url: `${process.env.FRONTEND_URL}/dashboard/explore/promotion/payment-callback`,
+//                 channels: ["card", "bank", "ussd"],
+//                 // reference: reference, // use the generated unique transaction reference
+//                 metadata: {
+//                     email: user!.email,
+//                     first_name: user!.firstName,
+//                     last_name: user!.lastName,
+//                     artistName: promotion?.artistName,
+//                     artistId: promotion?.artist.toString(),
+//                     releaseTitle: promotion?.releaseTitle,
+//                     releaseDescription: promotion?.releaseDescription,
+//                     promotionPackage: promotion?.packageName,
+//                     promotionType: promotion?.category,
+//                     isPromotion: true,
+//                     transactionReference: promotion!.transactionReference,
+//                 },
+//             }),
+//         });
 
-        const data = await res.json();
-        console.log(data);
+//         const data = await res.json();
+//         console.log(data);
 
-        if (!data.status)
-            return NextResponse.json({ error: data.message }, { status: 400 });
+//         if (!data.status)
+//             return NextResponse.json({ error: data.message }, { status: 400 });
 
-        return NextResponse.json({
-            url: data.data.authorization_url,
-            msg: "You're getting redirected to the payment gateway.",
-        });
-    } catch (err) {
-        console.error("payment error", err);
-        return NextResponse.json(
-            { msg: "Payment initialization failed" },
-            { status: 500 },
-        );
-    }
-}
+//         return NextResponse.json({
+//             url: data.data.authorization_url,
+//             msg: "You're getting redirected to the payment gateway.",
+//         });
+//     } catch (err) {
+//         console.error("payment error", err);
+//         return NextResponse.json(
+//             { msg: "Payment initialization failed" },
+//             { status: 500 },
+//         );
+//     }
+// }
 
 
 export async function GET(req: Request) {
@@ -445,14 +438,11 @@ export async function GET(req: Request) {
         console.log(searchParams);
 
         const page = parseInt(searchParams.get("page") || "1", 10);
-        // const sort = searchParams.get("sort") || "createdAt"
         const releaseTitle = searchParams.get("releaseTitle");
         const artist = searchParams.get("artist");
         const limit = parseInt(searchParams.get("limit") || "10", 10);
         const chartStatus = searchParams.get("chartStatus");
-        // const sortQuery = buildSort(sort) as {
-        //   [key: string]: SortOrder | { $meta: any };
-        // }; //this is use to format the sort query for mongodb.
+
 
         const query: any = {
             user: userJwt.user,
@@ -473,7 +463,8 @@ export async function GET(req: Request) {
         const chartsQuery = ChartRegistrationModel.find(query).populate({path:"releaseId", select: "releaseTitle releaseImage featuredArtist"}).collation({ locale: "en", strength: 2 })
             // .sort(sortQuery)
             .skip((page - 1) * limit)
-            .limit(limit);
+            .limit(limit)
+            .lean();
         const totalCountQuery = ChartRegistrationModel.countDocuments(query);
         
         [charts, totalCount] = await Promise.all([

@@ -7,6 +7,11 @@ const ChartRegistrationSchema = new mongoose.Schema(
             required: [true, "Title is required"],
             trim: true,
         },
+        chartSlug: {
+            type: String,
+            required: [true, "Chart slug is required"],
+            trim: true,
+        },
         releaseTitle: {
             type: String,
             required: [true, "Title is required"],

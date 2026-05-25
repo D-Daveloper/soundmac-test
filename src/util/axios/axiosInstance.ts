@@ -432,3 +432,21 @@ export const getAlbumPerformanceData = async (
   });
   return res.data;
 };
+
+export const getAllChartRegistrations = async (
+  api: AxiosInstance,
+  params: { page: number, sort: string, releaseTitle: string, limit: string, chartName: string, chartStatus: string }
+): Promise<PAGINATION<ChartRegistration>> => {
+  const res = await api.get<Promise<PAGINATION<ChartRegistration>>>("admin/more/chart-registrations", {
+    params: params,
+  });
+  return res.data;
+};
+
+export const getAdminChartDetails = async (
+  api: AxiosInstance,
+  params: { chartId: string }
+): Promise<ChartRegistration> => {
+  const res = await api.get<Promise<ChartRegistration>>("admin/more/chart-registrations/" + params.chartId,);
+  return res.data;
+};

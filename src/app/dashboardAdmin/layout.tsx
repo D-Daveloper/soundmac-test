@@ -113,6 +113,12 @@ const sidebarComponents = [
         href: "/dashboardAdmin/more/promotions?promotionStatus=all",
         query: "sales_report",
       },
+      {
+        title: "Chart Registrations",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/more/chart-registrations?chartStatus=all",
+        query: "sales_report",
+      },
     ],
   },
 ];
