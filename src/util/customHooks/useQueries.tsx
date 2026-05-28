@@ -1,5 +1,9 @@
 "use client";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import UseAxios from "./UseAxios";
 import {
   getAdminAlbumDetails,
@@ -92,6 +96,7 @@ export const useAuthUser = () => {
 
 export const useDashboard = () => {
   const api = UseAxios();
+  const { data: authUser, isSuccess } = useAuthUser();
   return useQuery({
     queryKey: ["dashboard"],
     queryFn: () => getDashboard(api),
@@ -101,6 +106,7 @@ export const useDashboard = () => {
     refetchOnMount: false,
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
+    enabled: isSuccess && !!authUser,
   });
 };
 
@@ -110,13 +116,15 @@ export function usePaginatedArtists(params: {
   artistName: string;
 }) {
   const api = UseAxios();
+  const { data: authUser, isSuccess } = useAuthUser();
   return useQuery<PAGINATION<Artist>, Error>({
     queryKey: ["artists", params.page, params.sort, params.artistName],
     queryFn: async () => getArtists(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 5 minutes
+    enabled: isSuccess && !!authUser,
   });
 }
 
@@ -168,7 +176,7 @@ export function usePaginatedSongs(params: {
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 5 minutes
   });
 }
 
@@ -193,7 +201,7 @@ export function usePaginatedAlbums(params: {
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 5 minutes
   });
 }
 
@@ -205,7 +213,7 @@ export function useGetAlbums(params: { albumTitle: string }) {
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 5 minutes
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
@@ -219,7 +227,7 @@ export function useGetAlbumTracks(params: { albumTitle: string }) {
     queryFn: async () => getAlbumTracks(api, params),
     // placeholderData: (prev) => prev, // avoids UI flicker
     retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 15, // 5 minutes
   });
 }
 export function useGetBankList(options: { enabled?: boolean }) {
@@ -288,10 +296,22 @@ export function useGetPromotionData(params: { page: number }) {
     staleTime: 1000 * 60 * 30,
   });
 }
-export function useGetUserChartData(params: { page: number,limit:string, releaseTitle:string,artist:string,chartStatus:string }) {
+export function useGetUserChartData(params: {
+  page: number;
+  limit: string;
+  releaseTitle: string;
+  artist: string;
+  chartStatus: string;
+}) {
   const api = UseAxios();
   return useQuery<PAGINATION<ChartRegistration>, Error>({
-    queryKey: ["userChartData", params.page, params.releaseTitle, params.artist, params.chartStatus],
+    queryKey: [
+      "userChartData",
+      params.page,
+      params.releaseTitle,
+      params.artist,
+      params.chartStatus,
+    ],
     queryFn: async () => getUserChartData(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
@@ -409,11 +429,15 @@ export function useGetAdminSingleDetails(params: { songId: string }) {
   });
 }
 
-export const useReleaseRequests = (params: { releaseTitle: string,limit:string,releaseType:string }) => {
+export const useReleaseRequests = (params: {
+  releaseTitle: string;
+  limit: string;
+  releaseType: string;
+}) => {
   const api = UseAxios();
 
   return useInfiniteQuery<ReleaseRequestResponse, Error>({
-    queryKey: ["release-request", params.releaseTitle,params.releaseType],
+    queryKey: ["release-request", params.releaseTitle, params.releaseType],
     queryFn: async ({ pageParam }) =>
       getReleaseRequest(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
@@ -423,11 +447,15 @@ export const useReleaseRequests = (params: { releaseTitle: string,limit:string,r
     refetchOnWindowFocus: false,
   });
 };
-export const useGetAllArtists = (params: { artistName: string,limit:string,artistStatus:string }) => {
+export const useGetAllArtists = (params: {
+  artistName: string;
+  limit: string;
+  artistStatus: string;
+}) => {
   const api = UseAxios();
 
   return useInfiniteQuery<AllArtistResponse, Error>({
-    queryKey: ["admin-all-artists", params.artistName,params.artistStatus],
+    queryKey: ["admin-all-artists", params.artistName, params.artistStatus],
     queryFn: async ({ pageParam }) =>
       getAllArtists(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
@@ -451,7 +479,7 @@ export function usePaginatedAdminArtistDetails(params: {
       params.page,
       params.releaseStatusFilter,
       params.id,
-      params.releaseTitle
+      params.releaseTitle,
     ],
     queryFn: async () => getArtistDetails(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
@@ -467,7 +495,7 @@ export function usePaginatedAdminAllUsers(params: {
   name: string;
   limit: string;
   accountType: string;
-  userStatus:string
+  userStatus: string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<IUser>, Error>({
@@ -502,10 +530,21 @@ export function useGetAdminUserDetails(params: { userId: string }) {
   });
 }
 
-export function useGetAdminUserEarnings(params: { userId: string,page:number,limit:string ,upc:string}) {
+export function useGetAdminUserEarnings(params: {
+  userId: string;
+  page: number;
+  limit: string;
+  upc: string;
+}) {
   const api = UseAxios();
   return useQuery<AdminUserDetailsResponse, Error>({
-    queryKey: ["adminUserEarnings", params.userId,params.page,params.limit,params.upc],
+    queryKey: [
+      "adminUserEarnings",
+      params.userId,
+      params.page,
+      params.limit,
+      params.upc,
+    ],
     queryFn: async () => getAdminUserEarnings(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
@@ -516,16 +555,11 @@ export function useGetAdminUserEarnings(params: { userId: string,page:number,lim
     refetchOnMount: false,
   });
 }
-export const useGetUserWithdrawals = (params: {
-  userId: string;
-}) => {
+export const useGetUserWithdrawals = (params: { userId: string }) => {
   const api = UseAxios();
 
   return useInfiniteQuery<WithdrawalResponse, Error>({
-    queryKey: [
-      "userWithdrawals",
-      params.userId
-    ],
+    queryKey: ["userWithdrawals", params.userId],
     queryFn: async ({ pageParam }) =>
       getUserWithdrawalHistory(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
@@ -543,11 +577,7 @@ export function usePaginatedAdminAllVerificationRequests(params: {
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<IUser>, Error>({
-    queryKey: [
-      "allVerificationRequests",
-      params.page,
-      params.sort,
-    ],
+    queryKey: ["allVerificationRequests", params.page, params.sort],
     queryFn: async () => getAllVerificationRequests(api, params),
     placeholderData: (prev) => prev, // avoids UI flicker
     retry: (failedCount, error) =>
@@ -558,10 +588,10 @@ export function usePaginatedAdminAllVerificationRequests(params: {
 
 export function usePaginatedAdminAllWithdrawalRequests(params: {
   page: number;
-  withdrawalStatus:string
+  withdrawalStatus: string;
   sort: string;
   limit: string;
-  email:string;
+  email: string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<withdrawals>, Error>({
@@ -595,11 +625,14 @@ export function useGetAdminWithdrawaldetails(params: { withdrawalId: string }) {
   });
 }
 
-export const useGetAllSupportRequests = (params: { limit:string,supportStatus:string }) => {
+export const useGetAllSupportRequests = (params: {
+  limit: string;
+  supportStatus: string;
+}) => {
   const api = UseAxios();
 
   return useInfiniteQuery<AllSupportRequestsResponse, Error>({
-    queryKey: ["admin-all-support-requests",params.supportStatus],
+    queryKey: ["admin-all-support-requests", params.supportStatus],
     queryFn: async ({ pageParam }) =>
       getAllSupportRequests(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
@@ -610,7 +643,14 @@ export const useGetAllSupportRequests = (params: { limit:string,supportStatus:st
   });
 };
 
-export function useGetPaginatedPromotions(params: { page:number,sort:string,releaseTitle:string,limit:string,promotionType:string,promotionStatus:string }) {
+export function useGetPaginatedPromotions(params: {
+  page: number;
+  sort: string;
+  releaseTitle: string;
+  limit: string;
+  promotionType: string;
+  promotionStatus: string;
+}) {
   const api = UseAxios();
   return useQuery<PAGINATION<IPromotion>, Error>({
     queryKey: [
@@ -643,11 +683,15 @@ export function useGetPromotionDetails(params: { promotionId: string }) {
   });
 }
 
-export const useGetAllLabels = (params: { labelName: string,limit:string,labelStatus:string }) => {
+export const useGetAllLabels = (params: {
+  labelName: string;
+  limit: string;
+  labelStatus: string;
+}) => {
   const api = UseAxios();
 
   return useInfiniteQuery<AllLabelResponse, Error>({
-    queryKey: ["admin-all-labels", params.labelName,params.labelStatus],
+    queryKey: ["admin-all-labels", params.labelName, params.labelStatus],
     queryFn: async ({ pageParam }) =>
       getAlllabels(api, { ...params, cursor: pageParam as string }),
     initialPageParam: undefined,
@@ -700,7 +744,12 @@ export function useGetAdminSalesReportDashboardDetails() {
   });
 }
 
-export function useGetPaginatedUnmatchedSalesReport(params: { page:number,releaseTitle:string,limit:string,productType:string,}) {
+export function useGetPaginatedUnmatchedSalesReport(params: {
+  page: number;
+  releaseTitle: string;
+  limit: string;
+  productType: string;
+}) {
   const api = UseAxios();
   return useQuery<PAGINATION<ISalesReport>, Error>({
     queryKey: [
@@ -720,7 +769,8 @@ export function useGetPaginatedUnmatchedSalesReport(params: { page:number,releas
 }
 
 export const useGetUserNotifications = () => {
-  const api = UseAxios();
+  const api = UseAxios();  
+  const { data: authUser, isSuccess } = useAuthUser();
   return useQuery({
     queryKey: ["notifications"],
     queryFn: () => getUserNotification(api),
@@ -728,7 +778,8 @@ export const useGetUserNotifications = () => {
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    retry: false,
+    retry: false,    
+    enabled: isSuccess && !!authUser,
   });
 };
 
@@ -750,7 +801,7 @@ export function useGetPaginatedSongPerformance(params: {
   songTitle: string;
   // songStatusFilter: string;
   artist: string;
-  limit:string;
+  limit: string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<songPerformanceData>, Error>({
@@ -776,7 +827,7 @@ export function useGetPaginatedAlbumPerformance(params: {
   albumTitle: string;
   // songStatusFilter: string;
   artist: string;
-  limit:string;
+  limit: string;
 }) {
   const api = UseAxios();
   return useQuery<PAGINATION<albumPerformanceData>, Error>({
@@ -796,7 +847,14 @@ export function useGetPaginatedAlbumPerformance(params: {
   });
 }
 
-export function useGetPaginatedCharts(params: { page:number,sort:string,releaseTitle:string,limit:string,chartName:string,chartStatus:string }) {
+export function useGetPaginatedCharts(params: {
+  page: number;
+  sort: string;
+  releaseTitle: string;
+  limit: string;
+  chartName: string;
+  chartStatus: string;
+}) {
   const api = UseAxios();
   return useQuery<PAGINATION<ChartRegistration>, Error>({
     queryKey: [

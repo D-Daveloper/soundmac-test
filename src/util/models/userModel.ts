@@ -1,6 +1,5 @@
 import mongoose, { Model } from "mongoose";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 export const subscriptionDetails = new mongoose.Schema(
   {
@@ -425,23 +424,23 @@ UserSchema.pre("validate", function (next) {
   next();
 });
 
-UserSchema.methods.createJWT = function () {
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET is not defined in environment variables");
-  }
-  return jwt.sign(
-    {
-      userId: this._id,
-      name: this.first_name,
-      email: this.email,
-    },
-    jwtSecret,
-    {
-      expiresIn: process.env.JWT_LIFETIME || "2h",
-    } as jwt.SignOptions,
-  );
-};
+// UserSchema.methods.createJWT = function (expiry?:string) {
+//   const jwtSecret = process.env.JWT_SECRET;
+//   if (!jwtSecret) {
+//     throw new Error("JWT_SECRET is not defined in environment variables");
+//   }
+//   return jwt.sign(
+//     {
+//       userId: this._id,
+//       name: this.first_name,
+//       email: this.email,
+//     },
+//     jwtSecret,
+//     {
+//       expiresIn: expiry || process.env.JWT_LIFETIME || "2h",
+//     } as jwt.SignOptions,
+//   );
+// };
 
 UserSchema.methods.comparePassword = async function (
   candidatePassword: string,

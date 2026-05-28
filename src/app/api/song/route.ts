@@ -131,13 +131,9 @@ export async function POST(req: Request) {
       coverUrl: null,
       error: "Failed to upload image",
     };
-    let licenseUrl: { error: string | null; coverUrl: string | null } = {
-      coverUrl: null,
-      error: "Failed to upload license",
-    };
+
     try {
       const musicBuffer = Buffer.from(await payload.musicImage!.arrayBuffer());
-      const licenseBuffer = Buffer.from(await payload.license!.arrayBuffer());
       // ---- Resize to distributor standard ----
       const resized = await sharp(musicBuffer)
         .resize(3000, 3000, { fit: "cover" })
@@ -146,34 +142,53 @@ export async function POST(req: Request) {
       console.log("buffer", resized);
 
       const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
-      const licenseType = payload.license!.type.split("/")[1]; //get the image extension
 
       const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
-      const licenseLocation = `testing/${payload.upc}/cover_license_${payload.upc}.${licenseType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
       imageUrl = await uploadImage(
         imageType,
         resized as Buffer<ArrayBuffer>,
         imageStorageLocation,
       ); //send image to aws
-      licenseUrl = await uploadImage(
-        "application/pdf",
-        licenseBuffer,
-        licenseLocation,
-      ); //send license to aws
       console.log(imageUrl);
-      console.log(licenseUrl);
 
       if (imageUrl.coverUrl == null) {
-        await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
-        return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
-      } else if (licenseUrl.coverUrl == null) {
         await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
         return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
       }
     } catch (error) {
       console.log("upload image or license error", error);
       throw error;
+    }
+
+    let licenseUrl: { error: string | null; coverUrl: string | null } = {
+      coverUrl: null,
+      error: "Failed to upload license",
+    };
+
+    if (payload.license) {
+      try {
+        const licenseBuffer = Buffer.from(await payload.license!.arrayBuffer());
+
+        const licenseType = payload.license!.type.split("/")[1]; //get the image extension
+
+        const licenseLocation = `testing/${payload.upc}/cover_license_${payload.upc}.${licenseType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+
+        licenseUrl = await uploadImage(
+          "application/pdf",
+          licenseBuffer,
+          licenseLocation,
+        ); //send license to aws
+        console.log(licenseUrl);
+
+        if (licenseUrl.coverUrl == null) {
+          await deleteMultipleFromS3(bucketName, [payload.s3KeyAudio! as string,imageUrl.coverUrl]); // delete uploaded song if image upload fails
+          return NextResponse.json({ msg: licenseUrl.error }, { status: 400 });
+        }
+      } catch (error) {
+        console.log("upload image or license error", error);
+        throw error;
+      }
     }
 
     const savedSong = new SongModel({
@@ -212,7 +227,7 @@ export async function POST(req: Request) {
       catalogNumber: "SM" + Date.now(),
       timeZone: payload.timeZone,
       isCoverSong: payload.isCoverSong,
-      license: licenseUrl.coverUrl
+      license: licenseUrl.coverUrl || ""
     });
     await Promise.all([
       savedSong.save(),

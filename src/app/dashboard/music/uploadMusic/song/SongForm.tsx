@@ -270,7 +270,7 @@ const SongForm = () => {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
       } else if (key === "timeZone" && typeof value === "object") {
         formData.append(key, JSON.stringify(value));
-      } else {
+      } else if (value){
         formData.append(key, value);
       }
     });

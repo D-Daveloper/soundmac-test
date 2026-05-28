@@ -12,6 +12,7 @@ import AlbumModel from "@/util/models/AlbumModel";
 import { getYearRange } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import { generateUPC } from "@/services/dsp/dsp.service";
+import { Types } from "mongoose";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
       upcFromClient,
       artist,
       isFromAnotherDistributor,
+      releaseId
     } = body;
 
     if (!fileType || typeof fileType != "string") {
@@ -86,9 +88,17 @@ export async function POST(req: Request) {
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
-    if(user!.type === "EMERGING_ARTIST"){
+
+    if (releaseId && Types.ObjectId.isValid(releaseId)) {
+      const song = await SongModel.findById(releaseId);
+      if (song && song.releaseStatus === 'approved') {
+        return NextResponse.json({ msg: "Approved Releases cannot be Edited." }, { status: 400 })
+      }
+    }
+
+    if (user!.type === "EMERGING_ARTIST") {
       const { startOfYear, endOfYear } = getYearRange();
-  
+
       const releasesThisYear = await SongModel.countDocuments({
         user: user!._id,
         createdAt: {
@@ -96,7 +106,7 @@ export async function POST(req: Request) {
           $lt: endOfYear,
         },
       });
-  
+
       if (releasesThisYear >= 2) {
         return NextResponse.json(
           { msg: "Emerging artists can only upload 2 releases per year" },

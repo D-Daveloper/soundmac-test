@@ -6,7 +6,8 @@ export async function POST() {
   const cookieStore = await cookies();
   
   // Method 1: Explicitly delete the cookie
-  cookieStore.delete('token'); 
+  cookieStore.delete('accessToken'); 
+  cookieStore.delete('refreshToken'); 
 
   // Method 2 (Alternative): Overwrite with an expired date to ensure deletion
 //   cookieStore.set('token', '', { expires: new Date(0), path: '/' });

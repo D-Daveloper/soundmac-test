@@ -11,7 +11,7 @@ export const verifyJWT = async (): Promise<AuthenticatedRequest> => {
   try {
     // Get token from cookies
     const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
+    const token = cookieStore.get("accessToken")?.value;
     if (!token) {
       return { msg: "No token provided", user: null };
     }

@@ -4,6 +4,7 @@ import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { generateOtp } from "@/util/middleware/functions";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 //validate OTP
 export async function POST(req: Request) {
@@ -31,42 +32,76 @@ export async function POST(req: Request) {
         return NextResponse.json({ msg: "Invalid OTP" }, { status: 400 });
       }
     }
-      if (body.type === "forgotPassword") {
-        if (!body.password) {
-          return NextResponse.json(
-            { msg: "Password is required" },
-            { status: 400 }
-          );
-        }
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(body.password, salt);
-        user.otp = null; // Clear the OTP after successful verification
-        user.otpExpires = null; // Reset otpExpires to null
-        user.updatedAt = new Date(); // Update the updatedAt field
-        await user.save();
-        return NextResponse.json({ msg: "Please login" }, { status: 200 });
-      } else {
-        user.otp = null; // Clear the OTP after successful verification
-        user.otpExpires = null; // Reset otpExpires to null
-        user.updatedAt = new Date(); // Update the updatedAt field
-        await user.save();
+    if (body.type === "forgotPassword") {
+      if (!body.password) {
+        return NextResponse.json(
+          { msg: "Password is required" },
+          { status: 400 }
+        );
       }
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(body.password, salt);
+      user.otp = null; // Clear the OTP after successful verification
+      user.otpExpires = null; // Reset otpExpires to null
+      user.updatedAt = new Date(); // Update the updatedAt field
+      await user.save();
+      return NextResponse.json({ msg: "Please login" }, { status: 200 });
+    } else {
+      user.otp = null; // Clear the OTP after successful verification
+      user.otpExpires = null; // Reset otpExpires to null
+      user.updatedAt = new Date(); // Update the updatedAt field
+      await user.save();
+    }
     //   create token
-    const token = user.createJWT();
+    const accessToken = jwt.sign(
+      {
+        userId: user._id,
+        name: user.firstName,
+        email: user.email,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: process.env.JWT_LIFETIME || '15m',
+      } as jwt.SignOptions,
+    );
+    //   create token
+    const refreshToken = jwt.sign(
+      {
+        userId: user._id,
+        name: user.firstName,
+        email: user.email,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: process.env.JWT_LIFETIME_REFRESH_TOKEN || '1d',
+      } as jwt.SignOptions,
+    );
 
     const res = NextResponse.json({ msg: "successful", user });
-    res.cookies.set("token", token, {
+
+    const cookieConfig = {
       httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      path: "/",
-      expires: new Date(Date.now() + 7200 * 1000),
-      maxAge: 60 * 60 * 2, // 2 hours
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict" as const,
+      path: "/"
+    };
+    // Access token → 15 minutes
+    res.cookies.set("accessToken", accessToken, {
+      ...cookieConfig,
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+      maxAge: 15 * 60,
+    });
+
+    // Refresh token → 1 day
+    res.cookies.set("refreshToken", refreshToken, {
+      ...cookieConfig,
+      expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      maxAge: 24 * 60 * 60,
     });
     return res;
   } catch (error: unknown) {
     console.error(error);
-    
+
     if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
     } else {

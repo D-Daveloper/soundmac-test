@@ -5,6 +5,7 @@ import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
+import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
 import { languagesList } from "@/app/constant";
 import type {
   FeaturedArtist,
@@ -25,9 +26,10 @@ import {
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
-import { Info, Trash2 } from "lucide-react";
+import { ArrowRight, Info, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const SongForm = ({
@@ -255,6 +257,7 @@ const SongForm = ({
           form.artist,
           form.another_distribution_check,
           api,
+          songFormFromApi._id
         );
 
         if (error != null) {
@@ -271,6 +274,8 @@ const SongForm = ({
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+      } else if (key === "timeZone" && typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
       }
@@ -328,6 +333,7 @@ const SongForm = ({
         timeZone: { label: "", value: "", name: "" },
         cover_song: false,
         license: null,
+        old_license:null
       });
       setImage(null);
       refetch();
@@ -354,21 +360,21 @@ const SongForm = ({
       const song_writer = JSON.stringify(form.song_writer);
       const performer = JSON.stringify(form.performer);
       const producer = JSON.stringify(form.producer);
-      localStorage.setItem("song_writer", song_writer);
-      localStorage.setItem("songForm", string_form);
-      localStorage.setItem("featured_artist", featured_artist);
-      localStorage.setItem("performer", performer);
-      localStorage.setItem("producer", producer);
+      localStorage.setItem("M_song_writer", song_writer);
+      localStorage.setItem("M_songForm", string_form);
+      localStorage.setItem("M_featured_artist", featured_artist);
+      localStorage.setItem("M_performer", performer);
+      localStorage.setItem("M_producer", producer);
     }
     setPreview(!preview);
   };
 
   useEffect(() => {
-    const string_form = localStorage.getItem("songForm");
-    const featured_artist = localStorage.getItem("featured_artist");
-    const song_writer = localStorage.getItem("song_writer");
-    const performer = localStorage.getItem("performer");
-    const producer = localStorage.getItem("producer");
+    const string_form = localStorage.getItem("M_songForm");
+    const featured_artist = localStorage.getItem("M_featured_artist");
+    const song_writer = localStorage.getItem("M_song_writer");
+    const performer = localStorage.getItem("M_performer");
+    const producer = localStorage.getItem("M_producer");
 
     if (string_form) {
       const songForm = JSON.parse(string_form);
@@ -406,8 +412,8 @@ const SongForm = ({
           : undefined,
         music_image: null,
         song_audio: null,
-        cover_song:false,
-        license:null
+        cover_song: false,
+        license: null,
       });
     }
   }, []);
@@ -442,7 +448,7 @@ const SongForm = ({
       timeZone: songFormFromApi.timeZone || { label: "", value: "", name: "" },
       cover_song: songFormFromApi.isCoverSong,
       license: null,
-      old_license:songFormFromApi.license || null,
+      old_license: songFormFromApi.license || null,
     }));
     setImage(songFormFromApi.releaseImage);
   }, []);
@@ -453,7 +459,7 @@ const SongForm = ({
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
+    <div className="bg-main-white min-h-screen h-full w-full flex flex-col lg:pl-[300px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -558,6 +564,84 @@ const SongForm = ({
                           The main language of the lyrics.
                         </p>
                       </div>
+                    </div>
+                    <div className="flex flex-col w-[40%] mt-10 max-sm:w-full">
+                      <p className="font-medium mb-2 sm:text-sm text-lg">
+                        Cover Song?
+                      </p>
+                      <ToggleSwitch
+                        isOn={songForm.cover_song}
+                        onToggle={() =>
+                          setSongForm((prev) => ({
+                            ...prev,
+                            cover_song: !songForm.cover_song,
+                          }))
+                        }
+                      />
+                      {songForm.cover_song &&
+                        (songFormFromApi.releaseStatus != "approved" ? (
+                          <>
+                            <div className="flex gap-1 mt-5">
+                              <p className="font-medium mb-2 text-sm">
+                                Cover License
+                              </p>
+                              <Image
+                                priority={false}
+                                loading="lazy"
+                                src="/required.svg"
+                                alt="a star marking this field as required"
+                                width={0}
+                                height={0}
+                                className="w-2 -mt-5"
+                              />
+                            </div>
+                            <div
+                              className={
+                                "flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-1 sm:text-sm text-[16px] "
+                              }
+                            >
+                              <label
+                                htmlFor="license"
+                                className="line-clamp-1 outline-0  font-extralight h-5"
+                              >
+                                {!songForm.license
+                                  ? "please select a file"
+                                  : songForm.license?.name}
+                              </label>
+                              <input
+                                id="license"
+                                name="license"
+                                onChange={(e) =>
+                                  setSongForm((prev) => ({
+                                    ...prev,
+                                    license: e.target.files
+                                      ? e.target.files[0]
+                                      : null,
+                                  }))
+                                }
+                                type="file"
+                                accept="application/pdf"
+                                className="hidden w-full"
+                              />
+                            </div>
+                            <p className="font-light italic flex gap-3 text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                              Don&apos;t have a license?{" "}
+                              <Link
+                                href={"/dashboard/explore/coverLicense"}
+                                className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
+                              >
+                                Get License here
+                                <ArrowRight color="#11456B" size={15} />
+                              </Link>
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3">
+                              Approved songs cannot upload a license.
+                            </p>
+                          </>
+                        ))}
                     </div>
                   </div>
                   <div className="border border-neutral-100"></div>

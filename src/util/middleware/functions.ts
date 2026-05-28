@@ -120,10 +120,10 @@ export const isSongFormValid = (form: SongForm): string => {
         return "ISRC and UPC is required";
     } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
         return "Copy right holder and year is required";
-    } else if (form.cover_song && !form.license) {
+    } else if (form.cover_song && (!form.license && !form.old_license)) {
         return "License is required";
     } else if (form.license && form.license.type != "application/pdf") {
-        return "License is must be a PDF";
+        return "License must be a PDF";
     } else {
         return "true";
     }
@@ -253,6 +253,7 @@ export const uploadTrack = async (
     artist: string,
     isFromAnotherDistributor: boolean,
     api: AxiosInstance,
+    releaseId?:string
 ) => {
     try {
         // 1. Ask for permission
@@ -262,6 +263,7 @@ export const uploadTrack = async (
             upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
             artist,
             isFromAnotherDistributor,
+            releaseId
         });
 
         const { uploadUrl, s3Key, upcFromServer, uploadId } = await res.data;
@@ -632,7 +634,8 @@ export function parseSongFormData(formData: FormData) {
             ? JSON.parse(formData.get("timeZone") as string)
             : { label: "", value: "", name: "" },
         isCoverSong: formData.get("cover_song") === "true",
-        license: formData.get("license") as File || null
+        license: formData.get("license") as File | null,
+        oldLicense: formData.get("old_license") as string | null
     };
 }
 
@@ -785,8 +788,8 @@ export function validateNonDraftSongs(
     }
 
     if (
-        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-        typeof payload.preOrderDate != "string"
+        payload.preOrderCheck && (!payload.preOrderDate ||
+        typeof payload.preOrderDate != "string")
     ) {
         return "Pre order Date is required";
     }
@@ -836,11 +839,13 @@ export function validateNonDraftSongs(
     if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
         return "Time zone is required";
     }
-    if (payload.isCoverSong && !payload.license || !(payload.license instanceof File)) {
+    if (payload.isCoverSong && ((!payload.license || !(payload.license instanceof File)) && !payload.oldLicense)) {
         return "License is required."
     }
+    console.log(payload);
+    
     if (payload.license && payload.license.type != "application/pdf") {
-        return "License is must be a PDF";
+        return "License must be a PDF";
     }
     return null;
 }
