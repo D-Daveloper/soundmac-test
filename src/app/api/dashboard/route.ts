@@ -1,3 +1,4 @@
+import { authenticate } from "@/util/middleware/authMiddleware";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
@@ -7,9 +8,8 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
-    const userData = await verifyJWT();
-
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+    
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
