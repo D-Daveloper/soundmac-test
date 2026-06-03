@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "@/util/middleware/aws";
-import { getUPCs } from "@/util/middleware/dpm";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
@@ -13,6 +12,8 @@ import { getYearRange } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import { generateUPC } from "@/services/dsp/dsp.service";
 import { Types } from "mongoose";
+import { authenticate } from "@/util/middleware/authMiddleware";
+import { albumFromApi } from "@/app/type";
 // import { v4 as uuid } from "uuid";
 
 /**
@@ -49,8 +50,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "artist is required." }, { status: 400 });
     }
     let userArtist = null;
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
       userArtist = await Artist.findOne({
         user: userJwt.user,
         artistName: (artist as string).trim(),
-      });
+      }).lean();
     }
 
     if (!userArtist) {
@@ -215,8 +216,8 @@ export async function PUT(req: Request) {
         { status: 400 },
       );
     }
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -256,13 +257,13 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "UPC is required." }, { status: 400 });
     }
 
-    const userAlbum = await AlbumModel.findOne({ upc: upcFromClient });
+    const userAlbum = await AlbumModel.findOne({ upc: upcFromClient }).lean<albumFromApi>();
 
     if (!userAlbum) {
       return NextResponse.json({ msg: "Invalid upc" }, { status: 400 });
     }
 
-    if (userAlbum.user != userJwt.user) {
+    if (String(userAlbum.user) !== String(user._id)) {
       return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
     }
 
@@ -342,3 +343,67 @@ export async function PUT(req: Request) {
     );
   }
 }
+
+
+
+
+// import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+// import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+// const s3Client = new S3Client({ region: "us-east-1" });
+
+// // Express.js route handler
+// app.post("/api/get-upload-urls", async (req, res) => {
+//   const { files } = req.body; // Expecting an array: [{ name: "a.png", type: "image/png" }]
+  
+//   try {
+//     const urlPromises = files.map(async (file) => {
+//       const command = new PutObjectCommand({
+//         Bucket: "your-unique-bucket-name",
+//         Key: `uploads/${Date.now()}_${file.name}`,
+//         ContentType: file.type, // Forces client to match this file type
+//       });
+
+//       // Generate a URL that expires in 15 minutes (900 seconds)
+//       const url = await getSignedUrl(s3Client, command, { expiresIn: 900 });
+      
+//       return { fileName: file.name, uploadUrl: url };
+//     });
+
+//     const presignedUrls = await Promise.all(urlPromises);
+//     res.json({ urls: presignedUrls });
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to generate URLs" });
+//   }
+// });
+
+
+// async function uploadMultipleFiles(fileList) {
+//   // 1. Prepare payload for your backend API
+//   const filesMetadata = Array.from(fileList).map(file => ({
+//     name: file.name,
+//     type: file.type
+//   }));
+
+//   // 2. Request the unique presigned URLs from your server
+//   const response = await fetch("/api/get-upload-urls", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify({ files: filesMetadata })
+//   });
+//   const { urls } = await response.json();
+
+//   // 3. Execute all uploads concurrently straight to S3
+//   const uploadPromises = urls.map(async (item, index) => {
+//     const targetFile = fileList[index];
+
+//     return fetch(item.uploadUrl, {
+//       method: "PUT",
+//       headers: { "Content-Type": targetFile.type },
+//       body: targetFile
+//     });
+//   });
+
+//   await Promise.all(uploadPromises);
+//   alert("All files uploaded successfully!");
+// }

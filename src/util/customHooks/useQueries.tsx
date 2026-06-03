@@ -165,7 +165,7 @@ export function usePaginatedSongs(params: {
   const api = UseAxios();
   return useQuery<PAGINATION<songFromApi>, Error>({
     queryKey: [
-      "mangeSongs",
+      "manageSongs",
       params.page,
       params.sort,
       params.songTitle,
@@ -190,7 +190,7 @@ export function usePaginatedAlbums(params: {
   const api = UseAxios();
   return useQuery<PAGINATION<albumFromApi>, Error>({
     queryKey: [
-      "mangeAlbums",
+      "manageAlbums",
       params.page,
       params.sort,
       params.albumTitle,

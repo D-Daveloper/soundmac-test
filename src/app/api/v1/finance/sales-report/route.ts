@@ -1,18 +1,17 @@
 import dbConnect from "@/util/db";
 import { NextResponse } from "next/server";
 import salesReport from "@/util/models/salesReportModel";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
+import { authenticate } from "@/util/middleware/authMiddleware";
 
 export async function GET(req: Request) {
     try {
-        const userData = await verifyJWT();
-        const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
 
-        if (userJwt.msg) {
-            return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-        }
+    if (userJwt.msg) {
+      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+    }
         await dbConnect();
 
         const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;

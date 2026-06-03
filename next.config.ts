@@ -2,12 +2,25 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-    images: {
+  images: {
     remotePatterns: [new URL('https://soundmac1.s3.eu-north-1.amazonaws.com/**')],
   },
   eslint: {
     ignoreDuringBuilds: true,
-},
+  }, async headers() {
+    return [
+      {
+        // matching all API routes
+        source: "/api/v1/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Credentials", value: "false" },
+          { key: "Access-Control-Allow-Origin", value: "*" }, // Replace * with specific domains for security
+          { key: "Access-Control-Allow-Methods", value: "GET,DELETE,PATCH,POST,PUT" },
+          { key: "Access-Control-Allow-Headers", value: "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" },
+        ]
+      }
+    ]
+  }
 };
 
 export default nextConfig;

@@ -157,8 +157,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   }, [pathname]);
   if (isLoading || !data) return <NormalLoadingScreen />;
 
-  console.log(notification);
-
   const handleMarkAsRead = async (id?: string) => {
     try {
       await axios.patch("api/users/notification", { id });

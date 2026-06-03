@@ -22,7 +22,7 @@ export const getArtists = async (
   api: AxiosInstance,
   params: { page: number, sort: string, artistName: string }
 ): Promise<PAGINATION<Artist>> => {
-  const res = await api.get<Promise<PAGINATION<Artist>>>("users/artist", {
+  const res = await api.get<Promise<PAGINATION<Artist>>>("v1/artist", {
     params: params,
   });
   return res.data;
@@ -31,7 +31,7 @@ export const getArtists = async (
 export const getUserArtistsNames = async (
   api: AxiosInstance,
 ): Promise<string[]> => {
-  const res = await api.get<Promise<string[]>>("song/artist");
+  const res = await api.get<Promise<string[]>>("v1/artist/getNames");
   return res.data;
 };
 
@@ -39,7 +39,7 @@ export const getArtistStats = async (
   api: AxiosInstance,
   artistName: string
 ): Promise<ArtistStat> => {
-  const res = await api.get<Promise<ArtistStat>>("users/artist/stats/" + artistName);
+  const res = await api.get<Promise<ArtistStat>>("v1/artist/stats/" + artistName);
   return res.data;
 };
 
@@ -47,7 +47,7 @@ export const createArtist = async (
   api: AxiosInstance,
   form: CreateArtistForm
 ) => {
-  const res = await api.post("users/artist", form, {
+  const res = await api.post("v1/artist", form, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return res.data;
@@ -57,7 +57,7 @@ export const DeleteArtist = async (
   api: AxiosInstance,
   form: { artist_name: string }
 ) => {
-  const res = await api.delete("users/artist", {
+  const res = await api.delete("v1/artist", {
     data: form,
     headers: { "Content-Type": "application/json" },
   });
@@ -68,7 +68,7 @@ export const getSongs = async (
   api: AxiosInstance,
   params: { page: number, sort: string, songTitle: string, songStatusFilter: string, artist: string }
 ): Promise<PAGINATION<songFromApi>> => {
-  const res = await api.get<Promise<PAGINATION<songFromApi>>>("song", {
+  const res = await api.get<Promise<PAGINATION<songFromApi>>>("v1/music/song", {
     params: params,
   });
   return res.data;
@@ -77,7 +77,7 @@ export const DeleteSong = async (
   api: AxiosInstance,
   form: { artist_name: string, releaseTitle: string }
 ) => {
-  const res = await api.delete("song", {
+  const res = await api.delete("v1/music/song", {
     data: form,
     headers: { "Content-Type": "application/json" },
   });
@@ -88,7 +88,7 @@ export const getAlbums = async (
   api: AxiosInstance,
   params: { page: number, sort: string, albumTitle: string, albumStatusFilter: string, artist: string }
 ): Promise<PAGINATION<albumFromApi>> => {
-  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
+  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("v1/music/album", {
     params: params,
   });
   return res.data;
@@ -98,7 +98,7 @@ export const getAlbum = async (
   api: AxiosInstance,
   params: { albumTitle: string }
 ): Promise<PAGINATION<albumFromApi>> => {
-  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("album", {
+  const res = await api.get<Promise<PAGINATION<albumFromApi>>>("v1/music/album", {
     params: params,
   });
   return res.data;
@@ -108,7 +108,7 @@ export const getAlbumTracks = async (
   api: AxiosInstance,
   params: { albumTitle: string }
 ): Promise<any> => {
-  const res = await api.get<Promise<any>>("album/track", {
+  const res = await api.get<Promise<any>>("v1/music/album/track", {
     params: params,
   });
   return res.data;
@@ -116,9 +116,9 @@ export const getAlbumTracks = async (
 
 export const MarkAlbumComplete = async (
   api: AxiosInstance,
-  form: { releaseTitle: string }
+  form: { releaseId: string }
 ) => {
-  const res = await api.patch("album", {
+  const res = await api.patch("v1/music/album", {
     ...form,
     headers: { "Content-Type": "application/json" },
   });
@@ -129,7 +129,7 @@ export const DeleteAlbum = async (
   api: AxiosInstance,
   form: { releaseTitle: string }
 ) => {
-  const res = await api.delete("album", {
+  const res = await api.delete("v1/music/album", {
     data: form,
     headers: { "Content-Type": "application/json" },
   });
@@ -155,7 +155,7 @@ export const getUserReleaseTrackNames = async (
   api: AxiosInstance,
   params: { release_title: string }
 ): Promise<string[]> => {
-  const res = await api.get<Promise<string[]>>("album/track/getusertracknames", {
+  const res = await api.get<Promise<string[]>>("v1/music/album/track/getusertracknames", {
     params
   });
   return res.data;
@@ -372,7 +372,7 @@ export const getlabel = async (
 export const getUserSalesReportDashboardDetails = async (
   api: AxiosInstance,
 ): Promise<salesReportDashboardResponse> => {
-  const res = await api.get<Promise<salesReportDashboardResponse>>("/finance/sales-report");
+  const res = await api.get<Promise<salesReportDashboardResponse>>("v1/finance/sales-report");
   return res.data;
 };
 export const getAdminSalesReportDashboardDetails = async (

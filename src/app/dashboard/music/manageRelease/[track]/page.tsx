@@ -131,7 +131,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
       if (action === "upload") {
         res = await api.post(
-          "album/track",
+          "v1/music/album/track",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
             headers: { "Content-Type": "application/json" },
@@ -139,7 +139,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         );
       } else {
         res = await api.post(
-          "album/track/draft",
+          "v1/music/album/track/draft",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
             headers: { "Content-Type": "application/json" },

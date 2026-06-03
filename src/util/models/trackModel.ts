@@ -152,12 +152,6 @@ const TrackSchema = new mongoose.Schema(
     },
     startClip: {
       type: String,
-      required: [
-        function (this: any) {
-          return this.get("releaseStatus") !== "draft";
-        },
-        "Start clip is required",
-      ],
       trim: true,
     },
     isrc: {
@@ -203,7 +197,7 @@ const TrackSchema = new mongoose.Schema(
     },
     releaseStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected", "draft"],
+      enum: ["pending", "approved", "rejected", "draft", "deleted"],
       default: "pending",
     },
     catalogNumber: {

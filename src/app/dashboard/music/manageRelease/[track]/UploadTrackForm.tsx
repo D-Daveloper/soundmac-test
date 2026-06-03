@@ -841,7 +841,7 @@ const UploadTrackForm = ({
                         name={"start_clip"}
                         placeholder={"30"}
                         updateValue={handleChange}
-                        required={true}
+                        required={false}
                       />
                       <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                         This determines which part of your song will play in

@@ -160,7 +160,7 @@ const AlbumSchema = new mongoose.Schema(
     },
     releaseStatus: {
       type: String,
-      enum: ["pending","completed", "approved", "rejected", "draft"],
+      enum: ["pending", "completed", "approved", "rejected", "draft", "deleted"],
       default: "pending",
     },
     catalogNumber: {
@@ -203,12 +203,8 @@ AlbumSchema.index(
   { user: 1, releaseTitle: 1, createdAt: -1 },
   { collation: { locale: "en", strength: 2 } }
 );
-AlbumSchema.index({ user: 1, artistName: 1 });
+AlbumSchema.index({ user: 1, artistName: 1, releaseTitle: 1 },{unique:true});
 AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
-AlbumSchema.index(
-  { artistName: 1, releaseTitle: 1 },
-  { unique: true }
-);
 
 const AlbumModel =
   mongoose.models?.Album || mongoose.model("Album", AlbumSchema);

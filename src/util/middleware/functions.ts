@@ -217,7 +217,7 @@ export const isTrackFormValid = (form: TrackForm): string => {
         return "producer is required";
     } else if (form.old_audio === null && !form.s3key) {
         return "Audio is required";
-    } else if (form.start_clip == "" || !parseFloat(form.start_clip)) {
+    } else if (form.start_clip && !parseFloat(form.start_clip)) {
         return "Starting Clip is required and must be a valid number";
     } else if (
         form.another_distribution_check &&
@@ -253,11 +253,11 @@ export const uploadTrack = async (
     artist: string,
     isFromAnotherDistributor: boolean,
     api: AxiosInstance,
-    releaseId?:string
+    releaseId?: string
 ) => {
     try {
         // 1. Ask for permission
-        const res = await api.post("/createawssignedurl", {
+        const res = await api.post("v1/createawssignedurl", {
             fileType: file.type,
             fileSize: file.size,
             upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
@@ -293,7 +293,7 @@ export const uploadAlbumTrack = async (
 ) => {
     try {
         // 1. Ask for permission
-        const res = await api.put("/createawssignedurl", {
+        const res = await api.put("v1/createawssignedurl", {
             fileType: file.type,
             fileSize: file.size,
             upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
@@ -583,10 +583,17 @@ function safeJsonParse<T>(value: any): T | null {
 }
 
 function getArray<T>(formData: FormData, key: string): T[] {
-    return formData
-        .getAll(key)
-        .map((v) => safeJsonParse<T>(v))
-        .filter(Boolean) as T[];
+    if (key === "territories") {
+        return formData
+            .getAll(key)
+            .filter(Boolean) as T[];
+    } else {
+        return formData
+            .getAll(key)
+            .map((v) => safeJsonParse<T>(v))
+            .filter(Boolean) as T[];
+    }
+
 }
 
 export function parseSongFormData(formData: FormData) {
@@ -789,7 +796,7 @@ export function validateNonDraftSongs(
 
     if (
         payload.preOrderCheck && (!payload.preOrderDate ||
-        typeof payload.preOrderDate != "string")
+            typeof payload.preOrderDate != "string")
     ) {
         return "Pre order Date is required";
     }
@@ -803,14 +810,6 @@ export function validateNonDraftSongs(
     } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
         return "Invalid Dsp format.";
     }
-
-    // if (
-    //     !payload.startClip ||
-    //     typeof payload.startClip != "string" ||
-    //     !numRegex.test(payload.startClip)
-    // ) {
-    //     return "Start Clip is required.";
-    // }
 
     if (payload.anotherDistributionCheck && payload.isrc === "") {
         return "ISRC is required when transferring from another distributor.";
@@ -842,8 +841,7 @@ export function validateNonDraftSongs(
     if (payload.isCoverSong && ((!payload.license || !(payload.license instanceof File)) && !payload.oldLicense)) {
         return "License is required."
     }
-    console.log(payload);
-    
+
     if (payload.license && payload.license.type != "application/pdf") {
         return "License must be a PDF";
     }
@@ -1004,13 +1002,13 @@ export function validateDraftSongs(
     }
 
     if (
-        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
-        typeof payload.preOrderDate != "string"
+        (payload.preOrderCheck && (!payload.preOrderDate ||
+            typeof payload.preOrderDate != "string"))
     ) {
         return "Pre order Date is required";
     }
 
-    if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
+    if (oneWeek && payload.preOrderDate && new Date(payload.preOrderDate) >= oneWeek) {
         return "Pre order Date must be 1 week from the release date.";
     }
 
@@ -1023,10 +1021,7 @@ export function validateDraftSongs(
     }
 
     if (
-        (payload.startClip && typeof payload.startClip != "string") ||
-        (payload.startClip &&
-            payload.startClip.length > 0 &&
-            !numRegex.test(payload.startClip))
+        (payload.startClip && (typeof payload.startClip != "string" || numRegex.test(payload.startClip)))
     ) {
         return "Start Clip is required.";
     }
@@ -1038,11 +1033,15 @@ export function validateDraftSongs(
         return "UPC is required when transferring from another distributor.";
     }
 
-    if(payload.license && !(payload.license instanceof File)){
-        return "License must be a PDF file."
-    }
-    if(payload.license && payload.license.type != "application/pdf"){
-        return "License must be a PDF file."
+    if (payload.license) {
+        // Ensure File exists (avoid ReferenceError in non-browser envs)
+        if (typeof File !== 'undefined' && payload.license instanceof File) {
+            const f = payload.license as File;
+            const isPdf = f.type === 'application/pdf' || /\.pdf$/i.test(f.name || '');
+            if (!isPdf) return "License must be a PDF file.";
+        } else {
+            return "License must be a PDF file.";
+        }
     }
 
     // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
@@ -1230,6 +1229,7 @@ export function validateDraftTracks(
 export function validateNonDraftTracks(
     payload: TrackForm,
     listOfTrackNumbers: string[],
+    isEdit: boolean = false
 ) {
     if (
         !payload.title ||
@@ -1283,8 +1283,8 @@ export function validateNonDraftTracks(
     }
 
     if (
-        !payload.start_clip ||
-        typeof payload.start_clip != "string" ||
+        payload.start_clip &&
+        typeof payload.start_clip != "string" &&
         !numRegex.test(payload.start_clip)
     ) {
         return "Start Clip is required.";
@@ -1297,7 +1297,7 @@ export function validateNonDraftTracks(
     if (!payload.track_number || !numRegex.test(payload.track_number)) {
         return "Track number is required.";
     }
-    if (!listOfTrackNumbers.includes(payload.track_number)) {
+    if (!listOfTrackNumbers.includes(payload.track_number) && !isEdit) {
         return "Invalid Track number or Track number already used.";
     }
 
@@ -3917,7 +3917,7 @@ export function parseLabelFormData(formData: FormData) {
 }
 
 //used to format numbers like 1000 = 1k, 1200 = 1.2k so on
-export const formatNumber = (numString:string) => {
-    const numInt = parseInt(numString,10);
-  return new Intl.NumberFormat('en', { notation: 'compact' }).format(numInt);
+export const formatNumber = (numString: string) => {
+    const numInt = parseInt(numString, 10);
+    return new Intl.NumberFormat('en', { notation: 'compact' }).format(numInt);
 };

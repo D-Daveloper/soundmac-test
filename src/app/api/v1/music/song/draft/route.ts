@@ -1,5 +1,7 @@
+import { generateISRC, generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
+import { authenticate } from "@/util/middleware/authMiddleware";
 import { getUPCs } from "@/util/middleware/dpm";
 import {
   getYearRange,
@@ -16,6 +18,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     let userArtist = null;
+    let release = null;
     let releaseTitleAlreadyExist = null;
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
     const formData = await req.formData();
@@ -37,8 +40,8 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -59,10 +62,20 @@ export async function POST(req: Request) {
       await user.save();
       Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     } else {
-      userArtist = await Artist.findOne({
+      const userArtistQuery = Artist.findOne({
         user: userJwt.user,
-        artistName: (payload.artist as string)?.trim(),
+        artistName: (payload.artist as string).trim(),
       });
+    
+      const releaseQuery = SongModel.findOne({
+        user: user._id,
+        artistName: (payload.artist as string).trim(),
+        releaseTitle: payload.title!.trim(),
+      }).lean();
+
+      [userArtist, release] = await Promise.all([
+        userArtistQuery, releaseQuery
+      ]).catch(err => { throw err; });
     }
 
     if (Uploaderror != null) {
@@ -74,6 +87,8 @@ export async function POST(req: Request) {
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }else if (release) {
+      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
 
     const { startOfYear, endOfYear } = getYearRange();
@@ -93,17 +108,6 @@ export async function POST(req: Request) {
       );
     }
 
-    releaseTitleAlreadyExist = await SongModel.find({
-      artist: userArtist._id,
-      releaseTitle: payload.title,
-    });
-
-    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 0) {
-      return NextResponse.json(
-        { msg: "Release title already exists" },
-        { status: 400 },
-      );
-    }
     if (
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
@@ -171,8 +175,8 @@ export async function POST(req: Request) {
       lyrics: payload.lyrics,
       startClip: payload.startClip,
       dsp: payload.dsp,
-      upc: payload.upc ? payload.upc : await getUPCs(),
-      isrc: payload.isrc ? payload.isrc : "isrc" + Date.now(),
+      upc: payload.upc ? payload.upc :await generateUPC(),
+      isrc: payload.isrc ? payload.isrc : await generateISRC(),
       territories: payload.territories,
       artistName: userArtist.artistName,
       artist: userArtist._id,
@@ -180,6 +184,7 @@ export async function POST(req: Request) {
       releaseStatus: "draft",
       catalogNumber: "SM" + Date.now(),
       timeZone: payload?.timeZone,
+      isCoverSong: payload.isCoverSong
     });
 
     await savedSong.save();
@@ -215,8 +220,8 @@ export async function PUT(req: Request) {
 
     await dbConnect();
 
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -253,7 +258,7 @@ export async function PUT(req: Request) {
       releaseTitle: payload.title,
     });
 
-    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length >= 1) {
+    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 1) {
       return NextResponse.json(
         { msg: "Release title already exists" },
         { status: 400 },
@@ -336,7 +341,6 @@ export async function PUT(req: Request) {
         territories: payload.territories,
         artistName: userArtist.artistName,
         artist: userArtist._id,
-        user: userJwt.user,
       },
       { runValidators: true },
     );

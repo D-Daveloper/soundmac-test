@@ -102,8 +102,12 @@ const ManageAlbumForm = ({
     console.log(form);
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && key != "territories") {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+      } else if (key === "territories" && Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}`, v));
+      } else if (key === "timeZone" && typeof value === "object") {
+        formData.append(key, JSON.stringify(value));
       } else {
         formData.append(key, value);
       }
@@ -116,11 +120,11 @@ const ManageAlbumForm = ({
       if (action === "upload") {
         const validForm = isAlbumFormValid(form);
         if (validForm != "true") return toast.warn(validForm);
-        res = await api.put("album", formData, {
+        res = await api.put("v1/music/album", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else if (action === "draft" && albumFromApi.releaseStatus === "draft") {
-        res = await api.put("album/draft", formData, {
+        res = await api.put("v1/music/album/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {

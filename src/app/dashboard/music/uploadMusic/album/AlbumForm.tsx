@@ -16,6 +16,7 @@ import {
 } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
+import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -23,6 +24,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const AlbumForm = () => {
+  const queryClient = useQueryClient();
   const dashboardContext = useContext(DashboardContext);
   const router = useRouter();
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
@@ -97,8 +99,10 @@ const AlbumForm = () => {
       console.log(form);
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
+        if (Array.isArray(value) && key != "territories") {
           value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+        } else if (key === "territories" && Array.isArray(value)) {
+          value.forEach((v) => formData.append(key, v));
         } else if (key === "timeZone" && typeof value === "object") {
           formData.append(key, JSON.stringify(value));
         } else {
@@ -112,15 +116,17 @@ const AlbumForm = () => {
       if (action === "upload") {
         const validForm = isAlbumFormValid(form);
         if (validForm != "true") return toast.warn(validForm);
-        res = await api.post("album", formData, {
+        res = await api.post("v1/music/album", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        res = await api.post("album/draft", formData, {
+        res = await api.post("v1/music/album/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
-      toast.success("You're getting redirected to add tracks to your album.");
+      if (action === "upload") {
+        toast.success("You're getting redirected to add tracks to your album.");
+      }
       localStorage.removeItem("albumForm");
       setAlbumForm({
         title: "",
@@ -140,7 +146,9 @@ const AlbumForm = () => {
         number_of_track: "",
         timeZone: { label: "", value: "", name: "" },
       });
-
+      queryClient.invalidateQueries({
+        queryKey: ["manageAlbums"],
+      });
       setImage(null);
       setPreview(false);
       if (action === "upload") {

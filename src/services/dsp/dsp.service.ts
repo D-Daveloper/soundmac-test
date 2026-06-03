@@ -1,3 +1,4 @@
+import axios from "axios";
 import { dspFetch } from "./dsp.client";
 
 export async function generateUPC() {
@@ -23,7 +24,7 @@ export async function generateISRC() {
   return data.upc_list[0]
 }
 export async function generateMultipleISRC(amount: number) {
-  const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID + "qty=" + amount, {
+  const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID + "?qty=" + amount, {
     method: "GET",
   });
   //   console.log("upc",data);
@@ -42,4 +43,18 @@ export async function approveRelease(releaseId: string) {
   return dspFetch(`https://dsp-api.com/releases/${releaseId}/approve`, {
     method: "POST",
   });
+}
+
+export async function getDsps(){
+  try {
+    const res = await axios.get(process.env.GET_DSPS_URL!, {
+      headers: {
+        Authorization: `Basic ${process.env.GET_DSPS_BASIC_AUTH_PASSWORD}`
+      }
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching DSPs:", error);
+    throw error;
+  }
 }

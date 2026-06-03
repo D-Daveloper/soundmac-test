@@ -379,7 +379,7 @@ const Song = () => {
             className={
               isFetching || isLoading || isPendingSongs || isRefetchingSongs
                 ? "flex justify-center items-center md:max-h-[400px]"
-                : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[600px] "
+                : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 "
             }
           >
             {isFetching || isLoading || isPendingSongs || isRefetchingSongs ? (

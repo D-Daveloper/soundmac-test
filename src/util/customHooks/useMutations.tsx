@@ -148,7 +148,7 @@ export const useMarkAlbumCompleteMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { releaseTitle: string }) =>
+    mutationFn: async (form: { releaseId: string }) =>
       MarkAlbumComplete(api, form),
     onSuccess: async (data, variables) => {
       toast.success(data.msg);

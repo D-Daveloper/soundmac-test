@@ -62,7 +62,7 @@ const Input = React.memo(({
           onChange={updateValue}
           name={props.name}
           required={required}
-          value={props.value}
+          value={props.value ?? ""}
           type={
             type === "password" ? (isOpen ? "text" : "password") : type
           }

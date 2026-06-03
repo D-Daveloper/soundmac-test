@@ -6,7 +6,7 @@ import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
-import { languagesList } from "@/app/constant";
+import { languagesList, timeZones } from "@/app/constant";
 import type {
   FeaturedArtist,
   PAGINATION,
@@ -257,7 +257,7 @@ const SongForm = ({
           form.artist,
           form.another_distribution_check,
           api,
-          songFormFromApi._id
+          songFormFromApi._id,
         );
 
         if (error != null) {
@@ -272,11 +272,13 @@ const SongForm = ({
       }
     }
     Object.entries(form).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && key != "territories") {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+      } else if (key === "territories" && Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}`, v));
       } else if (key === "timeZone" && typeof value === "object") {
         formData.append(key, JSON.stringify(value));
-      } else {
+      } else if (value) {
         formData.append(key, value);
       }
     });
@@ -287,14 +289,14 @@ const SongForm = ({
         toast.info(
           "Uploading song. This may take a while depending on your internet speed.",
         );
-        res = await api.put("song", formData, {
+        res = await api.put("v1/music/song", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else if (
         action === "draft" &&
         songFormFromApi.releaseStatus === "draft"
       ) {
-        res = await api.put("song/draft", formData, {
+        res = await api.put("v1/music/song/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -333,7 +335,7 @@ const SongForm = ({
         timeZone: { label: "", value: "", name: "" },
         cover_song: false,
         license: null,
-        old_license:null
+        old_license: null,
       });
       setImage(null);
       refetch();
@@ -1071,6 +1073,44 @@ const SongForm = ({
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
+                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                              Time Zones
+                            </p>
+                            <Image
+                              priority={false}
+                              loading="lazy"
+                              src="/required.svg"
+                              alt="a star marking this field as required"
+                              width={0}
+                              height={0}
+                              className="w-2 -mt-3 "
+                            />
+                          </div>
+                          <div className="w-full">
+                            <Select
+                              selected={songForm.timeZone.label}
+                              setSelected={(t) => {
+                                // Find the timezone object where label matches the selected value (t)
+                                const selectedTimeZone = timeZones.find(
+                                  (item) => item.label === t,
+                                );
+
+                                // Update form with the value (or full object if needed)
+                                setSongForm((prev) => ({
+                                  ...prev,
+                                  timeZone: selectedTimeZone
+                                    ? selectedTimeZone
+                                    : { label: "", value: "", name: "" },
+                                }));
+                              }}
+                              placeholder="Select TimeZone..."
+                              options={timeZones.map((item) => item.label)}
+                              name="timeZone"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                          <div className="flex">
                             <p className=" capitalize font-medium sm:text-sm text-lg">
                               territories{" "}
                             </p>
@@ -1323,7 +1363,7 @@ const SongForm = ({
                       </div>
 
                       <textarea
-                        value={songForm.lyrics}
+                        value={songForm.lyrics ? undefined : ""} // to prevent uncontrolled to controlled input error
                         onChange={(e) =>
                           setSongForm((prev) => ({
                             ...prev,
@@ -1707,7 +1747,7 @@ const SongForm = ({
                       <h2>Preorder Start date</h2>
                       <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
                         {songForm.preOrderDate &&
-                          songForm.preOrderDate.toLocaleDateString()}
+                          new Date(songForm.preOrderDate).toLocaleDateString()}
                       </p>
                       {/* border line */}
                       <div className="border border-neutral-100"></div>

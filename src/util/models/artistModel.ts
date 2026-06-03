@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from "mongoose";
 
 // Define Artist interface
 export interface IArtist extends Document {
+  _id: mongoose.Types.ObjectId;
   artistName: string;
   artistImage: string;
   appleId?: string;

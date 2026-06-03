@@ -26,7 +26,7 @@ export async function authenticate(req: Request) {
         ApiKeyModel.findByIdAndUpdate(apiKey._id, {
             lastUsedAt: new Date(),
             updatedAt: new Date()
-        }).catch(() => { });
+        }).catch(err => console.error("Background save error:", err));
 
         return { user: apiKey.userId, msg: null, authType: 'api_key' };
     } else {

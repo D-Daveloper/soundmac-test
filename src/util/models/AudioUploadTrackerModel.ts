@@ -4,7 +4,6 @@ import mongoose from "mongoose";
 const AudioUploadTrackerSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   artist: { type: mongoose.Schema.Types.ObjectId, ref: "Artist" },
-  artistName: { type: String,required:true },
   s3Key: { type: String, required: true },
   upc: { type: String, required: true },
 

@@ -2,6 +2,7 @@ import { albumFromApi, TrackForm } from "@/app/type";
 import { generateISRC, generateMultipleISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
+import { authenticate } from "@/util/middleware/authMiddleware";
 import { validateNonDraftTracks } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
@@ -15,8 +16,7 @@ export async function GET(req: Request) {
   try {
     let tracks;
     await dbConnect();
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
 
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
@@ -25,6 +25,8 @@ export async function GET(req: Request) {
     console.log(searchParams);
 
     const albumTitle = searchParams.get("albumTitle");
+    console.log(albumTitle);
+    
     if (!albumTitle) {
       return NextResponse.json(
         {
@@ -47,8 +49,8 @@ export async function GET(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     }
     tracks = await TrackModel.find({
-      albumName: albumTitle,
       user: userJwt.user,
+      albumName: albumTitle,
     }).lean();
 
     if (tracks && tracks.length <= 0) {
@@ -89,8 +91,8 @@ export async function POST(req: Request) {
 
     await dbConnect();
 
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -199,20 +201,18 @@ export async function POST(req: Request) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      await Promise.all([
-        AudioUploadTrackerModel.updateMany(
-          {
-            upc: userAlbum.upc,
-            status: "PENDING",
-          },
-          { $set: { status: "ACTIVE" } },
-          { session },
-        ),
-        TrackModel.insertMany(docs, { session }),
-        AlbumModel.findByIdAndUpdate(userAlbum._id, {
+      await AudioUploadTrackerModel.updateMany(
+        {
+          upc: userAlbum.upc,
+          status: "PENDING",
+        },
+        { $set: { status: "ACTIVE" } },
+        { session },
+      ),
+        await TrackModel.insertMany(docs, { session }),
+        await AlbumModel.findByIdAndUpdate(userAlbum._id, {
           unassignedNumbers: userAlbum.unassignedNumbers,
         }, { session })
-      ]);
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
@@ -241,8 +241,8 @@ export async function PUT(req: Request) {
 
     await dbConnect();
 
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -270,6 +270,7 @@ export async function PUT(req: Request) {
       const err = validateNonDraftTracks(
         tracks[i],
         userAlbum.unassignedNumbers,
+        true
       );
       if (err) {
         return NextResponse.json(
@@ -279,39 +280,60 @@ export async function PUT(req: Request) {
       }
     }
 
-    const docs = tracks.map((track, index) => ({
-      releaseTitle: track.title,
-      genre: track.genre,
-      releaseLanguage: track.language,
-      releaseAudio: track.s3key,
-      songWriter: track.song_writer,
-      producer: track.producer,
-      performer: track.performer,
-      featuredArtist: track.featured_artist || [],
-      explicitContent: track.explicit_content,
-      lyrics: track.lyrics,
-      startClip: track.start_clip,
-      // upc: userAlbum.upc,
-      // isrc: track.isrc || Date.now() + index,
-      artistName: userAlbum.artistName,
-      artist: userAlbum.artist,
-      albumName: userAlbum.releaseTitle,
-      album: userAlbum._id,
-      // trackNumber: track.track_number,
-      anotherDistributionCheck: track.another_distribution_check,
-      user: user!._id,
-      releaseStatus: "pending",
-      catalogNumber: "SM" + Date.now() + index,
+    const bulkOps = tracks.map((track, index) => ({
+      updateOne: {
+        // 1. Find the specific track by its unique identifier (e.g., track._id or track.title)
+        filter: {
+          upc: userAlbum.upc,
+          _id: track.id // Or use another unique field if _id isn't in 'track'
+        },
+        // 2. Apply the updates using the proper $set operator
+        update: {
+          $set: {
+            releaseTitle: track.title,
+            genre: track.genre,
+            releaseLanguage: track.language,
+            releaseAudio: track.s3key,
+            songWriter: track.song_writer,
+            producer: track.producer,
+            performer: track.performer,
+            featuredArtist: track.featured_artist || [],
+            explicitContent: track.explicit_content,
+            lyrics: track.lyrics,
+            startClip: track.start_clip,
+            artistName: userAlbum.artistName,
+            artist: userAlbum.artist,
+            albumName: userAlbum.releaseTitle,
+            album: userAlbum._id,
+            user: user._id,
+            releaseStatus: "pending",
+          }
+        },
+      }
     }));
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+      // Run all updates in one efficient command
+      await TrackModel.bulkWrite(bulkOps, { session });
 
-    await AudioUploadTrackerModel.updateMany(
-      {
-        upc: userAlbum.upc,
-        status: "PENDING",
-      },
-      { $set: { status: "ACTIVE" } },
-    );
-    await TrackModel.updateMany({ upc: userAlbum.upc }, docs);
+      await AudioUploadTrackerModel.updateMany(
+        { 
+          upc: userAlbum.upc,
+          status: "PENDING",
+        },
+        { $set: { status: "ACTIVE" } },
+        { session },
+      );
+      await session.commitTransaction();
+
+    } catch (error) {
+      await session.abortTransaction();
+
+      throw error;
+    } finally {
+      await session.endSession();
+    }
 
     return NextResponse.json({ msg: "Tracks saved" }, { status: 200 });
   } catch (error) {

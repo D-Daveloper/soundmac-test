@@ -24,6 +24,7 @@ import {
 } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
+import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { ArrowRight, Info, Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -33,6 +34,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const SongForm = () => {
+  const queryClient = useQueryClient();
   const api = UseAxios();
   const router = useRouter();
   const dashboardContext = useContext(DashboardContext);
@@ -266,11 +268,13 @@ const SongForm = () => {
     }
 
     Object.entries(form).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && key != "territories") {
         value.forEach((v) => formData.append(`${key}`, JSON.stringify(v)));
+      } else if (key === "territories" && Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}`, v));
       } else if (key === "timeZone" && typeof value === "object") {
         formData.append(key, JSON.stringify(value));
-      } else if (value){
+      } else if (value) {
         formData.append(key, value);
       }
     });
@@ -287,11 +291,11 @@ const SongForm = () => {
         toast.info(
           "Uploading song. This may take a while depending on your internet speed.",
         );
-        res = await api.post("song", formData, {
+        res = await api.post("v1/music/song", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       } else {
-        res = await api.post("song/draft", formData, {
+        res = await api.post("v1/music/song/draft", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
       }
@@ -299,6 +303,9 @@ const SongForm = () => {
       if (action === "upload") {
         setshowSuccessPage(true);
       }
+      queryClient.invalidateQueries({
+        queryKey: ["manageSongs"],
+      });
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
       localStorage.removeItem("featured_artist");
@@ -411,8 +418,8 @@ const SongForm = () => {
           : undefined,
         music_image: null,
         song_audio: null,
-        cover_song:false,
-        license:null
+        cover_song: false,
+        license: null,
       });
     }
   }, []);
@@ -602,7 +609,7 @@ const SongForm = () => {
                               href={"/dashboard/explore/coverLicense"}
                               className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
                             >
-                              Get License here 
+                              Get License here
                               <ArrowRight color="#11456B" size={15} />
                             </Link>
                           </p>
@@ -1618,12 +1625,8 @@ const SongForm = () => {
                         className="object-cover w-20 h-20 rounded-lg"
                       />
                       <div className="text-main-heading flex-1 line-clamp-1 ">
-                        <p className="text-xl font-normal">
-                          {"songForm.title"}
-                        </p>
-                        <p className="text-sm font-light">
-                          {"songForm.artist"}
-                        </p>
+                        <p className="text-xl font-normal">{songForm.title}</p>
+                        <p className="text-sm font-light">{songForm.artist}</p>
                       </div>
                     </div>
                     <div className="flex gap-3 mt-8">

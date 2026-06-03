@@ -411,7 +411,7 @@ const SongModelSchema = new mongoose.Schema(
 // Indexes for better query performance
 
 // Uniqueness constraints
-SongModelSchema.index({ artistName: 1, releaseTitle: 1 }, { unique: true });
+SongModelSchema.index({ user:1, artistName: 1, releaseTitle: 1 }, { unique: true });
 SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true });
 SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true });
 
@@ -440,7 +440,6 @@ SongModelSchema.index(
 
 // User-scoped queries (keep if used elsewhere in your app)
 SongModelSchema.index({ user: 1, createdAt: -1 });
-SongModelSchema.index({ user: 1, artistName: 1 });
 SongModelSchema.index(
   { user: 1, releaseTitle: 1, createdAt: -1 },
   { collation: { locale: "en", strength: 2 } },
@@ -449,7 +448,6 @@ SongModelSchema.index(
 /**
  * Static method to approve a song and create metadata atomically
  * @param {ObjectId} songId - The ID of the song to approve
- * @param {Object} session - The MongoDB client session
  * @param {string} label - The user label
  */
 SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, label: string) {

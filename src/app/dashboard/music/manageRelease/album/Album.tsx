@@ -94,6 +94,9 @@ const Album = () => {
       icon: <Music strokeWidth={1} />,
       iconFunction: (release: albumFromApi) => {
         if (release.releaseStatus === "draft") {
+          setinfoPopUpText(
+            "Draft Albums can not add tracks, please complete your album to be able to add tracks.",
+          );
           setShowCannotAddTracks(true);
           return;
         }
@@ -108,6 +111,9 @@ const Album = () => {
       icon: <Eye strokeWidth={1} />,
       iconFunction: (release: albumFromApi) => {
         if (release.releaseStatus === "draft") {
+          setinfoPopUpText(
+            "Draft Albums can not View tracks, please complete your album to be able to View tracks.",
+          );
           setShowCannotAddTracks(true);
           return;
         }
@@ -162,8 +168,8 @@ const Album = () => {
   };
   const handleDeleteAlbum = async (release: albumFromApi) => {
     try {
-      if (release.releaseStatus! !== "draft") {
-        return toast.info("Only draft Albums can be deleted");
+      if (release.releaseStatus! === "approved") {
+        return toast.info("Approved alvums cannot be deleted");
       }
       await mutateAsync({
         releaseTitle: release.releaseTitle,
@@ -179,9 +185,7 @@ const Album = () => {
   const handleMarkAlbumcomplete = async (release: albumFromApi) => {
     try {
       if (release.releaseStatus! !== "pending") {
-        setinfoPopUpText(
-          "Please assign all track numbers to mark as complete.",
-        );
+        setinfoPopUpText("Only Pending Albums can be marked as completed.");
         setShowCannotAddTracks(true);
         return;
       }
@@ -193,7 +197,7 @@ const Album = () => {
         return;
       }
       await markAlbumCompletedAsync({
-        releaseTitle: release.releaseTitle,
+        releaseId: release._id,
       });
       setSelectedIndex(null);
       release.releaseStatus = "completed";
@@ -452,16 +456,20 @@ const Album = () => {
           {/* main body */}
           <div
             className={
-              isFetching || isLoading || isPendingAlbums || isRefetchingAlbums ||isPendingMarkAlbumCompletedAsync
+              isFetching ||
+              isLoading ||
+              isPendingAlbums ||
+              isRefetchingAlbums ||
+              isPendingMarkAlbumCompletedAsync
                 ? "flex justify-center items-center md:max-h-[400px] w-full"
-                : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[600px] "
+                : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 "
             }
           >
             {isFetching ||
             isLoading ||
             isPendingAlbums ||
             isRefetchingAlbums ||
-            isPendingMarkAlbumCompletedAsync? (
+            isPendingMarkAlbumCompletedAsync ? (
               <InlineLoadingScreen />
             ) : (
               // song card
@@ -494,7 +502,7 @@ const Album = () => {
                       </span>
                       {new Date(song.releaseDate).toLocaleDateString()}
                     </p>
-                   <div className="flex items-end">
+                    <div className="flex items-end">
                       <p className="">
                         <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
                           Label:{" "}
@@ -632,7 +640,7 @@ const Album = () => {
                   <h3 className="text-xl font-normal leading-[30px] tracking-[-1px] text-main-heading text-center">
                     Unavaliable
                   </h3>
-                  <p className="text-body-two-regular text-text-body">
+                  <p className="text-body-two-regular text-text-body text-center">
                     {infoPopUpText}
                   </p>
                   {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">

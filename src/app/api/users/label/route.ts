@@ -7,6 +7,8 @@ import { parseLabelFormData, uploadImage } from "@/util/middleware/functions";
 import Label from "@/util/models/labelModel";
 import mongoose from "mongoose";
 
+const acceptedUserTypes = ["INDIE_LABEL", "MAJOR_LABEL"]
+
 export async function POST(req: Request) {
   try {
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
@@ -66,8 +68,17 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 401 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 401 };
-    } else if (user.label != null) {
+    } else if (user.label != null && user.label != "Independent Artist") {
       Uploaderror = { msg: "Only one label per account", status: 400 };
+    } else if (!acceptedUserTypes.includes(user.type)) {
+      Uploaderror = { msg: `${user.type.replaceAll("_", " ")} can not create label account`, status: 402 };
+     } else if (user.premium !== true) {
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      user.premium = false;
+      user.premiumExpiration = null;
+      await user.save();
+      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     }
 
     if (Uploaderror != null) {
@@ -115,7 +126,7 @@ export async function POST(req: Request) {
     }
 
     const session = await mongoose.startSession();
-    
+
     try {
       session.startTransaction();
       // Pass the session to every operation

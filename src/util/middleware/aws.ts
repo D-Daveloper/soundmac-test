@@ -17,9 +17,9 @@ export const s3 = new S3Client({
 /**
  * Delete songs from S3 with retry logic
  */
-export async function deleteSongsFromS3WithRetry(s3KeyAudio:string[]) {
+export async function deleteSongsFromS3WithRetry(s3KeyAudio: string[]) {
   const bucketName = process.env.AWS_S3_BUCKET_NAME;
-  
+
   if (!bucketName) {
     throw new Error('S3 bucket name not configured');
   }
@@ -53,14 +53,14 @@ export async function deleteSongsFromS3WithRetry(s3KeyAudio:string[]) {
 /**
  * Delete multiple objects from S3 (up to 1000 at a time)
  */
-export async function deleteMultipleFromS3(bucketName:string, s3Keys:string[]) {
+export async function deleteMultipleFromS3(bucketName: string, s3Keys: string[]) {
   // S3 allows max 1000 objects per batch
   const batchSize = 1000;
   let totalDeleted = 0;
 
   for (let i = 0; i < s3Keys.length; i += batchSize) {
     const batch = s3Keys.slice(i, i + batchSize);
-    
+
     const command = new DeleteObjectsCommand({
       Bucket: bucketName,
       Delete: {
@@ -70,19 +70,19 @@ export async function deleteMultipleFromS3(bucketName:string, s3Keys:string[]) {
     });
 
     const response = await s3.send(command);
-    
+
     if (response.Errors && response.Errors.length > 0) {
       console.error('Some files failed to delete from S3:', response.Errors);
-      
+
       // If any errors occurred, throw to trigger retry
       throw new Error(
         `Failed to delete ${response.Errors.length} files: ${response.Errors[0].Message}`
       );
     }
-    
+
     const deletedCount = response.Deleted?.length || 0;
     totalDeleted += deletedCount;
-    
+
     console.log(`Deleted batch ${Math.floor(i / batchSize) + 1}: ${deletedCount} files`);
   }
 
@@ -92,24 +92,24 @@ export async function deleteMultipleFromS3(bucketName:string, s3Keys:string[]) {
 /**
  * Delete single object from S3
  */
-export async function deleteSingleFromS3WithError(bucketName:string, s3Key:string) {
+export async function deleteSingleFromS3WithError(bucketName: string, s3Key: string) {
   try {
     const command = new DeleteObjectCommand({ Bucket: bucketName, Key: s3Key });
     const response = await s3.send(command);
-    
+
     // Validate response
     if (response.$metadata?.httpStatusCode !== 204 && response.$metadata?.httpStatusCode !== 200) {
       throw new Error(`Unexpected status: ${response.$metadata?.httpStatusCode}`);
     }
-    
+
     return 1;
   } catch (error) {
     if (error instanceof Error && error.name === 'NoSuchKey') return 1; // Already deleted
     throw error; // ✅ Propagate error for retry
   }
 }
-export async function deleteSingleFromS3(bucketName:string, s3Key:string):Promise<boolean> {
-try {
+export async function deleteSingleFromS3(bucketName: string, s3Key: string): Promise<boolean> {
+  try {
     const command = new DeleteObjectCommand({ Bucket: bucketName, Key: s3Key });
     await s3.send(command);
     return true;

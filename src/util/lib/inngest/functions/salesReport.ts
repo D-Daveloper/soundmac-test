@@ -11,7 +11,6 @@ import salesReportBatch from "@/util/models/saleReportBatchModel";
 import { stripQuotes, normalize } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import AlbumModel from "@/util/models/AlbumModel";
-import Artist from "@/util/models/artistModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import dbConnect from "@/util/db";
 
@@ -87,7 +86,7 @@ export const uploadSalesReport = inngest.createFunction(
                 let userCatalogNumber = catalogNumber;
                 let onModel: string | undefined = undefined;  // ← undefined, never ''
                 if (songResult?.user) {
-                    onModel= 'song';
+                    onModel = 'song';
                     userId = songResult.user;
                     userUpc = songResult.upc
                     userIsrc = songResult.isrc
@@ -96,9 +95,9 @@ export const uploadSalesReport = inngest.createFunction(
                     artistId = songResult.artist
                     userCatalogNumber = songResult.catalogNumber
                 } else if (albumResult?.user) {
-                    console.log("cat before",userCatalogNumber);
-                    console.log("found album",albumResult);
-                    
+                    console.log("cat before", userCatalogNumber);
+                    console.log("found album", albumResult);
+
                     onModel = "album";
                     userId = albumResult.user;
                     userUpc = albumResult.upc
@@ -107,7 +106,7 @@ export const uploadSalesReport = inngest.createFunction(
                     userTrackArtist = albumResult.artistName
                     artistId = albumResult.artist
                     userCatalogNumber = albumResult.catalogNumber
-                } 
+                }
                 // else if (artistResult?.user) {
                 //     const [realSong,realAlbum] = await Promise.all([
                 //         SongModel.find({user: artistResult.user}).lean(),
@@ -142,7 +141,7 @@ export const uploadSalesReport = inngest.createFunction(
                     user: userId,
                     reportBatch: batchId,
                     matchStatus: userId ? "matched" : "unmatched",
-                    ...(onModel ? { onModel } : {}), 
+                    ...(onModel ? { onModel } : {}),
                 });
 
                 // 💰 create ledger entry ONLY if matched
@@ -162,10 +161,10 @@ export const uploadSalesReport = inngest.createFunction(
                 session.startTransaction();
 
                 // Pass the session to every operation
-                await Promise.all([
-                    salesReport.insertMany(sales, { session }),
-                    salesReportLedger.insertMany(ledgers, { session }),
-                    salesReportBatch.findByIdAndUpdate({ _id: batchId }, {
+
+                await salesReport.insertMany(sales, { session }),
+                    await salesReportLedger.insertMany(ledgers, { session }),
+                    await salesReportBatch.findByIdAndUpdate({ _id: batchId }, {
                         $set: {
                             status: "completed",
                             totalRows: data.length,
@@ -173,9 +172,9 @@ export const uploadSalesReport = inngest.createFunction(
                             unProcessedRows: sales.length - ledgers.length
                         }
                     }, { session }),
-                ])
 
-                await session.commitTransaction();
+
+                    await session.commitTransaction();
             } catch (error) {
                 await session.abortTransaction();
                 throw error;

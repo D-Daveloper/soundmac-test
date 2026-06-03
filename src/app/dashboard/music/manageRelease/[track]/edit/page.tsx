@@ -171,7 +171,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
           "Uploading song. This may take a while depending on your internet speed.",
         );
         res = await api.put(
-          "album/track",
+          "v1/music/album/track",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
             headers: { "Content-Type": "application/json" },
@@ -179,7 +179,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         );
       } else {
         res = await api.put(
-          "album/track/draft",
+          "v1/music/album/track/draft",
           JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
           {
             headers: { "Content-Type": "application/json" },

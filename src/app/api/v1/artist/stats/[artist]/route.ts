@@ -1,32 +1,31 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/util/db";
-import Artist, { IArtist } from "@/util/models/artistModel";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
+import Artist from "@/util/models/artistModel";
+import { authenticate } from "@/util/middleware/authMiddleware";
 // import { Artist } from "@/app/type";
 
 export async function GET(req: Request,  context: { params: Promise<{ artist: string }> }) {
   try {
     const { artist } = await context.params;
-    let artists: IArtist[] = [];
+    let artistNames: any[] = [];
+    let mainArtist = null;
     await dbConnect();
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
-
+    const userJwt = await authenticate(req);
+    
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-      artists = await Artist.find({user: userJwt.user});
-      if (!artists || artists.length === 0) {
-        return NextResponse.json({ msg: "No artists found" }, { status: 404 });
+      mainArtist = await Artist.findOne({user: userJwt.user,artistName:artist}).lean();
+      if (!mainArtist) {
+        return NextResponse.json({ msg: "Invalid Artist." }, { status: 404 });
       }
-      const artistNames = artists.map(artist=>artist.artistName);
-      const mainArtist = artists.filter((art)=>art.artistName===artist);
+      artistNames = await Artist.distinct('artistName',{user: userJwt.user}).sort({createdAt:-1});
     return NextResponse.json(
       {
         artists:artistNames,
         totalReleases:0,
-        artist:mainArtist[0]||null
+        artist:mainArtist
       },
       { status: 200 }
     );

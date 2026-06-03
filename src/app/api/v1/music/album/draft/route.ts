@@ -1,12 +1,12 @@
 import { albumFromApi } from "@/app/type";
+import { generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
-import { getUPCs } from "@/util/middleware/dpm";
+import { authenticate } from "@/util/middleware/authMiddleware";
 import {
   parseAlbumFormData,
   validateDraftAlbums,
 } from "@/util/middleware/functions";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import User from "@/util/models/userModel";
@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     let userArtist = null;
+    let release = null;
 
     const formData = await req.formData();
     console.log({ ...formData });
@@ -27,8 +28,9 @@ export async function POST(req: Request) {
     ) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
+
+    const userJwt = await authenticate(req);
+
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
@@ -62,14 +64,26 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     } else {
-      userArtist = await Artist.findOne({
+      const userArtistQuery = Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
-      }).lean();
+      });
+
+      const releaseQuery = AlbumModel.findOne({
+        user: user._id,
+        artistName: (payload.artist as string).trim(),
+        releaseTitle: payload.title!.trim(),
+      }).lean<albumFromApi>();
+
+      [userArtist, release] = await Promise.all([
+        userArtistQuery, releaseQuery
+      ]).catch(err => { throw err; });
     }
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    } else if (release) {
+      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
 
     if (user!.type === "EMERGING_ARTIST") {
@@ -104,7 +118,7 @@ export async function POST(req: Request) {
       copyRightHolder: payload.copyRightHolder,
       copyRightYear: payload.copyRightYear,
       dsp: payload.dsp,
-      upc: payload.upc,
+      upc: payload.upc || await generateUPC(),
       territories: payload.territories,
       releaseImage: undefined,
       artistName: userArtist.artistName,
@@ -143,9 +157,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
-    const userData = await verifyJWT();
-
-    const userJwt = verifyUser(userData);
+    const userJwt = await authenticate(req);
 
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
@@ -164,14 +176,18 @@ export async function PUT(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else {
-      userArtist = await Artist.findOne({
+
+      const userArtistQuery = await Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
       });
-      release = await AlbumModel.findOne({
+      const releaseQuery = await AlbumModel.findOne({
         upc: payload.upc,
-        user: user._id,
       }).lean<albumFromApi>();
+      
+      [userArtist, release] = await Promise.all([
+        userArtistQuery, releaseQuery
+      ]).catch(err => { throw err; });
     }
     console.log(release);
 
@@ -217,7 +233,7 @@ export async function PUT(req: Request) {
         copyRightHolder: payload.copyRightHolder,
         copyRightYear: payload.copyRightYear,
         dsp: payload.dsp,
-        upc: payload.upc ? payload.upc : release.upc,
+        upc: release.upc,
         territories: payload.territories,
         artistName: userArtist.artistName,
         artist: userArtist._id,
