@@ -42,6 +42,7 @@ const TrackSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: [true, "Album ID is required"],
       trim: true,
+      ref: "Album",
     },
     artistName: {
       type: String,
@@ -219,8 +220,7 @@ TrackSchema.index({ upc: 1, user: 1 });
 TrackSchema.index({ upc: 1, releaseTitle: 1 }, { unique: true });
 // TrackSchema.index({ genre: 1 });
 TrackSchema.index({ isrc: 1 }, { unique: true, sparse: true });
-// TrackSchema.index({ upc: 1 }, { unique: true, sparse: true });
-// delete mongoose.models.Song;
+
 
 const TrackModel =
   mongoose.models?.Track || mongoose.model("Track", TrackSchema);

@@ -2,18 +2,17 @@ import { generateISRC, generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
-import { getUPCs } from "@/util/middleware/dpm";
 import {
   getYearRange,
   parseSongFormData,
   validateDraftSongs,
 } from "@/util/middleware/functions";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import Artist from "@/util/models/artistModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks } from "date-fns";
 import { NextResponse } from "next/server";
+import { release } from "os";
 
 export async function POST(req: Request) {
   try {
@@ -61,23 +60,7 @@ export async function POST(req: Request) {
       user.premiumExpiration = null;
       await user.save();
       Uploaderror = { msg: "Please upgrade your account.", status: 402 };
-    } else {
-      const userArtistQuery = Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string).trim(),
-      });
-    
-      const releaseQuery = SongModel.findOne({
-        user: user._id,
-        artistName: (payload.artist as string).trim(),
-        releaseTitle: payload.title!.trim(),
-      }).lean();
-
-      [userArtist, release] = await Promise.all([
-        userArtistQuery, releaseQuery
-      ]).catch(err => { throw err; });
     }
-
     if (Uploaderror != null) {
       return NextResponse.json(
         { msg: Uploaderror.msg },
@@ -85,28 +68,48 @@ export async function POST(req: Request) {
       );
     } // return any errors up to this point and delete the song
 
+    if (user!.type === "EMERGING_ARTIST") {
+      const { startOfYear, endOfYear } = getYearRange();
+
+      const releasesThisYear = await SongModel.countDocuments({
+        user: user!._id,
+        createdAt: {
+          $gte: startOfYear,
+          $lt: endOfYear,
+        },
+      });
+
+      if (releasesThisYear >= 2) {
+        return NextResponse.json(
+          { msg: "Emerging artists can only upload 2 releases per year" },
+          { status: 403 },
+        );
+      }
+    }
+
+    const userArtistQuery = Artist.findOne({
+      user: userJwt.user,
+      artistName: (payload.artist as string).trim(),
+    }).lean();
+
+    const releaseQuery = SongModel.findOne({
+      user: user!._id,
+      artistName: (payload.artist as string).trim(),
+      releaseTitle: payload.title!.trim(),
+    }).lean();
+
+    [userArtist, release] = await Promise.all([
+      userArtistQuery, releaseQuery
+    ]).catch(err => { throw err; });
+
+
+
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }else if (release) {
+    } else if (release) {
       return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
 
-    const { startOfYear, endOfYear } = getYearRange();
-
-    const releasesThisYear = await SongModel.countDocuments({
-      user: user!._id,
-      createdAt: {
-        $gte: startOfYear,
-        $lt: endOfYear,
-      },
-    });
-
-    if (user!.type === "EMERGING_ARTIST" && releasesThisYear >= 2) {
-      return NextResponse.json(
-        { msg: "Emerging artists can only upload 2 releases per year" },
-        { status: 403 },
-      );
-    }
 
     if (
       payload.song_writer &&
@@ -175,7 +178,7 @@ export async function POST(req: Request) {
       lyrics: payload.lyrics,
       startClip: payload.startClip,
       dsp: payload.dsp,
-      upc: payload.upc ? payload.upc :await generateUPC(),
+      upc: payload.upc ? payload.upc : await generateUPC(),
       isrc: payload.isrc ? payload.isrc : await generateISRC(),
       territories: payload.territories,
       artistName: userArtist.artistName,
@@ -216,6 +219,8 @@ export async function PUT(req: Request) {
       typeof payload.artist !== "string"
     ) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
+    } else if (!payload.upc) {
+      return NextResponse.json({ msg: "UPC is required" }, { status: 400 });
     }
 
     await dbConnect();
@@ -234,11 +239,6 @@ export async function PUT(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 400 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 400 };
-    } else {
-      userArtist = await Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string)?.trim(),
-      });
     }
 
     if (Uploaderror != null) {
@@ -248,22 +248,43 @@ export async function PUT(req: Request) {
       );
     } // return any errors up to this point and delete the song
 
+    userArtist = await Artist.findOne({
+      user: userJwt.user,
+      artistName: (payload.artist as string)?.trim(),
+    }).lean()
+
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
     let releaseTitleAlreadyExist = null;
 
-    releaseTitleAlreadyExist = await SongModel.find({
-      artistName: userArtist.artistName,
-      releaseTitle: payload.title,
-    });
+    releaseTitleAlreadyExist = await SongModel.findOne({
+      upc: payload.upc
+    }).lean();
 
-    if (releaseTitleAlreadyExist && releaseTitleAlreadyExist.length > 1) {
-      return NextResponse.json(
-        { msg: "Release title already exists" },
-        { status: 400 },
-      );
+    if (!releaseTitleAlreadyExist) {
+      return NextResponse.json({ msg: "Invalid Release" }, { status: 400 })
     }
+
+    if (releaseTitleAlreadyExist.releaseStatus != "draft") {
+      return NextResponse.json({ msg: "Only draft Release can be edited here." }, { status: 400 })
+    }
+    
+    if (releaseTitleAlreadyExist.releaseTitle != payload.title) {
+      const checkReleaseTitle = await SongModel.find({
+        user: user!._id,
+        artistName: userArtist.artistName,
+        releaseTitle: payload.title
+      }).lean();
+      if (checkReleaseTitle.length > 0) {
+        return NextResponse.json(
+          { msg: "Release title already exists" },
+          { status: 400 },
+        );
+      }
+    }
+
+
     if (
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
@@ -305,9 +326,6 @@ export async function PUT(req: Request) {
     if (isDraftSongValid != null) {
       return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
     }
-    if (!payload.upc) {
-      return NextResponse.json({ msg: "UPC is required" }, { status: 400 });
-    }
     const savedSong = await SongModel.findOneAndUpdate(
       {
         user: userJwt.user,
@@ -341,6 +359,7 @@ export async function PUT(req: Request) {
         territories: payload.territories,
         artistName: userArtist.artistName,
         artist: userArtist._id,
+        releaseStatus: "draft"
       },
       { runValidators: true },
     );

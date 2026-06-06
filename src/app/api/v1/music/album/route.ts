@@ -73,19 +73,25 @@ export async function POST(req: Request) {
         { msg: "Please upgrade your account." },
         { status: 402 },
       );
-    } else {
-
+    } else if (user!.type === "EMERGING_ARTIST") {
+        return NextResponse.json(
+          { msg: "Emerging artists can not upload Album" },
+          { status: 403 },
+        );
+      }
+      
       [userArtist, release] = await Promise.all([
          Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
       }).lean(),
+
       AlbumModel.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
         releaseTitle: payload.title!.trim(),
       }).lean<albumFromApi>()]).catch(err => { throw err; });
-    }
+    
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
@@ -93,12 +99,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
 
-    if (user!.type === "EMERGING_ARTIST") {
-      return NextResponse.json(
-        { msg: "Emerging artists can not upload Album" },
-        { status: 403 },
-      );
-    }
 
     const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
 
@@ -156,7 +156,7 @@ export async function POST(req: Request) {
       numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
       user: user._id,
-      catalogNumber: "SM" + Date.now(),
+      catalogNumber: "SM" + payload.upc,
       timeZone: payload.timeZone,
     });
     await album.save();
@@ -271,11 +271,25 @@ export async function PUT(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
-    } else {
+    }
+
+      const isAlbumForValid = validateNonDraftAlbums(payload);
+  
+      if (isAlbumForValid != null) {
+        return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+      }
+  
+      const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
+      if (isNaN(num) || num < 2) {
+        return NextResponse.json(
+          { msg: "No. of tracks must be at least 2" },
+          { status: 400 },
+        );
+      }
       const userArtistQuery = Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
-      });
+      }).lean();
 
       const releaseQuery = AlbumModel.findOne({
         upc: payload.upc,
@@ -284,7 +298,7 @@ export async function PUT(req: Request) {
       [userArtist, release] = await Promise.all([
         userArtistQuery, releaseQuery
       ]).catch(err => { throw err; });
-    }
+    
     
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
@@ -295,21 +309,22 @@ export async function PUT(req: Request) {
         { msg: "Approved albums cannot be edited" },
         { status: 400 },
       );
+    } else if (release.user.toString() !== user!._id.toString()) {
+      return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
+    } else if (release.releaseTitle != payload.title) {
+      const checkReleaseTitle = await AlbumModel.find({
+        user: user!._id,
+        artistName: userArtist.artistName,
+        releaseTitle: payload.title
+      }).lean();
+      if (checkReleaseTitle.length > 0) {
+        return NextResponse.json(
+          { msg: "Release title already exists" },
+          { status: 400 },
+        );
+      }
     }
 
-    const isAlbumForValid = validateNonDraftAlbums(payload);
-
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
-    }
-
-    const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
-    if (isNaN(num) || num < 1) {
-      return NextResponse.json(
-        { msg: "No. of tracks must greater than 0" },
-        { status: 400 },
-      );
-    }
     const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
     let imageUrl: {
@@ -434,10 +449,7 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
       // Find and verify release belongs to user before deleting
-      const releaseQuery = AlbumModel.findOne({
-        user: user._id,
-        _id: formData.releaseId,
-      }).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
+      const releaseQuery = AlbumModel.findById(formData.releaseId).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
       const tracksQuery = TrackModel.find<Track>(
         {
           user: user._id,
@@ -457,6 +469,8 @@ export async function PATCH(req: Request) {
         },
         { status: 400 },
       );
+    }else if (release.user.toString() !== user!._id.toString()) {
+      return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
     }
     if (release.releaseStatus != "pending") {
       return NextResponse.json(

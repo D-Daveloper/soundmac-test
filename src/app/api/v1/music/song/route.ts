@@ -73,21 +73,6 @@ export async function POST(req: Request) {
       user.premiumExpiration = null;
       await user.save();
       Uploaderror = { msg: "Please upgrade your account.", status: 402 };
-    } else {
-      const userArtistQuery = Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string).trim(),
-      });
-
-      const releaseQuery = SongModel.findOne({
-        user: user._id,
-        artistName: (payload.artist as string).trim(),
-        releaseTitle: payload.title!.trim(),
-      }).lean();
-
-      [userArtist, release] = await Promise.all([
-        userArtistQuery, releaseQuery
-      ]).catch(err => { throw err; });
     }
 
     if (Uploaderror != null) {
@@ -96,12 +81,6 @@ export async function POST(req: Request) {
         { status: Uploaderror.status },
       );
     } // return any errors up to this point and delete the song
-
-    if (!userArtist) {
-      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }else if (release) {
-      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
-    }
 
     if (user!.type === "EMERGING_ARTIST") {
       const { startOfYear, endOfYear } = getYearRange();
@@ -121,6 +100,30 @@ export async function POST(req: Request) {
         );
       }
     }
+
+    const userArtistQuery = Artist.findOne({
+      user: userJwt.user,
+      artistName: (payload.artist as string).trim(),
+    });
+
+    const releaseQuery = SongModel.findOne({
+      user: user!._id,
+      artistName: (payload.artist as string).trim(),
+      releaseTitle: payload.title!.trim(),
+    }).lean();
+
+    [userArtist, release] = await Promise.all([
+      userArtistQuery, releaseQuery
+    ]).catch(err => { throw err; });
+
+
+
+    if (!userArtist) {
+      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    } else if (release) {
+      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
+    }
+
 
     if (!payload.featured_artist) {
       payload.featured_artist = [];
@@ -167,7 +170,7 @@ export async function POST(req: Request) {
       console.log(imageUrl);
 
       if (imageUrl.coverUrl == null) {
-        await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
+        // await deleteSingleFromS3(bucketName, payload.s3KeyAudio! as string); // delete uploaded song if image upload fails
         return NextResponse.json({ msg: imageUrl.error }, { status: 400 });
       }
     } catch (error) {
@@ -196,7 +199,7 @@ export async function POST(req: Request) {
         console.log(licenseUrl);
 
         if (licenseUrl.coverUrl == null) {
-          await deleteMultipleFromS3(bucketName, [payload.s3KeyAudio! as string, imageUrl.coverUrl]); // delete uploaded song if image upload fails
+          // await deleteMultipleFromS3(bucketName, [payload.s3KeyAudio! as string, imageUrl.coverUrl]); // delete uploaded song if image upload fails
           return NextResponse.json({ msg: licenseUrl.error }, { status: 400 });
         }
       } catch (error) {
@@ -238,25 +241,25 @@ export async function POST(req: Request) {
       artistName: userArtist.artistName,
       artist: userArtist._id,
       user: user!._id,
-      catalogNumber: "SM" + Date.now(),
+      catalogNumber: "SM" + payload.upc,
       timeZone: payload.timeZone,
       isCoverSong: payload.isCoverSong,
       license: licenseUrl.coverUrl || ""
     });
-    
+
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-        await savedSong.save({ session });
-        await AudioUploadTrackerModel.findOneAndUpdate(
-          {
-            _id: payload.uploadId,
-            s3Key: payload.s3KeyAudio,
-            user: user!._id,
-            status: "PENDING",
-          },
-          { status: "ACTIVE" },
-        ).session(session);
+      await savedSong.save({ session });
+      await AudioUploadTrackerModel.findOneAndUpdate(
+        {
+          _id: payload.uploadId,
+          s3Key: payload.s3KeyAudio,
+          user: user!._id,
+          status: "PENDING",
+        },
+        { status: "ACTIVE" },
+      ).session(session);
       await session.commitTransaction();
     } catch (error) {
       await session.abortTransaction();
@@ -828,24 +831,36 @@ export async function DELETE(req: Request) {
         );
       }
 
-      if (release.releaseStatus === "pending") {
+      if (release.releaseStatus === "pending" || release.releaseStatus === "rejected") {
+
         const isSongDeleted = await deleteMultipleFromS3(bucketName, [
           release.releaseAudio,
-          release.releaseImage,
+          release.releaseImage.split("com/")[1], // extract the s3 key from the url
         ]);
-        if (isSongDeleted) {
-          const deleteSongsResult = await SongModel.findByIdAndDelete({
-            _id: release._id,
-          });
-          await AudioUploadTrackerModel.findOneAndDelete({
-            upc: release.upc,
-          });
 
-          if (deleteSongsResult.deletedCount < 1) {
-            return NextResponse.json(
-              { msg: "Failed to delete." },
-              { status: 400 },
-            );
+        if (isSongDeleted) {
+          const session = await mongoose.startSession();
+          try {
+            session.startTransaction();
+            const deleteSongsResult = await SongModel.findByIdAndDelete({
+              _id: release._id,
+            }).session(session);
+            await AudioUploadTrackerModel.findOneAndDelete({
+              upc: release.upc,
+            }).session(session);
+            if (deleteSongsResult.deletedCount < 1) {
+              return NextResponse.json(
+                { msg: "Failed to delete." },
+                { status: 400 },
+              );
+            }
+            await session.commitTransaction();
+          } catch (error) {
+            await session.abortTransaction();
+            console.log("Transaction error:", error);
+            return NextResponse.json({ msg: "Failed to delete song" }, { status: 500 });
+          } finally {
+            await session.endSession();
           }
           return NextResponse.json({ msg: "Song Deleted" }, { status: 200 });
         } else {
@@ -917,20 +932,7 @@ export async function PUT(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 400 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 400 };
-    } else {
-      const userArtistQuery = Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string)?.trim(),
-      });
-      const releaseQuery = SongModel.findOne({
-        user: userJwt.user,
-        upc: payload.upc,
-      });
-      [userArtist, release] = await Promise.all([
-        userArtistQuery, releaseQuery
-      ]).catch(err => { throw err; });
     }
-
     if (Uploaderror != null) {
       return NextResponse.json(
         { msg: Uploaderror.msg },
@@ -938,23 +940,7 @@ export async function PUT(req: Request) {
       );
     } // return any errors up to this point and delete the song
 
-    if (!userArtist) {
-      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }
-
-    if (!release) {
-      return NextResponse.json({ msg: "Invalid Release" }, { status: 400 });
-    }
-
-    if (release.releaseStatus === "approved") {
-      return NextResponse.json({ msg: "Approved Releases cannot be edited." }, { status: 400 });
-    }
-
     const isSongValid = validateNonDraftSongs(payload);
-    if (!payload.featured_artist) {
-      payload.featured_artist = [];
-    }
-
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
@@ -965,7 +951,7 @@ export async function PUT(req: Request) {
         s3Key: payload.s3KeyAudio,
         user: user!._id,
         status: "PENDING",
-      });
+      }).lean();
 
       if (audioTracker == null) {
         return NextResponse.json(
@@ -974,6 +960,48 @@ export async function PUT(req: Request) {
         );
       }
     }
+
+    const userArtistQuery = Artist.findOne({
+      user: userJwt.user,
+      artistName: (payload.artist as string)?.trim(),
+    }).lean();
+
+    const releaseQuery = SongModel.findOne({
+      upc: payload.upc,
+    }).lean();
+
+    [userArtist, release] = await Promise.all([
+      userArtistQuery, releaseQuery
+    ]).catch(err => { throw err; });
+
+    if (!userArtist) {
+      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }
+
+    if (!release) {
+      return NextResponse.json({ msg: "Invalid Release" }, { status: 400 });
+    } else if (release.releaseStatus === "approved") {
+      return NextResponse.json({ msg: "Approved Releases cannot be edited." }, { status: 400 });
+    } else if (release.user.toString() !== user!._id.toString()) {
+      return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
+    } else if (release.releaseTitle != payload.title) {
+      const checkReleaseTitle = await SongModel.find({
+        user: user!._id,
+        artistName: userArtist.artistName,
+        releaseTitle: payload.title
+      }).lean();
+      if (checkReleaseTitle.length > 0) {
+        return NextResponse.json(
+          { msg: "Release title already exists" },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (!payload.featured_artist) {
+      payload.featured_artist = [];
+    }
+
 
     let imageUrl: {
       error: string | null;
@@ -1054,7 +1082,7 @@ export async function PUT(req: Request) {
         },
         { runValidators: true },
       ).session(session);
-  
+
       if (payload.uploadId) {
         await AudioUploadTrackerModel.findOneAndUpdate(
           {

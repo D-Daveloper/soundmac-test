@@ -30,10 +30,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
         }
 
         // Get audio record from database
-        const release = await SongModel.findOne({ user: user._id, _id: songId }).select("-artistName").populate("artist", "artistName spotifyId appleId -_id").lean();
+        const release = await SongModel.findById(songId).select("-artistName").populate("artist", "artistName spotifyId appleId -_id").lean();
 
         if (!release) {
             return NextResponse.json({ msg: "Audio not found" }, { status: 404 });
+        } else if (release.user.toString() !== user._id.toString()) {
+            return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
         }
         // console.log(release);
 
@@ -88,7 +90,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ songI
                 );
             }
 
-            if (release.releaseStatus === "pending") {
+            if (release.releaseStatus === "pending" || release.releaseStatus === "rejected") {
                 const isSongDeleted = await deleteMultipleFromS3(bucketName, [
                     release.releaseAudio,
                     release.releaseImage.split("com/")[1],
@@ -114,12 +116,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ songI
 
                     } catch (error) {
                         console.log(error);
-                        
+
                         await session.abortTransaction();
                         return NextResponse.json(
-                                { msg: "Failed to delete." },
-                                { status: 400 },
-                            );
+                            { msg: "Failed to delete." },
+                            { status: 400 },
+                        );
 
                     } finally {
                         await session.endSession()
