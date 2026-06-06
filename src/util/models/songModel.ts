@@ -423,10 +423,6 @@ SongModelSchema.index(
 
 // User-scoped queries (keep if used elsewhere in your app)
 SongModelSchema.index({ user: 1, createdAt: -1 });
-SongModelSchema.index(
-  { user: 1, artistName: 1, releaseTitle: 1 },
-  { collation: { locale: "en", strength: 2 } },
-);
 // delete mongoose.models.Song;
 /**
  * Static method to approve a song and create metadata atomically
