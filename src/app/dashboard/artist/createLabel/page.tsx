@@ -100,6 +100,7 @@ const Page = () => {
       });
       setImage(null);
       toast.success(res.data.msg);
+      router.push("/dashboard/artist/createArtist/")
     } catch (error) {
       if (isAxiosError(error)) {
         return;
@@ -203,7 +204,7 @@ const Page = () => {
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <Input
                         value={labelForm.first_name}
-                        title={"Label First Name"}
+                        title={"First Name"}
                         type={"text"}
                         name={"first_name"}
                         placeholder={"Enter Label First Name"}

@@ -100,7 +100,7 @@ const Page = () => {
           </p>
           <button
             onClick={() => {
-              router.push("/dashboard?tab=Artists&section=createArtist");
+              router.push("/dashboard/artist/createArtist");
             }}
             className={
               "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "

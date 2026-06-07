@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       artist = await Artist.find({
         user: user._id,
         artistName: artistName,
-      });
+      }).lean();
       // .explain("executionStats");
     }
 
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const imageType = file.type.split("/")[1];
-    const imageStorageLocation = `testing/artistImages/${artist[0]._id}_${artistName.replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+    const imageStorageLocation = `testing/artistImages/${user.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
     const selectedImage = await uploadImage(
       imageType,
       buffer,
@@ -339,16 +339,7 @@ export async function PUT(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
-      [artist, artists] = await Promise.all([
-        Artist.findOne({
-          _id: artistId,
-          user: user._id
-        }),
-        Artist.find({
-          user: user._id,
-          artistName: artistName
-        })
-      ])
+      artist = await Artist.findById(artistId).lean()
     }
 
     if (!artist) {
@@ -356,16 +347,25 @@ export async function PUT(req: Request) {
         { msg: "Invalid artist ID." },
         { status: 400 }
       );
-    } else if (artists.length > 0) {
-      return NextResponse.json({ msg: "Artist name already exists." },
+    } else if (artist.user.toString() != user._id.toString()) {
+      return NextResponse.json({ msg: "Invalid Artist." },
         { status: 400 })
+    } else if (artist.artistName.trim() != artistName) {
+      const doesArtistNameAlreadyExist = await Artist.find({
+        user: user._id,
+        artistName: artistName
+      }).lean();
+      
+      if (doesArtistNameAlreadyExist.length > 0) {
+        return NextResponse.json({ msg: "Artist name already exist" }, { status: 400 })
+      }
     }
     let selectedImage: { error: string | null, coverUrl: string | null } = { error: null, coverUrl: null };
 
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const imageType = file.type.split("/")[1];
-      const imageStorageLocation = `testing/artistImages/${artist._id}_${artistName.replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const imageStorageLocation = `testing/artistImages/${user.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
       selectedImage = await uploadImage(
         imageType,
         buffer,
