@@ -193,7 +193,7 @@ export async function PATCH(req: Request) {
           artistName: body.artist_name,
         }, { artistStatus: "inactive" }, { session });
 
-        await EntityDeactivation.create({
+        await EntityDeactivation.create([{
           entityType: "artist",
           entityId: artist._id,
           deactivationType: "user",
@@ -201,7 +201,7 @@ export async function PATCH(req: Request) {
           additionalNotes: "user",
           deactivatedBy: user._id,
           entityStatus: "deactivated",
-        }, { session });
+        }], { session });
 
         await session.commitTransaction();
       } catch (error) {
@@ -339,7 +339,7 @@ export async function PUT(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
-      artist = await Artist.findById(artistId).lean()
+      artist = await Artist.findById(artistId);
     }
 
     if (!artist) {
