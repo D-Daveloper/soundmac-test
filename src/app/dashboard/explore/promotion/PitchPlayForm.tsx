@@ -21,6 +21,7 @@ import {
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAxiosError } from "axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 type pitchFormArrayType = {
@@ -236,6 +237,7 @@ const pitchplayFormFields: pitchFormArrayType[] = [
   },
 ];
 const PitchPlayForm = () => {
+  const router = useRouter()
   const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
@@ -348,6 +350,7 @@ const PitchPlayForm = () => {
       });
 
       toast.success(res?.data?.msg);
+      router.push('/dashboard/explore/promotion?page=myPromotions')
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);

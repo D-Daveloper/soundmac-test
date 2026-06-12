@@ -325,7 +325,7 @@ export async function PUT(req: Request) {
       }
     }
 
-    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
+    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1); // check later, adds +1 to the initial number.
 
     let imageUrl: {
       error: string | null;

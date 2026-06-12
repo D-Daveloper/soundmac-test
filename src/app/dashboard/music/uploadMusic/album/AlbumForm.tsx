@@ -4,7 +4,7 @@ import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList, timeZones } from "@/app/constant";
+import { languagesList, NumberOfTracks, timeZones } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type { AlbumForm, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
@@ -42,17 +42,12 @@ const AlbumForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
-  const futureYears = Array.from({ length: 11 }, (_, i) =>
-    (new Date().getFullYear() + i).toString(),
+  const START_YEAR = 1990;
+  const currentYear = new Date().getFullYear();
+
+  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
+    (START_YEAR + i).toString(),
   );
-  const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - (i + 1)).toString(),
-  );
-  const years = [
-    ...pastYears.reverse().filter((_, i) => _ !== "2025"),
-    "2025",
-    ...futureYears,
-  ];
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",
@@ -310,15 +305,34 @@ const AlbumForm = () => {
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
-                        <Input
-                          value={albumForm.number_of_track}
-                          title={"No. of tracks"}
-                          type={"text"}
-                          name={"number_of_track"}
-                          placeholder={"Enter the number of tracks"}
-                          updateValue={handleChange}
-                          required={true}
-                        />
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 sm:text-sm text-lg">
+                            No. of tracks
+                          </p>
+                          <Image
+                            priority={false}
+                            loading="lazy"
+                            src="/required.svg"
+                            alt="a star marking this field as required"
+                            width={0}
+                            height={0}
+                            className="w-2 -mt-5"
+                          />
+                        </div>
+                        <div className="w-full">
+                          <Select
+                            selected={albumForm.number_of_track}
+                            setSelected={(t) =>
+                              setAlbumForm((prev) => ({
+                                ...prev,
+                                number_of_track: t,
+                              }))
+                            }
+                            placeholder="Select Number of tracks..."
+                            options={NumberOfTracks}
+                            name="number_of_track"
+                          />
+                        </div>
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           The Number of tracks expected to be in the album.
                         </p>

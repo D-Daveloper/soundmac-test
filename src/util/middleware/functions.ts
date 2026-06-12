@@ -44,6 +44,20 @@ export const generateOtp = () => {
     }
     return otp;
 };
+
+function isValidDateString(dateStr:string) {
+  return !isNaN(Date.parse(dateStr));
+}
+
+function isDateInPast(targetDate:Date) {
+    const today = new Date();
+    // Reset hours to 0 to compare the actual day
+    today.setHours(0, 0, 0, 0);
+    
+    // Check if target date occurs before today
+    return targetDate.setHours(0, 0, 0, 0) < today.getTime();
+}
+
 // normalize helper
 export const normalize = (str: string) =>
     str?.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim();
@@ -59,11 +73,10 @@ export const formatAmount = (amount: string | number) => {
 }
 export const isSongFormValid = (form: SongForm): string => {
     console.log(form);
-    const twoWeeks = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (form.release_date != undefined)
-        oneWeek = subWeeks(new Date(form.release_date), 1);
+        twoWeeks = subWeeks(new Date(form.release_date), 2);
     if (form.title.length < 3 || form.title.length > 32) {
         return "Song title must be longer than 3 not more than 32";
     } else if (containsEmoji(form.title)) {
@@ -91,14 +104,14 @@ export const isSongFormValid = (form: SongForm): string => {
         return "producer is required";
     } else if (!form.release_date) {
         return "Release date is required";
-    } else if (new Date(form.release_date) < twoWeeks) {
-        return "Release date must be at least two weeks ahead of the upload date";
+    } else if (typeof form.release_date != "string" || isValidDateString(form.release_date)) {
+        return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
     } else if (form.pre_order_check && !form.preOrderDate) {
         return "Pre order date is required";
-    } else if (oneWeek && form.preOrderDate! > oneWeek) {
-        return "Pre order date must be at least one week before the release date";
+    } else if (twoWeeks && new Date(form.preOrderDate!) > twoWeeks) {
+        return "Pre order date must be at least two weeks before the release date";
     } else if (form.dsp.length <= 0) {
         return "DSP is required";
     } else if (
@@ -131,11 +144,10 @@ export const isSongFormValid = (form: SongForm): string => {
 
 export const isAlbumFormValid = (form: AlbumForm): string => {
     console.log(form);
-    const twoWeeks = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (form.release_date != undefined)
-        oneWeek = subWeeks(new Date(form.release_date), 1);
+        twoWeeks = subWeeks(new Date(form.release_date), 1);
     if (form.title === "") {
         return "Album title is required";
     } else if (form.title.length < 3 || form.title.length > 32) {
@@ -148,14 +160,14 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
         return "artist is required";
     } else if (form.release_date === undefined) {
         return "Release date is required";
-    } else if (new Date(form.release_date) < twoWeeks) {
-        return "Release date must be at least two weeks ahead of the upload date";
+    } else if (typeof form.release_date != "string" || isValidDateString(form.release_date)) {
+        return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
     } else if (form.pre_order_check && form.preOrderDate === undefined) {
         return "Pre order date is required";
-    } else if (oneWeek && form.preOrderDate! > oneWeek) {
-        return "Pre order date must be at least one week before the release date";
+    } else if (twoWeeks && new Date(form.preOrderDate!) > twoWeeks) {
+        return "Pre order date must be at least two weeks before the release date";
     } else if (form.dsp.length <= 0) {
         return "DSP is required";
     } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
@@ -717,8 +729,7 @@ export function parseTrackFormData(formData: FormData) {
 export function validateNonDraftSongs(
     payload: ReturnType<typeof parseSongFormData>,
 ) {
-    const twoWeeksFromNow = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (!payload.oldAudio && !payload.uploadId) {
         return "uploadId is required when old audio is not present.";
@@ -749,11 +760,13 @@ export function validateNonDraftSongs(
         return "Release date is required";
     }
 
-    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-
-    if (new Date(payload.releaseDate) < twoWeeksFromNow) {
-        return "Release date must be at least 2 weeks ahead";
+    if(!isDateInPast(new Date(payload.releaseDate))){
+        twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
+
+    // if (new Date(payload.releaseDate) < twoWeeksFromNow) {
+    //     return "Release date must be at least 2 weeks ahead";
+    // }
 
     if (
         (payload.featured_artist && !(payload.featured_artist instanceof Array)) ||
@@ -801,8 +814,8 @@ export function validateNonDraftSongs(
         return "Pre order Date is required";
     }
 
-    if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
-        return "Pre order Date must be 1 week from the release date.";
+    if (twoWeeks && new Date(payload.preOrderDate!) > twoWeeks) {
+        return "Pre order Date must be 2 weeks from the release date.";
     }
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
@@ -851,8 +864,7 @@ export function validateNonDraftSongs(
 export function validateNonDraftAlbums(
     payload: ReturnType<typeof parseAlbumFormData>,
 ) {
-    const twoWeeksFromNow = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (
         !payload.title ||
@@ -875,11 +887,12 @@ export function validateNonDraftAlbums(
         return "Release date is required";
     }
 
-    oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-
-    if (new Date(payload.releaseDate) < twoWeeksFromNow) {
-        return "Release date must be at least 2 weeks ahead";
+    if(!isDateInPast(new Date(payload.releaseDate))){
+        twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
+    // if (new Date(payload.releaseDate) < twoWeeksFromNow) {
+    //     return "Release date must be at least 2 weeks ahead";
+    // }
 
     if (
         !(payload.territories instanceof Array) ||
@@ -895,8 +908,8 @@ export function validateNonDraftAlbums(
         return "Pre order Date is required";
     }
 
-    if (oneWeek && new Date(payload.preOrderDate!) >= oneWeek) {
-        return "Pre order Date must be 1 week from the release date.";
+    if (twoWeeks && new Date(payload.preOrderDate!) > twoWeeks) {
+        return "Pre order Date must be 2 weeks from the release date.";
     }
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {

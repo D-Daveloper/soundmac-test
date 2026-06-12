@@ -51,18 +51,12 @@ const SongForm = () => {
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
 
-  //used to get years like 2006, 2013 etc.
-  const futureYears = Array.from({ length: 11 }, (_, i) =>
-    (new Date().getFullYear() + i).toString(),
+  const START_YEAR = 1990;
+  const currentYear = new Date().getFullYear();
+
+  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
+    (START_YEAR + i).toString(),
   );
-  const pastYears = Array.from({ length: 21 }, (_, i) =>
-    (new Date().getFullYear() - (i + 1)).toString(),
-  );
-  const years = [
-    ...pastYears.reverse().filter((_, i) => _ !== "2025"),
-    "2025",
-    ...futureYears,
-  ];
 
   const [preview, setPreview] = useState(false);
 

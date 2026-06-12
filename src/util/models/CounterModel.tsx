@@ -1,0 +1,22 @@
+import mongoose, { Schema, Document } from "mongoose";
+
+export interface ICounter extends Document<string> {
+  _id: string;
+  value: number;
+  year?: number;
+  recycled?: number[];
+}
+
+const CounterSchema = new Schema<ICounter>(
+  {
+    _id: { type: String, required: true },
+    value: { type: Number, required: true },
+    // year: { type: Number },
+    // recycled: { type: [Number], default: [] },
+  },
+  { _id: false } // disable auto-generated ObjectId since we're using string _id
+);
+
+export const Counter =
+  mongoose.models.Counter ||
+  mongoose.model<ICounter>("Counter", CounterSchema);

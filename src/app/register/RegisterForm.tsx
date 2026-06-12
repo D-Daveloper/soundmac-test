@@ -176,8 +176,15 @@ const RegisterForm = () => {
             checked={registerForm.isChecked}
             onChange={handleChange}
           />
-          <p className="leading-6 text-sm sm:text-lg text-primary font-semibold">
-            I agree to the Terms of Service and Privacy Policy
+          <p className="leading-6 text-sm sm:text-lg text-primary font-semibold flex gap-2">
+            I agree to the 
+          <span className="text-primary underline font-extrabold">
+            <Link href={"https://sites.google.com/view/soundmac-legal/terms-condition"}>Terms of Service</Link>
+          </span>
+             and 
+          <span className="text-primary underline font-extrabold">
+            <Link href={"https://sites.google.com/view/soundmac-privacy-policy/home"}>Privacy Policy</Link>
+          </span>
           </p>
         </div>
         <button
