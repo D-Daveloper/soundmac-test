@@ -7,8 +7,10 @@
     padding: 0 calc(30 / 1440 * 100vw);
     position: sticky;
     top: 0;
-    background: #E7E7E7;
-    z-index: 2;
+    z-index: 100;
+    background: #F9F9F9; 
+    backdrop-filter: blur(12px); /* Native CSS blur engine for scrolling content */
+    -webkit-backdrop-filter: blur(12px); /* Support for Safari engine instances */
 }
 
 div.container {
