@@ -1,14 +1,14 @@
-import { generateISRC } from "@/services/dsp/dsp.service";
+import { generateCatalogNumber, generateISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import {
   deleteMultipleFromS3,
-  deleteSingleFromS3,
 } from "@/util/middleware/aws";
 import {
   buildSort,
   getYearRange,
+  isDateInPast,
   parseSongFormData,
   uploadImage,
   validateNonDraftSongs,
@@ -207,7 +207,15 @@ export async function POST(req: Request) {
         throw error;
       }
     }
+    let catalogNumber = null
+    if (payload.isrc) {
+      catalogNumber = await generateCatalogNumber();
 
+    } else {
+      [catalogNumber, payload.isrc] = await Promise.all([
+       generateCatalogNumber(), generateISRC()
+      ]).catch((err) => { throw err })
+    }
     const savedSong = new SongModel({
       releaseTitle: payload.title,
       releaseImage: imageUrl.coverUrl,
@@ -218,7 +226,7 @@ export async function POST(req: Request) {
       producer: payload.producer,
       performer: payload.performer,
       featuredArtist: payload.featured_artist,
-      preOrderCheck: payload.preOrderCheck,
+      preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck, // check if release date is in the past if it is they cant put preorder date
       anotherDistributionCheck: payload.anotherDistributionCheck,
       explicitContent: payload.explicitContent,
       releaseDate:
@@ -226,7 +234,7 @@ export async function POST(req: Request) {
           ? addWeeks(new Date(), 2)
           : payload.releaseDate,
       preOrderDate:
-        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
       copyRightHolder:
         user!.type === "EMERGING_ARTIST"
           ? "Distributed by SoundMac"
@@ -236,12 +244,12 @@ export async function POST(req: Request) {
       startClip: payload.startClip,
       dsp: payload.dsp,
       upc: payload.upc,
-      isrc: payload.isrc || await generateISRC(),
+      isrc: payload.isrc,
       territories: payload.territories,
       artistName: userArtist.artistName,
       artist: userArtist._id,
       user: user!._id,
-      catalogNumber: "SM" + payload.upc,
+      catalogNumber,
       timeZone: payload.timeZone,
       isCoverSong: payload.isCoverSong,
       license: licenseUrl.coverUrl || ""
@@ -1055,7 +1063,7 @@ export async function PUT(req: Request) {
           producer: payload.producer,
           performer: payload.performer,
           featuredArtist: payload.featured_artist,
-          preOrderCheck: payload.preOrderCheck,
+          preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
           anotherDistributionCheck: payload.anotherDistributionCheck,
           explicitContent: payload.explicitContent,
           releaseDate:
@@ -1063,17 +1071,19 @@ export async function PUT(req: Request) {
               ? addWeeks(new Date(), 2)
               : payload.releaseDate,
           preOrderDate:
-            payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+            payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
           copyRightHolder:
             user!.type === "EMERGING_ARTIST"
               ? "Distributed by SoundMac"
               : payload.copyRightHolder,
-          copyRightYear: payload.copyRightYear,
+          copyRightYear: user!.type === "EMERGING_ARTIST"
+              ? new Date().getFullYear()
+              : payload.copyRightYear,
           lyrics: payload.lyrics,
           startClip: payload.startClip,
           dsp: payload.dsp,
-          upc: payload.upc,
-          isrc: payload.isrc,
+          // upc: payload.upc,
+          // isrc: payload.isrc,
           territories: payload.territories,
           artistName: userArtist.artistName,
           artist: userArtist._id,

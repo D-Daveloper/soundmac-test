@@ -481,7 +481,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
     );
 
     // return { song, metadata: metadata[0] };
-    await session.commitTransaction();
+    await session.commitTransaction(); 
     return { error: false, msg: "Release Approved" }
   } catch (error) {
     console.error("failed to approve release ", error);

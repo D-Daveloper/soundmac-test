@@ -49,7 +49,7 @@ function isValidDateString(dateStr:string) {
   return !isNaN(Date.parse(dateStr));
 }
 
-function isDateInPast(targetDate:Date) {
+export function isDateInPast(targetDate:Date) {
     const today = new Date();
     // Reset hours to 0 to compare the actual day
     today.setHours(0, 0, 0, 0);
@@ -75,7 +75,7 @@ export const isSongFormValid = (form: SongForm): string => {
     console.log(form);
     let twoWeeks = null;
 
-    if (form.release_date != undefined)
+    if (form.release_date != undefined && !isDateInPast(form.release_date) && form.preOrderDate)
         twoWeeks = subWeeks(new Date(form.release_date), 2);
     if (form.title.length < 3 || form.title.length > 32) {
         return "Song title must be longer than 3 not more than 32";
@@ -104,7 +104,7 @@ export const isSongFormValid = (form: SongForm): string => {
         return "producer is required";
     } else if (!form.release_date) {
         return "Release date is required";
-    } else if (typeof form.release_date != "string" || isValidDateString(form.release_date)) {
+    } else if (!(form.release_date instanceof Date) || !isValidDateString(form.release_date.toString())) {
         return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
@@ -146,7 +146,7 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
     console.log(form);
     let twoWeeks = null;
 
-    if (form.release_date != undefined)
+    if (form.release_date != undefined && !isDateInPast(form.release_date) && form.preOrderDate)
         twoWeeks = subWeeks(new Date(form.release_date), 1);
     if (form.title === "") {
         return "Album title is required";
@@ -160,7 +160,7 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
         return "artist is required";
     } else if (form.release_date === undefined) {
         return "Release date is required";
-    } else if (typeof form.release_date != "string" || isValidDateString(form.release_date)) {
+    } else if (!(form.release_date instanceof Date) || !isValidDateString(form.release_date.toString())) {
         return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
@@ -902,7 +902,7 @@ export function validateNonDraftAlbums(
     }
 
     if (
-        (payload.preOrderCheck && payload.preOrderDate === undefined) ||
+        (payload.preOrderCheck && !payload.preOrderDate) ||
         typeof payload.preOrderDate != "string"
     ) {
         return "Pre order Date is required";
@@ -955,8 +955,7 @@ export function validateNonDraftAlbums(
 export function validateDraftSongs(
     payload: ReturnType<typeof parseSongFormData>,
 ) {
-    const twoWeeksFromNow = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (
         !payload.title ||
@@ -971,13 +970,17 @@ export function validateDraftSongs(
         return "Release date is required";
     }
 
-    if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
-        return "Release date must be at least 2 weeks ahead of upload date";
+    // if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
+    //     return "Release date must be at least 2 weeks ahead of upload date";
+    // }
+
+    if(payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))){
+        twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
 
-    if (payload.releaseDate && payload.preOrderDate) {
-        oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-    }
+    // if (twoWeeks && payload.preOrderDate) {
+    //     oneWeek = subWeeks(new Date(payload.releaseDate!), 1); //used to validate pre order date.
+    // }
 
     if (
         payload.song_writer &&
@@ -1021,7 +1024,7 @@ export function validateDraftSongs(
         return "Pre order Date is required";
     }
 
-    if (oneWeek && payload.preOrderDate && new Date(payload.preOrderDate) >= oneWeek) {
+    if ((twoWeeks && payload.preOrderDate) && new Date(payload.preOrderDate) >= twoWeeks) {
         return "Pre order Date must be 1 week from the release date.";
     }
 
@@ -1082,8 +1085,7 @@ export function validateDraftSongs(
 export function validateDraftAlbums(
     payload: ReturnType<typeof parseAlbumFormData>,
 ) {
-    const twoWeeksFromNow = addWeeks(new Date(), 2);
-    let oneWeek = null;
+    let twoWeeks = null;
 
     if (
         !payload.title ||
@@ -1098,13 +1100,21 @@ export function validateDraftAlbums(
         return "Release date is required";
     }
 
-    if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
-        return "Release date must be at least 2 weeks ahead of upload date";
+    // if (payload.releaseDate && new Date(payload.releaseDate) < twoWeeksFromNow) {
+    //     return "Release date must be at least 2 weeks ahead of upload date";
+    // }
+
+    if(payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))){
+        twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
 
-    if (payload.releaseDate && payload.preOrderDate) {
-        oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
-    }
+    // if (twoWeeks && payload.preOrderDate) {
+    //     oneWeek = subWeeks(new Date(payload.releaseDate!), 1); //used to validate pre order date.
+    // }
+
+    // if (payload.releaseDate && payload.preOrderDate) {
+    //     oneWeek = subWeeks(new Date(payload.releaseDate), 1); //used to validate pre order date.
+    // }
 
     if (
         payload.territories &&
@@ -1121,7 +1131,7 @@ export function validateDraftAlbums(
         return "Pre order Date is required";
     }
 
-    if (oneWeek && new Date(payload.preOrderDate) >= oneWeek) {
+    if (twoWeeks && new Date(payload.preOrderDate) >= twoWeeks) {
         return "Pre order Date must be 1 week from the release date.";
     }
 

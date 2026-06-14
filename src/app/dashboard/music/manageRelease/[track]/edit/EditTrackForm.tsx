@@ -15,11 +15,11 @@ import type {
 import { genreList, performerRoles } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { uploadAlbumTrack, uploadTrack } from "@/util/middleware/functions";
+import { uploadAlbumTrack } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import { Info, Trash2 } from "lucide-react";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toast } from "react-toastify";
 
 type TrackFormProps = {

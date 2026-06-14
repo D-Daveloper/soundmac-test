@@ -1,4 +1,4 @@
-import { generateISRC, generateUPC } from "@/services/dsp/dsp.service";
+import { generateCatalogNumber, generateISRC, generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
@@ -12,13 +12,11 @@ import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks } from "date-fns";
 import { NextResponse } from "next/server";
-import { release } from "os";
 
 export async function POST(req: Request) {
   try {
     let userArtist = null;
     let release = null;
-    let releaseTitleAlreadyExist = null;
     let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
     const formData = await req.formData();
 
@@ -152,7 +150,15 @@ export async function POST(req: Request) {
     if (isDraftSongValid != null) {
       return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
     }
+    let catalogNumber = null
+    if (payload.isrc) {
+      catalogNumber = await generateCatalogNumber();
 
+    } else {
+      [catalogNumber, payload.isrc] = await Promise.all([
+        generateCatalogNumber(), generateISRC()
+      ]).catch((err) => { throw err })
+    }
     const savedSong = new SongModel({
       releaseTitle: payload.title,
       genre: payload.genre,
@@ -167,25 +173,27 @@ export async function POST(req: Request) {
       releaseDate:
         user!.type === "EMERGING_ARTIST"
           ? addWeeks(new Date(), 2)
-          : payload.releaseDate == 'undefined' ? null : payload.releaseDate,
+          : payload.releaseDate == 'undefined' ? null : new Date(payload.releaseDate!),
       preOrderDate:
         payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
       copyRightHolder:
         user!.type === "EMERGING_ARTIST"
           ? "Distributed by SoundMac"
           : payload.copyRightHolder,
-      copyRightYear: payload.copyRightYear,
+      copyRightYear: user!.type === "EMERGING_ARTIST"
+        ? new Date().getFullYear()
+        : payload.copyRightYear,
       lyrics: payload.lyrics,
       startClip: payload.startClip,
       dsp: payload.dsp,
       upc: payload.upc ? payload.upc : await generateUPC(),
-      isrc: payload.isrc ? payload.isrc : await generateISRC(),
+      isrc: payload.isrc,
       territories: payload.territories,
       artistName: userArtist.artistName,
       artist: userArtist._id,
       user: user!._id,
       releaseStatus: "draft",
-      catalogNumber: "SM" + Date.now(),
+      catalogNumber,
       timeZone: payload?.timeZone,
       isCoverSong: payload.isCoverSong
     });
@@ -269,7 +277,7 @@ export async function PUT(req: Request) {
     if (releaseTitleAlreadyExist.releaseStatus != "draft") {
       return NextResponse.json({ msg: "Only draft Release can be edited here." }, { status: 400 })
     }
-    
+
     if (releaseTitleAlreadyExist.releaseTitle != payload.title) {
       const checkReleaseTitle = await SongModel.find({
         user: user!._id,

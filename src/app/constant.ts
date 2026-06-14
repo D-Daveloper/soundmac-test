@@ -217,6 +217,13 @@ export const languagesList = [
   "Zulu",
 ];
 
+  const START_YEAR = 1990;
+  const currentYear = new Date().getFullYear();
+
+export const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
+    (START_YEAR + i).toString(),
+  ).reverse();
+
 export const NumberOfTracks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25"]
 
 export const OTP_EXPIRY_SECONDS = parseInt(

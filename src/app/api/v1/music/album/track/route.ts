@@ -1,5 +1,5 @@
 import { albumFromApi, TrackForm } from "@/app/type";
-import { generateISRC, generateMultipleISRC } from "@/services/dsp/dsp.service";
+import { generateCatalogNumber, generateISRC, generateMultipleISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
 
     const albumTitle = searchParams.get("albumTitle");
     console.log(albumTitle);
-    
+
     if (!albumTitle) {
       return NextResponse.json(
         {
@@ -166,8 +166,8 @@ export async function POST(req: Request) {
         );
       }
     }
-
-    const multipleIsrc: string[] = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length);
+    let multipleIsrc: string[] = []
+    if (array_of_tracks_dont_have_isrc.length > 0) { multipleIsrc = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length); }
     console.log(multipleIsrc);
 
     const docs = tracks.map((track, index) => ({
@@ -183,7 +183,7 @@ export async function POST(req: Request) {
       lyrics: track.lyrics,
       startClip: track.start_clip,
       upc: userAlbum.upc,
-      isrc: track.isrc || multipleIsrc[index],
+      isrc: track.isrc || multipleIsrc.length > 0 ? multipleIsrc[index] : null,
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
       albumName: userAlbum.releaseTitle,
@@ -192,7 +192,7 @@ export async function POST(req: Request) {
       anotherDistributionCheck: track.another_distribution_check,
       user: user!._id,
       releaseStatus: "pending",
-      catalogNumber: "SM" + Date.now() + index,
+      catalogNumber: async () => await generateCatalogNumber(),
     }));
 
 
@@ -318,7 +318,7 @@ export async function PUT(req: Request) {
       await TrackModel.bulkWrite(bulkOps, { session });
 
       await AudioUploadTrackerModel.updateMany(
-        { 
+        {
           upc: userAlbum.upc,
           status: "PENDING",
         },

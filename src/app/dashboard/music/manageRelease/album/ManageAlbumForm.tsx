@@ -4,8 +4,8 @@ import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList, NumberOfTracks } from "@/app/constant";
-import type { AlbumForm, albumFromApi, PAGINATION, SongForm } from "@/app/type";
+import { languagesList, NumberOfTracks, years } from "@/app/constant";
+import type { AlbumForm, albumFromApi, PAGINATION } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
@@ -13,7 +13,6 @@ import {
   useGetDPMDsp,
   useGetUserArtistsNames,
 } from "@/util/customHooks/useQueries";
-import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAlbumFormValid } from "@/util/middleware/functions";
 import {
   RefetchOptions,
@@ -51,12 +50,7 @@ const ManageAlbumForm = ({
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
-  const START_YEAR = 1990;
-  const currentYear = new Date().getFullYear();
 
-  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
-    (START_YEAR + i).toString(),
-  );
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",

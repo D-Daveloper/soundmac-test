@@ -6,7 +6,7 @@ import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
-import { languagesList, timeZones } from "@/app/constant";
+import { languagesList, timeZones, years } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
   FeaturedArtist,
@@ -23,7 +23,7 @@ import {
   useGetUserArtistsNames,
 } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
-import { isSongFormValid, uploadTrack } from "@/util/middleware/functions";
+import { isDateInPast, isSongFormValid, uploadTrack } from "@/util/middleware/functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { ArrowRight, Info, Trash2 } from "lucide-react";
@@ -50,13 +50,6 @@ const SongForm = () => {
   const [image, setImage] = useState<string | null>(null);
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
-
-  const START_YEAR = 1990;
-  const currentYear = new Date().getFullYear();
-
-  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
-    (START_YEAR + i).toString(),
-  );
 
   const [preview, setPreview] = useState(false);
 
@@ -1117,7 +1110,7 @@ const SongForm = () => {
                                 preOrderDate: date,
                               }))
                             }
-                            value={songForm.preOrderDate}
+                            value={(!songForm.release_date || isDateInPast(new Date(songForm.release_date))) ? undefined : songForm.preOrderDate}
                             releaseDate={songForm.release_date}
                             type="second"
                             toYear={toYear}
@@ -1134,8 +1127,9 @@ const SongForm = () => {
                               type="checkbox"
                               className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
                               name="pre_order_check"
-                              checked={songForm.pre_order_check}
+                              checked={(!songForm.release_date || isDateInPast(new Date(songForm.release_date))) ? false :songForm.pre_order_check}
                               onChange={handleChange}
+                              disabled={!songForm.release_date || isDateInPast(new Date(songForm.release_date))}
                             />
                             <p className="leading-6 text-sm sm:text-lg font-medium">
                               Pre-Order (optional)

@@ -4,7 +4,12 @@ import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList, NumberOfTracks, timeZones } from "@/app/constant";
+import {
+  languagesList,
+  NumberOfTracks,
+  timeZones,
+  years,
+} from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type { AlbumForm, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
@@ -15,7 +20,7 @@ import {
   useGetUserArtistsNames,
 } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
-import { isAlbumFormValid } from "@/util/middleware/functions";
+import { isAlbumFormValid, isDateInPast } from "@/util/middleware/functions";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Image from "next/image";
@@ -42,12 +47,7 @@ const AlbumForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
-  const START_YEAR = 1990;
-  const currentYear = new Date().getFullYear();
 
-  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
-    (START_YEAR + i).toString(),
-  );
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",
@@ -485,8 +485,17 @@ const AlbumForm = () => {
                               type="checkbox"
                               className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
                               name="pre_order_check"
-                              checked={albumForm.pre_order_check}
+                              checked={
+                                !albumForm.release_date ||
+                                isDateInPast(new Date(albumForm.release_date))
+                                  ? false
+                                  : albumForm.pre_order_check
+                              }
                               onChange={handleChange}
+                              disabled={
+                                !albumForm.release_date ||
+                                isDateInPast(new Date(albumForm.release_date))
+                              }
                             />
                             <p className="leading-6 text-sm sm:text-lg font-medium">
                               Pre-Order (optional)
@@ -501,7 +510,12 @@ const AlbumForm = () => {
                                   preOrderDate: date,
                                 }))
                               }
-                              value={albumForm.preOrderDate}
+                              value={
+                                !albumForm.release_date ||
+                                isDateInPast(new Date(albumForm.release_date))
+                                  ? undefined
+                                  : albumForm.preOrderDate
+                              }
                               releaseDate={albumForm.release_date}
                               type="second"
                               toYear={date.toYear}

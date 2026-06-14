@@ -1,5 +1,7 @@
 import axios from "axios";
 import { dspFetch } from "./dsp.client";
+import dbConnect from "@/util/db";
+import { Counter } from "@/util/models/CounterModel";
 
 export async function generateUPC() {
   if (process.env.NODE_ENV === "development") {
@@ -12,25 +14,70 @@ export async function generateUPC() {
 
   return data.upc_list[0]
 }
+
 export async function generateISRC() {
-  if (process.env.NODE_ENV === "development") {
-    return Math.floor(Math.random() * 9000000000) + 1000000000;
+  await dbConnect()
+  const isrc = await Counter.findOneAndUpdate(
+    { _id: "isrc" },
+    { $inc: { value: 1 } },
+    { returnDocument: "before" }
+  );
+  if (isrc) {
+
+    return 'NGASN' + new Date().getFullYear().toString().slice(2) + isrc.value + 1
   }
-  const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID, {
-    method: "GET",
-  });
-  //   console.log("upc",data);
-
-  return data.upc_list[0]
+  throw Error("Failed to generate isrc")
 }
+
+export async function generateCatalogNumber() {
+  await dbConnect()
+  const catalog = await Counter.findOneAndUpdate(
+    { _id: "catalog" },
+    { $inc: { value: 1 } },
+    { returnDocument: "before" }
+  );
+  if (catalog) {
+
+    return 'SM' + catalog.value + 1
+  }
+  throw Error("Failed to generate catalog number")
+}
+
+// export async function generateISRC() {
+//   if (process.env.NODE_ENV === "development") {
+//     return Math.floor(Math.random() * 9000000000) + 1000000000;
+//   }
+//   const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID, {
+//     method: "GET",
+//   });
+//   //   console.log("upc",data);
+
+//   return data.upc_list[0]
+// }
+
 export async function generateMultipleISRC(amount: number) {
-  const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID + "?qty=" + amount, {
-    method: "GET",
-  });
-  //   console.log("upc",data);
-
-  return data.upc_list
+  await dbConnect()
+  const isrc = await Counter.findOneAndUpdate(
+    { _id: "isrc" },
+    { $inc: { value: amount } },
+    { returnDocument: "before" }
+  );
+  if (isrc) {
+    const isrcs = Array.from({ length: amount },(_,index)=>(
+     'NGASN' + new Date().getFullYear().toString().slice(2) + isrc.value + ( index +1)));
+     return isrcs;
+  }
+  throw Error("Failed to generate isrc")
 }
+
+// export async function generateMultipleISRC(amount: number) {
+//   const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID + "?qty=" + amount, {
+//     method: "GET",
+//   });
+//   //   console.log("upc",data);
+
+//   return data.upc_list
+// }
 
 export async function uploadTrack(payload: any) {
   return dspFetch("https://dsp-api.com/upload", {
@@ -45,7 +92,7 @@ export async function approveRelease(releaseId: string) {
   });
 }
 
-export async function getDsps(){
+export async function getDsps() {
   try {
     const res = await axios.get(process.env.GET_DSPS_URL!, {
       headers: {

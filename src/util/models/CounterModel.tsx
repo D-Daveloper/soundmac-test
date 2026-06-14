@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ICounter extends Document<string> {
   _id: string;
@@ -14,9 +14,8 @@ const CounterSchema = new Schema<ICounter>(
     // year: { type: Number },
     // recycled: { type: [Number], default: [] },
   },
-  { _id: false } // disable auto-generated ObjectId since we're using string _id
+  { _id: false }, // disable auto-generated ObjectId since we're using string _id
 );
 
-export const Counter =
-  mongoose.models.Counter ||
-  mongoose.model<ICounter>("Counter", CounterSchema);
+export const Counter: Model<ICounter> =
+  mongoose.models.Counter || mongoose.model<ICounter>("Counter", CounterSchema);

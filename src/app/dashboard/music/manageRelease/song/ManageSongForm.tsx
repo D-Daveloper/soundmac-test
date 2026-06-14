@@ -6,7 +6,7 @@ import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
-import { languagesList, timeZones } from "@/app/constant";
+import { languagesList, timeZones, years } from "@/app/constant";
 import type {
   FeaturedArtist,
   PAGINATION,
@@ -57,13 +57,6 @@ const SongForm = ({
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
   // });
-
-  const START_YEAR = 1990;
-  const currentYear = new Date().getFullYear();
-
-  const years = Array.from({ length: currentYear - START_YEAR + 1 }, (_, i) =>
-    (START_YEAR + i).toString(),
-  );
 
   const [preview, setPreview] = useState(false);
 
@@ -1392,7 +1385,7 @@ const SongForm = ({
                             name={"start_clip"}
                             placeholder={"30"}
                             updateValue={handleChange}
-                            required={true}
+                            required={false}
                           />
                           <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                             This determines which part of your song will play in

@@ -1,11 +1,12 @@
 import { albumFromApi } from "@/app/type";
-import { generateUPC } from "@/services/dsp/dsp.service";
+import { generateCatalogNumber, generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import { deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
+  isDateInPast,
   parseAlbumFormData,
   uploadImage,
   validateNonDraftAlbums,
@@ -74,14 +75,14 @@ export async function POST(req: Request) {
         { status: 402 },
       );
     } else if (user!.type === "EMERGING_ARTIST") {
-        return NextResponse.json(
-          { msg: "Emerging artists can not upload Album" },
-          { status: 403 },
-        );
-      }
-      
-      [userArtist, release] = await Promise.all([
-         Artist.findOne({
+      return NextResponse.json(
+        { msg: "Emerging artists can not upload Album" },
+        { status: 403 },
+      );
+    }
+
+    [userArtist, release] = await Promise.all([
+      Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
       }).lean(),
@@ -91,11 +92,11 @@ export async function POST(req: Request) {
         artistName: (payload.artist as string).trim(),
         releaseTitle: payload.title!.trim(),
       }).lean<albumFromApi>()]).catch(err => { throw err; });
-    
+
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }else if (release) {
+    } else if (release) {
       return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
 
@@ -140,11 +141,11 @@ export async function POST(req: Request) {
       releaseTitle: payload.title,
       genre: payload.genre,
       releaseLanguage: payload.language,
-      preOrderCheck: payload.preOrderCheck,
+      preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
       anotherDistributionCheck: payload.anotherDistributionCheck,
       releaseDate: payload.releaseDate,
       preOrderDate:
-        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
       copyRightHolder: payload.copyRightHolder,
       copyRightYear: payload.copyRightYear,
       dsp: payload.dsp,
@@ -156,7 +157,7 @@ export async function POST(req: Request) {
       numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
       user: user._id,
-      catalogNumber: "SM" + payload.upc,
+      catalogNumber: await generateCatalogNumber(),
       timeZone: payload.timeZone,
     });
     await album.save();
@@ -273,36 +274,36 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     }
 
-      const isAlbumForValid = validateNonDraftAlbums(payload);
-  
-      if (isAlbumForValid != null) {
-        return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
-      }
-  
-      const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
-      if (isNaN(num) || num < 2) {
-        return NextResponse.json(
-          { msg: "No. of tracks must be at least 2" },
-          { status: 400 },
-        );
-      }
-      const userArtistQuery = Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string).trim(),
-      }).lean();
+    const isAlbumForValid = validateNonDraftAlbums(payload);
 
-      const releaseQuery = AlbumModel.findOne({
-        upc: payload.upc,
-      }).lean<albumFromApi>();
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
 
-      [userArtist, release] = await Promise.all([
-        userArtistQuery, releaseQuery
-      ]).catch(err => { throw err; });
-    
-    
+    const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
+    if (isNaN(num) || num < 2) {
+      return NextResponse.json(
+        { msg: "No. of tracks must be at least 2" },
+        { status: 400 },
+      );
+    }
+    const userArtistQuery = Artist.findOne({
+      user: userJwt.user,
+      artistName: (payload.artist as string).trim(),
+    }).lean();
+
+    const releaseQuery = AlbumModel.findOne({
+      upc: payload.upc,
+    }).lean<albumFromApi>();
+
+    [userArtist, release] = await Promise.all([
+      userArtistQuery, releaseQuery
+    ]).catch(err => { throw err; });
+
+
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }else if (!release) {
+    } else if (!release) {
       return NextResponse.json({ msg: "Invalid Release" }, { status: 400 });
     } else if (release.releaseStatus === "approved") {
       return NextResponse.json(
@@ -375,11 +376,11 @@ export async function PUT(req: Request) {
           releaseTitle: payload.title,
           genre: payload.genre,
           releaseLanguage: payload.language,
-          preOrderCheck: payload.preOrderCheck,
+          preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
           anotherDistributionCheck: payload.anotherDistributionCheck,
           releaseDate: payload.releaseDate,
           preOrderDate:
-            payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+            payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
           copyRightHolder: payload.copyRightHolder,
           copyRightYear: payload.copyRightYear,
           dsp: payload.dsp,
@@ -469,7 +470,7 @@ export async function PATCH(req: Request) {
         },
         { status: 400 },
       );
-    }else if (release.user.toString() !== user!._id.toString()) {
+    } else if (release.user.toString() !== user!._id.toString()) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
     }
     if (release.releaseStatus != "pending") {
@@ -501,17 +502,17 @@ export async function PATCH(req: Request) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-        await AlbumModel.findOneAndUpdate(
-          { user: user._id, _id: formData.releaseId },
-          { releaseStatus: "completed" },
-          { session }
-        ),
+      await AlbumModel.findOneAndUpdate(
+        { user: user._id, _id: formData.releaseId },
+        { releaseStatus: "completed" },
+        { session }
+      ),
         await TrackModel.updateMany(
           { user: user._id, album: formData.releaseId },
           { releaseStatus: "completed" },
           { session }
         ),
-      await session.commitTransaction();
+        await session.commitTransaction();
       return NextResponse.json(
         { msg: "Release Marked as Completed!" },
         { status: 200 },
