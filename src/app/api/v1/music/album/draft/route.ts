@@ -126,7 +126,6 @@ export async function POST(req: Request) {
       numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
       user: user._id,
-      catalogNumber: "SM" + Date.now().toString(),
       releaseStatus: "draft",
       timeZone: payload.timeZone || { label: "", value: "", name: "" },
     });

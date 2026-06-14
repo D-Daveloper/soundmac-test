@@ -203,8 +203,9 @@ const TrackSchema = new mongoose.Schema(
     },
     catalogNumber: {
       type: String,
-      required: [true, "catalog number is required"],
-      unique: true,
+      required: [function (this: any) {
+        return this.get("releaseStatus") !== "draft";
+      }, "catalog number is required"],
     },
   },
   {
@@ -213,9 +214,11 @@ const TrackSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
+TrackSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true } );
 TrackSchema.index({ artistName: 1, releaseDate: -1 });
-TrackSchema.index({ releaseTitle: 1, user: 1 });
-TrackSchema.index({ upc: 1, user: 1 });
+TrackSchema.index({ user: 1, releaseTitle: 1 });
+TrackSchema.index({ user: 1, artist: 1 });
+TrackSchema.index({ user: 1, upc: 1 });
 // enforce uniqueness
 TrackSchema.index({ upc: 1, releaseTitle: 1 }, { unique: true });
 // TrackSchema.index({ genre: 1 });

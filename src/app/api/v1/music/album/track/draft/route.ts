@@ -1,4 +1,5 @@
 import { albumFromApi, TrackForm } from "@/app/type";
+import { generateMultipleCatalogNumber } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { validateDraftTracks } from "@/util/middleware/functions";
@@ -110,7 +111,6 @@ export async function POST(req: Request) {
       lyrics: track.lyrics,
       startClip: track.start_clip,
       upc: track.upc,
-      isrc: track.isrc || Date.now() + index,
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
       albumName: userAlbum.releaseTitle,
@@ -118,7 +118,6 @@ export async function POST(req: Request) {
       trackNumber: track.track_number,
       user: user!._id,
       releaseStatus: "draft",
-      catalogNumber: "SM" + Date.now() + index,
     }));
 
     await TrackModel.insertMany(docs);
@@ -251,7 +250,6 @@ export async function PUT(req: Request) {
       lyrics: track.lyrics,
       startClip: track.start_clip,
       upc: track.upc,
-      isrc: track.isrc || Date.now() + index,
       artistName: userAlbum.artistName,
       artist: userAlbum.artist,
       albumName: userAlbum.releaseTitle,
@@ -259,7 +257,6 @@ export async function PUT(req: Request) {
       // trackNumber: track.track_number,
       user: user!._id,
       releaseStatus: "draft",
-      catalogNumber: "SM" + Date.now() + index,
     }));
 
     await TrackModel.deleteMany({ upc: userAlbum.upc });

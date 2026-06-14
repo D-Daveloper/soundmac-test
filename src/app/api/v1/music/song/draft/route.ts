@@ -35,6 +35,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
+    const isDraftSongValid = validateDraftSongs(payload);
+
+    if (isDraftSongValid != null) {
+      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
+    }
     await dbConnect();
 
     const userJwt = await authenticate(req);
@@ -145,19 +150,8 @@ export async function POST(req: Request) {
     }
     console.log({ ...payload });
 
-    const isDraftSongValid = validateDraftSongs(payload);
-
-    if (isDraftSongValid != null) {
-      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
-    }
-    let catalogNumber = null
-    if (payload.isrc) {
-      catalogNumber = await generateCatalogNumber();
-
-    } else {
-      [catalogNumber, payload.isrc] = await Promise.all([
-        generateCatalogNumber(), generateISRC()
-      ]).catch((err) => { throw err })
+    if (!payload.isrc) {
+      payload.isrc = await generateISRC()
     }
     const savedSong = new SongModel({
       releaseTitle: payload.title,
@@ -193,7 +187,6 @@ export async function POST(req: Request) {
       artist: userArtist._id,
       user: user!._id,
       releaseStatus: "draft",
-      catalogNumber,
       timeZone: payload?.timeZone,
       isCoverSong: payload.isCoverSong
     });

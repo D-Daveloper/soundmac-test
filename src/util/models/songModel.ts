@@ -385,8 +385,9 @@ const SongModelSchema = new mongoose.Schema(
     },
     catalogNumber: {
       type: String,
-      required: [true, "catalog number is required"],
-      unique: true,
+      required: [function (this: any) {
+        return this.get("releaseStatus") !== "draft";
+      }, "catalog number is required"],
     },
     timeZone: {
       type: {
@@ -409,7 +410,8 @@ const SongModelSchema = new mongoose.Schema(
 );
 
 // Uniqueness constraints
-SongModelSchema.index({ user:1, artistName: 1, releaseTitle: 1 }, { unique: true });
+SongModelSchema.index({ user: 1, artistName: 1, releaseTitle: 1 }, { unique: true });
+SongModelSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true });
 SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true });
 SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true });
 
@@ -481,7 +483,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
     );
 
     // return { song, metadata: metadata[0] };
-    await session.commitTransaction(); 
+    await session.commitTransaction();
     return { error: false, msg: "Release Approved" }
   } catch (error) {
     console.error("failed to approve release ", error);

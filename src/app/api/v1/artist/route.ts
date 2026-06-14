@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import EntityDeactivation from "@/util/models/deactivateEntity";
 import SongModel from "@/util/models/songModel";
 import AlbumModel from "@/util/models/AlbumModel";
+import TrackModel from "@/util/models/trackModel";
 
 
 export async function POST(req: Request) {
@@ -320,7 +321,7 @@ export async function PUT(req: Request) {
         { msg: "ID is required" },
         { status: 400 }
       );
-    } else if (artistName === "") {
+    } else if (!artistName) {
       return NextResponse.json(
         { msg: "Artist name cannot be an empty string." },
         { status: 400 }
@@ -386,10 +387,11 @@ export async function PUT(req: Request) {
       const session = await mongoose.startSession();
       try {
         session.startTransaction();
+        
+        await SongModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+        await AlbumModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+        await TrackModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
         artist.artistName = artistName;
-
-        await SongModel.updateMany({ user: user._id, artist: artist._id }, { artistName: artistName }, { session }),
-          await AlbumModel.updateMany({ user: user._id, artist: artist._id }, { artistName: artistName }, { session }),
           await artist.save({ session }),
 
           await session.commitTransaction();

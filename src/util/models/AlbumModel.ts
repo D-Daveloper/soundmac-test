@@ -165,7 +165,9 @@ const AlbumSchema = new mongoose.Schema(
     },
     catalogNumber: {
       type: String,
-      required: [true, "catalog number is required"],
+      required: [function (this: any) {
+        return this.get("releaseStatus") !== "draft";
+      }, "catalog number is required"],
       unique:true
     },    
     timeZone: {
@@ -204,6 +206,7 @@ AlbumSchema.index(
   { collation: { locale: "en", strength: 2 } }
 );
 AlbumSchema.index({ user: 1, artistName: 1, releaseTitle: 1 },{unique:true});
+AlbumSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true } );
 AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
 
 const AlbumModel =

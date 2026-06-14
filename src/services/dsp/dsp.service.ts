@@ -55,6 +55,21 @@ export async function generateCatalogNumber() {
 //   return data.upc_list[0]
 // }
 
+export async function generateMultipleCatalogNumber(amount: number) {
+  await dbConnect()
+  const catalogNumber = await Counter.findOneAndUpdate(
+    { _id: "catalog" },
+    { $inc: { value: amount } },
+    { returnDocument: "before" }
+  );
+  if (catalogNumber) {
+    const catalogNumbers = Array.from({ length: amount },(_,index)=>(
+     'NGASN' + new Date().getFullYear().toString().slice(2) + catalogNumber.value + ( index +1)));
+     return catalogNumbers;
+  }
+  throw Error("Failed to generate catalog number")
+}
+
 export async function generateMultipleISRC(amount: number) {
   await dbConnect()
   const isrc = await Counter.findOneAndUpdate(

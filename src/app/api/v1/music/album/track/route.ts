@@ -1,10 +1,9 @@
 import { albumFromApi, TrackForm } from "@/app/type";
-import { generateCatalogNumber, generateISRC, generateMultipleISRC } from "@/services/dsp/dsp.service";
+import { generateMultipleCatalogNumber, generateMultipleISRC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import { validateNonDraftTracks } from "@/util/middleware/functions";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
@@ -168,7 +167,9 @@ export async function POST(req: Request) {
     }
     let multipleIsrc: string[] = []
     if (array_of_tracks_dont_have_isrc.length > 0) { multipleIsrc = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length); }
-    console.log(multipleIsrc);
+    
+    const catalogNumbers = await generateMultipleCatalogNumber(tracks.length)
+    console.log(multipleIsrc,catalogNumbers);
 
     const docs = tracks.map((track, index) => ({
       releaseTitle: track.title,
@@ -192,7 +193,7 @@ export async function POST(req: Request) {
       anotherDistributionCheck: track.another_distribution_check,
       user: user!._id,
       releaseStatus: "pending",
-      catalogNumber: async () => await generateCatalogNumber(),
+      catalogNumber: catalogNumbers[index],
     }));
 
 
