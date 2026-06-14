@@ -1,13 +1,14 @@
 import { albumFromApi, rejectEmailProps } from "@/app/type";
 import dbConnect from "@/util/db";
-import { releaseRejectionEmail } from "@/util/middleware/functions";
+import { releaseApprovalEmail, releaseRejectionEmail, replaceTemplatePlaceholders } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import AlbumModel from "@/util/models/AlbumModel";
 import TrackModel from "@/util/models/trackModel";
+import { inngest } from "@/util/lib/inngest/inngest";
 
 export async function POST(req: Request) {
   try {
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
     } else if (body.requestType == "rejected" && !body.message) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!body.albumId || !Types.ObjectId.isValid(body.albumId)) {
-      return NextResponse.json({ msg: "Invalid Request." },{status:400});
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
     const release = await AlbumModel.findById<
       albumFromApi & { user: { email: string } }
@@ -59,35 +60,71 @@ export async function POST(req: Request) {
       );
     }
 
+    const userEmail = release.user.email;
+    let emailHtml = null;
+    let emailTitle = null
+
+    const session = await mongoose.startSession();
+    let albumUpdate = null;
+    let trackUpdate = null
+
     if (body.requestType == "approved") {
+
       // create the dpm callback here
-      await AlbumModel.findByIdAndUpdate(
+      albumUpdate = AlbumModel.findByIdAndUpdate(
         body.albumId,
         { releaseStatus: body.requestType },
-        { runValidators: true },
+        { runValidators: true, session },
       );
-      await TrackModel.updateMany(
+
+      trackUpdate = TrackModel.updateMany(
         {
           album: body.albumId,
         },
         {
           releaseStatus: body.requestType,
-        },
+        }, { session }
       );
+
+      const approvalEmailData = {
+        artistName: release.artistName,
+        releaseTitle: release.releaseTitle,
+        releaseDate: new Date(release.releaseDate).toDateString(),
+        releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=single",
+        supportEmail: "",
+        company_name: "Soundmac",
+        year: new Date().getFullYear().toString(),
+        company_address: "",
+        website_url: process.env.FRONTEND_URL!,
+        help_center_url: "",
+        terms_url: "",
+        unsubscribe_url: "",
+      };
+
+      emailTitle = "Release Approval";
+
+      emailHtml = replaceTemplatePlaceholders(
+        releaseApprovalEmail(),
+        approvalEmailData,
+      );
+
     } else if (body.requestType == "rejected") {
-      const updateRelease = AlbumModel.findByIdAndUpdate(
+
+      albumUpdate = AlbumModel.findByIdAndUpdate(
         body.albumId,
         { releaseStatus: body.requestType },
-        { runValidators: true },
+        { runValidators: true, session },
       );
-      const updateTracks = TrackModel.updateMany(
+
+      trackUpdate = TrackModel.updateMany(
         {
           album: body.albumId,
         },
         {
           releaseStatus: body.requestType,
-        },
+        }, { session }
       );
+      
       const rejectEmailData: rejectEmailProps = {
         artistName: release.artistName,
         releaseTitle: release.releaseTitle,
@@ -96,22 +133,30 @@ export async function POST(req: Request) {
         supportEmail: "release",
       };
       ///prepare email body
-      const rejectionEmail = releaseRejectionEmail(rejectEmailData);
+      emailHtml = releaseRejectionEmail(rejectEmailData);
+      emailTitle = "Release Rejection";
 
-      try {
-        const result = await Promise.all([
-          //send mail here
-          sendEmail(release.user.email, "Release Rejection", rejectionEmail),
-          updateRelease,
-          updateTracks,
-        ]);
-      } catch (error) {
-        console.error("failed to reject release ", error);
-        return NextResponse.json(
-          { msg: "Failed to reject release." },
-          { status: 200 },
-        );
-      }
+    }
+    try {
+      session.startTransaction()
+      await albumUpdate
+      await trackUpdate
+      await session.commitTransaction();
+      //  background job
+      await inngest.send({
+        name: "send-email",
+        data: {
+          html: emailHtml,
+          emailTo: userEmail,
+          title: emailTitle
+        },
+      });
+    } catch (error) {
+      await session.abortTransaction();
+      return NextResponse.json(`Failed to ${body.requestType === "approved" ? "approve" : 'reject'} release`)
+
+    } finally {
+      await session.endSession()
     }
 
     return NextResponse.json(

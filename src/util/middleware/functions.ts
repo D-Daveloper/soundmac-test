@@ -2120,6 +2120,146 @@ export function parsePromotionFormData(formData: FormData) {
         focusTrack: formData.get("focus_track") as string | null,
     };
 }
+export const releaseApprovalEmail = () => {
+    return `<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Approved</title>
+</head>
+
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px 30px 30px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">🎉 Release Approved!</h1>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <!-- Greeting -->
+                            <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                Hi <strong>{{artistName}}</strong>,
+                            </p>
+
+                            <!-- Message Body -->
+                            <p style="margin: 0 0 20px 0; color: #333333; font-size: 16px; line-height: 1.6;">
+                                Great news! Your release <strong>"{{releaseTitle}}"</strong> has been approved and would be released to all streaming platforms on the release date.
+                            </p>
+
+                            <!-- Release Details Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0fdf4; border-radius: 8px; margin: 30px 0; border: 2px solid #10b981;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <h3 style="margin: 0 0 15px 0; color: #065f46; font-size: 16px; font-weight: 600;">Release Details</h3>
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #059669; font-size: 14px; width: 140px;">Release Name:</td>
+                                                <td style="padding: 6px 0; color: #065f46; font-size: 14px; font-weight: 500;">{{releaseTitle}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #059669; font-size: 14px;">Artist:</td>
+                                                <td style="padding: 6px 0; color: #065f46; font-size: 14px; font-weight: 500;">{{artistName}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #059669; font-size: 14px;">Release Date:</td>
+                                                <td style="padding: 6px 0; color: #065f46; font-size: 14px; font-weight: 500;">{{releaseDate}}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 6px 0; color: #059669; font-size: 14px;">Status:</td>
+                                                <td style="padding: 6px 0;">
+                                                    <span style="display: inline-block; padding: 4px 12px; background-color: #dcfce7; color: #166534; font-size: 13px; font-weight: 500; border-radius: 12px;">✓ Approved</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+
+                            <!-- Next Steps -->
+                            <h3 style="margin: 30px 0 15px 0; color: #333333; font-size: 18px; font-weight: 600;">What You Can Do Now</h3>
+                            <ul style="margin: 0 0 20px 0; padding-left: 20px; color: #333333; font-size: 15px; line-height: 1.8;">
+                                <li><strong>Share on Social Media:</strong> Let your fans know your music is live</li>
+                                <li><strong>Promote Your Release:</strong> Launch a promotion campaign to reach more listeners</li>
+                                <li><strong>Submit to Charts:</strong> Get your track onto our charts for more visibility</li>
+                                <li><strong>Engage with Fans:</strong> Respond to comments and build your community</li>
+                            </ul>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{releaseUrl}}" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; border-radius: 8px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); margin-right: 10px;">
+                                            View Release
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Promotion Tip -->
+                            <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 30px 0; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #92400e; font-size: 14px; font-weight: 600;">💡 Pro Tip</h3>
+                                <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                                    Launch a promotion campaign now to boost your release visibility and reach new listeners. The first few days are crucial for building momentum!
+                                </p>
+                            </div>
+
+                            <!-- Support -->
+                            <p style="margin: 20px 0 0 0; color: #666666; font-size: 14px; line-height: 1.6;">
+                                If you have any questions or need assistance, please don't hesitate to reach out to our support team at <a href="mailto:{{supportEmail}}" style="color: #10b981; text-decoration: none;">{{supportEmail}}</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #f8f9fa; padding: 30px 40px; text-align: center; border-top: 1px solid #e9ecef;">
+                            <p style="margin: 0 0 10px 0; color: #666666; font-size: 14px;">
+                                Best regards,<br>
+                                <strong>The {{company_name}} Team</strong>
+                            </p>
+                            <p style="margin: 20px 0 0 0; color: #999999; font-size: 12px; line-height: 1.6;">
+                                © {{year}} {{company_name}}. All rights reserved.<br>
+                                {{company_address}}
+                            </p>
+                            <div style="margin-top: 20px;">
+                                <a href="{{website_url}}" style="color: #10b981; text-decoration: none; font-size: 12px; margin: 0 10px;">Website</a>
+                                <a href="{{help_center_url}}" style="color: #10b981; text-decoration: none; font-size: 12px; margin: 0 10px;">Help Center</a>
+                                <a href="{{terms_url}}" style="color: #10b981; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms</a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <!-- Footer Link -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="margin-top: 20px;">
+                    <tr>
+                        <td align="center" style="padding: 10px;">
+                            <p style="margin: 0; color: #999999; font-size: 11px;">
+                                You're receiving this email because you submitted a release to {{company_name}}.<br>
+                                <a href="{{unsubscribe_url}}" style="color: #999999; text-decoration: underline;">Unsubscribe from release notifications</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>`;
+};
 export const releaseRejectionEmail = (props: rejectEmailProps) => {
     return `<!DOCTYPE html>
 <html lang="en">

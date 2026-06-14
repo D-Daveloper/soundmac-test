@@ -18,4 +18,4 @@ const CounterSchema = new Schema<ICounter>(
 );
 
 export const Counter: Model<ICounter> =
-  mongoose.models.Counter || mongoose.model<ICounter>("Counter", CounterSchema);
+  mongoose.models?.Counter || mongoose.model<ICounter>("Counter", CounterSchema);

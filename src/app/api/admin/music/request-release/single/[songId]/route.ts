@@ -1,12 +1,12 @@
 import { rejectEmailProps } from "@/app/type";
 import dbConnect from "@/util/db";
-import { releaseRejectionEmail } from "@/util/middleware/functions";
+import { releaseApprovalEmail, releaseRejectionEmail, replaceTemplatePlaceholders } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
-import sendEmail from "@/util/sendMail/sendEmail";
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
+import { inngest } from "@/util/lib/inngest/inngest";
 
 export async function POST(req: Request, { params }: { params: Promise<{ songId: string }> }) {
   const { songId } = await params; // Access the dynamic 'id' parameter
@@ -59,12 +59,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
       );
     }
 
-    if (body.requestType == "approved") {
-      // create the dpm callback here
-      //     const session = await mongoose.startSession();
-      // session.startTransaction();
-      // try {
+    const userEmail = release.user.email;
 
+    if (body.requestType == "approved") {
       // Execute the model method passing the session
       const result = await SongModel.approveAndCreateMetadata(songId, release.user.label);
       if (result.error) {
@@ -73,40 +70,43 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
           { status: 400 },
         );
       } else {
+        const approvalEmailData = {
+          artistName: release.artistName,
+          releaseTitle: release.releaseTitle,
+          releaseDate: new Date(release.releaseDate).toDateString(),
+          releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=single",
+          supportEmail: "",
+          company_name: "Soundmac",
+          year: new Date().getFullYear().toString(),
+          company_address: "",
+          website_url: process.env.FRONTEND_URL!,
+          help_center_url: "",
+          terms_url: "",
+          unsubscribe_url: "",
+        };
+      const emailTitle = "Release Approval";
+
+        const approvalEmailhtml = replaceTemplatePlaceholders(
+          releaseApprovalEmail(),
+          approvalEmailData,
+        );
+      await inngest.send({
+        name: "send-email",
+        data: {
+          html:approvalEmailhtml,
+          emailTo:userEmail,
+          title:emailTitle
+        },
+      });
+        
         return NextResponse.json(
           { msg: result.msg },
           { status: 201 },
         );
       }
-      // If everything is successful, commit the changes
-      //   await session.commitTransaction();
-
-      //   // const approveSongQuery = SongModel.findByIdAndUpdate(
-      //   //   songId,
-      //   //   { releaseStatus: body.requestType },
-      //   //   { runValidators: true },
-      //   // );
-      //   // const dpmCallBackMetaDataQuery = release.generateDpmCallBackMetaData();
-
-      //   // await Promise.all([approveSongQuery, dpmCallBackMetaDataQuery]).catch(
-      //   //   (error) => {
-      //   //     console.error("failed to approve release ", error);
-      //   //   }
-      //   // );
-
-      // } catch (error) {
-      //   console.error("failed to approve release ", error);
-      //   await session.abortTransaction();
-      //   return NextResponse.json(
-      //     { msg: "Failed to approve release." },
-      //     { status: 400 },
-      //   );
-      // }finally{
-      //   session.endSession();
-      // }
 
     } else if (body.requestType == "rejected") {
-      const updateRelease = SongModel.findByIdAndUpdate(
+      const updateRelease = await SongModel.findByIdAndUpdate(
         songId,
         { releaseStatus: body.requestType },
         { runValidators: true },
@@ -121,16 +121,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
 
       //send mail here
       const rejectionEmail = releaseRejectionEmail(rejectEmailData);
-      await Promise.all([
-        sendEmail(release.user.email, "Release Rejection", rejectionEmail),
-        updateRelease,
-      ]).catch((error) => {
-        console.error("failed to reject release ", error);
-
-        return NextResponse.json(
-          { msg: "Failed to reject release." },
-          { status: 400 },
-        );
+      const emailTitle = "Release Rejection";
+      //  background job
+      await inngest.send({
+        name: "send-email",
+        data: {
+          html:rejectionEmail,
+          emailTo:userEmail,
+          title: emailTitle
+        },
       });
     }
 
