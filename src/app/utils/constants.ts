@@ -1,16 +1,28 @@
 import { Props } from "../dashboard/finance/salesReport/history/withdrawalLine";
 import { AdminRelease, LOCATION_TREE_ASSIGNOR, ROUTE_CONFIG } from "../type";
 
+// export const navigationLinks = [
+//   { name: "Home", link: "/" },
+//   { name: "Features", link: "/features" },
+//   { name: "Pricing", link: "/pricing" },
+//   { name: "Promotion", link: "/promotion" },
+//   { name: "Blog", link: "/blog" },
+//   { name: "Convert", link: "/convert" },
+// ];
+
+// Switched to section id's based on the Landing Page design
 export const navigationLinks = [
-  { name: "Home", link: "/" },
-  { name: "Pricing", link: "/pricing" },
-  { name: "Promotion", link: "/promotion" },
-  { name: "Blog", link: "/blog" },
-  { name: "Convert", link: "/convert" },
+  { name: "Home", link: "#home" },
+  { name: "Features", link: "#features" },
+  { name: "Pricing", link: "#pricing" },
+  { name: "Promotion", link: "#promotion" },
+  // { name: "Blog", link: "#blog" },
+  { name: "Try Converter!", link: "#convert" },
 ];
 
 const nL = navigationLinks.map((n) => n.link);
-export const rootScreenLinks = [...nL];
+// export const rootScreenLinks = [...nL];
+export const rootScreenLinks=['/'];
 
 export const linkRoutes: ROUTE_CONFIG = {
   Home: "/",
