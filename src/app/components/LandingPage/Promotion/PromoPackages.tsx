@@ -7,7 +7,7 @@ import promoCard3 from "@/assets/images/9c47a3bbcdb3609e20476933d1cba9a7ecdc87aa
 
 const PromoPackages = () => {
   return (
-    <div className="mx-10 mt-10">
+    <div className="md:mx-10 mt-10">
       <p className="text-center text-2xl md:text-3xl font-semibold">
         Top tier promo packages for you
       </p>

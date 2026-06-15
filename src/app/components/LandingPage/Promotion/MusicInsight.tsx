@@ -15,7 +15,7 @@ import music3 from "@/assets/images/music3.png";
 
 const MusicInsight = () => {
   return (
-    <div className="mt-10 mx-10 relative">
+    <div className="mt-10 md:mx-10 relative">
 
       <div
         className="w-full"

@@ -69,7 +69,7 @@ const Page = () => {
               <IoMdInformationCircle size={20} />
             </button>
             <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 p-5 rounded-[20px] flex flex-col gap-3 justify-center items-center shadow-2xl transition-all duration-300 group-hover:bg-black/75 z-10">
-              <p className="text-[#F9F9F9] text-sm leading-relaxed text-center font-medium tracking-wide">
+              <p className="text-[#F9F9F9] text-[12px] leading-relaxed text-center font-medium tracking-wide">
                 "Soundmac made releasing my music simple. I uploaded once and my
                 song was everywhere. The analytics also helped me understand my
                 audience better."
@@ -104,7 +104,7 @@ const Page = () => {
               <IoMdInformationCircle size={20} />
             </button>
             <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 p-5 rounded-[20px] flex flex-col gap-3 justify-center items-center shadow-2xl transition-all duration-300 group-hover:bg-black/75 z-10">
-              <p className="text-[#F9F9F9] text-sm leading-relaxed text-center font-medium tracking-wide">
+              <p className="text-[#F9F9F9] text-[12px] leading leading-relaxed text-center font-medium tracking-wide">
                 "Soundmac made releasing my music simple. I uploaded once and my
                 song was everywhere. The analytics also helped me understand my
                 audience better."
@@ -139,7 +139,7 @@ const Page = () => {
               <IoMdInformationCircle size={20} />
             </button>
             <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-md border border-white/10 p-5 rounded-[20px] flex flex-col gap-3 justify-center items-center shadow-2xl transition-all duration-300 group-hover:bg-black/75 z-10">
-              <p className="text-[#F9F9F9] text-sm leading-relaxed text-center font-medium tracking-wide">
+              <p className="text-[#F9F9F9] text-[12px] leading leading-relaxed text-center font-medium tracking-wide">
                 "The platform is clean and easy to use. From distribution to
                 tracking performance, everything just works."
               </p>
