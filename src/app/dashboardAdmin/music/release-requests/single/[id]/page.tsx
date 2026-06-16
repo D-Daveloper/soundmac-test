@@ -47,9 +47,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const handleApproveRelease = async () => {
     try {
       setisSubmitting(true);
-      const res = await api.post("admin/music/request-release/single/"+singleDetails?.release?._id, {
-        requestType: "approved",
-      });
+      const res = await api.post(
+        "admin/music/request-release/single/" + singleDetails?.release?._id,
+        {
+          requestType: "approved",
+        },
+      );
       console.log(res.data);
       toast.success(res.data.msg);
       await queryClient.invalidateQueries({ queryKey: ["release-request"] });
@@ -73,10 +76,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
       if (!rejectReason) {
         return toast.warn("Please enter the reason for the rejected.");
       }
-      const res = await api.post("admin/music/request-release/single/"+singleDetails?.release?._id, {
-        requestType: "rejected",
-        message: rejectReason,
-      });
+      const res = await api.post(
+        "admin/music/request-release/single/" + singleDetails?.release?._id,
+        {
+          requestType: "rejected",
+          message: rejectReason,
+        },
+      );
       console.log(res.data);
       toast.success(res.data.msg);
       await queryClient.invalidateQueries({ queryKey: ["release-request"] });
@@ -266,96 +272,69 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         {singleDetails.release.upc}
                       </p>
                     </div>
-
-                    {/*catalog number */}
+                    {/* isrc */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
-                        Catalog Number
+                        ISRC
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {singleDetails.release.catalogNumber}
+                        {singleDetails.release.isrc}
                       </p>
                     </div>
                   </div>
                 </div>
 
-              
-                  {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* Featured Artists */}
-                  <div className="flex w-full gap-1">
-                    <div className="flex-1 max-w-[50%]">
-                      <p className="text-text-disable font-bold text-sm mb-1">
-                        Featured Artists
-                      </p>
-                      <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
-                        {singleDetails.release.featuredArtist.map(
-                          (item, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
-                            >
-                              <p className="text-gray-900 text-lg font-medium min-w-fit px-2">
-                                {item.artistName} |
-                              </p>
-                              <div className="flex items-center gap-1.5 mr-2">
-                                <Image
-                                  priority={false}
-                                  src={"/spotify.svg"}
-                                  alt="search icon"
-                                  width={20}
-                                  height={20}
-                                />
-                                <span className="text-sm text-gray-600">
-                                  {item.spotifyId}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Image
-                                  priority={false}
-                                  src={"/applemusic.svg"}
-                                  alt="search icon"
-                                  width={20}
-                                  height={20}
-                                />
-                                <span className="text-sm text-gray-600 pr-5">
-                                  {item.appleId}
-                                </span>
-                              </div>
+                {/* border line */}
+                <div className="border border-neutral-100 mb-6"></div>
+                {/* Featured Artists */}
+                <div className="flex w-full gap-1">
+                  <div className="flex-1 max-w-[50%]">
+                    <p className="text-text-disable font-bold text-sm mb-1">
+                      Featured Artists
+                    </p>
+                    <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
+                      {singleDetails.release.featuredArtist.map(
+                        (item, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
+                          >
+                            <p className="text-gray-900 text-lg font-medium min-w-fit px-2">
+                              {item.artistName} |
+                            </p>
+                            <div className="flex items-center gap-1.5 mr-2">
+                              <Image
+                                priority={false}
+                                src={"/spotify.svg"}
+                                alt="search icon"
+                                width={20}
+                                height={20}
+                              />
+                              <span className="text-sm text-gray-600">
+                                {item.spotifyId}
+                              </span>
                             </div>
-                          ),
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1 max-w-[50%]">
-                      <div className="relative max-w-[350px]">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Producers
-                        </p>
-                        <div
-                          className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                          style={{
-                            scrollbarWidth: "none",
-                            msOverflowStyle: "none",
-                          }}
-                        >
-                          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {singleDetails.release.producer
-                            .map((item) => item.name)
-                            .join(", ")}{" "}
-                        </div>
-                        {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-                      </div>
+                            <div className="flex items-center gap-1.5">
+                              <Image
+                                priority={false}
+                                src={"/applemusic.svg"}
+                                alt="search icon"
+                                width={20}
+                                height={20}
+                              />
+                              <span className="text-sm text-gray-600 pr-5">
+                                {item.appleId}
+                              </span>
+                            </div>
+                          </div>
+                        ),
+                      )}
                     </div>
                   </div>
-                  {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* Songwriter and Producer */}
-                  <div className="grid grid-cols-2">
-                    <div className="relative max-w-[400px]">
+                  <div className="flex-1 max-w-[50%]">
+                    <div className="relative max-w-[350px]">
                       <p className="text-text-disable font-bold text-sm mb-1">
-                        Song Writers
+                        Producers
                       </p>
                       <div
                         className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
@@ -365,38 +344,73 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         }}
                       >
                         <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                        {singleDetails.release.songWriter
-                          .map((item) => item.first_name)
-                          .join(", ")}
+                        {singleDetails.release.producer
+                          .map((item) => item.name)
+                          .join(", ")}{" "}
                       </div>
                       {/* fade hint on the right */}
-                      <div className="absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-                    </div>
-                    <div>
-                      <div className="relative max-w-[400px]">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Producers
-                        </p>
-                        <div
-                          className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                          style={{
-                            scrollbarWidth: "none",
-                            msOverflowStyle: "none",
-                          }}
-                        >
-                          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {singleDetails.release.producer
-                            .map((item) => item.name)
-                            .join(", ")}{" "}
-                        </div>
-                        {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-                      </div>
+                      <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
                     </div>
                   </div>
-                  <div className="border border-neutral-100 mb-6"></div>
+                </div>
+                {/* border line */}
+                <div className="border border-neutral-100 mb-6"></div>
+                {/* Songwriter and Producer */}
+                <div className="grid grid-cols-2">
+                  <div className="relative max-w-[400px]">
+                    <p className="text-text-disable font-bold text-sm mb-1">
+                      Song Writers
+                    </p>
+                    <div
+                      className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                      style={{
+                        scrollbarWidth: "none",
+                        msOverflowStyle: "none",
+                      }}
+                    >
+                      <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                      {singleDetails.release.songWriter
+                        .map((item) => item.first_name)
+                        .join(", ")}
+                    </div>
+                    {/* fade hint on the right */}
+                    <div className="absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                  </div>
+                  <div>
+                    <div className="relative max-w-[400px]">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        Producers
+                      </p>
+                      <div
+                        className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                        style={{
+                          scrollbarWidth: "none",
+                          msOverflowStyle: "none",
+                        }}
+                      >
+                        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                        {singleDetails.release.producer
+                          .map((item) => item.name)
+                          .join(", ")}{" "}
+                      </div>
+                      {/* fade hint on the right */}
+                      <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+                <div className="border border-neutral-100 mb-6"></div>
+                <div className="flex">
+                  {/*catalog number */}
+                  <div className="flex-1">
+                    <p className="text-text-disable font-bold text-sm mb-1">
+                      Catalog Number
+                    </p>
+                    <p className="text-gray-900 text-lg font-medium">
+                      {singleDetails.release.catalogNumber}
+                    </p>
+                  </div>
                   {/* explicit content */}
-                  <div className="">
+                  <div className="flex-1">
                     <p className="text-text-body font-bold text-sm my-1">
                       Explicit Content
                     </p>
@@ -407,6 +421,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       className="cursor-pointer w-5 h-5 accent-primary-500"
                     />
                   </div>
+                </div>
+                <div className="border border-neutral-100 mb-6"></div>
+                {/*Lyrics */}
+                <div className="flex-1">
+                  <p className="text-text-disable font-bold text-sm mb-1">
+                    Lyrics
+                  </p>
+                  <p className="text-gray-900 text-lg font-medium">
+                    {singleDetails.release?.lyrics}
+                  </p>
+                </div>
 
                 {/* Action Buttons */}
                 {singleDetails.release.releaseStatus === "pending" && (

@@ -226,6 +226,7 @@ export async function GET(req: Request) {
         producer: 1,
         catalogNumber: 1,
         explicitContent: 1,
+        lyrics:1
       },
     ).lean();
     if (!release) {

@@ -405,6 +405,7 @@ export interface AdminTrackDetails {
   catalogNumber: string;
   explicitContent: boolean;
   trackNumber: number;
+  lyrics:string;
 }
 export interface AdminAlbumDetailsResponse {
   release: AdminAlbumDetails;
