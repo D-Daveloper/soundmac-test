@@ -168,7 +168,6 @@ const AlbumSchema = new mongoose.Schema(
       required: [function (this: any) {
         return this.get("releaseStatus") !== "draft";
       }, "catalog number is required"],
-      unique:true
     },    
     timeZone: {
       type: {
