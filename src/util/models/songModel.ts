@@ -460,20 +460,20 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
         "track-title": song.releaseTitle,
         genre: song.genre,
         "release-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
-        "release-date-time": song.releaseDate.toISOString(),
+        "release-date-time": "00:00:00",
         "release-date-timezone": song.timeZone.value,
         "c-line": `© ${song.copyRightYear} ${song.copyRightHolder}`,
         "disc-number": 1,
         "track-number": 1,
-        "language-of-performance": "check track",
+        "language-of-performance": song.releaseLanguage,
         "isrc-code": song.isrc,
-        "track-release-id": "check track",
+        "track-release-id": song.catalogNumber,
         "p-line": `℗ ${song.copyRightYear} ${song.copyRightHolder}`,
         composer: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
         lyricist: song.songWriter.length > 0 ? song.songWriter.map((writer) => writer.first_name + " " + writer.last_name).join("|") : "",
         "effective-date": song.releaseDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
         "parental-advisory": song.explicitContent ? "Explicit" : "Not Explicit",
-        "track-length": "check track",
+        "track-length": "",
         "album-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
         "track-featured-artist": song.featuredArtist.length > 0 ? song.featuredArtist.map((artist) => artist.artistName).join("|") : "",
         "music-producer": song.producer.length > 0 ? song.producer.map((producer) => producer.name).join("|") : "",
@@ -493,7 +493,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
     }
     return { error: true, msg: "Failed to approve release" }
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 };
 const SongModel: any =

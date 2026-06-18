@@ -448,7 +448,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Lyrics
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-lg font-medium whitespace-pre-wrap max-h-[500] h-full overflow-y-auto">
                         {selectedTrack?.lyrics}
                       </p>
                     </div>

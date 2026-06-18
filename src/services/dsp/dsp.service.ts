@@ -24,7 +24,7 @@ export async function generateISRC() {
   );
   if (isrc) {
 
-    return 'NGASN' + new Date().getFullYear().toString().slice(2) + isrc.value + 1
+    return 'NG-ASN-' + new Date().getFullYear().toString().slice(2) + "-" + (isrc.value + 1).toString().padStart(5,"0")
   }
   throw Error("Failed to generate isrc")
 }
