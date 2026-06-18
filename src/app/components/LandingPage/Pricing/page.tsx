@@ -9,6 +9,7 @@ import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
 import { IoMdInformationCircle } from "react-icons/io";
+import Link from "next/link";
 
 
 export default function Pricing() {
@@ -39,7 +40,7 @@ export default function Pricing() {
   };
 
   return (
-    <section className={`classes.container md:mt-20 mt-10 lg:mx-10`}>
+    <section className={`classes.container md:mt-20 mt-10 lg:mx-20`}>
       <h2 className="text-center text-[#103958] text-2xl lg:text-4xl capitalize font-semibold">
         Everything you need, one plan away
       </h2>
@@ -60,7 +61,7 @@ export default function Pricing() {
       </div>
 
       {/* ── Subscribe modal ── */}
-      {wantsToSubscribe && selectedPlan && (
+      {/* {wantsToSubscribe && selectedPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="flex flex-col w-[90vw] max-w-sm py-5 px-6 sm:px-10 justify-center items-center bg-neutral-100 rounded-lg shadow-2xl">
             <button
@@ -103,7 +104,7 @@ export default function Pricing() {
             </button>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* ── Features modal ── */}
       {viewingFeatures && (
@@ -154,18 +155,13 @@ export default function Pricing() {
 
             {/* Footer CTA */}
             {viewingFeatures.prompt !== "Contact Us" && (
-              <div className="px-6 py-4 border-t border-gray-200">
-                <button
-                  onClick={() => {
-                    setViewingFeatures(null);
-                    setSelectedPlan(viewingFeatures);
-                    setWantsToSubscribe(true);
-                  }}
-                  className="w-full bg-[#11456B] text-white text-sm font-bold py-2.5 rounded-lg hover:opacity-80 transition-opacity"
+              // <div className="px-6 py-4 border-t border-gray-200">
+                <Link
+                  href={'/register'}
+                  className="w-fit lg:w-[80%] text-center m-auto px-6 py-2.5 mb-2 bg-[#11456B] text-white text-sm font-bold rounded-lg hover:opacity-80 transition-opacity"
                 >
-                  Get Started — {viewingFeatures.price}
-                </button>
-              </div>
+                 <p className="text-white">Get Started — {viewingFeatures.price}</p> 
+                </Link>
             )}
           </div>
         </div>
@@ -203,7 +199,7 @@ function PricingCard({
         className={`${classes.smallCard} ${props.bigBox ? classes.bigCard : ""} ${props.popular ? classes.popularCard : ""} pt-4 pb-2`}
       >
         <h4
-          style={props.popular ? { color: "#fff" } : {}}
+          style={props.popular ? { color: "" } : {}}
            className={`${classes.h4} ${classes[`planBg${index}`]} ${classes[`planText${index}`]} px-3 py-1 rounded-full border ${getBorderColor(index)} font-semibold`}
         >
           {props.title}
@@ -222,7 +218,7 @@ function PricingCard({
         </h1>
 
         <div className="flex flex-col items-center gap-2 w-full">
-          <button
+          {/* <button
             onClick={() => {
               if (props.prompt === "Contact Us") return;
               setPlan(props);
@@ -230,15 +226,15 @@ function PricingCard({
             className={`${classes.cardPromptBtn} ${props.popular ? classes.popularPromptBtn : ""} ${props.prompt === "Contact Us" ? classes.contactUsPromptBtn : ""}`}
           >
             {props.prompt}
-          </button>
+          </button> */}
 
           <button
             onClick={() => onLearnMore(props)}
             style={props.popular ? { color: "#cbd5e1" } : { color: "#11456B" }}
-            className="text-xs flex items-center gap-x-1 text-[#11456B]  hover:opacity-70 transition-opacity"
+            className="text-xs flex underline items-center gap-x-1 text-[#11456B]  hover:opacity-70 transition-opacity"
           >
             Learn more
-           <IoMdInformationCircle className="text-[#11456B]" />
+           <IoMdInformationCircle className="" />
           </button>
         </div>
       </div>

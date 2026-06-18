@@ -38,11 +38,11 @@ export default function InfiniteLogoScroll() {
 
       <div className="flex">
         <motion.div
-          className="flex gap-x-16 md:gap-x-24 items-center whitespace-nowrap"
-          animate={{ x: ["0%", "-50%"] }}
+          className="flex gap-x-16 md:gap-x-16 items-center whitespace-nowrap"
+          animate={{ x: ["0%", "-20%"] }}
           transition={{
             ease: "linear",
-            duration: 25,
+            duration: 10,
             repeat: Infinity,
           }}
         >

@@ -72,19 +72,32 @@ export function Footer() {
         <div className={classes.linkColumn}>
           <p className={classes.quickLinkHeader}>Contact</p>
           <div className={classes.quickLinkItem}>
-            <a href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}>
-              {contactInfo.phone}
+            <a href={"https://wa.me/15558284080"}>{contactInfo.phone}</a>
+
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${contactInfo.email}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {contactInfo.email}
             </a>
-            <a href={`mailto:${contactInfo.email}`}>{contactInfo.email}</a>
+            {/* <a href={`mailto:${contactInfo.email}`}>{contactInfo.email}</a> */}
           </div>
         </div>
       </div>
 
       <div className={classes.bottomContainer}>
         <div className={classes.bottomLeft}>
+          {/* <div className="flex justify-between border border-red-500"> */}
           <p className={classes.copyrightText}>
-            © Soundmac Music Group LTD - All rights reserved
+            © SoundMac Music Distribution Ltd - All rights reserved
           </p>
+          <p className={classes.copyrightText}>
+            The Product “SoundMac” is brought to you by the amazing team at
+            SoundMac music group
+          </p>
+
+          {/* </div> */}
           <div className={classes.legalLinks}>
             {legalLinks.map((item, idx) => (
               <Link href={item.link} key={idx}>

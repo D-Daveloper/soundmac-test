@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 // import avatar from '@/assets/images/avatar.webm'
 // import { NormalLoadingScreen } from '../components/Loader/loader';
@@ -36,15 +37,15 @@ const Features = () => {
         <div className="flex flex-col md:flex-row md:mx-10 mx-5 gap-y-5 md:mt-10 mt-5 justify-between items-start">
           <div className="space-y-4">
             <p className="capitalize text-[#103958] md:text-3xl font-semibold">
-              manage music
+              global music distribution
             </p>
             <p className="text-[#494949] text-[10px] md:text-md">
               Keep all your singles and albums in one place. Edit <br />{" "}
               details, track status, and stay organized.
             </p>
-            <button className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
+            <Link href={'/register'} className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
               start now
-            </button>
+            </Link>
           </div>
 
           <div className="border md:w-[50%] bg-[#F4F4F4] rounded-[20px] md:h-[300px] overflow-hidden">
@@ -68,9 +69,9 @@ const Features = () => {
               Select songs and run promotions to reach more <br /> listeners and
               grow your audience.
             </p>
-             <button className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
+             <Link href={'/register'} className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
               start now
-            </button>
+            </Link>
           </div>
         </div>
 
@@ -83,9 +84,9 @@ const Features = () => {
               View your sales reports and download ready CSV <br /> files
               anytime you need them..
             </p>
-            <button className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
+            <Link href={'/register'} className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-5 py-1 capitalize text-[10px] md:text-sm hover:bg-[#F0F0E7] ">
               start now
-            </button>
+            </Link>
           </div>
 
             <div className="border w-full md:w-[50%] bg-[#F4F4F4] rounded-[20px] md:h-[300px] overflow-hidden">
@@ -134,7 +135,7 @@ const Features = () => {
 
             <div className="bg-[#F0F0E7] border rounded-[60px] w-fit px-5 py-3">
               <p className="capitalize font-semibold text-[#103958] text-[10px] md:text-md">
-                global distribution
+                catalog management
               </p>
             </div>
 

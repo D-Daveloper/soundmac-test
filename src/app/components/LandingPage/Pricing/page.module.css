@@ -1,20 +1,20 @@
 /* Card base backgrounds */
 .planBg0 { background-color: #E8E8E8; }
-.planBg1 { background-color: #E7ECF0; }
+.planBg1 { background-color: #FCF1EA; }
 .planBg2 { background-color: #F0F0E7; }
 .planBg3 { background-color: #FCF1EA; }
 .planBg4 { background-color: #EAF5EB; }
 
 /* Header typography colors */
 .planText0 { color: #333333; }
-.planText1 { color: #103958; }
+.planText1 { color: #DD7230; }
 .planText2 { color: #585810; }
 .planText3 { color: #DD7230; }
 .planText4 { color: #2B9E36; }
 
 /* border colors */
 .planBorder0 { border-color: #C8C8C8; }
-.planBorder1 { border-color: #B0C4D4; }
+.planBorder1 { border-color: #F0B48A; }
 .planBorder2 { border-color: #C8C8A0; }
 .planBorder3 { border-color: #F0B48A; }
 .planBorder4 { border-color: #A0D4A8; }
@@ -79,6 +79,7 @@
 
 .popularCard {
     background: #11456B;
+    /* position: relative; */
 }
 
 .popularCap {
@@ -86,12 +87,13 @@
     background: #D7EAC7;
     border-radius: calc(20 / 1440 * 100vw) calc(20 / 1440 * 100vw) 0 0;
     width: calc(185 / 1440 * 100vw);
-    /* height: calc(27 / 1440 * 100vw); */
+    height: calc(27 / 1440 * 100vw);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-top: calc(-27 / 1440 * 100vw);
-    left: 48%;
+    /* margin-top: 0; */
+    left: 50%;
     transform: translateX(-50%);
 }
 

@@ -7,6 +7,7 @@ import slideTwo from "@/assets/images/bea1867f397c0043dfc921f3b8e691c985a1f5e1.j
 import slideFive from "@/assets/images/214a0454d0498bc0d39d9f7f92cdb53e1a46c31a.jpg";
 import slideFour from "@/assets/images/e6757fc16623d741dc5d384cbdced2447d439f9b.png";
 import slideThree from "@/assets/images/1fb8f04fc3aafa31a1f711c931e86d6bc188dc4f.jpg";
+import Link from "next/link";
 
 const slides = [
   {
@@ -92,9 +93,9 @@ export default function Slider() {
 
         {/* Action Button */}
         <div className="mt-8 pointer-events-auto">
-          <button className="bg-[#11456B] hover:bg-[#155685] text-white font-bold text-sm lg:text-base px-7 py-3 rounded-md shadow-lg hover:scale-105 transition-all duration-300">
+          <Link href={'/register'} className="bg-[#11456B] hover:bg-[#155685] text-white font-bold text-sm lg:text-base px-7 py-3 rounded-md shadow-lg hover:scale-105 transition-all duration-300">
             Start Now
-          </button>
+          </Link>
         </div>
       </div>
     </div>

@@ -12,7 +12,7 @@ const page = () => {
 
             <div className='space-y-5'>
               <p className='text-[#333333] md:text-3xl font-semibold'>Convert your audio in <br /> seconds</p>
-              <p className='text-[#494949] text-sm'>Upload any audio file and convert it yo the right format, ready for <br /> distribution</p>
+              <p className='text-[#494949] text-sm'>Upload any audio file and convert it to the right format, ready for <br /> distribution</p>
 
             {/* <button className="border-[1.5px] border-[#6B6B11] rounded-[15px] px-4 py-2 capitalize text-sm hover:bg-[#F0F0E7] "> */}
 
