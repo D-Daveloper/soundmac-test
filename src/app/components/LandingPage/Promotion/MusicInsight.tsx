@@ -12,6 +12,7 @@ import music7 from "@/assets/images/music7.png";
 import music6 from "@/assets/images/music6.png";
 import music8 from "@/assets/images/music8.png";
 import music3 from "@/assets/images/music3.png";
+import Link from "next/link";
 
 const MusicInsight = () => {
   return (
@@ -86,10 +87,10 @@ const MusicInsight = () => {
             Stay updated with tips, and stories to help you grow your music
             and reach more listeners
           </p>
-          <button className="flex items-center w-fit px-5 py-2 gap-x-2 bg-[#11456B] rounded-[15px]">
+          <Link href={'/blog'} className="flex items-center w-fit px-5 py-2 gap-x-2 bg-[#11456B] rounded-[15px]">
             <p className="text-white text-[10px] md:text-[15px]">Explore Articles</p>
             <FaBookOpen className="text-white" />
-          </button>
+          </Link>
         </div>
       </div>
 

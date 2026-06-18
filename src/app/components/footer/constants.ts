@@ -11,17 +11,21 @@ export const socialMediaMapping = [
 ]
 
 export const legalLinks = [
-    { name: "Privacy Policy", link: '/privacy-policy' },
-    { name: "Cookie Policy", link: '/cookie-policy' },
-    { name: "Terms of Service", link: '/terms-of-service' },
+    { name: "Privacy Policy", link: 'https://sites.google.com/view/soundmac-privacy-policy/home'},
+    { name: "Cookie Policy", link: 'https://www.soundmac.co/terms-condition' },
+    { name: "Terms of Service", link: 'https://sites.google.com/view/soundmac-legal/terms-condition' },
+    { name: "Sitemap", link: '/sitemap.xml' }, 
 ]
 
 export const quickLinks: QuickLinks = {
     Solutions: [
-        { name: "Soundmac for Artists & Labels", link: '' },
-        { name: "Soundmac Publishing", link: '' },
-        { name: "Soundmac Music Distribution API", link: '' },
-        { name: "Echo Republic", link: '' },
+        { name: "Digital Music Distribution", link: '' },
+        { name: "Music Marketing & Promotion", link: '' },
+        { name: "Catalogue Management", link: '' },
+        { name: "Chart Registration", link: '' },
+        { name: "Audio Conversion", link: '' },
+        { name: "Royalty Collection", link: '' },
+        { name: "Advance Royalties", link: '' },
     ],
     Company: [
         { name: "Careers", link: '' },
@@ -31,8 +35,8 @@ export const quickLinks: QuickLinks = {
 }
 
 export const contactInfo = {
-    phone: "+234 811 111 1111",
-    email: "soundmacinfo@gmail.com",
+    phone: "+1 (555) 824-4080",
+    email: "Support@soundmac.co",
 }
 
 

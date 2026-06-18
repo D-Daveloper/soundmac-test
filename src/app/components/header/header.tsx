@@ -66,15 +66,18 @@ export default function Header() {
       className={`${classes.container} ${modal ? classes.containerActive : ""}`}
     >
       {gettingUser && <NormalLoadingScreen />}
+      <div className="w-full flex justify-between items-center md:w-auto md:contents">
+
       <GiHamburgerMenu
         onClick={toggleModal}
         className={classes.hamburgerIcon}
       />
       <div className="flex items-center gap-x-2 ">
-        <Image src={soundmacLogo} alt="Company Logo" width={30} height={30} />
+        <Image src={soundmacLogo} alt="Company Logo" width={30} height={30} className="w-5 h-5 md:w-[30px] md:h-[30px] " />
         <Link href={"/"} className={classes.logo}>
           S O U N D M A C
         </Link>
+      </div>
       </div>
       {modal && <div className={classes.overlay} />}
       <nav

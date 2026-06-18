@@ -26,6 +26,7 @@ div.container {
 .navGroup {
     gap: calc(33 / 1440 * 100vw);
     color: #999999;
+    /* background: #E7E7E7; */
     display: flex;
     align-items: center;
     width: calc(900 / 1440 * 100vw);
@@ -88,7 +89,7 @@ div.container {
 
     .navGroup {
         position: fixed;
-        background: #E7E7E7;
+        background: #fff;
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
