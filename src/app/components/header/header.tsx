@@ -74,7 +74,7 @@ export default function Header() {
       />
       <div className="flex items-center gap-x-2 ">
         <Image src={soundmacLogo} alt="Company Logo" width={30} height={30} className="w-5 h-5 md:w-[30px] md:h-[30px] " />
-        <Link href={"/"} className={classes.logo}>
+        <Link href={"#home"} className={classes.logo}>
           S O U N D M A C
         </Link>
       </div>

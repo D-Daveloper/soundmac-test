@@ -9,6 +9,7 @@ export interface PricingObjects{
     prompt: string;
     features: string[]
     plan:string
+    // link
 }
 
 export const planColors = [
