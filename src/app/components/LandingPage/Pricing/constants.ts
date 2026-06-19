@@ -39,6 +39,6 @@ export const pricing: PricingObjects[] = [
         features: [
             'Everything in full label', 'Anti fraud tools', 'Customer percent deal', 'Users registration', 'Monthly statement and payment', 'All streaming platforms', 'Work as sub-distributor', 'White label', 'API documentation', 'Bulk import / release tool'
         ],
-        plan:""
+        plan:"Contact_Us"
     },
 ]

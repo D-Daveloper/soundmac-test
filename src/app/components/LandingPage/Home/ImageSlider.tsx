@@ -94,7 +94,7 @@ export default function Slider() {
         {/* Action Button */}
         <div className="mt-8 pointer-events-auto">
           <Link href={'/register'} className="bg-[#11456B] hover:bg-[#155685] text-white font-bold text-sm lg:text-base px-7 py-3 rounded-md shadow-lg hover:scale-105 transition-all duration-300">
-            Start Now
+            <span className="text-white">Start Now</span> 
           </Link>
         </div>
       </div>

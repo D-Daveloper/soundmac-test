@@ -6,11 +6,10 @@ import { PricingObjects } from "./types";
 import { Fragment, useState } from "react";
 import { X } from "lucide-react";
 import UseAxios from "@/util/customHooks/UseAxios";
-import { toast } from "react-toastify";
-import { isAxiosError } from "axios";
+// import { toast } from "react-toastify";
+// import { isAxiosError } from "axios";
 import { IoMdInformationCircle } from "react-icons/io";
 import Link from "next/link";
-
 
 export default function Pricing() {
   const api = UseAxios();
@@ -22,22 +21,22 @@ export default function Pricing() {
   );
   const [email, setEmail] = useState("");
 
-  const subscribe = async (plan: string, email: string) => {
-    try {
-      setIsSubscribing(true);
-      if (!email) return toast.warn("Please provide a valid email.");
-      if (!plan) return toast.warn("Please select a plan.");
-      const res = await api.post("/payments", JSON.stringify({ email, plan }));
-      toast.info("You will be redirected now.");
-      window.location.href = res.data.url;
-    } catch (error) {
-      if (isAxiosError(error)) return;
-      console.error("payment error", error);
-      toast.error("Something went wrong.");
-    } finally {
-      setIsSubscribing(false);
-    }
-  };
+  // const subscribe = async (plan: string, email: string) => {
+  //   try {
+  //     setIsSubscribing(true);
+  //     if (!email) return toast.warn("Please provide a valid email.");
+  //     if (!plan) return toast.warn("Please select a plan.");
+  //     const res = await api.post("/payments", JSON.stringify({ email, plan }));
+  //     toast.info("You will be redirected now.");
+  //     window.location.href = res.data.url;
+  //   } catch (error) {
+  //     if (isAxiosError(error)) return;
+  //     console.error("payment error", error);
+  //     toast.error("Something went wrong.");
+  //   } finally {
+  //     setIsSubscribing(false);
+  //   }
+  // };
 
   return (
     <section className={`classes.container md:mt-20 mt-10 lg:mx-20`}>
@@ -156,12 +155,25 @@ export default function Pricing() {
             {/* Footer CTA */}
             {viewingFeatures.prompt !== "Contact Us" && (
               // <div className="px-6 py-4 border-t border-gray-200">
-                <Link
-                  href={'/register'}
-                  className="w-fit lg:w-[80%] text-center m-auto px-6 py-2.5 mb-2 bg-[#11456B] text-white text-sm font-bold rounded-lg hover:opacity-80 transition-opacity"
-                >
-                 <p className="text-white">Get Started — {viewingFeatures.price}</p> 
-                </Link>
+              <Link
+                href={"/register"}
+                className="w-fit lg:w-[80%] text-center m-auto px-6 py-2.5 mb-2 bg-[#11456B] text-white text-sm font-bold rounded-lg hover:opacity-80 transition-opacity"
+              >
+                <p className="text-white">
+                  Get Started — {viewingFeatures.price}
+                </p>
+              </Link>
+            )}
+
+            {viewingFeatures.prompt == "Contact Us" && (
+              // <div className="px-6 py-4 border-t border-gray-200">
+              <a
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=admin@soundmac.co`}
+                // href={'admin@soundmac.co'}
+                className="w-fit lg:w-[80%] text-center m-auto px-6 py-2.5 mb-2 bg-[#11456B] text-white text-sm font-bold rounded-lg hover:opacity-80 transition-opacity"
+              >
+                <span className="text-white">Let&apos;s Talk</span>
+              </a>
             )}
           </div>
         </div>
@@ -190,7 +202,7 @@ function PricingCard({
   props: PricingObjects;
   setPlan: (plan: PricingObjects) => void;
   onLearnMore: (plan: PricingObjects) => void;
-  index: number
+  index: number;
 }) {
   return (
     <div className={`classes.cardContainer h-fit`}>
@@ -200,7 +212,7 @@ function PricingCard({
       >
         <h4
           style={props.popular ? { color: "" } : {}}
-           className={`${classes.h4} ${classes[`planBg${index}`]} ${classes[`planText${index}`]} px-3 py-1 rounded-full border ${getBorderColor(index)} font-semibold`}
+          className={`${classes.h4} ${classes[`planBg${index}`]} ${classes[`planText${index}`]} px-3 py-1 rounded-full border ${getBorderColor(index)} font-semibold`}
         >
           {props.title}
         </h4>
@@ -234,7 +246,7 @@ function PricingCard({
             className="text-xs flex underline items-center gap-x-1 text-[#11456B]  hover:opacity-70 transition-opacity"
           >
             Learn more
-           <IoMdInformationCircle className="" />
+            <IoMdInformationCircle className="" />
           </button>
         </div>
       </div>
