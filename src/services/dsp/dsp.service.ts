@@ -24,7 +24,7 @@ export async function generateISRC() {
   );
   if (isrc) {
 
-    return 'NG-ASN-' + new Date().getFullYear().toString().slice(2) + "-" + (isrc.value + 1).toString().padStart(5,"0")
+    return 'NGASN' + new Date().getFullYear().toString().slice(2) + (isrc.value + 1).toString().padStart(5,"0")
   }
   throw Error("Failed to generate isrc")
 }
@@ -79,7 +79,7 @@ export async function generateMultipleISRC(amount: number) {
   );
   if (isrc) {
     const isrcs = Array.from({ length: amount },(_,index)=>(
-     'NGASN' + new Date().getFullYear().toString().slice(2) + isrc.value + ( index +1)));
+     'NGASN' + new Date().getFullYear().toString().slice(2) + (isrc.value + ( index +1)).toString().padStart(5,"0")));
      return isrcs;
   }
   throw Error("Failed to generate isrc")

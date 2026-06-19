@@ -22,7 +22,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [rejectReason, setrejectReason] = useState("");
   const [isTrack, setisTrack] = useState(false);
   const [album, setalbum] = useState<AdminAlbumDetails | null>(null);
-  const [selectedTrack, setselectedTrack] = useState<AdminTrackDetails | null>(null);
+  const [selectedTrack, setselectedTrack] = useState<AdminTrackDetails | null>(
+    null,
+  );
   const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
@@ -190,6 +192,16 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 )}
                 {/* Song Details Grid */}
                 <div className="flex flex-col gap-x-12">
+                  {/* Song Name */}
+                  <div className="flex-1">
+                    <p className="text-text-disable font-bold text-sm mb-1">
+                      Email
+                    </p>
+                    <p className="text-gray-900 text-lg font-medium">
+                      {albumDetails.release.user.email}
+                    </p>
+                  </div>
+                  <div className="border border-neutral-100 mb-6"></div>
                   <div className="flex ">
                     {/* Song Name */}
                     <div className="flex-1">
@@ -302,6 +314,30 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </div>
                     )}
                   </div>
+                  <div className="border border-neutral-100 mb-6"></div>
+
+                  <div className="flex">
+                    {/* copy right holder */}
+                    <div className="flex-1">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        CopyRightHolder
+                      </p>
+                      <p className="text-gray-900 text-lg font-medium">
+                        {albumDetails.release.copyRightHolder}
+                      </p>
+                    </div>
+                    {/* copy right year */}
+                    <div className="flex-1">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        CopyRightYear
+                      </p>
+                      <p className="text-gray-900 text-lg font-medium">
+                        {albumDetails.release.copyRightYear}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-neutral-100 mb-6"></div>
                 </div>
 
                 {selectedTrack && isTrack && (

@@ -230,8 +230,8 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
 
     if (tracks.length < 2) {
       throw new Error('Tracks not found or less than 2.');
-    } else if (tracks.some(item => item.releaseStatus != "pending")) {
-      throw new Error("Only pending Tracks can be distributed.")
+    } else if (tracks.some(item => item.releaseStatus != "completed")) {
+      throw new Error("Only completed Tracks can be distributed.")
     }
     
     await TrackModel.updateMany(

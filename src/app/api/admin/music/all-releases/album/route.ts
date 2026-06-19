@@ -194,9 +194,11 @@ export async function GET(req: Request) {
     // console.log(searchParams);
 
     let albumId = searchParams.get("albumId");
+
     if (!albumId || !Types.ObjectId.isValid(albumId)) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
+    
     // Get audio record from database
     const release = await AlbumModel.findById(albumId, {
       releaseTitle: 1,
@@ -207,7 +209,10 @@ export async function GET(req: Request) {
       releaseDate: 1,
       upc: 1,
       catalogNumber: 1,
-    }).populate("artist", "spotifyId appleId -_id").lean();
+      copyRightYear: 1,
+      copyRightHolder: 1,
+    }).populate("artist", "spotifyId appleId -_id").populate("user", "email").lean();
+
     const tracks = await TrackModel.find(
       { album: albumId },
       {
@@ -228,6 +233,7 @@ export async function GET(req: Request) {
         lyrics: 1
       },
     ).lean();
+
     if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });
     }

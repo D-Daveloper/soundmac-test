@@ -185,10 +185,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
       producer: 1,
       catalogNumber: 1,
       explicitContent: 1,
-      lyrics:1
+      lyrics:1,
+      copyRightYear: 1,
+      copyRightHolder: 1
     }
     // Get audio record from database
-    const release = await SongModel.findById(songId, projection).populate("artist", "spotifyId appleId -_id").lean();
+    const release = await SongModel.findById(songId, projection).populate("user", "email").populate("artist", "spotifyId appleId -_id").lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });

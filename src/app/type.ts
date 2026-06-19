@@ -204,7 +204,7 @@ export interface songFromApi extends BaseApiResponseForRelease {
   startClip: string;
   isrc: string;
   explicitContent: boolean;
-  releaseStatus: "pending" | "approved" | "rejected" | "draft";
+  releaseStatus: "pending" | "approved" | "rejected" | "draft" | "completed";
   isCoverSong: boolean;
   license: string;
 }
@@ -384,6 +384,8 @@ export interface AdminAlbumDetails {
   releaseDate: string;
   upc: string;
   catalogNumber: string;
+  copyRightYear: string;
+  copyRightHolder: string;
   artist: {
     spotifyId: string;
     appleId: string;
@@ -405,15 +407,15 @@ export interface AdminTrackDetails {
   catalogNumber: string;
   explicitContent: boolean;
   trackNumber: number;
-  lyrics:string;
+  lyrics: string;
 }
 export interface AdminAlbumDetailsResponse {
-  release: AdminAlbumDetails;
+  release: AdminAlbumDetails & { user: { email: string } };
   tracks: AdminTrackDetails[];
   msg: string;
 }
 export interface AdminSingleDetailsResponse {
-  release: songFromApi;
+  release: songFromApi & { user: { email: string } };
   msg: string;
 }
 type ReleaseRequest = {
@@ -603,7 +605,7 @@ export type ChartRegistration = {
   chartName: string
   artist: Artist;
   releaseTitle: string
-  chartStatus: "awaiting_payment"| "pending"| "approved"| "payment_failed"
+  chartStatus: "awaiting_payment" | "pending" | "approved" | "payment_failed"
   createdAt: string
   onModel: string
   updatedAt: string
