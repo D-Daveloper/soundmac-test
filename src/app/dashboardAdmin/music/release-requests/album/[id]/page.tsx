@@ -22,9 +22,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [rejectReason, setrejectReason] = useState("");
   const [isTrack, setisTrack] = useState(false);
   const [album, setalbum] = useState<AdminAlbumDetails | null>(null);
-  const [selectedTrack, setselectedTrack] = useState<
-    AdminTrackDetails | AdminTrackDetails | null
-  >(null);
+  const [selectedTrack, setselectedTrack] = useState<AdminTrackDetails | null>(null);
   const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
@@ -284,14 +282,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
 
                     {/*catalog number */}
-                    <div className="flex-1">
-                      <p className="text-text-disable font-bold text-sm mb-1">
-                        Catalog Number
-                      </p>
-                      <p className="text-gray-900 text-lg font-medium">
-                        {albumDetails.release.catalogNumber}
-                      </p>
-                    </div>
+                    {selectedTrack && isTrack ? (
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          ISRC
+                        </p>
+                        <p className="text-gray-900 text-lg font-medium">
+                          {selectedTrack.isrc}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Catalog Number
+                        </p>
+                        <p className="text-gray-900 text-lg font-medium">
+                          {albumDetails.release.catalogNumber}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -410,17 +419,38 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </div>
                     </div>
                     <div className="border border-neutral-100 mb-6"></div>
-                    {/* explicit content */}
-                    <div className="">
-                      <p className="text-text-body font-bold text-sm my-1">
-                        Explicit Content
+                    <div className="flex">
+                      {/*catalog number */}
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Catalog Number
+                        </p>
+                        <p className="text-gray-900 text-lg font-medium">
+                          {selectedTrack.catalogNumber}
+                        </p>
+                      </div>
+                      {/* explicit content */}
+                      <div className="flex-1">
+                        <p className="text-text-body font-bold text-sm my-1">
+                          Explicit Content
+                        </p>
+                        <input
+                          type="checkbox"
+                          checked={selectedTrack.explicitContent}
+                          disabled
+                          className="cursor-pointer w-5 h-5 accent-primary-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="border border-neutral-100 mb-6"></div>
+                    {/*Lyrics */}
+                    <div className="flex-1">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        Lyrics
                       </p>
-                      <input
-                        type="checkbox"
-                        checked={selectedTrack.explicitContent}
-                        disabled
-                        className="cursor-pointer w-5 h-5 accent-primary-500"
-                      />
+                      <p className="text-gray-900 text-lg font-medium whitespace-pre-wrap max-h-[500] h-full overflow-y-auto">
+                        {selectedTrack?.lyrics}
+                      </p>
                     </div>
                   </>
                 )}

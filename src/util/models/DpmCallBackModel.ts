@@ -8,8 +8,8 @@ const dpmCallBackSchema = new mongoose.Schema({
         required: true
     },
     "release-type": { type: String, required: [true, "Release type is required"] },
-    upc: { type: String, required: [true, "UPC is required"], unique: true, index: true },
-    "catalog-number": { type: String, required: [true, "Catalog number is required"] },
+    upc: { type: String, required: [true, "UPC is required"], index: true },
+    "catalog-number": { type: String, required: [true, "Catalog number is required"], unique:true },
     "album-release-id": { type: String, required: [true, "Album release ID is required"] },
     "album-main-artist": { type: String, required: [true, "Album main artist is required"] },
     "secondary-language-album-main-artist": { type: String, default: "" },
@@ -27,7 +27,11 @@ const dpmCallBackSchema = new mongoose.Schema({
     "c-line": { type: String, default: "" },
     "disc-number": { type: Number, required: [true, "Disc number is required"] },
     "track-number": { type: Number, required: [true, "Track number is required"] },
-    "track-title": { type: String, required: [true, "Track title is required"] },
+    "track-title": {
+        type: String, required: [function (this: any) {
+            return this.get("release-type") !== "Album";
+        }, "Track title is required"]
+    },
     "track-subtitle": { type: String, default: "" },
     "secondary-language-track-title": { type: String, default: "" },
     "secondary-language-track-subtitle": { type: String, default: "" },
@@ -38,13 +42,25 @@ const dpmCallBackSchema = new mongoose.Schema({
     "language-of-performance": { type: String, required: [true, "Language of performance is required"] },
     "track-length": { type: String, default: "" },
     "isrc-code": { type: String, default: "" },
-    "track-release-id": { type: String, required: [true, "Track release ID is required"] },
+    "track-release-id": {
+        type: String, required: [function (this: any) {
+            return this.get("release-type") !== "Album";
+        }, "Track release ID is required"]
+    },
     "p-line": { type: String, required: [true, "P-line is required"] },
     "music-producer": { type: String, default: "" },
     "remixer": { type: String, default: "" },
     "ISWC-Code": { type: String, },
-    composer: { type: String, required: [true, "Composer is required"] },
-    lyricist: { type: String, default: "", required: [true, "Lyricist is required"] },
+    composer: {
+        type: String, required: [function (this: any) {
+            return this.get("release-type") !== "Album";
+        }, "Composer is required"]
+    },
+    lyricist: {
+        type: String, required: [function (this: any) {
+            return this.get("release-type") !== "Album";
+        }, "Lyricist is required"]
+    },
     publisher: { type: String, default: "" },
     "territory-availability": { type: String, default: "WW", required: [true, "Territory availability is required"] }, // Default to worldwide availability
     "download-purchase": { type: String, default: "Y", required: [true, "Download Purchase is required"] },

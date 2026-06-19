@@ -69,45 +69,45 @@ export async function POST(req: Request) {
     let trackUpdate = null
 
     if (body.requestType == "approved") {
+      // Execute the model method passing the session
+      const result = await (AlbumModel as any).approveAndCreateMetadata(release._id, release.user.label);
+      if (result.error) {
+        return NextResponse.json(
+          { msg: result.msg },
+          { status: 400 },
+        );
+      } else {
+        const approvalEmailData = {
+          artistName: release.artistName,
+          releaseTitle: release.releaseTitle,
+          releaseDate: new Date(release.releaseDate).toDateString(),
+          releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=album",
+          supportEmail: "",
+          company_name: "Soundmac",
+          year: new Date().getFullYear().toString(),
+          company_address: "",
+          website_url: process.env.FRONTEND_URL!,
+          help_center_url: "",
+          terms_url: "",
+          unsubscribe_url: "",
+        };
 
-      // create the dpm callback here
-      albumUpdate = AlbumModel.findByIdAndUpdate(
-        body.albumId,
-        { releaseStatus: body.requestType },
-        { runValidators: true, session },
-      );
+        emailTitle = "Release Approval";
 
-      trackUpdate = TrackModel.updateMany(
-        {
-          album: body.albumId,
-        },
-        {
-          releaseStatus: body.requestType,
-        }, { session }
-      );
-
-      const approvalEmailData = {
-        artistName: release.artistName,
-        releaseTitle: release.releaseTitle,
-        releaseDate: new Date(release.releaseDate).toDateString(),
-        releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=single",
-        supportEmail: "",
-        company_name: "Soundmac",
-        year: new Date().getFullYear().toString(),
-        company_address: "",
-        website_url: process.env.FRONTEND_URL!,
-        help_center_url: "",
-        terms_url: "",
-        unsubscribe_url: "",
-      };
-
-      emailTitle = "Release Approval";
-
-      emailHtml = replaceTemplatePlaceholders(
-        releaseApprovalEmail(),
-        approvalEmailData,
-      );
-
+        emailHtml = replaceTemplatePlaceholders(
+          releaseApprovalEmail(),
+          approvalEmailData,
+        );
+        //  background job
+        await inngest.send({
+          name: "send-email",
+          data: {
+            html: emailHtml,
+            emailTo: userEmail,
+            title: emailTitle
+          },
+        });
+      }
     } else if (body.requestType == "rejected") {
 
       albumUpdate = AlbumModel.findByIdAndUpdate(
@@ -124,7 +124,7 @@ export async function POST(req: Request) {
           releaseStatus: body.requestType,
         }, { session }
       );
-      
+
       const rejectEmailData: rejectEmailProps = {
         artistName: release.artistName,
         releaseTitle: release.releaseTitle,
@@ -135,34 +135,33 @@ export async function POST(req: Request) {
       ///prepare email body
       emailHtml = releaseRejectionEmail(rejectEmailData);
       emailTitle = "Release Rejection";
-
-    }
-    try {
-      session.startTransaction()
-      await albumUpdate
-      await trackUpdate
-      await session.commitTransaction();
-      //  background job
-      await inngest.send({
-        name: "send-email",
-        data: {
-          html: emailHtml,
-          emailTo: userEmail,
-          title: emailTitle
-        },
-      });
-    } catch (error) {
-      await session.abortTransaction();
-      return NextResponse.json(`Failed to ${body.requestType === "approved" ? "approve" : 'reject'} release`)
-
-    } finally {
-      await session.endSession()
+      try {
+        session.startTransaction()
+        await albumUpdate
+        await trackUpdate
+        await session.commitTransaction();
+        //  background job
+        await inngest.send({
+          name: "send-email",
+          data: {
+            html: emailHtml,
+            emailTo: userEmail,
+            title: emailTitle
+          },
+        });
+      } catch (error) {
+        await session.abortTransaction();
+        return NextResponse.json(`Failed to reject release`)
+      } finally {
+        await session.endSession()
+      }
     }
 
     return NextResponse.json(
       { msg: "Release" + " " + body.requestType + "." },
       { status: 200 },
     );
+    
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
@@ -226,6 +225,7 @@ export async function GET(req: Request) {
         producer: 1,
         catalogNumber: 1,
         explicitContent: 1,
+        lyrics: 1
       },
     ).lean();
     if (!release) {

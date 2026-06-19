@@ -41,12 +41,13 @@ export async function GET(req: Request) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });
     }
     console.log(release);
+    const fileName = release.releaseTitle + "_" + release.releaseAudio.split("/")[2];
 
     // Generate presigned URL
     const command = new GetObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET!,
       Key: release.releaseAudio,
-      ResponseContentDisposition: `attachment; filename="${release.releaseTitle}"`,
+      ResponseContentDisposition: `attachment; filename="${fileName}"`,
     });
 
     const downloadUrl = await getSignedUrl(s3, command, {
@@ -55,7 +56,7 @@ export async function GET(req: Request) {
 
     return NextResponse.json({
       downloadUrl,
-      fileName: release.releasteTitle,
+      fileName,
       expiresIn: 3600,
       msg: "Link generated Successfully.",
     });
