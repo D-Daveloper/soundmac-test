@@ -3,7 +3,7 @@ import React, { use, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import { CircleCheck, Music, X } from "lucide-react";
+import { CircleCheck, FileSearch, Music, X } from "lucide-react";
 import { useGetAdminSingleDetails } from "@/util/customHooks/useQueries";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
@@ -133,6 +133,13 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     }
   };
 
+  const handleViewCoverLincense = () => {
+    if (singleDetails?.release.license) {
+      const url = singleDetails?.release.license;
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <>
       {/* Main Modal */}
@@ -155,29 +162,47 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <>
             <div className="flex mt-3">
               {/* Content */}
-              <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
-                <div className="flex items-center gap-4 mb-10">
-                  <button
-                    onClick={handleDownloadSong}
-                    aria-label="download music"
-                    className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
-                  >
-                    {/* Icon placeholder - add your music note icon here */}
-                    <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
-                      <Music />
-                    </div>
-                    Download Audio file
-                  </button>
-                  <button className="w-fit h-fit px-4 py-2 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-colors">
-                    {/* Icon */}
-                    <Image
-                      priority={false}
-                      src={"/play-circle.svg"}
-                      alt="play icon"
-                      width={20}
-                      height={20}
-                    />
-                  </button>
+              <div className="p-3 flex-2 max-w-[70%] w-full overflow-hidden">
+                <div className="flex gap-5">
+                  <div className="flex items-center gap-4 mb-10">
+                    <button
+                      onClick={handleDownloadSong}
+                      aria-label="download music"
+                      className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
+                    >
+                      {/* Icon placeholder - add your music note icon here */}
+                      <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
+                        <Music />
+                      </div>
+                      Download Audio file
+                    </button>
+                    <button className="w-fit h-fit px-4 py-2 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-colors">
+                      {/* Icon */}
+                      <Image
+                        priority={false}
+                        src={"/play-circle.svg"}
+                        alt="play icon"
+                        width={20}
+                        height={20}
+                      />
+                    </button>
+                  </div>
+                  <div className=" items-center gap-4 mb-10">
+                    <button
+                      onClick={() => handleViewCoverLincense()}
+                      disabled={!singleDetails?.release.license}
+                      aria-label="view cover lincense"
+                      className={
+                        "flex items-center gap-2 font-bold w-full transition-colors not-disabled:text-primary-500 not-disabled:hover:text-primary/90 disabled:text-gray-500"
+                      }
+                    >
+                      {/* Icon placeholder - add your music note icon here */}
+                      <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
+                        <FileSearch />
+                      </div>
+                      View Cover License
+                    </button>
+                  </div>
                 </div>
 
                 {/* Song Details Grid */}

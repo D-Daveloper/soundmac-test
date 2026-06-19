@@ -187,7 +187,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
       explicitContent: 1,
       lyrics:1,
       copyRightYear: 1,
-      copyRightHolder: 1
+      copyRightHolder: 1,
+      license:1
     }
     // Get audio record from database
     const release = await SongModel.findById(songId, projection).populate("user", "email").populate("artist", "spotifyId appleId -_id").lean();
