@@ -1,4 +1,4 @@
-import { rejectEmailProps } from "@/app/type";
+import { rejectEmailProps, songFromApi } from "@/app/type";
 import dbConnect from "@/util/db";
 import { releaseApprovalEmail, releaseRejectionEmail, replaceTemplatePlaceholders } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
@@ -44,7 +44,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     } else if (!songId || !Types.ObjectId.isValid(songId)) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    const release = await SongModel.findById(songId).populate(
+    const release: songFromApi & { user: { email: string } } = await SongModel.findById(songId).populate(
       "user",
       "email label",
 
@@ -84,21 +84,29 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
           terms_url: "",
           unsubscribe_url: "",
         };
-      const emailTitle = "Release Approval";
+        const emailTitle = "Release Approval";
 
         const approvalEmailhtml = replaceTemplatePlaceholders(
           releaseApprovalEmail(),
           approvalEmailData,
         );
-      await inngest.send({
-        name: "send-email",
-        data: {
-          html:approvalEmailhtml,
-          emailTo:userEmail,
-          title:emailTitle
-        },
-      });
-        
+        await inngest.send({
+          name: "send-email",
+          data: {
+            html: approvalEmailhtml,
+            emailTo: userEmail,
+            title: emailTitle
+          },
+        });
+        await inngest.send({
+          name: "release/deliver",
+          data: {
+            upc: release.upc,
+            listDspId: release.dsp.map(item => item.value),
+            releaseId: release._id,
+            isSingle: true
+          },
+        });
         return NextResponse.json(
           { msg: result.msg },
           { status: 201 },
@@ -126,8 +134,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
       await inngest.send({
         name: "send-email",
         data: {
-          html:rejectionEmail,
-          emailTo:userEmail,
+          html: rejectionEmail,
+          emailTo: userEmail,
           title: emailTitle
         },
       });
@@ -185,10 +193,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
       producer: 1,
       catalogNumber: 1,
       explicitContent: 1,
-      lyrics:1,
+      lyrics: 1,
       copyRightYear: 1,
       copyRightHolder: 1,
-      license:1
+      license: 1
     }
     // Get audio record from database
     const release = await SongModel.findById(songId, projection).populate("user", "email").populate("artist", "spotifyId appleId -_id").lean();

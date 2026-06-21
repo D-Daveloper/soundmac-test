@@ -19,7 +19,6 @@ export const deleteAlbumData = inngest.createFunction(
             )
         })
         console.log(results);
-        
 
         const failed = results.filter(r => r.status === 'rejected')
 
@@ -32,13 +31,14 @@ export const deleteAlbumData = inngest.createFunction(
             await dbConnect();
             const session = await mongoose.startSession();
             try {
-                 session.startTransaction();
+                session.startTransaction();
                 await AlbumModel.findByIdAndDelete(albumId)
                 await TrackModel.deleteMany({ album: albumId })
                 await session.commitTransaction();
             } catch (error) {
-                await session.abortTransaction();
-                throw error;
+                if (session.inTransaction()) {
+                    await session.abortTransaction();
+                } throw error;
             } finally {
                 await session.endSession();
             }

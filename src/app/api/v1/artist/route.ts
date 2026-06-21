@@ -356,7 +356,7 @@ export async function PUT(req: Request) {
         user: user._id,
         artistName: artistName
       }).lean();
-      
+
       if (doesArtistNameAlreadyExist.length > 0) {
         return NextResponse.json({ msg: "Artist name already exist" }, { status: 400 })
       }
@@ -387,12 +387,12 @@ export async function PUT(req: Request) {
       const session = await mongoose.startSession();
       try {
         session.startTransaction();
-        
+
         await SongModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-        await AlbumModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-        await TrackModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-        artist.artistName = artistName;
-          await artist.save({ session }),
+          await AlbumModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+          await TrackModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+          artist.artistName = artistName;
+        await artist.save({ session }),
 
           await session.commitTransaction();
         return NextResponse.json(
@@ -401,7 +401,9 @@ export async function PUT(req: Request) {
         );
       } catch (error) {
         console.error("error editing artist", error);
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
         return NextResponse.json({ msg: "Failed to edit artist" }, { status: 500 });
 
       } finally {

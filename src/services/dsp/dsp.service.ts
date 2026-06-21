@@ -38,7 +38,7 @@ export async function generateCatalogNumber() {
   );
   if (catalog) {
 
-    return 'SM' + catalog.value + 1
+    return 'SM' + new Date().getFullYear().toString().slice(2) + catalog.value + 1
   }
   throw Error("Failed to generate catalog number")
 }
@@ -64,7 +64,7 @@ export async function generateMultipleCatalogNumber(amount: number) {
   );
   if (catalogNumber) {
     const catalogNumbers = Array.from({ length: amount },(_,index)=>(
-     'NGASN' + new Date().getFullYear().toString().slice(2) + catalogNumber.value + ( index +1)));
+     'SM' + new Date().getFullYear().toString().slice(2) + catalogNumber.value + ( index +1)));
      return catalogNumbers;
   }
   throw Error("Failed to generate catalog number")
@@ -109,9 +109,9 @@ export async function approveRelease(releaseId: string) {
 
 export async function getDsps() {
   try {
-    const res = await axios.get(process.env.GET_DSPS_URL!, {
+    const res = await axios.get(process.env.DPM_HOST_V1!+"dsp", {
       headers: {
-        Authorization: `Basic ${process.env.GET_DSPS_BASIC_AUTH_PASSWORD}`
+        Authorization: `Basic ${process.env.DPM_HOST_V1_AUTH}`
       }
     });
     return res.data;

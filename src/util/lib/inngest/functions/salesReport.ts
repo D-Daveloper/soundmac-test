@@ -176,7 +176,9 @@ export const uploadSalesReport = inngest.createFunction(
 
                     await session.commitTransaction();
             } catch (error) {
-                await session.abortTransaction();
+                if (session.inTransaction()) {
+                    await session.abortTransaction();
+                }
                 throw error;
             } finally {
                 await session.endSession();
@@ -258,7 +260,7 @@ export const generateReport = inngest.createFunction(
             await sendEmail(
                 email,
                 "Your report is ready",
-                `Download here: ${fileUrl}`,
+                `Download here: ${fileUrl}, This Link expires in one hour`,
             );
         });
 

@@ -213,7 +213,7 @@ export async function POST(req: Request) {
 
     } else {
       [catalogNumber, payload.isrc] = await Promise.all([
-       generateCatalogNumber(), generateISRC()
+        generateCatalogNumber(), generateISRC()
       ]).catch((err) => { throw err })
     }
     const savedSong = new SongModel({
@@ -270,8 +270,9 @@ export async function POST(req: Request) {
       ).session(session);
       await session.commitTransaction();
     } catch (error) {
-      await session.abortTransaction();
-      console.log("Transaction error:", error);
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      } console.log("Transaction error:", error);
       return NextResponse.json({ msg: "Failed to save song" }, { status: 500 });
     } finally {
       await session.endSession();
@@ -864,8 +865,9 @@ export async function DELETE(req: Request) {
             }
             await session.commitTransaction();
           } catch (error) {
-            await session.abortTransaction();
-            console.log("Transaction error:", error);
+            if (session.inTransaction()) {
+              await session.abortTransaction();
+            } console.log("Transaction error:", error);
             return NextResponse.json({ msg: "Failed to delete song" }, { status: 500 });
           } finally {
             await session.endSession();
@@ -1077,8 +1079,8 @@ export async function PUT(req: Request) {
               ? "Distributed by SoundMac"
               : payload.copyRightHolder,
           copyRightYear: user!.type === "EMERGING_ARTIST"
-              ? new Date().getFullYear()
-              : payload.copyRightYear,
+            ? new Date().getFullYear()
+            : payload.copyRightYear,
           lyrics: payload.lyrics,
           startClip: payload.startClip,
           dsp: payload.dsp,
@@ -1106,8 +1108,9 @@ export async function PUT(req: Request) {
       }
       await session.commitTransaction();
     } catch (error) {
-      await session.abortTransaction();
-      console.log("transaction error", error);
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      } console.log("transaction error", error);
       return NextResponse.json({ msg: "Failed to update release" }, { status: 400 });
     } finally {
       await session.endSession();

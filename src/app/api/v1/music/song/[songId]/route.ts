@@ -117,8 +117,9 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ songI
                     } catch (error) {
                         console.log(error);
 
-                        await session.abortTransaction();
-                        return NextResponse.json(
+                        if (session.inTransaction()) {
+                            await session.abortTransaction();
+                        } return NextResponse.json(
                             { msg: "Failed to delete." },
                             { status: 400 },
                         );

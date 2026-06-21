@@ -403,7 +403,9 @@ export async function PUT(req: Request) {
       );
       await session.commitTransaction();
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
     } finally {
       await session.endSession();
     }
@@ -519,7 +521,9 @@ export async function PATCH(req: Request) {
       );
     } catch (error) {
       console.error("mark as completed error", error);
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       return NextResponse.json(
         { msg: "Failed to update status" },
         { status: 500 },

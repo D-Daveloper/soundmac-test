@@ -216,7 +216,9 @@ export async function POST(req: Request) {
         }, { session })
       await session.commitTransaction();
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw error;
     } finally {
       await session.endSession();
@@ -329,8 +331,9 @@ export async function PUT(req: Request) {
       await session.commitTransaction();
 
     } catch (error) {
-      await session.abortTransaction();
-
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw error;
     } finally {
       await session.endSession();

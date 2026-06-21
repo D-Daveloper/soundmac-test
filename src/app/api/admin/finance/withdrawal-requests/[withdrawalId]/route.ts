@@ -95,8 +95,9 @@ export async function POST(
         await session.commitTransaction();
 
       } catch (error) {
-        await session.abortTransaction();
-        throw error;
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        } throw error;
       } finally {
         await session.endSession();
       }

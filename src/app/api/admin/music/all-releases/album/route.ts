@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       albumFromApi & { user: { email: string } }
     >(body.albumId)
       .populate("user", "email")
-      .lean();
+      .lean<albumFromApi & { user: { email: string } }>();
 
     if (!release || release.unassignedNumbers.length > 0) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -107,6 +107,15 @@ export async function POST(req: Request) {
             title: emailTitle
           },
         });
+        await inngest.send({
+          name: "release/deliver",
+          data: {
+            upc: release.upc,
+            listDspId: release.dsp.map(item => item.value),
+            releaseId: release._id,
+            isSingle: false
+          },
+        });
       }
     } else if (body.requestType == "rejected") {
 
@@ -150,7 +159,9 @@ export async function POST(req: Request) {
           },
         });
       } catch (error) {
-        await session.abortTransaction();
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
         return NextResponse.json(`Failed to reject release`)
       } finally {
         await session.endSession()
@@ -161,7 +172,7 @@ export async function POST(req: Request) {
       { msg: "Release" + " " + body.requestType + "." },
       { status: 200 },
     );
-    
+
   } catch (error: unknown) {
     if (error instanceof Error) {
       return NextResponse.json({ msg: error.message }, { status: 500 });
@@ -198,7 +209,7 @@ export async function GET(req: Request) {
     if (!albumId || !Types.ObjectId.isValid(albumId)) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
-    
+
     // Get audio record from database
     const release = await AlbumModel.findById(albumId, {
       releaseTitle: 1,

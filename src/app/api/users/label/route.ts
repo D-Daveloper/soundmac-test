@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Only one label per account", status: 400 };
     } else if (!acceptedUserTypes.includes(user.type)) {
       Uploaderror = { msg: `${user.type.replaceAll("_", " ")} can not create label account`, status: 402 };
-     } else if (user.premium !== true) {
+    } else if (user.premium !== true) {
       Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
       user.premium = false;
@@ -140,7 +140,9 @@ export async function POST(req: Request) {
 
       await session.commitTransaction();
     } catch (error) {
-      await session.abortTransaction();
+      if (session.inTransaction()) {
+        await session.abortTransaction();
+      }
       throw error;
     } finally {
       await session.endSession();
