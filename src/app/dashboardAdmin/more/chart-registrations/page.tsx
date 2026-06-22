@@ -26,7 +26,7 @@ const Page = () => {
   const releaseTitle = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("All Promotions");
+    dashboardContext?.setLayoutHeaderMessage("All Charts");
   }, [dashboardContext]);
 
   const handleSearchQueryChange = (filter: string) => {

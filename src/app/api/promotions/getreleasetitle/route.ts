@@ -28,6 +28,7 @@ export async function GET(req: Request) {
     const query: any = {
       user: userJwt.user,
       artistName: artist,
+      releaseStatus:"approved"
     };
 
     const songs = await SongModel.find(query, { releaseTitle: 1, _id: 0 }).sort(
