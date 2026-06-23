@@ -15,16 +15,13 @@ import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import dbConnect from "@/util/db";
 
 export const uploadSalesReport = inngest.createFunction(
-    { id: "upload-report", triggers: { event: "report/upload" } },
+    { id: "upload-report", triggers: { event: "report/upload" }, onFailure: handleFailedUpload },
     async ({ event, step }) => {
 
         console.log(event);
         const { batchId, sales_period, data } = event.data;
 
         await step.run("parse-sales-report", async () => {
-            await dbConnect();
-
-
             // console.log(data);
             let sales = [];
             let ledgers = [];//save everything in memory then save to the db at the end
@@ -35,7 +32,7 @@ export const uploadSalesReport = inngest.createFunction(
                 const trackTitle = stripQuotes(row["TrackTitle"]);
                 const quantity = parseInt(row["Quantity"]) || 0;
                 const rawAmountUsd = amount;
-                const netAmountUsd = amount * 0.1;
+                const netAmountUsd = amount - (amount * 0.1);
                 const dsp = row["DigitalServiceProvider"];
                 const territory = row["Territory"];
                 const upc = row["Upc"]?.toString().trim();
@@ -69,7 +66,7 @@ export const uploadSalesReport = inngest.createFunction(
                 // const artistPromise: any = Artist.findOne({
                 //     artistName: normalizedArtist, // 🔥 see note below
                 // }).lean();// doesnt make sense to search the artist collection when two artist can have the same name, artist name is only unique per user
-
+                await dbConnect();
                 const [songResult, albumResult] = await Promise.all([
                     songPromise,
                     albumPromise,
@@ -267,3 +264,18 @@ export const generateReport = inngest.createFunction(
         return { success: true };
     }
 );
+
+
+async function handleFailedUpload({ error, event, step }: { error: any; event: any; step: any }) {
+    console.log(error);
+
+
+    const { batchId, sales_period, data } = event.data.event.data;
+    await step.run("roll-back-batch", async () => {
+        console.log(batchId);
+        await salesReportBatch.findByIdAndUpdate(batchId, {
+            status: "failed"
+        })
+    })
+    console.error("Upload failed", { error, event });
+}

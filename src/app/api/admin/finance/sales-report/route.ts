@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
         }
         const batch: any = await salesReportBatch.findOne({ fileName: file.name }).lean();
         if (batch && batch.status === "processing") {
-            return NextResponse.json({ msg: "Sales report is being processed. Should be done shortly." },{status:400});
+            return NextResponse.json({ msg: "Sales report is being processed. Should be done shortly." }, { status: 400 });
         } else if (batch && batch.status === "completed") {
-            return NextResponse.json({ msg: "Sales report has been uploaded" },{status:400});
+            return NextResponse.json({ msg: "Sales report has been uploaded" }, { status: 400 });
         }
         const buffer = Buffer.from(await file.arrayBuffer());
         const workbook = xlsx.read(buffer);
@@ -88,12 +88,12 @@ export async function POST(req: NextRequest) {
 
         }[] = xlsx.utils.sheet_to_json(sheet);
 
-        const newBatch = await salesReportBatch.create({
+        const newBatch = await salesReportBatch.findOneAndUpdate({ fileName: file.name }, {
             fileName: file.name,
             fileSource: royalty_source,
             status: "processing",
             uploadDate: new Date(accounting_period)
-        });
+        }, { upsert: true, new: true });
 
         // 3. Trigger background job
         await inngest.send({

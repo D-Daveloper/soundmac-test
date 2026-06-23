@@ -4,8 +4,9 @@ import { generateReport, uploadSalesReport } from "@/util/lib/inngest/functions/
 import { deleteAlbumData } from "@/util/lib/inngest/functions/album";
 import { SendEmail } from "@/util/lib/inngest/functions/email";
 import { releaseDelivery } from "@/util/lib/inngest/functions/dpm";
+import { globalErrorHandler } from "@/util/lib/inngest/functions/globalError";
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [uploadSalesReport,generateReport,deleteAlbumData,SendEmail,releaseDelivery],
+  functions: [uploadSalesReport,generateReport,deleteAlbumData,SendEmail,releaseDelivery,globalErrorHandler],
 });
