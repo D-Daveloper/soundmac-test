@@ -51,7 +51,7 @@ export default function SignIn() {
                 return;
             }
             localStorage.setItem("token", data.token);
-            console.log(data.user);
+            // console.log(data.user);
             if(updateUser){
                 updateUser(data.user || null);
             }

@@ -34,7 +34,7 @@ const sideBarCom = (props: Props) => {
           alt="arrow point up"
           width={20}
           height={20}
-          className={""+(pathname.includes(props.title.toLocaleLowerCase()) || open ? " rotate-180 " : " rotate-0 ")}
+          className={""+(pathname.includes(props.title.toLocaleLowerCase()) || open ? " rotate-0 " : " rotate-180 ")}
         />
       </button>
       {/* <div className={""}> */}

@@ -33,18 +33,19 @@ const DynamicInput = React.memo(({
   };
   return (
     <>
-      <div className="flex gap-1 sm:text-sm text-lg">
+      <div className="flex gap-1 sm:text-sm text-lg mt-1">
         <p className=" capitalize font-medium">{props.title} </p>
         {required && (
-          <Image
-            priority={false}
-            loading="lazy"
-            src="/required.svg"
-            alt="a star marking this field as required"
-            width={0}
-            height={0}
-            className="w-2 -mt-3"
-          />
+           <span className="text-red-500">*</span>
+          // <Image
+          //   priority={false}
+          //   loading="lazy"
+          //   src="/required.svg"
+          //   alt="a star marking this field as required"
+          //   width={0}
+          //   height={0}
+          //   className="w-2 -mt-3"
+          // />
         )}
       </div>
       <div className={"flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-2 sm:text-sm text-[16px] " + ( props.disabled && " text-text-disable bg-neutral-50")}>
