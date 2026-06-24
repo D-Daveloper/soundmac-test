@@ -9,7 +9,8 @@ import { ChevronLeft } from "lucide-react";
 const Page = () => {
   const router = useRouter();
   return (
-    <main className="section flex h-[100dvh] sm:overflow-hidden max-xs:min-h-[100dvh]">
+    // <main className="section flex h-[100dvh] sm:overflow-hidden max-xs:min-h-[100dvh]">
+      <main className="section flex min-h-screen lg:h-screen overflow-y-hidden">
       <div className="w-[40%] max-md:hidden relative">
         <Image
           priority={true}
@@ -26,7 +27,9 @@ const Page = () => {
           <ChevronLeft />
         </button>
       </div>
-      <div className="flex flex-1 mt-3 flex-col">
+      {/* <div className="flex flex-1 mt-3 flex-col"> */}
+      <div className="flex flex-1 mt-3 flex-col overflow-y-auto">
+
         <button
           onClick={() => router.back()}
           className="max-w-15 max-h-10 min-w-15 min-h-10 rounded-lg flex justify-center items-center text-2xl text-white! bg-primary-500 m-5 md:hidden"

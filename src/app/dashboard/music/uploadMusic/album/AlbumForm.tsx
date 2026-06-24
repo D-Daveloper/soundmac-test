@@ -28,6 +28,9 @@ import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
+// Preview Component
+import AlbumPreview from "./AlbumPreview";
+
 const AlbumForm = () => {
   const queryClient = useQueryClient();
   const dashboardContext = useContext(DashboardContext);
@@ -191,8 +194,11 @@ const AlbumForm = () => {
   }, []);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Upload Album");
-  }, [dashboardContext]);
+    dashboardContext?.setHeader({
+      title: "Upload Album",
+      showBackButton: true,
+    });
+  }, []);
 
   if (isErrorDsp) {
     toast.error("Failed to load DSP list. Please refresh the page.");
@@ -200,14 +206,14 @@ const AlbumForm = () => {
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px] px-5">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
         (!isError || data != undefined || !dspData) && (
           <>
-            <button
+            {/* <button
               onClick={() => {
                 deleteParam("type");
               }}
@@ -219,8 +225,8 @@ const AlbumForm = () => {
                 width={32}
                 alt="arrow left"
               />
-            </button>
-            <div className="flex gap-8 px-5 py-5">
+            </button> */}
+            <div className="flex gap-8 px-0 lg:px-2 py-5">
               {!preview ? (
                 <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-30 min-h-[64dvh]">
                   {/* Song info */}
@@ -249,10 +255,10 @@ const AlbumForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Genre
+                          <p className="font-medium mb-2 text-sm ">
+                            Genre <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -260,7 +266,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -276,10 +282,10 @@ const AlbumForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Language
+                          <p className="font-medium mb-2 text-sm">
+                            Language <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -287,7 +293,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -306,10 +312,11 @@ const AlbumForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            No. of tracks
+                          <p className="font-medium mb-2 text-sm">
+                            No. of tracks{" "}
+                            <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -317,7 +324,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -343,9 +350,9 @@ const AlbumForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
                           <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Artist
+                            Artist <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -353,7 +360,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -546,9 +553,9 @@ const AlbumForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg">
-                            DSPs
+                            DSPs <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -556,7 +563,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <CheckboxSelectDsp
                           title="Select DSPs"
@@ -593,9 +600,10 @@ const AlbumForm = () => {
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
                             <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                              Artwork File
+                              Artwork File{" "}
+                              <span className="text-red-500">*</span>
                             </h4>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -603,9 +611,9 @@ const AlbumForm = () => {
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
-                          <div className="flex items-center justify-center w-60">
+                          <div className="flex items-center justify-center w-60 lg:w-80">
                             <label
                               htmlFor="music_image"
                               className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
@@ -630,7 +638,7 @@ const AlbumForm = () => {
                               </div>
                               <div className="w-[50%]">
                                 {!albumForm.music_image ? (
-                                  <p className="mb-2 text-sm text-gray-500">
+                                  <p className="mb-2 text-[12px] text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
@@ -730,12 +738,13 @@ const AlbumForm = () => {
                           required={true}
                         />
                       </div>
-                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2 pb-10">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                            Copyright Year
+                            Copyright Year{" "}
+                            <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -743,7 +752,7 @@ const AlbumForm = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -764,126 +773,13 @@ const AlbumForm = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex-3 overflow-auto flex flex-col gap-20 px-1 pb-3 h-[64dvh]">
-                  <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                      Album Summary
-                    </h1>
-                    {/* image */}
-                    <div className="w-full flex flex-col gap-y-3 mt-15">
-                      <p className="font-bold text-[#000000] text-sm leading-[18px] tracking-[0.5px]">
-                        Artwork File
-                      </p>
-                      <div className="max-w-70 max-h-32 flex gap-3 items-center justify-center p-19 rounded-4xl border-2 border-neutral-100">
-                        {image ? (
-                          <>
-                            <div className="flex-1 w-full">
-                              <Image
-                                src={image ? image : ""}
-                                width={100}
-                                height={150}
-                                alt="music note icon"
-                                className="min-w-32 h-32 object-cover rounded-2xl flex-1"
-                              />
-                            </div>
-                            <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate min-w-[80%] flex-2">
-                              {albumForm.music_image?.name}
-                            </p>
-                          </>
-                        ) : (
-                          <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate ">
-                            No image Selected
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-16 max-xs:grid-cols-1">
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Album Title</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.title}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Genre</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.genre}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Language</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.language}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Main Artist</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.artist}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Territories</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.territories.join(",")}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>UPC</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.upc}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Release date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.release_date?.toLocaleDateString() || ""}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Preorder Start date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.preOrderDate?.toLocaleDateString() || ""}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copyright Holder</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.copyRightHolder}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copyright Year</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.copyRightYear}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                  </div>
-                </div>
+                <AlbumPreview
+                  albumForm={albumForm}
+                  image={image}
+                  onEdit={() => handlePreview(albumForm)}
+                />
               )}
+
               {/* the image side bar */}
               <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                 <div className="w-full h-[80%] flex-2">
@@ -913,38 +809,36 @@ const AlbumForm = () => {
                 </div>
               </div>
             </div>
+
             {/* buttons */}
-            <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
-              <button
-                onClick={() => {
-                  handleSubmit(albumForm, "draft");
-                }}
-                className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary text-main-heading flex " +
-                  (!preview && " hidden")
-                }
-              >
-                {" "}
-                Save as Draft
-              </button>
-              <button
-                onClick={() => {
-                  handleSubmit(albumForm, "upload");
-                }}
-                className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 " +
-                  (!preview && " hidden")
-                }
-              >
-                Continue
-              </button>
+            <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
+                <button
+                  onClick={() => {
+                    handleSubmit(albumForm, "draft");
+                  }}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Save as Draft
+                </button>
+                <button
+                  onClick={() => {
+                    handleSubmit(albumForm, "upload");
+                  }}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Continue
+                </button>
+              </div>
               <button
                 onClick={() => {
                   handlePreview(albumForm);
                 }}
-                className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 "
-                }
+                className="font-bold text-xs sm:text-sm rounded-lg px-4 sm:px-5 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors ml-auto sm:ml-0 shrink-0 flex items-center justify-center"
               >
                 {preview ? "Edit" : "Preview"}
               </button>

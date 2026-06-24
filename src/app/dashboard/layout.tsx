@@ -34,8 +34,6 @@ const sidebarComponents = [
         query: "manageRelease",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("music"),
   },
   {
     title: "artist",
@@ -58,15 +56,7 @@ const sidebarComponents = [
         href: "/dashboard/artist/manageArtist",
         query: "manageArtist",
       },
-      // {
-      //   title: "collaborations",
-      //   icon: "/likeshapes.svg",
-      //   href: "",
-      //   query: "collaboration",
-      // },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("artists"),
   },
   {
     title: "insights",
@@ -78,8 +68,6 @@ const sidebarComponents = [
         query: "songPerformance",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("insights"),
   },
   {
     title: "finance",
@@ -91,8 +79,6 @@ const sidebarComponents = [
         query: "salesReport",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("finance"),
   },
   {
     title: "explore",
@@ -116,10 +102,9 @@ const sidebarComponents = [
         query: "chartRegistration",
       },
     ],
-    // isActive: "",
-    // setIsActive: () => setIsActive("explore"),
   },
 ];
+
 const profileLinks = [
   {
     title: "Help & Support",
@@ -155,6 +140,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     setIsOpen(false);
     setIsProfilePopUpOpen(false);
   }, [pathname]);
+
   if (isLoading || !data) return <NormalLoadingScreen />;
 
   const handleMarkAsRead = async (id?: string) => {
@@ -163,259 +149,271 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       await refetchNotifications();
     } catch (error) {
       console.log(error);
-      // toast.warn("")
     }
   };
+
   return (
     <UserRoute>
-      <div className="relative">
-        <div className="sticky top-0 z-20 ">
-          <div className="flex gap-5 items-center p-5 outline-1 relative top-0 bg-main-white lg:pl-[300px]">
-            <div
-              aria-label="side bar nav button"
-              role="button"
-              className="flex items-center flex-col gap-1 hover:cursor-pointer lg:hidden "
-              onClick={() => {
-                setIsOpen(!isOpen);
-              }}
-            >
-              <div className="bg-primary w-5 h-1"></div>
-              <div className="bg-primary w-5 h-1"></div>
-              <div className="bg-primary w-5 h-1"></div>
+      <div className="min-h-screen bg-neutral-50 flex flex-col relative">
+        {/* Top Navbar Header Section */}
+        <header className="sticky top-0 z-30 bg-main-white border-b border-neutral-200 lg:pl-[300px]">
+          <div className="flex h-16 items-center justify-between px-6">
+            <div className="flex items-center gap-4">
+              <button
+                aria-label="Toggle side bar navigation"
+                className="flex flex-col gap-1 hover:cursor-pointer lg:hidden p-1"
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <div className="bg-primary w-5 h-0.5"></div>
+                <div className="bg-primary w-5 h-0.5"></div>
+                <div className="bg-primary w-5 h-0.5"></div>
+              </button>
+
+              {/* header title  + backbutton if needed*/}
+              <div className="flex items-center gap-3">
+                {dashboardContext?.header.showBackButton && (
+                  <button
+                    aria-label="go back"
+                    onClick={() => {
+                      if (dashboardContext.header.onBack) {
+                        dashboardContext.header.onBack(); 
+                      } else {
+                        router.back(); 
+                      }
+                    }}
+                    className="bg-main-white/70 p-3 w-[38px] h-[38px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2 hidden lg:flex"
+                  >
+                    <Image
+                      src={"/arrow-left.svg"}
+                      height={32}
+                      width={32}
+                      alt="arrow left"
+                      className="w-[20px] h-[20p]"
+                    />
+                  </button>
+                )}
+                <h1 className="font-semibold lg:text-xl text-main-heading tracking-[-1px] leading-6 capitalize ml-5 h-4">
+                  {dashboardContext?.header.title}
+                </h1>
+              </div>
             </div>
-            <h1 className="font-extralight text-xl text-main-heading tracking-[-1px] leading-6 capitalize ml-5 h-4">
-              {dashboardContext?.layoutHeaderMessage}
-            </h1>
+
+            {/* Notification Modal Button Trigger */}
             <button
-              onClick={() => {
-                setIsNotificationOpen(!isNotificationOpen);
-              }}
-              className="ml-auto flex"
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className="relative p-2 rounded-full hover:bg-neutral-100 transition"
             >
-              <Bell color="#11456B" stroke="#11456B" />
-              {notification && notification.hasNewNotification && (
-                <div className="w-2 h-2 rounded-full bg-error-500 -ml-1 -mt-1"></div>
+              <Bell color="#11456B" stroke="#11456B" size={22} />
+              {notification?.hasNewNotification && (
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error-500 ring-2 ring-white"></span>
               )}
             </button>
-            <div
-              className={
-                "ml-auto transition-all duration-300 ease-in-out flex h-[90dvh] lg:w-[450px] max-lg:w-[50%] max-sm:w-full absolute top-0 bottom-0 left-0 right-0 " +
-                (isNotificationOpen ? " -translate-y-0" : " -translate-y-full ")
-              }
-            >
-              <div className="bg-neutral-100 py-10 w-full text-main-heading rounded-xl ">
-                <div className="flex flex-col gap-12 ml-6 overflow-y-auto h-full remove-scrollbar">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h1 className="font-medium text-2xl ">Notifications</h1>
-                      <button
-                        onClick={() => handleMarkAsRead()}
-                        disabled={
-                          notification &&
-                          notification.hasNewNotification === false
-                        }
-                        className="text-xs border text-white bg-primary-500 border-primary-500 rounded-sm p-1 hover:bg-primary-500/80 disabled:bg-disable disabled:text-primary-500"
-                      >
-                        mark all as read
-                      </button>
-                    </div>
+          </div>
+        </header>
 
-                    <button
-                      className=" text-black px-5 py-3 rounded-lg "
-                      onClick={() => {
-                        setIsNotificationOpen(false);
-                        setIsProfilePopUpOpen(false);
-
-                        console.log(isOpen);
-                      }}
-                    >
-                      X
-                    </button>
-                  </div>
-                  <div className="overflow-y-auto max-h-[99%] h-full flex flex-col gap-5 remove-scrollbar">
-                    {notification &&
-                      notification.notifications.map(
-                        (item: any, index: number) => (
-                          <Notification
-                            key={index}
-                            title={item.reason}
-                            description={item.message}
-                            createdAt={item.createdAt}
-                            statusWeight={item.statusWeight}
-                            onClick={() => handleMarkAsRead(item._id)}
-                          />
-                        ),
-                      )}
-                  </div>
-                </div>
-              </div>
+        {/* Notification Modal Slide Panel */}
+        <div
+          className={`fixed inset-y-0 right-0 z-40 w-full sm:w-[400px] bg-neutral-100 shadow-2xl border-l border-neutral-200 transform transition-transform duration-300 ease-in-out flex flex-col ${
+            isNotificationOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="p-6 flex items-center justify-between border-b border-neutral-200">
+            <div>
+              <h2 className="font-semibold text-xl text-main-heading">
+                Notifications
+              </h2>
+              <button
+                onClick={() => handleMarkAsRead()}
+                disabled={notification?.hasNewNotification === false}
+                className="text-xs font-medium text-white bg-primary-500 rounded px-2 py-1 mt-1 hover:bg-primary-500/80 disabled:bg-neutral-300 disabled:text-neutral-500 transition"
+              >
+                Mark all as read
+              </button>
             </div>
-            <div
-              className={
-                " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[300px] max-lg:w-[50%] max-sm:w-[70%] absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +
-                (isOpen
-                  ? " max-lg:-translate-x-0"
-                  : " max-lg:-translate-x-full")
-              }
+            <button
+              className="w-10 h-10 flex items-center justify-center font-bold text-neutral-600 hover:bg-neutral-200 rounded-full transition"
+              onClick={() => setIsNotificationOpen(false)}
             >
-              <div className="bg-primary-700 py-10 pb-30 w-full text-main-white remove-scrollbar">
-                <div className="flex flex-col gap-12 ml-6 mr-2 overflow-y-auto h-full remove-scrollbar">
-                  <div className="flex justify-between items-center">
-                    <Link
-                      href={"/"}
-                      className="flex gap-3 items-center opacity-60"
-                    >
-                      <Image
-                        src="/logo.svg"
-                        alt="soundmac logo"
-                        width={20}
-                        height={20}
-                      />
-                      <h1 className="font-light ">SOUNDMAC</h1>
-                    </Link>
-                    <button
-                      className="bg-primary text-white px-5 py-3 rounded-lg lg:hidden"
-                      onClick={() => {
-                        setIsOpen(false);
-                        setIsProfilePopUpOpen(false);
+              ✕
+            </button>
+          </div>
 
-                        console.log(isOpen);
-                      }}
-                    >
-                      X
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-5">
-                    <Link
-                      className={
-                        "font-extralight flex gap-3 w-full px-4 py-2 rounded-lg hover:cursor-pointer hover:bg-primary-500/90" +
-                        (pathname.endsWith("dashboard") && " bg-primary-500")
-                      }
-                      href={"/dashboard"}
-
-                      // onClick={() => {
-                      //   setIsOpen(false);
-                      //   setIsActive("dashboard");
-                      //   setTab("dashboard");
-                      // }}
-                    >
-                      <Image
-                        src="/home.svg"
-                        alt="home logo"
-                        width={20}
-                        height={20}
-                      />
-                      Dashboard
-                    </Link>
-                  </div>
-                  {sidebarComponents.map((component, index) => (
-                    <SideBarCom
-                      isActive={isActive}
-                      setIsActive={setIsActive}
-                      key={index}
-                      title={component.title}
-                      list={component.list}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 remove-scrollbar">
+            {notification?.notifications?.map((item: any, index: number) => (
+              <Notification
+                key={index}
+                title={item.reason}
+                description={item.message}
+                createdAt={item.createdAt}
+                statusWeight={item.statusWeight}
+                onClick={() => handleMarkAsRead(item._id)}
+              />
+            ))}
           </div>
         </div>
-        <div
-          className={
-            dashboardContext?.openUpgradePopUp
-              ? " fixed inset-0 z-100 flex items-center justify-center bg-black/30 backdrop-blur-sm  "
-              : " hidden"
-          }
+
+        {/* Mobile Sidebar Overlay Background */}
+        {isOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+            onClick={() => setIsOpen(false)}
+          />
+        )}
+
+        {/* left side of dashboard container */}
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 w-[280px] lg:w-[300px] bg-primary-700 text-main-white transform lg:transform-none transition-transform duration-300 ease-in-out flex flex-col border-r border-primary-800 ${
+            isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          }`}
         >
-          <div className="flex flex-col gap-5 w-fit py-5 px-5 justify-center items-center bg-neutral-100  rounded-xl shadow-2xl max-w-[350px]">
-            <div className="flex flex-col gap-2 mb-2 justify-center items-center">
-              <LockKeyhole size={80} color="#999" strokeWidth={2} />
-              <h3 className="text-xl font-semibold tracking-[-0.5px] text-main-heading">
-                Subscription Required{" "}
-              </h3>
-              <p className="text-p font-normal text-sm leading-4 -tracking-[0.5px] text-center">
-                This feature is available only to subscribed users.
-                <br /> Pick a plan and start creating with Soundmac.
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  dashboardContext?.setOpenUpgradePopUp(false);
-                  router.push("/dashboard");
-                }}
-                className={
-                  "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm  bg-transparent border-2 border-primary-500 text-[#494949]"
-                }
-              >
-                Not Now
-              </button>
+          {/* Sidebar Brand Logo Header */}
+          <div className="p-6 flex items-center justify-between h-16">
+            <Link
+              href="/"
+              className="flex gap-3 items-center opacity-80 hover:opacity-100 transition"
+            >
+              <Image
+                src="/logo.svg"
+                alt="soundmac logo"
+                width={24}
+                height={24}
+              />
+              <h1 className="font-bold tracking-wider text-sm">SOUNDMAC</h1>
+            </Link>
+            <button
+              className="w-8 h-8 flex items-center justify-center bg-primary text-white rounded-lg lg:hidden font-bold"
+              onClick={() => setIsOpen(false)}
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Nav Links Body Container */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 remove-scrollbar pb-32">
+            <div className="space-y-1">
               <Link
-                href={"/pricing"}
-                aria-label="go to pricing page"
-                className={
-                  "px-5 py-2 font-bold rounded-lg text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
-                }
+                className={`font-light flex gap-3 w-full px-4 py-2.5 rounded-lg items-center transition hover:bg-primary-500/50 ${
+                  pathname.endsWith("dashboard")
+                    ? "bg-primary-500 text-white font-medium"
+                    : "text-primary-100"
+                }`}
+                href="/dashboard"
               >
-                View Plans
+                <Image src="/home.svg" alt="home logo" width={18} height={18} />
+                Dashboard
               </Link>
             </div>
+
+            <nav className="space-y-4 md:mt-10">
+              {sidebarComponents.map((component, index) => (
+                <SideBarCom
+                  isActive={isActive}
+                  setIsActive={setIsActive}
+                  key={index}
+                  title={component.title}
+                  list={component.list}
+                />
+              ))}
+            </nav>
           </div>
-        </div>
-        <button
-          onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
-          className={
-            "transition-all duration-300 ease-in-out fixed rounded-2xl w-55 h-15 bg-black z-100 top-[90%] left-2 flex p-2 justify-between items-center " +
-            (isOpen ? " max-lg:-translate-x-0 " : " max-lg:-translate-x-[110%]")
-          }
-        >
-          <div className="flex">
-            <Image
-              src={"/boomplay.jpg"}
-              width={50}
-              height={50}
-              alt="profile picture"
-              className="rounded-2xl object-cover  "
-            />
-            <div className="flex flex-col justify-center items-center ml-2">
-              <h2 className="font-light text-lg text-white tracking-[-1px] leading-8 capitalize h-8 line-clamp-1">
-                {data.firstName}
-              </h2>
-              <p className="text-primary-300 font-light leading-[18px] -tracking-[-0.5px] text-xs line-clamp-1">
-                {data.type}
-              </p>
+
+          {/* Artist name modal Container Element inside Layout Panel */}
+          <div className="absolute bottom-4 inset-x-4 z-50">
+            <button
+              onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
+              className="w-full h-14 bg-black/90 hover:bg-black rounded-xl flex items-center justify-between p-2.5 transition backdrop-blur-sm shadow-xl"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <Image
+                  src="/boomplay.jpg"
+                  width={40}
+                  height={40}
+                  alt="profile picture"
+                  className="rounded-lg object-cover flex-shrink-0"
+                />
+                <div className="text-left min-w-0">
+                  <h2 className="font-medium text-sm text-white capitalize truncate">
+                    {data.firstName}
+                  </h2>
+                  <p className="text-primary-300 font-light text-xs truncate">
+                    {data.type}
+                  </p>
+                </div>
+              </div>
+              <div className="flex-shrink-0 ml-1">
+                {isProfilePopUpOpen ? (
+                  <ChevronDown color="#fff" size={18} />
+                ) : (
+                  <ChevronUp color="#fff" size={18} />
+                )}
+              </div>
+            </button>
+
+            {/* profile popup dropdown */}
+            <div
+              className={`absolute bottom-16 left-0 w-full bg-white text-neutral-800 rounded-xl shadow-2xl border border-neutral-100 p-1.5 flex flex-col space-y-0.5 transition-all duration-200 origin-bottom ${
+                isProfilePopUpOpen
+                  ? "opacity-100 scale-100 pointer-events-auto"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
+            >
+              {profileLinks.map((link, index) => (
+                <Link
+                  key={index}
+                  href={link.href}
+                  className="text-neutral-700 font-normal text-sm capitalize px-4 py-2 hover:bg-neutral-100 rounded-lg transition"
+                >
+                  {link.title}
+                </Link>
+              ))}
+              <LogoutButton />
             </div>
           </div>
-          <div>
-            {isProfilePopUpOpen ? (
-              <ChevronDown color="#fff" />
-            ) : (
-              <ChevronUp color="#fff" />
-            )}
+        </aside>
+        {/* Main Content Area Execution Grid Wrapper */}
+        <main className="flex w-full">{children}</main>
+
+        {/* unsubscribed users modal */}
+        {dashboardContext?.openUpgradePopUp && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="flex flex-col gap-5 w-full max-w-[360px] p-6 items-center bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex flex-col gap-3 items-center text-center">
+                <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-1">
+                  <LockKeyhole
+                    size={36}
+                    className="text-neutral-500"
+                    strokeWidth={2}
+                  />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight text-neutral-900">
+                  Subscription Required
+                </h3>
+                <p className="text-neutral-500 text-sm leading-relaxed">
+                  This feature is available only to subscribed users.
+                  <br /> Pick a plan and start creating with Soundmac.
+                </p>
+              </div>
+              <div className="flex gap-3 w-full mt-2">
+                <button
+                  onClick={() => {
+                    dashboardContext?.setOpenUpgradePopUp(false);
+                    router.push("/dashboard");
+                  }}
+                  className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-sm border-2 border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition"
+                >
+                  Not Now
+                </button>
+                <Link
+                  href="/pricing"
+                  aria-label="go to pricing page"
+                  className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-center text-sm bg-primary hover:bg-primary/90 text-white shadow-md transition"
+                >
+                  View Plans
+                </Link>
+              </div>
+            </div>
           </div>
-        </button>
-        <div
-          className={
-            "fixed rounded-2xl w-55 h-55 bg-white z-30 bottom-25 left-2 flex flex-col p-2 justify-between transition-opacity duration-300 " +
-            (isProfilePopUpOpen
-              ? "opacity-100"
-              : " opacity-0 pointer-events-none")
-          }
-        >
-          {profileLinks.map((link, index) => (
-            <Link
-              key={index}
-              href={link.href}
-              className="text-text-body font-normal leading-[18px] -tracking-[-0.5px] text-sm capitalize p-3 hover:bg-gray-200 rounded-lg"
-            >
-              {link.title}
-            </Link>
-          ))}
-          <LogoutButton />
-        </div>
-        {children}
+        )}
       </div>
     </UserRoute>
   );

@@ -6,6 +6,12 @@ export interface DASHBOARD_CONTEXT {
     openUpgradePopUp: boolean;
     setOpenUpgradePopUp: React.Dispatch<React.SetStateAction<boolean>>;
     isPremium:boolean
+    header:{
+        title: string
+        showBackButton: boolean
+        onBack?: () => void;
+    }
+    setHeader: (header: {title:string; showBackButton: boolean, onBack?: () =>void}) => void;
     // getUser: (setLoading: GET_USER, onSuccess: ON_SUCCESS, onError: ON_ERROR) => void
     // hamburgerOpen: boolean
     // logOut: () => void

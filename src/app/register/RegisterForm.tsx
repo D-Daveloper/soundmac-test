@@ -97,8 +97,8 @@ const RegisterForm = () => {
     try {
       setLoading(true);
       const res = await api.post("auth/register", registerForm);
-      console.log(res);
-      console.log(res.data?.email);
+      // console.log(res);
+      // console.log(res.data?.email);
       if (res.status === 200) {
         toast.success(res.data.msg);
         localStorage.setItem("soundmacPendingEmail", res.data.email);

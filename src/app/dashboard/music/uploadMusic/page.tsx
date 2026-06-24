@@ -11,7 +11,7 @@ const Page = () => {
   const type = getParam("type");
     const dashboardContext = useContext(DashboardContext);
     useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Upload Release");
+    dashboardContext?.setHeader({title: "Upload Release", showBackButton:true});
   }, [type]);
 
   if (type == "single") {
@@ -20,7 +20,7 @@ const Page = () => {
     return <AlbumForm />;
   } else {
     return (
-    <main className="lg:pl-[300px] px-5 w-full min-h-screen bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-10">
+    <main className="lg:pl-[320px] px-2  w-full min-h-screen bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-10 border border-red-50">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
             Choose Your Release Type
@@ -30,7 +30,7 @@ const Page = () => {
             full album.
           </p>
         </div>
-        <div className="flex w-full justify-between gap-7 mt-20 max-sm:flex-col text-center">
+        <div className="flex w-full justify-between gap-7 mt-10 max-sm:flex-col text-center">
           <div className="py-5 h-[450px] bg-neutral-50 border-2 border-neutral-100 rounded-lg flex-1 flex flex-col items-center justify-center gap-5">
             <Image
               src={"/uploadsong.svg"}
