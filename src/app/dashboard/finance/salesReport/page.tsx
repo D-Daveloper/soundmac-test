@@ -189,7 +189,7 @@ const Page = () => {
                           {item.song.releaseTitle}
                         </h1>
                         <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
-                          feat. {item.song.featuredArtist[0].artistName}
+                          feat. {item.song.featuredArtist.length > 0 ? item.song.featuredArtist[0]?.artistName : ""}
                         </p>
                         <p className="mt-2">
                           <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">

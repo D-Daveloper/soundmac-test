@@ -168,7 +168,7 @@ const Page = () => {
                   <PerformanceCard
                     key={index}
                     title={item.trackTitle}
-                    featured_artist={item.featuredArtist[0].artistName}
+                    featured_artist={item.featuredArtist.length > 0 ? item.featuredArtist[0]?.artistName : ""}
                     date={new Date(item.releaseDate).toDateString()}
                     streams={item.totalStreams.toString()}
                     downloads={item.totalDownloads.toString()}

@@ -146,7 +146,7 @@ export const uploadSalesReport = inngest.createFunction(
                     ledgers.push({
                         user: userId,
                         type: "sale",
-                        amountUsd: amount,
+                        amountUsd: netAmountUsd,
                         direction: "credit",
                         reference: saleId,
                     });
