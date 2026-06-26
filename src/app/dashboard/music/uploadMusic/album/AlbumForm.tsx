@@ -50,6 +50,8 @@ const AlbumForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
+  // const searchParams = useSearchParams()
+  // const preview = searchParams.get("step") === "preview";
 
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
@@ -148,6 +150,7 @@ const AlbumForm = () => {
         queryKey: ["manageAlbums"],
       });
       setImage(null);
+      // router.replace("?type=album");
       setPreview(false);
       if (action === "upload") {
         router.push(
@@ -167,12 +170,13 @@ const AlbumForm = () => {
 
   const handlePreview = (form: AlbumForm) => {
     console.log(form);
-    if (preview === false) {
+    if (!preview) {
       const string_form = JSON.stringify(form);
       localStorage.setItem("albumForm", string_form);
-    }
-    setPreview(!preview);
-  };
+      setPreview(true)
+  } else {
+    setPreview(false)
+  }};
 
   useEffect(() => {
     const string_form = localStorage.getItem("albumForm");
@@ -193,12 +197,28 @@ const AlbumForm = () => {
     }
   }, []);
 
-  useEffect(() => {
-    dashboardContext?.setHeader({
-      title: "Upload Album",
-      showBackButton: true,
-    });
-  }, []);
+    useEffect(() => {
+      if (preview) {
+        dashboardContext?.setHeader({
+          title: "preview",
+          showBackButton: true,
+          onBack: () => setPreview(false),
+        });
+      } else {
+        dashboardContext?.setHeader({
+          title: "upload album",
+          showBackButton: true,
+          onBack: () => router.back(),
+        });
+      }
+    }, [preview]);
+
+  // useEffect(() => {
+  //   dashboardContext?.setHeader({
+  //     title: "Upload Album",
+  //     showBackButton: true,
+  //   });
+  // }, []);
 
   if (isErrorDsp) {
     toast.error("Failed to load DSP list. Please refresh the page.");
@@ -226,19 +246,19 @@ const AlbumForm = () => {
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-8 px-0 lg:px-2 py-5">
+            <div className="flex gap-8 px-5 md:px-2 py-5">
               {!preview ? (
                 <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-30 min-h-[64dvh]">
                   {/* Song info */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Album Information
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Provide the main details about your album to ensure it is
                       properly identified and distributed.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.title}
@@ -349,7 +369,7 @@ const AlbumForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
+                          <p className="font-medium mb-2 text-sm">
                             Artist <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
@@ -379,7 +399,7 @@ const AlbumForm = () => {
                   <div className="border border-neutral-100"></div>
                   {/* release details */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Release Details
                     </h1>
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
@@ -390,10 +410,10 @@ const AlbumForm = () => {
                       <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
-                              Release Date
+                            <p className=" capitalize font-medium text-sm">
+                              Release Date <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -401,7 +421,7 @@ const AlbumForm = () => {
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
                           <SelectDate
                             disabled={false}
@@ -422,10 +442,10 @@ const AlbumForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                              Time Zones
+                            <p className=" capitalize font-medium text-sm mr-1">
+                              Time Zones <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -433,7 +453,7 @@ const AlbumForm = () => {
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
                           <div className="w-full">
                             <Select
@@ -460,10 +480,10 @@ const AlbumForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
-                              territories{" "}
+                            <p className=" capitalize font-medium text-sm">
+                              territories{" "} <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -471,7 +491,7 @@ const AlbumForm = () => {
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
 
                           <CheckboxSelect
@@ -504,7 +524,7 @@ const AlbumForm = () => {
                                 isDateInPast(new Date(albumForm.release_date))
                               }
                             />
-                            <p className="leading-6 text-sm sm:text-lg font-medium">
+                            <p className="leading-6 text-sm  font-medium">
                               Pre-Order (optional)
                             </p>
                           </div>
@@ -543,16 +563,16 @@ const AlbumForm = () => {
 
                   {/*  DSP*/}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Distribution Platforms
                     </h1>
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
                       Choose the platforms where your release will be available.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg">
+                          <p className=" capitalize font-medium text-sm">
                             DSPs <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
@@ -589,17 +609,17 @@ const AlbumForm = () => {
 
                   {/* cover art */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Cover Art
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Add eye-catching artwork that represents your single.{" "}
                     </p>
                     <div className="flex items-center justify-center w-60">
                       <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
-                            <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                            <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                               Artwork File{" "}
                               <span className="text-red-500">*</span>
                             </h4>
@@ -613,10 +633,10 @@ const AlbumForm = () => {
                               className="w-2 -mt-3 "
                             /> */}
                           </div>
-                          <div className="flex items-center justify-center w-60 lg:w-80">
+                          <div className="flex items-center justify-center w-64 lg:w-80">
                             <label
                               htmlFor="music_image"
-                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
                             >
                               <div
                                 className={
@@ -800,10 +820,10 @@ const AlbumForm = () => {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
+                  <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-base">
                     {albumForm.title || "Title"}
                   </p>
-                  <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-[16px]">
+                  <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-sm">
                     {albumForm.artist || "Artist"}
                   </p>
                 </div>

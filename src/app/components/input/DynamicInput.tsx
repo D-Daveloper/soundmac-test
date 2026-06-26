@@ -34,7 +34,7 @@ const DynamicInput = React.memo(({
   return (
     <>
       <div className="flex gap-1 sm:text-sm text-lg mt-1">
-        <p className=" capitalize font-medium">{props.title} </p>
+        <p className=" capitalize font-medium text-sm">{props.title} </p>
         {required && (
            <span className="text-red-500">*</span>
           // <Image

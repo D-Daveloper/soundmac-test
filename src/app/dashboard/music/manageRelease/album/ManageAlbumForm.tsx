@@ -5,6 +5,7 @@ import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { languagesList, NumberOfTracks, years } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type { AlbumForm, albumFromApi, PAGINATION } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
@@ -21,7 +22,8 @@ import {
 } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const ManageAlbumForm = ({
@@ -50,6 +52,11 @@ const ManageAlbumForm = ({
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
+
+  const dashboardContext = useContext(DashboardContext);
+  const router = useRouter();
+  // const searchParams = useSearchParams();
+  // const preview = searchParams.get("step") === "preview";
 
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
@@ -147,6 +154,7 @@ const ManageAlbumForm = ({
       });
 
       refetch();
+      // router.replace("?type=single");
       setPreview(false);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -162,9 +170,12 @@ const ManageAlbumForm = ({
     if (preview === false) {
       const string_form = JSON.stringify(form);
       localStorage.setItem("albumForm", string_form);
-    }
-    setPreview(!preview);
-  };
+      // router.push("?type=album&step=preview");
+    setPreview(true)
+  } else {
+    setPreview(false)
+  }
+};
 
   useEffect(() => {
     const string_form = localStorage.getItem("albumForm");
@@ -208,20 +219,36 @@ const ManageAlbumForm = ({
     setImage(albumFromApi?.releaseImage || null);
   }, []);
 
+  useEffect(() => {
+    if (preview) {
+      dashboardContext?.setHeader({
+        title: "preview",
+        showBackButton: true,
+        onBack: () => setPreview(false),
+      });
+    } else {
+      dashboardContext?.setHeader({
+        title: "manage album",
+        showBackButton: false,
+        // onBack: () => router.push('/dashboard/music/manageRelease?type=single'),
+      });
+    }
+  }, [preview]);
+
   if (isErrorDsp) {
     toast.error("Failed to load DSP list. Please refresh the page.");
     return <InlineLoadingScreen />;
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[320px]">
       {isLoading || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
         (!isError || data != undefined || !dspData) && (
           <>
-            <button
+            {/* <button
               onClick={() => {
                 goBack();
               }}
@@ -233,20 +260,20 @@ const ManageAlbumForm = ({
                 width={32}
                 alt="arrow left"
               />
-            </button>
-            <div className="flex gap-8 px-5 py-5">
+            </button> */}
+            <div className="flex gap-4 px-5 md:px-2 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-6 pb-3 h-[64dvh]">
                   {/* album info */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-sm md:text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Album Information
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Provide the main details about your album to ensure it is
                       properly identified and distributed.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 px-1">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.title}
@@ -263,10 +290,10 @@ const ManageAlbumForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Genre
+                          <p className="font-medium mb-1 text-sm">
+                            Genre <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -274,7 +301,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -290,10 +317,10 @@ const ManageAlbumForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Language
+                          <p className="font-medium mb-1 text-sm">
+                            Language <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -301,7 +328,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -320,10 +347,11 @@ const ManageAlbumForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            No. of tracks
+                          <p className="font-medium mb-1 text-sm">
+                            No. of tracks{" "}
+                            <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -331,7 +359,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -356,10 +384,10 @@ const ManageAlbumForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Artist
+                          <p className="font-medium mb-2 text-sm">
+                            Artist <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -367,7 +395,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -386,21 +414,22 @@ const ManageAlbumForm = ({
                   <div className="border border-neutral-100"></div>
                   {/* release details */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-sm md:text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Release Details
                     </h1>
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
                       Set how and when your album goes live.
                     </p>
 
-                    <div>
-                      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-15">
+                    <div className="px-1">
+                      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
-                              Release Date
+                            <p className=" capitalize font-medium text-sm">
+                              Release Date{" "}
+                              <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -408,7 +437,7 @@ const ManageAlbumForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
                           <SelectDate
                             disabled={false}
@@ -429,10 +458,11 @@ const ManageAlbumForm = ({
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
+                            <p className=" capitalize font-medium text-sm">
                               territories{" "}
+                              <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -440,7 +470,7 @@ const ManageAlbumForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
 
                           <CheckboxSelect
@@ -455,7 +485,7 @@ const ManageAlbumForm = ({
                             }}
                           />
                         </div>
-                        <div className="mt-5 justify-between w-full flex max-sm:flex-col">
+                        <div className="mt-2 justify-between w-full flex max-sm:flex-col">
                           <div className="flex w-fit gap-2 items-center">
                             <input
                               type="checkbox"
@@ -464,7 +494,7 @@ const ManageAlbumForm = ({
                               checked={albumForm.pre_order_check}
                               onChange={handleChange}
                             />
-                            <p className="leading-6 text-sm sm:text-lg font-medium">
+                            <p className="leading-6 text-sm md:text-base font-medium">
                               Pre-Order (optional)
                             </p>
                           </div>
@@ -498,19 +528,19 @@ const ManageAlbumForm = ({
 
                   {/*  DSP*/}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Distribution Platforms
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Choose the platforms where your release will be available.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 px-1 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg">
-                            DSPs
+                            DSPs <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -518,7 +548,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <CheckboxSelectDsp
                           title="Select DSPs"
@@ -544,20 +574,21 @@ const ManageAlbumForm = ({
 
                   {/* cover art */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Cover Art
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Add eye-catching artwork that represents your single.{" "}
                     </p>
                     <div className="flex items-center justify-center w-60">
                       <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
-                            <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                              Artwork File
+                            <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                              Artwork File{" "}
+                              <span className="text-red-500">*</span>
                             </h4>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -565,12 +596,12 @@ const ManageAlbumForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
-                          <div className="flex items-center justify-center w-60">
+                          <div className="flex items-center justify-center w-64 md:w-80">
                             <label
                               htmlFor="music_image"
-                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
                               <div
                                 className={
@@ -592,7 +623,7 @@ const ManageAlbumForm = ({
                               </div>
                               <div className="w-[50%]">
                                 {!albumForm.music_image ? (
-                                  <p className="mb-2 text-sm text-gray-500">
+                                  <p className="mb-2 text-xs text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
@@ -650,7 +681,7 @@ const ManageAlbumForm = ({
                         Transferring from another distributor?
                       </p>
                     </div>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 px-1">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={albumForm.upc}
@@ -682,10 +713,10 @@ const ManageAlbumForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                            Copyright Year
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            Copyright Year <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -693,7 +724,7 @@ const ManageAlbumForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -714,123 +745,196 @@ const ManageAlbumForm = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex-3 overflow-auto flex flex-col gap-20 px-1 pb-3 h-[64dvh]">
-                  <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                // preview starts here
+                <div className="flex-1 overflow-y-auto flex flex-col gap-5 px- pb-6 h-[64dvh] custom-scrollbar">
+                  {/* Header Section with Action */}
+                  <div className="flex items-center justify-between border- border-neutral-100 pb-4">
+                    <h1 className="text-base font-bold tracking-tight text-main-heading">
                       Album Summary
                     </h1>
-                    {/* image */}
-                    <div className="w-full flex flex-col gap-y-3 mt-15">
-                      <p className="font-bold text-[#000000] text-sm leading-[18px] tracking-[0.5px]">
-                        Artwork File
-                      </p>
-                      <div className="max-w-70 max-h-32 flex gap-3 items-center justify-center p-19 rounded-4xl border-2 border-neutral-100">
-                        {image ? (
-                          <>
-                            <div className="flex-1 w-full">
-                              <Image
-                                src={image}
-                                width={100}
-                                height={150}
-                                alt="music note icon"
-                                className="min-w-32 h-32 object-cover rounded-2xl flex-1"
-                              />
-                            </div>
-                            <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate min-w-[80%] flex-2">
-                              {albumForm.music_image?.name}
+                          {/* <button
+                    onClick= {handlePreview(albumForm)}
+                  className="text-sm font-semibold text-primary hover:underline transition-all"
+                >
+                  Edit Details
+                </button> */}
+                  </div>
+
+                  {/* Artwork Section */}
+                  <div className="space-y-3">
+                    <p className="font-bold text-neutral-800 text-sm tracking-wide uppercase">
+                      Artwork File
+                    </p>
+                    <div className=" w-64 md:w-80 h-24 flex gap-4 items-center p-4 rounded-2xl border border-neutral-200 bg-white shadow-xs">
+                      {image ? (
+                        <>
+                          <div className="w-20 h-20 relative shrink-0 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
+                            <Image
+                              src={image}
+                              fill
+                              alt="Album artwork preview"
+                              className="object-cover"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-text-body font-semibold text-sm truncate">
+                              {albumForm.music_image?.name || "Uploaded Image"}
                             </p>
-                          </>
-                        ) : (
-                          <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate ">
-                            No image Selected
+                            <p className="text-xs text-text-disable mt-0.5">
+                              Ready for distribution
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-3 py-2 px-1">
+                          <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-400">
+                            ⚠️
+                          </div>
+                          <p className="text-text-disable font-medium text-sm">
+                            No image selected
                           </p>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-16 max-xs:grid-cols-1">
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Album Title</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.title}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Genre</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.genre}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Language</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.language}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Main Artist</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.artist}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+
+                  {/* Album Metadata Grid */}
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-5 text-sm">
+                    {/* Album Title */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Album Title
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.title || "—"}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Territories</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.territories.join(",")}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
-                    </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>UPC</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.upc}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                    {/* Genre */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Genre
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.genre || "—"}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Release date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.release_date != undefined &&
-                          new Date(albumForm.release_date).toLocaleDateString()}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                    {/* Language */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Language
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.language || "—"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Preorder Start date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.preOrderDate?.toLocaleDateString() || ""}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+
+                    {/* Main Artist */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Main Artist
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.artist || "—"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copyright Holder</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.copyRightHolder}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+
+                    {/* Territories */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Territories
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p
+                          className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]"
+                          title={albumForm.territories?.join(", ")}
+                        >
+                          {albumForm.territories?.length > 0
+                            ? albumForm.territories.join(", ")
+                            : "—"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Copyright Year</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {albumForm.copyRightYear}
-                      </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+
+                    {/* UPC */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        UPC Barcode
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-mono font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.upc || ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Release date */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Release Date
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.release_date
+                            ? new Date(
+                                albumForm.release_date,
+                              ).toLocaleDateString(undefined, {
+                                dateStyle: "medium",
+                              })
+                            : "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Preorder Start date */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Preorder Start Date
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.preOrderDate
+                            ? new Date(
+                                albumForm.preOrderDate,
+                              ).toLocaleDateString(undefined, {
+                                dateStyle: "medium",
+                              })
+                            : ""}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Copyright Holder */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Copyright Holder
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.copyRightHolder || "—"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Copyright Year */}
+                    <div className="flex flex-col gap-y-1 w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                        Copyright Year
+                      </h2>
+                      <div className="pb-1 border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                          {albumForm.copyRightYear || "—"}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -867,7 +971,38 @@ const ManageAlbumForm = ({
               </div>
             </div>
             {/* buttons */}
-            <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
+            <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
+              {/* Left group / Early buttons on mobile */}
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
+                <button
+                  onClick={() => handleSubmit(albumForm, "draft")}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Save as Draft
+                </button>
+
+                <button
+                  onClick={() => handleSubmit(albumForm, "upload")}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Distribute
+                </button>
+              </div>
+
+              {/* Primary action toggle (Pushed right on mobile if other buttons are hidden) */}
+              <button
+                onClick={() => handlePreview(albumForm)}
+                className="font-bold text-xs sm:text-sm rounded-lg px-4 sm:px-5 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors ml-auto sm:ml-0 shrink-0 flex items-center justify-center"
+              >
+                {preview ? "Edit" : "Preview"}
+              </button>
+            </div>
+
+            {/* <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
               <button
                 onClick={() => {
                   handleSubmit(albumForm, "draft");
@@ -901,7 +1036,7 @@ const ManageAlbumForm = ({
               >
                 {preview ? "Edit" : "Preview"}
               </button>
-            </div>
+            </div> */}
           </>
         )
       )}

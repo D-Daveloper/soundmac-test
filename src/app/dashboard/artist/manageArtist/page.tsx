@@ -1,7 +1,7 @@
 "use client";
+
 import {
   InlineLoadingScreen,
-  NormalLoadingScreen,
 } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import useDebounce from "@/app/components/searchBox/searchBox";
@@ -20,110 +20,142 @@ const artistOptions = [
   { name: "View", icon: <FileSearchIcon strokeWidth={1} /> },
   { name: "Stats", icon: <ChartNoAxesCombined strokeWidth={1} /> },
 ];
+
 const Page = () => {
+  const router = useRouter();
+  const dashboardContext = useContext(DashboardContext);
+
+  const [currentView, setCurrentView] = useState<"list" | "view" | "stats">("list");
+  const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
+
   const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
-  const [viewArtist, setViewArtist] = useState<null | Artist>(null);
-  const [viewStats, setViewStats] = useState<null | Artist>(null);
   const [filter, setFilter] = useState("-createdAt");
   const [query, setQuery] = useState("");
-  const artistNam = useDebounce<string>(query, 500);
+
+  const artistName = useDebounce<string>(query, 500);
+
   const { data, isLoading, isError, error, isFetching } = usePaginatedArtists({
     page,
     sort: filter,
-    artistName: artistNam,
+    artistName: artistName,
   });
-  const router = useRouter();
-  const dashboardContext = useContext(DashboardContext);
-  const handleFilterChange = (filter: string) => {
-    setFilter(filter);
+
+  // Restore selected artist from sessionStorage on mount
+  useEffect(() => {
+    const saved = sessionStorage.getItem("selectedArtist");
+    if (saved) {
+      setSelectedArtist(JSON.parse(saved));
+      // Optionally restore view if needed
+    }
+  }, []);
+
+  // Update header based on current view
+  useEffect(() => {
+    if (currentView === "view" && selectedArtist) {
+      dashboardContext?.setHeader({
+        title: selectedArtist.artistName || "View Artist",
+        showBackButton: true,
+        onBack: handleGoBack,
+      });
+    } else if (currentView === "stats" && selectedArtist) {
+      dashboardContext?.setHeader({
+        title: "Artist Stats",
+        showBackButton: true,
+        onBack: handleGoBack,
+      });
+    } else {
+      dashboardContext?.setHeader({
+        title: "Manage Artists",
+        showBackButton: false,
+      });
+    }
+  }, [currentView, selectedArtist]);
+
+  const handleGoBack = () => {
+    setSelectedArtist(null);
+    setCurrentView("list");
+    sessionStorage.removeItem("selectedArtist");
+  };
+
+  const handleSelectArtist = (artist: Artist, view: "view" | "stats") => {
+    setSelectedArtist(artist);
+    sessionStorage.setItem("selectedArtist", JSON.stringify(artist));
+    setCurrentView(view);
+    setSelectedIndex(null);
+  };
+
+  const handleFilterChange = (newFilter: string) => {
+    setFilter(newFilter);
     setPage(1);
     setIsFilterOpen(false);
   };
-  useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Manage Artists");
-  }, []);
+
   const handleArtistOptionChange = (index: number) => {
-    setIsFilterOpen(false);
-    if (selectedIndex === index) {
-      setSelectedIndex(null);
-      return;
-    }
-    setSelectedIndex(index);
+    setSelectedIndex(selectedIndex === index ? null : index);
   };
+
+  // Reset filter dropdown when query or page changes
   useEffect(() => {
     setIsFilterOpen(false);
     setSelectedIndex(null);
   }, [query, page]);
-  // if (isLoading) {
-  //   return <NormalLoadingScreen />;
-  // }
-  // if (
-  //   !isLoading &&
-  //   !isError &&
-  //   data != undefined &&
-  //   data.totalCount === 0 &&
-  //   query.trim() !== ""
-  // ) {
-  //   toast.info("No artist profiles found matching your search.");
-  // }
-  if (viewArtist) {
-    return <ViewArtist artist={viewArtist} setArtist={setViewArtist} />;
-  } else if (viewStats) {
+
+  // Show ViewArtist component
+  if (currentView === "view" && selectedArtist) {
     return (
-      <ViewStats
-        artistToViewStats={viewStats}
-        setArtistToViewStats={setViewStats}
+      <ViewArtist
+        artist={selectedArtist}
+        setArtist={handleGoBack}
       />
     );
   }
+
+  // Show ViewStats component
+  if (currentView === "stats" && selectedArtist) {
+    return (
+      <ViewStats
+        artistToViewStats={selectedArtist}
+        setArtistToViewStats={handleGoBack}
+      />
+    );
+  }
+
+  // Main Artist List View
   return (
-    <div className="bg-main-white  min-h-[90dvh] w-full flex flex-col px-8 lg:pl-[300px] ">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-4 md:px-8 lg:pl-[320px]">
       {isLoading ? (
         <InlineLoadingScreen />
-      ) : !isLoading &&
-        (isError || data === undefined || data.data.length === 0) ? (
+      ) : isError || !data || data.data.length === 0 ? (
         <div className="flex flex-col justify-center items-center min-h-[90dvh] gap-15">
-          <div>
-            <Image
-              priority={true}
-              src={"/manage_artist_image.png"}
-              alt="an image depicting no artist profile"
-              width={200}
-              height={200}
-            />
-          </div>
+          <Image
+            priority={true}
+            src="/manage_artist_image.png"
+            alt="no artist"
+            width={200}
+            height={200}
+          />
           <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-            No Artist Profile Yet. Create your first artist profile to start
-            releasing and managing music.
+            No Artist Profile Yet. Create your first artist profile to start releasing and managing music.
           </p>
           <button
-            onClick={() => {
-              router.push("/dashboard/artist/createArtist");
-            }}
-            className={
-              "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "
-            }
+            onClick={() => router.push("/dashboard/artist/createArtist")}
+            className="font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500"
           >
             + Create Artist
           </button>
         </div>
       ) : (
         <div className="min-h-full">
-          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%]  mt-10">
-            View and manage all your artist profiles. Edit details, link
-            streaming platforms, and track performance.
+          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] mt-10">
+            View and manage all your artist profiles. Edit details, link streaming platforms, and track performance.
           </p>
+
+          {/* Search + Filter */}
           <div className="flex justify-between w-full mt-10 items-center">
             <div className="flex p-2 outline-1 m-2 rounded-lg mb-5 max-w-[60%] w-full">
-              <Image
-                priority={true}
-                src="/search-normal.svg"
-                alt="search icon"
-                width={20}
-                height={20}
-              />
+              <Image src="/search-normal.svg" alt="search" width={20} height={20} />
               <input
                 type="search"
                 className="w-full p-1 text-[16px] sm:text-sm outline-0"
@@ -131,113 +163,85 @@ const Page = () => {
                 placeholder="Search"
               />
             </div>
+
+            {/* Filter Button */}
             <div className="relative">
               <button
-                disabled={isLoading || isFetching}
-                aria-label="open filters button"
-                className={
-                  "border-2 w-[50px]  h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
-                  (isFetching && " hover:!cursor-not-allowed ")
-                }
-                onClick={() => {
-                  setIsFilterOpen(!isFilterOpen);
-                  setSelectedIndex(null);
-                }}
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className="border-2 w-[50px] h-[50px] rounded-lg flex flex-col justify-center items-center gap-1"
               >
                 <div className="bg-primary w-[25px] h-[2px]"></div>
                 <div className="bg-primary w-[15px] h-[2px]"></div>
                 <div className="bg-primary w-[10px] h-[2px]"></div>
               </button>
+
               {isFilterOpen && (
-                <div className="p-3 absolute mt-2 w-full min-w-fit bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm sm:text-md  right-10 top-10 flex flex-col gap-2">
-                  {filterOptions.map((options, index) => (
+                <div className="absolute mt-2 right-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                  {filterOptions.map((option) => (
                     <button
-                      key={index}
-                      onClick={() => handleFilterChange(options.value)}
-                      name={options.label}
-                      aria-label={options.label}
-                      className=" flex items-center gap-2 px-3"
+                      key={option.value}
+                      onClick={() => handleFilterChange(option.value)}
+                      className="flex items-center gap-2 px-3 py-2 w-full hover:bg-neutral-50"
                     >
-                      {" "}
-                      <div
-                        className={
-                          "w-2 h-2 rounded-full bg-primary  " +
-                          (filter != options.value && " opacity-0")
-                        }
-                      ></div>
-                      {options.label}
+                      <div className={`w-2 h-2 rounded-full bg-primary ${filter !== option.value && "opacity-0"}`} />
+                      {option.label}
                     </button>
                   ))}
                 </div>
               )}
             </div>
           </div>
-          <div className="grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 md:max-h-[400px]">
-            {
-              // artistCard
-              data &&
-                data.data.map((artist, index) => (
-                  <div
-                    key={index}
-                    className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-5 row-span-1 col-span-1 min-h-[100px] max-h-[110px] relative "
-                  >
-                    <div className="relative max-w-[100px] max-h-[100px] w-full h-full">
-                      <Image
-                        priority={true}
-                        src={artist.artistImage}
-                        alt="an image depicting no artist profile"
-                        fill
-                        className="object-contain rounded-lg shadow-md max-h-[80px] "
-                      />
-                    </div>
-                    <h1 className="text-xl font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-2">
-                      {artist.artistName}
-                    </h1>
-                    <button
-                      onClick={() => handleArtistOptionChange(index)}
-                      aria-label={artist.artistName + " options"}
-                      className="flex gap-1 border-2 border-neutral-200 rounded-lg max-h-[30px] min-h-[32px] max-w-[32px] min-w-[32px] items-center justify-center ml-auto"
-                    >
-                      <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                      <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                      <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                    </button>
-                    {/* this is for the viewArtist button options */}
-                    <div
-                      className={
-                        "divide-y divide-zinc-200 p-3 absolute mt-2 w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col gap-2" +
-                        (selectedIndex === index ? " flex" : " hidden")
-                      }
-                    >
-                      {artistOptions.map((options, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            if (options.name === "Stats") setViewStats(artist);
-                            else setViewArtist(artist);
-                            setSelectedIndex(null);
-                          }}
-                          name={options.name}
-                          aria-label={options.name}
-                          className=" flex items-center gap-2"
-                        >
-                          {" "}
-                          {options.icon}
-                          {options.name}
-                        </button>
-                      ))}
-                    </div>
+
+          {/* Artists Grid */}
+          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+            {data.data.map((artist, index) => (
+              <div key={index} className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-5 relative">
+                <div className="relative w-[100px] h-[100px]">
+                  <Image
+                    src={artist.artistImage}
+                    alt={artist.artistName}
+                    fill
+                    className="object-cover rounded-lg"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <h1 className="text-xl font-normal leading-[24px] tracking-[-0.5px] text-text-body line-clamp-2">
+                    {artist.artistName}
+                  </h1>
+                </div>
+
+                <button
+                  onClick={() => handleArtistOptionChange(index)}
+                  className="border-2 border-neutral-200 rounded-lg w-8 h-8 flex items-center justify-center"
+                >
+                  ⋮
+                </button>
+
+                {/* Options Dropdown */}
+                {selectedIndex === index && (
+                  <div className="absolute right-4 top-12 bg-white border border-gray-200 rounded-lg shadow-lg z-20 py-1 w-32">
+                    {artistOptions.map((option, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectArtist(artist, option.name.toLowerCase() as "view" | "stats")}
+                        className="flex items-center gap-2 px-4 py-2 w-full hover:bg-neutral-50 text-left"
+                      >
+                        {option.icon}
+                        {option.name}
+                      </button>
+                    ))}
                   </div>
-                ))
-            }
+                )}
+              </div>
+            ))}
           </div>
-          <div>
-            <Pagination
-              currentPage={page}
-              totalPages={data ? data.totalPages : 0}
-              onChange={(page) => setPage(page)}
-            />
-          </div>
+
+          <Pagination
+            currentPage={page}
+            totalPages={data?.totalPages || 0}
+            onChange={setPage}
+          />
         </div>
       )}
     </div>
