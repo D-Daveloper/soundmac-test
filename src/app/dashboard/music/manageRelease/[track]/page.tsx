@@ -21,7 +21,11 @@ import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   const dashboardContext = useContext(DashboardContext);
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Upload tracks");
+    dashboardContext?.setHeader({
+      title: "Upload tracks",
+      showBackButton: true,
+      onBack: () => router.back(),
+    });
   }, []);
   const { track } = use(params);
   console.log(track);
@@ -41,10 +45,8 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   if (isLoading || !album) {
     return <InlineLoadingScreen />;
-  }else if(
-    album.data.length < 1
-  ){
-    toast.error(album.msg)
+  } else if (album.data.length < 1) {
+    toast.error(album.msg);
     return router.push("/dashboard/music/manageRelease?type=album");
   }
   const maxTracks = parseInt(album.data[0].numberOfTracks, 10); // e.g. 5
@@ -177,12 +179,12 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   // };
 
   return (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[300px]">
+    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[320px]">
       {isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         <>
-          <button
+          {/* <button
             onClick={() => {
               // saveToLocalStorage();
               router.push("/dashboard/music/manageRelease?type=album");
@@ -195,13 +197,13 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
               width={32}
               alt="arrow left"
             />
-          </button>
-          <div>
-            <div className="flex gap-2 mb-4">
+          </button> */}
+          <div className="py-4 px-2">
+            <div className="flex flex-wrap gap-2 mb-4">
               {tracks.map((track, index) => (
                 <button
                   className={
-                    " capitalize px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
+                    " capitalize px-5 py-1 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
                     (track.id === activeTrack?.id
                       ? " bg-primary hover:bg-primary/90 text-white"
                       : " bg-transparent border-2 border-text-disable text-text-disable")
@@ -233,37 +235,42 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
               onRemove={() => removeTrack(activeTrack.id)}
               album={album.data[0]}
             />
-            <div className="bg-[#F0F0E7] mt-30 border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
+            <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-neutral-100 flex justify-end items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-10 z-20 shadow-lg">
+              {/* Delete Track Action Button */}
               <button
-                arelia-label="delete featured artist"
+                type="button"
+                aria-label="Delete featured artist track"
                 disabled={tracks.length === 1 || isSubmittingForm}
                 onClick={() => {
                   removeTrack(activeTrackId);
                 }}
-                className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 flex"
+                // className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
+
+                className="font-bold text-xs sm:text-sm rounded-xl bg-red-500 hover:bg-primary-red text-white p-3 hover:bg-error-700 disabled:opacity-90 disabled:hover:bg-error-600 transition-all flex items-center justify-center shrink-0"
               >
-                <Trash2 />
+                <Trash2 size={14} />
               </button>
+
+              {/* Save as Draft Action Button */}
               <button
+                type="button"
                 disabled={isSubmittingForm}
                 onClick={() => {
                   handleSubmit("draft");
                 }}
-                className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary text-main-heading flex "
-                }
+                className="font-bold text-xs sm:text-sm rounded-xl px-4 py-2.5 border-2 border-neutral-200 text-neutral-700 bg-white hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-50 disabled:hover:bg-white transition-all flex items-center justify-center"
               >
-                {" "}
                 Save as Draft
               </button>
+
+              {/* Distribute/Submit Form Action Button */}
               <button
+                type="button"
                 disabled={isSubmittingForm}
                 onClick={() => {
                   handleSubmit("upload");
                 }}
-                className={
-                  "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 "
-                }
+                className="font-bold text-xs sm:text-sm rounded-xl px-5 py-2.5 text-white bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:hover:bg-primary-500 transition-all flex items-center justify-center shadow-sm shadow-primary-500/10"
               >
                 Distribute
               </button>

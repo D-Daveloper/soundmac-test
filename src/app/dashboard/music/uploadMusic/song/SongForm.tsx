@@ -33,7 +33,7 @@ import { isAxiosError } from "axios";
 import { ArrowRight, Info, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter} from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import SongPreview from "./SongPreview";
@@ -55,10 +55,9 @@ const SongForm = () => {
   const [image, setImage] = useState<string | null>(null);
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
-
-  // const [preview, setPreview] = useState(false);
-  const searchParams = useSearchParams();
-  const preview = searchParams.get("step") === "preview";
+  const [preview, setPreview] = useState(false);
+  // const searchParams = useSearchParams();
+  // const preview = searchParams.get("step") === "preview";
 
   const [songForm, setSongForm] = useState<SongForm>({
     title: "",
@@ -295,8 +294,7 @@ const SongForm = () => {
       songForm.song_audio = null;
     } finally {
       setIsSubmittingForm(false);
-      // setPreview(false);
-      router.replace("?type=single");
+      setPreview(false);
     }
   };
 
@@ -314,11 +312,11 @@ const SongForm = () => {
       localStorage.setItem("featured_artist", featured_artist);
       localStorage.setItem("performer", performer);
       localStorage.setItem("producer", producer);
-      router.push("?type=single&step=preview");
+      setPreview(true)
     } else {
-      router.back();
+      setPreview(false)
     }
-  };
+  };     
 
   const createAnother = () => {
     setSongForm({
@@ -402,13 +400,13 @@ const SongForm = () => {
       dashboardContext?.setHeader({
         title: "preview",
         showBackButton: true,
-        onBack: () => router.back(),
+        onBack: () => setPreview(false),
       });
     } else {
       dashboardContext?.setHeader({
         title: "upload single",
         showBackButton: true,
-        onBack: () => router.push("/dashboard/music/uploadMusic?type=single"),
+        onBack: () => router.back(),
       });
     }
   }, [preview]);
@@ -440,10 +438,10 @@ const SongForm = () => {
                 <div className="flex-3 overflow-auto flex flex-col gap-8 pb-3 h-[64dvh]">
                   {/* Song info */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Song Information
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs mt-3 sm:max-w-[40%]">
                       Provide the main details about your single to ensure it is
                       properly identified and distributed.
                     </p>
@@ -464,7 +462,7 @@ const SongForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 text-sm">
+                          <p className="font-medium mb-2 text-sm flex items-center">
                             Genre <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
@@ -491,7 +489,7 @@ const SongForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
+                          <p className="font-medium mb-2 text-sm">
                             Language <span className="text-red-500">*</span>
                           </p>
                         </div>
@@ -515,7 +513,7 @@ const SongForm = () => {
                       </div>
                     </div>
                     <div className="flex flex-col w-[40%] mt-10 max-sm:w-full">
-                      <p className="font-medium mb-2 sm:text-sm text-lg">
+                      <p className="font-medium mb-2 sm:text-sm text-base">
                         Cover Song?
                       </p>
                       <ToggleSwitch
@@ -581,10 +579,10 @@ const SongForm = () => {
                   <div className="border border-neutral-100"></div>
                   {/* Artists and Contributors */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Artists and Contributors
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Credit everyone who worked on your song. Add main artists,
                       featured acts, and other contributors.
                     </p>
@@ -714,7 +712,7 @@ const SongForm = () => {
                       {songForm.song_writer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-5 px-1"
+                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mt-2"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -805,7 +803,7 @@ const SongForm = () => {
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <div className="flex gap-1">
-                              <p className="font-medium mb-2 sm:text-sm text-lg">
+                              <p className="font-medium mb-2 text-sm">
                                 Role <span className="text-red-500">*</span>
                               </p>
                             </div>
@@ -938,7 +936,7 @@ const SongForm = () => {
                       <div className="w-full flex flex-wrap justify-between gap-y-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
+                            <p className=" capitalize font-medium text-sm ">
                               Release Date{" "}
                               <span className="text-red-500">*</span>
                             </p>
@@ -962,7 +960,7 @@ const SongForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2 px-1">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                            <p className=" capitalize font-medium text-sm mr-1">
                               Time Zones <span className="text-red-500">*</span>
                             </p>
                           </div>
@@ -988,7 +986,7 @@ const SongForm = () => {
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2 px-1">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
+                            <p className=" capitalize font-medium text-sm">
                               territories{" "}
                               <span className="text-red-500">*</span>
                             </p>
@@ -1007,7 +1005,7 @@ const SongForm = () => {
                           />
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full px-1">
-                          <p className=" capitalize font-medium sm:text-sm text-lg">
+                          <p className=" capitalize font-medium text-base">
                             Pre order date{" "}
                           </p>
                           <SelectDate
@@ -1052,7 +1050,7 @@ const SongForm = () => {
                                 isDateInPast(new Date(songForm.release_date))
                               }
                             />
-                            <p className="leading-6 text-sm sm:text-lg font-medium">
+                            <p className="leading-6 text-sm font-medium">
                               Pre-Order (optional)
                             </p>
                           </div>
@@ -1068,13 +1066,13 @@ const SongForm = () => {
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Distribution Platforms
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Choose the platforms where your release will be available.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 px-1 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 px-1 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg">
+                          <p className=" capitalize font-medium text-sm">
                             DSPs <span className="text-red-500">*</span>
                           </p>
                         </div>
@@ -1102,21 +1100,21 @@ const SongForm = () => {
 
                   {/* upload music */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Audio Upload
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Upload your track in the correct format for distribution.
                     </p>
                     <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex gap-1">
-                          <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                          <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                             Audio Upload <span className="text-red-500">*</span>
                           </h4>
                         </div>
 
-                        <div className="flex items-center justify-center w-60 lg:w-80">
+                        <div className="flex items-center justify-center w-64 lg:w-80">
                           <label
                             htmlFor="song_audio"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-50 dark:hover:border-gray-500"
@@ -1131,7 +1129,7 @@ const SongForm = () => {
                             </div>
                             <div className="w-[60%]">
                               {!songForm.song_audio ? (
-                                <p className="mb-2 text-[12px] text-gray-500">
+                                <p className="mb-2 text-xs text-gray-500">
                                   <span className="font-bold text-text-body">
                                     Supported Files:
                                   </span>{" "}
@@ -1164,10 +1162,10 @@ const SongForm = () => {
 
                   {/* add lyrics */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Add Your Lyrics
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Upload or paste your song lyrics to make your music more
                       discoverable across platforms.
                     </p>
@@ -1232,7 +1230,7 @@ const SongForm = () => {
                             lyrics: e.target.value,
                           }))
                         }
-                        className="w-full sm:w-[70%] min-h-80 border-2 rounded-2xl p-4 mt-1"
+                        className="w-full sm:w-[70%] text-xs min-h-80 border-2 rounded-2xl p-4 mt-1"
                         placeholder="Enter Lyrics here"
                       ></textarea>
                     </div>
@@ -1243,10 +1241,10 @@ const SongForm = () => {
 
                   {/* clip settings */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Clip Preview Settings
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Select where your song’s preview should start for
                       platforms that support clips.
                     </p>
@@ -1276,25 +1274,25 @@ const SongForm = () => {
 
                   {/* cover art */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Cover Art
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Add eye-catching artwork that represents your single.{" "}
                     </p>
                     <div className="flex items-center justify-center w-60">
                       <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
-                            <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                            <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                               Artwork File{" "}
                               <span className="text-red-500">*</span>
                             </h4>
                           </div>
-                          <div className="flex items-center justify-center w-60 lg:w-80">
+                          <div className="flex items-center justify-center w-64 lg:w-80">
                             <label
                               htmlFor="music_image"
-                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
                             >
                               <div
                                 className={
@@ -1316,7 +1314,7 @@ const SongForm = () => {
                               </div>
                               <div className="w-[50%]">
                                 {!songForm.music_image ? (
-                                  <p className="mb-2 text-[12px] text-gray-500">
+                                  <p className="mb-2 text-xs text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
@@ -1437,7 +1435,7 @@ const SongForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                          <p className=" capitalize font-medium text-sm mr-1">
                             Copyright Year{" "}
                             <span className="text-red-500">*</span>
                           </p>

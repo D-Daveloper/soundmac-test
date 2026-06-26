@@ -29,8 +29,10 @@ import { isAxiosError } from "axios";
 import { ArrowRight, Info, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import { useRouter} from "next/navigation";
 
 const SongForm = ({
   songFormFromApi,
@@ -56,8 +58,10 @@ const SongForm = ({
   // const [date, setDate] = useState({
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
-  // });
-
+  const dashboardContext = useContext(DashboardContext);
+  const router = useRouter();
+  // const searchParams = useSearchParams();
+  // const preview = searchParams.get("step") === "preview";
   const [preview, setPreview] = useState(false);
 
   const [songForm, setSongForm] = useState<SongForm>({
@@ -336,7 +340,7 @@ const SongForm = ({
       songForm.song_audio = null;
     } finally {
       setIsSubmittingForm(false);
-      setPreview(false);
+      // router.replace("?type=single");
     }
   };
 
@@ -354,9 +358,12 @@ const SongForm = ({
       localStorage.setItem("M_featured_artist", featured_artist);
       localStorage.setItem("M_performer", performer);
       localStorage.setItem("M_producer", producer);
-    }
-    setPreview(!preview);
-  };
+      setPreview(true)
+      // router.push("?type=single&step=preview");
+  } else {
+    setPreview(false)
+  }
+};
 
   useEffect(() => {
     const string_form = localStorage.getItem("M_songForm");
@@ -442,20 +449,36 @@ const SongForm = ({
     setImage(songFormFromApi.releaseImage);
   }, []);
 
+  useEffect(() => {
+    if (preview) {
+      dashboardContext?.setHeader({
+        title: "preview",
+        showBackButton: true,
+        onBack: () => setPreview(false),
+      });
+    } else {
+      dashboardContext?.setHeader({
+        title: "manage song",
+        showBackButton: false,
+        // onBack: () => router.push('/dashboard/music/manageRelease?type=single'),
+      });
+    }
+  }, [preview]);
+
   if (isErrorDsp) {
     toast.error("Failed to load DSP list. Please refresh the page.");
     return <InlineLoadingScreen />;
   }
 
   return (
-    <div className="bg-main-white min-h-screen h-full w-full flex flex-col lg:pl-[300px]">
+    <div className="bg-main-white min-h-screen h-full w-full flex flex-col lg:pl-[320px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
         (!isError || data != undefined || !dspData) && (
           <>
-            <button
+            {/* <button
               aria-label="go back"
               onClick={() => {
                 goBack();
@@ -468,20 +491,20 @@ const SongForm = ({
                 width={32}
                 alt="arrow left"
               />
-            </button>
-            <div className="flex gap-8 px-5 py-5">
+            </button> */}
+            <div className="flex gap-8 px-5 md:px-2 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-10 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-10 px- pb-10 h-[64dvh]">
                   {/* Song info */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Song Information
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Provide the main details about your single to ensure it is
                       properly identified and distributed.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 px-1 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={songForm.title}
@@ -499,9 +522,9 @@ const SongForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
                           <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Genre
+                            Genre <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -509,7 +532,7 @@ const SongForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -526,9 +549,9 @@ const SongForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
                           <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Language
+                            Language <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -536,7 +559,7 @@ const SongForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -555,9 +578,7 @@ const SongForm = ({
                       </div>
                     </div>
                     <div className="flex flex-col w-[40%] mt-10 max-sm:w-full">
-                      <p className="font-medium mb-2 sm:text-sm text-lg">
-                        Cover Song?
-                      </p>
+                      <p className="font-medium mb-2 text-sm">Cover Song?</p>
                       <ToggleSwitch
                         isOn={songForm.cover_song}
                         onToggle={() =>
@@ -570,11 +591,13 @@ const SongForm = ({
                       {songForm.cover_song &&
                         (songFormFromApi.releaseStatus != "approved" ? (
                           <>
-                            <div className="flex gap-1 mt-5">
-                              <p className="font-medium mb-2 text-sm">
-                                Cover License
-                              </p>
-                              <Image
+                            <div className="w-80">
+                              <div className="flex gap-1 mt-5">
+                                <p className="font-medium mb-2 text-sm">
+                                  Cover License{" "}
+                                  <span className="text-red-500">*</span>
+                                </p>
+                                {/* <Image
                                 priority={false}
                                 loading="lazy"
                                 src="/required.svg"
@@ -582,47 +605,48 @@ const SongForm = ({
                                 width={0}
                                 height={0}
                                 className="w-2 -mt-5"
-                              />
-                            </div>
-                            <div
-                              className={
-                                "flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-1 sm:text-sm text-[16px] "
-                              }
-                            >
-                              <label
-                                htmlFor="license"
-                                className="line-clamp-1 outline-0  font-extralight h-5"
-                              >
-                                {!songForm.license
-                                  ? "please select a file"
-                                  : songForm.license?.name}
-                              </label>
-                              <input
-                                id="license"
-                                name="license"
-                                onChange={(e) =>
-                                  setSongForm((prev) => ({
-                                    ...prev,
-                                    license: e.target.files
-                                      ? e.target.files[0]
-                                      : null,
-                                  }))
+                              /> */}
+                              </div>
+                              <div
+                                className={
+                                  "flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-1 sm:text-sm text-[16px] w-60"
                                 }
-                                type="file"
-                                accept="application/pdf"
-                                className="hidden w-full"
-                              />
-                            </div>
-                            <p className="font-light italic flex gap-3 text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                              Don&apos;t have a license?{" "}
-                              <Link
-                                href={"/dashboard/explore/coverLicense"}
-                                className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
                               >
-                                Get License here
-                                <ArrowRight color="#11456B" size={15} />
-                              </Link>
-                            </p>
+                                <label
+                                  htmlFor="license"
+                                  className="line-clamp-1 outline-0  font-extralight h-5"
+                                >
+                                  {!songForm.license
+                                    ? "please select a file"
+                                    : songForm.license?.name}
+                                </label>
+                                <input
+                                  id="license"
+                                  name="license"
+                                  onChange={(e) =>
+                                    setSongForm((prev) => ({
+                                      ...prev,
+                                      license: e.target.files
+                                        ? e.target.files[0]
+                                        : null,
+                                    }))
+                                  }
+                                  type="file"
+                                  accept="application/pdf"
+                                  className="hidden w-full"
+                                />
+                              </div>
+                              <p className="font-light italic flex mt-2 w-[100%] gap-x-5 text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                                Don&apos;t have a license?{" "}
+                                <Link
+                                  href={"/dashboard/explore/coverLicense"}
+                                  className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
+                                >
+                                  Get License here
+                                  <ArrowRight color="#11456B" size={15} />
+                                </Link>
+                              </p>
+                            </div>
                           </>
                         ) : (
                           <>
@@ -639,17 +663,17 @@ const SongForm = ({
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Artists and Contributors
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Credit everyone who worked on your song. Add main artists,
                       featured acts, and other contributors.
                     </p>
 
                     {/* main Artists */}
                     <div>
-                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15 mb-5">
+                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10 mb-5">
                         Main Artist
                       </h2>
-                      <div className="w-full flex flex-wrap justify-between gap-y-10 ">
+                      <div className="w-full flex flex-wrap justify-between gap-y-5 px-1 ">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           {/* <Input
                             value={songForm.artist}
@@ -676,7 +700,7 @@ const SongForm = ({
 
                     {/* featured_artist */}
                     <div>
-                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-5">
                         Featured Artists
                       </h2>
                       <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -686,7 +710,7 @@ const SongForm = ({
                       {songForm.featured_artist.map((_, i) => (
                         <div
                           key={i}
-                          className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -727,7 +751,7 @@ const SongForm = ({
                           </div>
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <button
                           disabled={songForm.featured_artist.length === 5}
                           onClick={() => {
@@ -758,16 +782,16 @@ const SongForm = ({
                               ),
                             }));
                           }}
-                          className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                          className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                         >
-                          <Trash2 />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
 
                     {/* song writer */}
                     <div>
-                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                         Songwriters
                       </h2>
                       {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -777,7 +801,7 @@ const SongForm = ({
                       {songForm.song_writer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -807,7 +831,7 @@ const SongForm = ({
                           </div>
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <button
                           disabled={songForm.song_writer.length === 12}
                           onClick={() => addField("song_writer")}
@@ -836,16 +860,16 @@ const SongForm = ({
                               ),
                             }));
                           }}
-                          className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                          className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                         >
-                          <Trash2 />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
 
                     {/* performers */}
                     <div>
-                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                         Performers
                       </h2>
                       {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -855,7 +879,7 @@ const SongForm = ({
                       {songForm.performer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -872,9 +896,7 @@ const SongForm = ({
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <div className="flex gap-1">
-                              <p className="font-medium mb-2 sm:text-sm text-lg">
-                                Role
-                              </p>
+                              <p className="font-medium mb-2 text-sm ">Role</p>
                               <Image
                                 priority={false}
                                 loading="lazy"
@@ -904,7 +926,7 @@ const SongForm = ({
                           </div>
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <button
                           disabled={songForm.performer.length === 5}
                           onClick={() => addField("performer")}
@@ -933,16 +955,16 @@ const SongForm = ({
                               ),
                             }));
                           }}
-                          className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                          className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                         >
-                          <Trash2 />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
 
                     {/* producer */}
                     <div>
-                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                      <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                         Producers
                       </h2>
                       {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -952,7 +974,7 @@ const SongForm = ({
                       {songForm.producer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-5"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -982,7 +1004,7 @@ const SongForm = ({
                           </div> */}
                         </div>
                       ))}
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 items-center">
                         <button
                           disabled={songForm.producer.length === 5}
                           onClick={() => addField("producer")}
@@ -1011,9 +1033,9 @@ const SongForm = ({
                               ),
                             }));
                           }}
-                          className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                          className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                         >
-                          <Trash2 />
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>
@@ -1028,10 +1050,11 @@ const SongForm = ({
                       <div className="w-full flex flex-wrap justify-between gap-y-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
-                              Release Date
+                            <p className=" capitalize font-medium text-sm">
+                              Release Date{" "}
+                              <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -1039,7 +1062,7 @@ const SongForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
                           <SelectDate
                             disabled={false}
@@ -1058,12 +1081,12 @@ const SongForm = ({
                             Release date must be 2 weeks ahead the upload date
                           </p>
                         </div>
-                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2 px-1">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                              Time Zones
+                            <p className=" capitalize font-medium text-sm ">
+                              Time Zones <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -1071,7 +1094,7 @@ const SongForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
                           <div className="w-full">
                             <Select
@@ -1096,12 +1119,13 @@ const SongForm = ({
                             />
                           </div>
                         </div>
-                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2 px-1">
                           <div className="flex">
-                            <p className=" capitalize font-medium sm:text-sm text-lg">
+                            <p className=" capitalize font-medium text-sm">
                               territories{" "}
+                              <span className="text-red-500">*</span>
                             </p>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -1109,7 +1133,7 @@ const SongForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
 
                           <CheckboxSelect
@@ -1124,8 +1148,8 @@ const SongForm = ({
                             }}
                           />
                         </div>
-                        <div className="flex flex-col w-[40%] max-sm:w-full">
-                          <p className=" capitalize font-medium sm:text-sm text-lg">
+                        <div className="flex flex-col w-[40%] max-sm:w-full px-1">
+                          <p className=" capitalize font-medium text-sm ">
                             Pre order date{" "}
                           </p>
                           <SelectDate
@@ -1156,7 +1180,7 @@ const SongForm = ({
                               checked={songForm.pre_order_check}
                               onChange={handleChange}
                             />
-                            <p className="leading-6 text-sm sm:text-lg font-medium">
+                            <p className="leading-6 text-sm  font-medium">
                               Pre-Order (optional)
                             </p>
                           </div>
@@ -1170,19 +1194,19 @@ const SongForm = ({
 
                   {/*  DSP*/}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Distribution Platforms
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-xs mt-3 sm:max-w-[40%]">
                       Choose the platforms where your release will be available.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 px-1 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg">
-                            DSPs
+                          <p className=" capitalize font-medium text-sm">
+                            DSPs <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -1190,7 +1214,7 @@ const SongForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <CheckboxSelectDsp
                           title="Select DSPs"
@@ -1216,19 +1240,19 @@ const SongForm = ({
 
                   {/* upload music */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Audio Upload
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Upload your track in the correct format for distribution.
                     </p>
                     <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex gap-1">
-                          <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                            Audio Upload
+                          <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                            Audio Upload <span className="text-red-500">*</span>
                           </h4>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -1236,13 +1260,13 @@ const SongForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
 
-                        <div className="flex items-center justify-center w-60">
+                        <div className="flex items-center justify-center w-64 lg:w-80">
                           <label
                             htmlFor="song_audio"
-                            className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
+                            className="flex p-3 gap-3 items-center justify-center w-full h-24 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
                           >
                             <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
                               <Image
@@ -1254,7 +1278,7 @@ const SongForm = ({
                             </div>
                             <div className="w-[50%]">
                               {!songForm.song_audio ? (
-                                <p className="mb-2 text-sm text-gray-500">
+                                <p className="mb-2 text-xs text-gray-500">
                                   <span className="font-bold text-text-body">
                                     Supported Files:
                                   </span>{" "}
@@ -1290,7 +1314,7 @@ const SongForm = ({
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Add Your Lyrics
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Upload or paste your song lyrics to make your music more
                       discoverable across platforms.
                     </p>
@@ -1357,7 +1381,7 @@ const SongForm = ({
                             lyrics: e.target.value,
                           }))
                         }
-                        className="w-full sm:w-[70%] min-h-80 border-2 rounded-2xl p-4 mt-1"
+                        className="w-full sm:w-[70%] text-xs min-h-80 border-2 rounded-2xl p-4 mt-1"
                         placeholder="Enter Lyrics here"
                       ></textarea>
                     </div>
@@ -1368,15 +1392,15 @@ const SongForm = ({
 
                   {/* clip settings */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Clip Preview Settings
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Select where your song’s preview should start for
                       platforms that support clips.
                     </p>
                     <div>
-                      <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10">
+                      <div className="w-full flex flex-wrap justify-between gap-y-5 px-1 mt-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <Input
                             value={songForm.start_clip}
@@ -1405,17 +1429,18 @@ const SongForm = ({
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Cover Art
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                       Add eye-catching artwork that represents your single.{" "}
                     </p>
                     <div className="flex items-center justify-center w-60">
                       <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
-                            <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                              Artwork File
+                            <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                              Artwork File{" "}
+                              <span className="text-red-500">*</span>
                             </h4>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -1423,12 +1448,12 @@ const SongForm = ({
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
-                          <div className="flex items-center justify-center w-60">
+                          <div className="flex items-center justify-center w-64 lg:w-80">
                             <label
                               htmlFor="music_image"
-                              className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
+                              className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
                               <div
                                 className={
@@ -1450,7 +1475,7 @@ const SongForm = ({
                               </div>
                               <div className="w-[50%]">
                                 {!image ? (
-                                  <p className="mb-2 text-sm text-gray-500">
+                                  <p className="mb-2 text-xs text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
                                     </span>{" "}
@@ -1496,7 +1521,7 @@ const SongForm = ({
                       Enter these details only if you are transferring from
                       another distributor
                     </p>
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap px-1 justify-between">
                       <div className="flex w-fit gap-2 items-center mb-5">
                         <input
                           aria-label="another distribution check box"
@@ -1523,7 +1548,7 @@ const SongForm = ({
                         </p>
                       </div>
                     </div>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10">
+                    <div className="w-full flex flex-wrap justify-between gap-y-5 px-1">
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={songForm.isrc}
@@ -1571,10 +1596,11 @@ const SongForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
-                            Copyright Year
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            Copyright Year{" "}
+                            <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -1582,7 +1608,7 @@ const SongForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
                         <div className="w-full">
                           <Select
@@ -1603,141 +1629,201 @@ const SongForm = ({
                   </div>
                 </div>
               ) : (
-                <div className="flex-3 overflow-auto flex flex-col gap-20 px-1 pb-3 h-[64dvh]">
+                // preview starts here
+                <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 pb-6 h-[64dvh] custom-scrollbar">
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                    <h1 className=" text-base md:text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Song Summary
                     </h1>
-                    <div className="w-full flex flex-col gap-y-3 mt-15">
+
+                    <div className="w-full flex flex-col gap-y-3 mt-6">
                       <p className="font-bold text-[#000000] text-sm leading-[18px] tracking-[0.5px]">
                         Artwork File
                       </p>
-                      <div className="max-w-70 max-h-32 flex gap-3 items-center justify-center p-19 rounded-4xl border-2 border-neutral-100">
+
+                      <div className="max-w-70 max-h-32 flex gap-4 items-center p-3 rounded-2xl border-2 border-neutral-100 bg-neutral-50/50">
                         {image ? (
                           <>
-                            <div className="flex-1 w-full">
+                            <div className="relative w-24 h-24 flex-shrink-0">
                               <Image
-                                src={image ? image : ""}
-                                width={100}
-                                height={150}
-                                alt="music note icon"
-                                className="min-w-32 h-32 object-cover rounded-2xl flex-1"
+                                src={image}
+                                fill
+                                alt="Selected artwork summary"
+                                className="object-cover rounded-xl shadow-sm"
                               />
                             </div>
-                            <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate min-w-[80%] flex-2">
-                              {songForm.music_image?.name}
+                            <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate flex-1">
+                              {songForm.music_image?.name || "Uploaded Artwork"}
                             </p>
                           </>
                         ) : (
-                          <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate ">
-                            No image Selected
-                          </p>
+                          <div className="flex items-center gap-3 py-2 px-1">
+                            <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-400">
+                              ⚠️
+                            </div>
+                            <p className="text-text-disable font-medium text-sm">
+                              No image selected
+                            </p>
+                          </div>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-16 max-xs:grid-cols-1">
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Song Title</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.title}
+
+                  {/* Summary Meta Fields Grid */}
+                  <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-x-10 gap-y-6 px-4 w-full">
+                    {/* Song Title */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                        Song Title
+                      </h2>
+                      <p className="truncate text-primary font-normal leading-[32px] tracking-tight">
+                        {songForm.title || "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Language</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.language}
+
+                    {/* Language */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Language
+                      </h2>
+                      <p className="truncate text-text-body font-normal  leading-[32px] tracking-tight">
+                        {songForm.language || "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Main Artist</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.artist}
+
+                    {/* Main Artist */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Main Artist
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.artist || "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Featured Artists</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.featured_artist.map(
-                          (item) => item.artistName + ",",
-                        )}
+
+                    {/* Featured Artists */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Featured Artists
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.featured_artist?.length > 0
+                          ? songForm.featured_artist
+                              .map((item) => item.artistName)
+                              .join(", ")
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Performers</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.performer.map((item) => item.name + ",")}
+
+                    {/* Performers */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                        Performers
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.performer?.length > 0
+                          ? songForm.performer
+                              .map((item) => item.name)
+                              .join(", ")
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Songwriter</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.song_writer.map(
-                          (item) => item.first_name + ",",
-                        )}
+
+                    {/* Songwriter */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                        Songwriter
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.song_writer?.length > 0
+                          ? songForm.song_writer
+                              .map((item) => item.first_name)
+                              .join(", ")
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Producer</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.producer.map((item) => item.name + ",")}
+
+                    {/* Producer */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Producer
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.producer?.length > 0
+                          ? songForm.producer
+                              .map((item) => item.name)
+                              .join(", ")
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Territories</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.territories.join(",")}
+
+                    {/* Territories */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                        Territories
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.territories?.length > 0
+                          ? songForm.territories.join(", ")
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>UPC</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.upc}
+
+                    {/* UPC */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        UPC
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.upc || "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>ISRC</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.isrc}
+
+                    {/* ISRC */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        ISRC
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.isrc || "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Release date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.release_date != undefined &&
-                          new Date(songForm.release_date).toLocaleDateString()}
+
+                    {/* Release date */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Release Date
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.release_date !== undefined
+                          ? new Date(songForm.release_date).toLocaleDateString()
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
-                      <h2>Preorder Start date</h2>
-                      <p className="truncate text-text-body font-normal text-2xl leading-[30px] tracking-[1px]">
-                        {songForm.preOrderDate &&
-                          new Date(songForm.preOrderDate).toLocaleDateString()}
+
+                    {/* Preorder Start date */}
+                    <div className="flex flex-col gap-1 w-full min-w-0">
+                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                        Preorder Start Date
+                      </h2>
+                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                        {songForm.preOrderDate
+                          ? new Date(songForm.preOrderDate).toLocaleDateString()
+                          : "—"}
                       </p>
-                      {/* border line */}
-                      <div className="border border-neutral-100"></div>
+                      <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
                   </div>
                 </div>
@@ -1773,6 +1859,38 @@ const SongForm = ({
               </div>
             </div>
             {/* buttons */}
+
+            <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
+              {/* Left group / Early buttons on mobile */}
+              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
+                <button
+                  onClick={() => handleSubmit(songForm, "draft")}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Save as Draft
+                </button>
+
+                <button
+                  onClick={() => handleSubmit(songForm, "upload")}
+                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors shrink-0 ${
+                    !preview ? "hidden" : "flex"
+                  }`}
+                >
+                  Distribute
+                </button>
+              </div>
+
+              {/* Primary action toggle (Pushed right on mobile if other buttons are hidden) */}
+              <button
+                onClick={() => handlePreview(songForm)}
+                className="font-bold text-xs sm:text-sm rounded-lg px-4 sm:px-5 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors ml-auto sm:ml-0 shrink-0 flex items-center justify-center"
+              >
+                {preview ? "Edit" : "Preview"}
+              </button>
+            </div>
+            {/*               
             <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
               <button
                 onClick={() => {
@@ -1807,7 +1925,7 @@ const SongForm = ({
               >
                 {preview ? "Edit" : "Preview"}
               </button>
-            </div>
+            </div> */}
           </>
         )
       )}

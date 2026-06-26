@@ -31,8 +31,8 @@ const Input = React.memo(({
   };
   return (
     <>
-      <div className="flex gap-1 sm:text-sm text-lg">
-        <p className={"font-medium text-sm md:text-[15px]" + (props.uppercase? " uppercase" : " capitalize")}>{props.title} </p>
+      <div className="flex gap-1 text-sm">
+        <p className={"font-medium text-sm" + (props.uppercase? " uppercase" : " capitalize")}>{props.title} </p>
         {required && (
            <span className="text-red-500">*</span>
           // <Image

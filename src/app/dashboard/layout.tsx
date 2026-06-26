@@ -154,63 +154,66 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <UserRoute>
-      <div className="min-h-screen bg-neutral-50 flex flex-col relative">
+      <div className="min-h-screen bg-neutral-50 flex flex-col items-ce relative">
         {/* Top Navbar Header Section */}
-        <header className="sticky top-0 z-30 bg-main-white border-b border-neutral-200 lg:pl-[300px]">
-          <div className="flex h-16 items-center justify-between px-6">
-            <div className="flex items-center gap-4">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[300px] transition-all">
+          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+            {/* Left Side: Navigation Controls & Title */}
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              {/* Hamburger */}
               <button
+                type="button"
                 aria-label="Toggle side bar navigation"
-                className="flex flex-col gap-1 hover:cursor-pointer lg:hidden p-1"
+                className="flex flex-col gap-1 hover:bg-neutral-50 lg:hidden p-2 rounded-lg transition-colors cursor-pointer shrink-0"
                 onClick={() => setIsOpen(!isOpen)}
               >
-                <div className="bg-primary w-5 h-0.5"></div>
-                <div className="bg-primary w-5 h-0.5"></div>
-                <div className="bg-primary w-5 h-0.5"></div>
+                <div className="bg-[#11456B] w-5 h-0.5 rounded-full"></div>
+                <div className="bg-[#11456B] w-5 h-0.5 rounded-full"></div>
+                <div className="bg-[#11456B] w-5 h-0.5 rounded-full"></div>
               </button>
 
-              {/* header title  + backbutton if needed*/}
-              <div className="flex items-center gap-3">
-                {dashboardContext?.header.showBackButton && (
-                  <button
-                    aria-label="go back"
-                    onClick={() => {
-                      if (dashboardContext.header.onBack) {
-                        dashboardContext.header.onBack(); 
-                      } else {
-                        router.back(); 
-                      }
-                    }}
-                    className="bg-main-white/70 p-3 w-[38px] h-[38px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2 hidden lg:flex"
-                  >
-                    <Image
-                      src={"/arrow-left.svg"}
-                      height={32}
-                      width={32}
-                      alt="arrow left"
-                      className="w-[20px] h-[20p]"
-                    />
-                  </button>
-                )}
-                <h1 className="font-semibold lg:text-xl text-main-heading tracking-[-1px] leading-6 capitalize ml-5 h-4">
-                  {dashboardContext?.header.title}
-                </h1>
-              </div>
+              {/* Back Button Container */}
+              {dashboardContext?.header.showBackButton && (
+                <button
+                  type="button"
+                  aria-label="Go back"
+                  onClick={() => {
+                    if (dashboardContext.header.onBack) {
+                      dashboardContext.header.onBack();
+                    } else {
+                      router.back();
+                    }
+                  }}
+                  className="p-2 w-9 h-9 border border-neutral-200 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow-2xs hidden lg:flex"
+                >
+                  <Image
+                    src="/arrow-left.svg"
+                    height={20}
+                    width={20}
+                    alt="arrow left"
+                    className="w-5 h-5"
+                  />
+                </button>
+              )}
+
+              <h1 className="font-bold text-base text-main-heading truncate tracking-tight py-1">
+                {dashboardContext?.header.title || "Dashboard"}
+              </h1>
             </div>
 
-            {/* Notification Modal Button Trigger */}
+            {/* Notification Modal Trigger */}
             <button
+              type="button"
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-              className="relative p-2 rounded-full hover:bg-neutral-100 transition"
+              className="relative p-2.5 rounded-xl border border-transparent hover:border-neutral-100 hover:bg-neutral-50 transition-all shrink-0 cursor-pointer"
             >
-              <Bell color="#11456B" stroke="#11456B" size={22} />
+              <Bell color="#11456B" stroke="#11456B" size={20} />
               {notification?.hasNewNotification && (
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-error-500 ring-2 ring-white"></span>
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error-500 ring-2 ring-white animate-pulse"></span>
               )}
             </button>
           </div>
         </header>
-
         {/* Notification Modal Slide Panel */}
         <div
           className={`fixed inset-y-0 right-0 z-40 w-full sm:w-[400px] bg-neutral-100 shadow-2xl border-l border-neutral-200 transform transition-transform duration-300 ease-in-out flex flex-col ${

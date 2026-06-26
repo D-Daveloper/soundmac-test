@@ -23,9 +23,14 @@ const Song = () => {
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
   const dashboardContext = useContext(DashboardContext);
+
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Manage Singles");
-  }, [type]);
+    dashboardContext?.setHeader({
+      title: "Manage Songs",
+      showBackButton: false,
+    });
+  }, []);
+
   const router = useRouter();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showDeletePopUp, setShowDeletePopUp] = useState(false);
@@ -55,6 +60,7 @@ const Song = () => {
     songStatusFilter,
     artist,
   });
+
   const {
     isLoading: isLoadingArtistNames,
     data: artistNames,
@@ -65,16 +71,15 @@ const Song = () => {
   const songOptions = [
     {
       name: "View Single",
-      icon: <Music strokeWidth={1} />,
+      icon: <Music strokeWidth={1} size={18} />,
       iconFunction: () => {
         setWantsToEdit(true);
       },
     },
     {
       name: "Delete",
-      icon: <Trash2 strokeWidth={1} />,
+      icon: <Trash2 strokeWidth={1} size={18} />,
       iconFunction: () => {
-        // setSongToDelete(data && data.data[selectedIndex]);
         handleShowDeletePopup();
       },
     },
@@ -105,6 +110,7 @@ const Song = () => {
     setPage(1);
     setSongStatusFilter("all");
   };
+
   const handleShowDeletePopup = () => {
     setShowDeletePopUp(true);
   };
@@ -127,422 +133,374 @@ const Song = () => {
     }
   };
 
+  const isDataLoading =
+    isFetching || isLoading || isPendingSongs || isRefetchingSongs;
+  const isDataEmpty =
+    !isDataLoading && (isError || !data || data.data.length === 0);
+
   return !wantsToEdit ? (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[300px] px-5">
-      <div className="flex gap-3 mt-5">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 lg:pl-[320px] px-4 sm:px-6 max-w-7xl mx-auto">
+      {/* Content Type Tabs */}
+      <div className="flex gap-3 mt-6">
         <button
           type="button"
           onClick={() => setParam("type", "single")}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
-            (type === "single"
-              ? " bg-primary hover:bg-primary/90 text-white"
-              : " bg-transparent border-2 border-text-disable text-text-disable")
-          }
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${
+            type === "single"
+              ? "bg-primary text-white shadow-xs"
+              : "bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"
+          }`}
         >
           Songs
         </button>
         <button
           type="button"
           onClick={() => setParam("type", "album")}
-          className={
-            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm  " +
-            (type === "album"
-              ? " bg-primary hover:bg-primary/90 text-white"
-              : " bg-transparent border-2 border-text-disable text-text-disable")
-          }
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${
+            type === "album"
+              ? "bg-primary text-white shadow-xs"
+              : "bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"
+          }`}
         >
           Albums
         </button>
       </div>
+
       {isLoadingArtistNames ? (
-        <InlineLoadingScreen />
-      ) : !isLoading &&
-        (isError || data === undefined || data.data.length === 0) ? (
-        <>
-          {/* you might see that the first two divs are duplicated the reason is a ui issue if theres no songs or albums if this condition above is true it should still show them search bar, select artist and also all the filter buttons like all ,pending,etc. */}
-
-          <div className="flex justify-between w-full mt-10 gap-2 max-[450px]:flex-col items-end">
-            <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
-              <Image
-                priority={true}
-                src="/search-normal.svg"
-                alt="search icon"
-                width={20}
-                height={20}
-              />
-              <input
-                name="search"
-                value={query}
-                type="search"
-                className="w-full p-1 text-[16px] sm:text-sm outline-0"
-                onChange={(e) => handleSearchQueryChange(e.target.value)}
-                placeholder="Search"
-              />
-            </div>
-            <div className="flex-1 flex gap-10 items-end justify-end w-full">
-              <div className="flex flex-col max-w-100 w-full ">
-                <p className="font-medium mb-2 sm:text-sm text-lg">Artists</p>
-
-                <Select
-                  selected={artist}
-                  setSelected={(t) => {
-                    setArtist(t);
-                  }}
-                  placeholder="Select Artist..."
-                  options={artistNames || []}
-                  name="artist"
-                />
-              </div>
-              <button
-                disabled={false}
-                aria-label="open filters button"
-                className={
-                  "outline-primary-500 outline-2 border-2 min-w-[50px] flex-1 max-w-[50px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
-                  (false && " hover:!cursor-not-allowed ")
-                }
-                onClick={() => {
-                  setIsFilterOpen(!isFilterOpen);
-                  // setSelectedIndex(null);
-                }}
-              >
-                <div className="bg-primary w-[25px] h-[2px]"></div>
-                <div className="bg-primary w-[15px] h-[2px]"></div>
-                <div className="bg-primary w-[10px] h-[2px]"></div>
-              </button>
-              {isFilterOpen && (
-                <div className="p-3 absolute mt-2 w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-40 flex flex-col gap-2">
-                  {songFilterOptions.map((options, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleFilterChange(options.value)}
-                      name={options.label}
-                      aria-label={options.label}
-                      className=" flex items-center gap-2"
-                    >
-                      {" "}
-                      <div
-                        className={
-                          "w-2 h-2 rounded-full bg-primary " +
-                          (filter != options.value && " opacity-0")
-                        }
-                      ></div>
-                      {options.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* buttons e.g all, pending */}
-          <div className="mt-5 flex gap-3 flex-wrap">
-            {songStatusFilterArray.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  handleReleaseStatusFilterChange(item);
-                }}
-                className={
-                  " capitalize px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
-                  (songStatusFilter === item
-                    ? " bg-primary hover:bg-primary/90 text-white"
-                    : " bg-transparent border-2 border-text-disable text-text-disable")
-                }
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-col justify-center items-center h-full gap-15 min-h-[90dvh]">
-            <div>
-              <Image
-                priority={true}
-                src={"/manage_song_image.png"}
-                alt="an image depicting no artist profile"
-                width={100}
-                height={100}
-              />
-            </div>
-            <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-              You haven’t released any singles. Upload your first track to get
-              started.
-            </p>
-            <button
-              onClick={() => {
-                router.push(
-                  "/dashboard?tab=Music&section=uploadMusic&type=single",
-                );
-              }}
-              className={
-                "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "
-              }
-            >
-              Upload a Single
-            </button>
-          </div>
-        </>
+        <div className="flex-1 flex justify-center items-center min-h-[400px]">
+          <InlineLoadingScreen />
+        </div>
       ) : (
-        <div>
-          <div className="flex justify-between w-full mt-10 gap-2 max-[450px]:flex-col items-end">
-            <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
+        <div className="flex flex-col flex-1">
+          {/* Unified Controls Panel */}
+          <div className="flex flex-col md:flex-row justify-between items-stretch md:items-end w-full mt-8 gap-4 relative">
+            {/* Search Input Container */}
+            <div className="flex items-center p-2 border border-neutral-200 rounded-xl w-full md:max-w-[35%] h-11 bg-white focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500/20 transition-all">
               <Image
-                priority={true}
+                priority
                 src="/search-normal.svg"
                 alt="search icon"
-                width={20}
-                height={20}
+                width={18}
+                height={18}
+                className="ml-1 shrink-0 opacity-60"
               />
               <input
-                value={query}
                 name="search"
+                value={query}
                 type="search"
-                className="w-full p-1 text-[16px] sm:text-sm outline-0"
+                className="w-full px-2 text-sm outline-hidden text-text-body placeholder-text-disable bg-transparent"
                 onChange={(e) => handleSearchQueryChange(e.target.value)}
-                placeholder="Search"
+                placeholder="Search releases..."
               />
             </div>
-            <div className="flex-1 flex gap-10 items-end justify-end w-full">
-              <div className="flex flex-col max-w-100 w-full ">
-                <p className="font-medium mb-2 sm:text-sm text-lg">Artists</p>
 
+            {/* Select & Dropdown Filter Elements */}
+            <div className="flex items-end justify-end gap-3 w-full md:w-auto flex-1">
+              <div className="flex flex-col w-full md:w-64">
+                <p className="font-semibold mb-1.5 text-xs text-main-heading tracking-wide uppercase">
+                  Artists
+                </p>
                 <Select
                   selected={artist}
-                  setSelected={(t) => {
-                    setArtist(t);
-                  }}
+                  setSelected={(t) => setArtist(t)}
                   placeholder="Select Artist..."
                   options={artistNames || []}
                   name="artist"
                 />
               </div>
-              <button
-                disabled={false}
-                aria-label="open filters button"
-                className={
-                  "outline-primary-500 outline-2 border-2 min-w-[50px] flex-1 max-w-[50px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
-                  (false && " hover:!cursor-not-allowed ")
-                }
-                onClick={() => {
-                  setIsFilterOpen(!isFilterOpen);
-                  // setSelectedIndex(null);
-                }}
-              >
-                <div className="bg-primary w-[25px] h-[2px]"></div>
-                <div className="bg-primary w-[15px] h-[2px]"></div>
-                <div className="bg-primary w-[10px] h-[2px]"></div>
-              </button>
-              {isFilterOpen && (
-                <div className="p-3 absolute mt-2 w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-40 flex flex-col gap-2">
-                  {songFilterOptions.map((options, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleFilterChange(options.value)}
-                      name={options.label}
-                      aria-label={options.label}
-                      className=" flex items-center gap-2"
-                    >
-                      {" "}
-                      <div
-                        className={
-                          "w-2 h-2 rounded-full bg-primary " +
-                          (filter != options.value && " opacity-0")
-                        }
-                      ></div>
-                      {options.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-          {/* buttons e.g all, pending */}
-          <div className="mt-5 flex gap-3 flex-wrap">
-            {songStatusFilterArray.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  handleReleaseStatusFilterChange(item);
-                }}
-                className={
-                  " capitalize px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm " +
-                  (songStatusFilter === item
-                    ? " bg-primary hover:bg-primary/90 text-white"
-                    : " bg-transparent border-2 border-text-disable text-text-disable")
-                }
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-          {/* main body */}
-          <div
-            className={
-              isFetching || isLoading || isPendingSongs || isRefetchingSongs
-                ? "flex justify-center items-center md:max-h-[400px]"
-                : "my-15 grid grid-rows-2 grid-cols-2 gap-5 max-md:grid-cols-1 "
-            }
-          >
-            {isFetching || isLoading || isPendingSongs || isRefetchingSongs ? (
-              <InlineLoadingScreen />
-            ) : (
-              // song card
-              data?.data &&
-              data?.data.map((song, index) => (
-                <div
-                  key={index}
-                  className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-3 row-span-1 col-span-1 h-fit relative "
+
+              {/* Advanced Filter Toggle Trigger Button */}
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="open filters button"
+                  className={`border border-neutral-200 w-11 h-11 rounded-xl flex flex-col justify-center items-center gap-1.5 transition-all bg-white shadow-2xs hover:bg-neutral-50 ${
+                    isFilterOpen ? "ring-2 ring-primary border-transparent" : ""
+                  }`}
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
                 >
-                  <div className="relative max-w-[100px] max-h-[100px] w-[100px] h-[100px] flex-2">
-                    <Image
-                      priority={true}
-                      src={song?.releaseImage || "/signinimage.png"}
-                      alt="an image depicting the song image"
-                      fill
-                      className="object-cover rounded-lg shadow-md max-h-[80px] "
-                    />
-                  </div>
-                  <div className="flex flex-col flex-2 overflow-hidden">
-                    <h1 className="text-lg font-normal leading-[24px] tracking-[-0.5px] text-text-body w-full line-clamp-1">
-                      {song.releaseTitle}
-                    </h1>
-                    <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
-                      feat.{" "}
-                      {song.featuredArtist.map(
-                        (item) => item.artistName.split(" ")[0] + ",",
-                      )}
-                    </p>
-                    <p className="my-2">
-                      <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
-                        Release Date:{" "}
-                      </span>
-                      {song.releaseDate
-                        ? new Date(song.releaseDate).toLocaleDateString()
-                        : "N/A"}
-                    </p>
-                    <div className="flex items-end">
-                      <p className="">
-                        <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">
-                          Label:{" "}
-                        </span>
-                        {song.user.label}
-                      </p>
-                      <p
-                        className={
-                          "ml-auto font-bold leading-[18px] tracking-tighter text-xs capitalize w-fit px-4 py-1 rounded-full h-fit " +
-                          (song.releaseStatus === "pending"
-                            ? " text-warning-500 bg-warning-100"
-                            : song.releaseStatus === "approved"
-                              ? " text-success-500 bg-success-100"
-                              : song.releaseStatus === "draft"
-                                ? " text-primary-500 bg-primary-50"
-                                : " text-error-500 bg-error-100")
-                        }
-                      >
-                        {song.releaseStatus}
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleArtistOptionChange(index)}
-                    aria-label={song.artistName + " options"}
-                    className="flex-1 flex gap-1 border-2 border-neutral-200 rounded-lg max-h-[30px] min-h-[32px] max-w-[32px] min-w-[32px] items-center justify-center ml-auto"
-                  >
-                    <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                    <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                    <div className="w-1 h-1 border-[1px] border-[#103958] rounded-full"></div>
-                  </button>
-                  {/* this is for the viewArtist button options */}
-                  <div
-                    className={
-                      "divide-y divide-zinc-200 absolute w-full max-w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out max-h-fit text-sm right-10 top-0 flex-col " +
-                      (selectedIndex === index ? " flex" : " hidden")
-                    }
-                  >
-                    {songOptions.map((options, index) => (
+                  <div className="bg-primary w-5 h-0.5 rounded-full"></div>
+                  <div className="bg-primary w-3.5 h-0.5 rounded-full"></div>
+                  <div className="bg-primary w-2 h-0.5 rounded-full"></div>
+                </button>
+
+                {/* Dropdown Options List */}
+                {isFilterOpen && (
+                  <div className="p-1.5 absolute right-0 mt-2 w-44 bg-white border border-neutral-200 rounded-xl shadow-xl z-30 transition-all text-sm flex flex-col gap-0.5">
+                    {songFilterOptions.map((options, index) => (
                       <button
                         key={index}
-                        onClick={() => {
-                          options.iconFunction();
-                        }}
-                        name={options.name}
-                        aria-label={options.name}
-                        className=" flex items-center gap-2 hover:bg-gray-300 p-2 transition-colors duration-300"
+                        onClick={() => handleFilterChange(options.value)}
+                        name={options.label}
+                        aria-label={options.label}
+                        className="flex items-center gap-2 w-full text-left px-3 py-2 rounded-lg hover:bg-neutral-50 text-text-body font-medium transition-colors"
                       >
-                        {" "}
-                        {options.icon}
-                        {options.name}
+                        <div
+                          className={`w-2 h-2 rounded-full bg-primary shrink-0 transition-opacity ${
+                            filter !== options.value
+                              ? "opacity-0"
+                              : "opacity-100"
+                          }`}
+                        />
+                        {options.label}
                       </button>
                     ))}
                   </div>
-                </div>
-              ))
-            )}
-          </div>
-          <div>
-            <Pagination
-              currentPage={page}
-              totalPages={data ? data.totalPages : 0}
-              onChange={(page) => setPage(page)}
-            />
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* pop up */}
-          <div
-            className={
-              showDeletePopUp && data && data.data.length > 0
-                ? " fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl  "
-                : " hidden"
-            }
-          >
-            <div className="max-w-[400px] h-[400px] w-full">
-              <div className="flex flex-col w-fit py-5 px-10 justify-center items-center bg-neutral-100  rounded-lg shadow-2xl">
-                <div className="flex flex-col gap-2 mb-2">
-                  <div className="flex justify-center my-5">
-                    <Trash2 size={50} color="#103958" strokeWidth={1} />
+          {/* Dynamic Release Status Array Pill Filters */}
+          <div className="mt-5 flex gap-2 flex-wrap">
+            {songStatusFilterArray.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => handleReleaseStatusFilterChange(item)}
+                className={`capitalize px-4 py-1.5 font-semibold rounded-xl text-center text-xs transition-all cursor-pointer ${
+                  songStatusFilter === item
+                    ? "bg-primary text-white shadow-xs"
+                    : "bg-white border border-neutral-200 text-text-body hover:bg-neutral-50"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+
+          {/* Conditional Inner Body Content Block */}
+          {isDataLoading ? (
+            <div className="flex-1 flex justify-center items-center min-h-[350px]">
+              <InlineLoadingScreen />
+            </div>
+          ) : isDataEmpty ? (
+            /* Empty State Segment Placeholder layout view */
+            <div className="flex-1 flex flex-col justify-center items-center gap-6 py-16 text-center max-w-sm mx-auto min-h-[400px]">
+              <div className="relative w-28 h-28 mix-blend-multiply opacity-90">
+                <Image
+                  priority
+                  src="/manage_song_image.png"
+                  alt="No releases found illustrations"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <p className="text-text-body font-medium text-sm sm:text-base leading-relaxed">
+                You haven’t released any singles. Upload your first track to get
+                started.
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/dashboard?tab=Music&section=uploadMusic&type=single",
+                  )
+                }
+                className="font-bold text-sm rounded-xl px-5 py-3 text-white bg-primary hover:bg-primary/90 shadow-sm transition-colors cursor-pointer"
+              >
+                Upload a Single
+              </button>
+            </div>
+          ) : (
+            /* Main Releases Grid Stream view mapping */
+            <div className="flex flex-col flex-1 justify-between min-h-[60dvh]">
+              <div className="my-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                {data?.data.map((song, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-neutral-100 hover:border-neutral-200 rounded-xl p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center shadow-sm hover:shadow-md transition-all duration-200 relative min-w-0"
+                  >
+                    {/* Artwork Container frame block */}
+                    <div className="relative w-full h-40 sm:w-24 sm:h-24 shrink-0 rounded-lg overflow-hidden bg-neutral-50 border border-neutral-100 group">
+                      <Image
+                        priority
+                        src={song?.releaseImage || "/signinimage.png"}
+                        alt="song release artwork cover"
+                        fill
+                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+
+                    {/* Metadata Content area parameters */}
+                    <div className="flex-1 min-w-0 pr-0 sm:pr-8 w-full flex flex-col justify-between space-y-2 sm:space-y-1">
+                      <div>
+                        <h1
+                          className="text-base sm:text-lg font-bold text-main-heading truncate pr-8 sm:pr-0 tracking-tight"
+                          title={song.releaseTitle}
+                        >
+                          {song.releaseTitle}
+                        </h1>
+
+                        {song.featuredArtist?.length > 0 && (
+                          <p className="text-neutral-400 font-medium text-xs sm:text-sm truncate mt-0.5">
+                            feat.{" "}
+                            {song.featuredArtist
+                              .map((item) => item.artistName.split(" ")[0])
+                              .join(", ")}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Release & Label fields */}
+                      <div className="text-xs space-y-1 pt-1 border-t border-neutral-50 sm:border-0">
+                        <p className="text-neutral-600 flex items-center gap-1.5">
+                          <span className="text-neutral-400 font-medium">
+                            Release Date:
+                          </span>
+                          <span className="font-semibold text-neutral-700">
+                            {song.releaseDate
+                              ? new Date(song.releaseDate).toLocaleDateString(
+                                  undefined,
+                                  { dateStyle: "medium" },
+                                )
+                              : "—"}
+                          </span>
+                        </p>
+                        <p className="text-neutral-600 truncate flex items-center gap-1.5 max-w-[90%]">
+                          <span className="text-neutral-400 font-medium">
+                            Label:
+                          </span>
+                          <span className="font-semibold text-neutral-700 truncate">
+                            {song.user?.label || "—"}
+                          </span>
+                        </p>
+                      </div>
+
+                      {/* Status Badge */}
+                      <div className="pt-2 sm:pt-1">
+                        <span
+                          className={`font-bold text-[10px] sm:text-[11px] uppercase tracking-wider px-2.5 py-0.5 sm:py-1 rounded-full border inline-block ${
+                            song.releaseStatus === "pending"
+                              ? "text-warning-600 bg-warning-50 border-warning-100"
+                              : song.releaseStatus === "approved"
+                                ? "text-success-600 bg-success-50 border-success-100"
+                                : song.releaseStatus === "draft"
+                                  ? "text-primary-600 bg-primary-50 border-primary-100"
+                                  : "text-error-600 bg-error-50 border-error-100"
+                          }`}
+                        >
+                          {song.releaseStatus}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Quick Context Settings Action Toggle Menu Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleArtistOptionChange(index)}
+                      aria-label={`${song.releaseTitle} option context popover trigger menu`}
+                      className={`absolute right-3 top-3 sm:top-1/2 sm:-translate-y-1/2 border border-neutral-200 rounded-lg w-8 h-8 flex items-center justify-center gap-0.5 hover:bg-neutral-50 transition-colors cursor-pointer ${
+                        selectedIndex === index
+                          ? "bg-neutral-100 ring-1 ring-neutral-300"
+                          : "bg-white"
+                      }`}
+                    >
+                      <div className="w-1 h-1 bg-[#103958] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#103958] rounded-full"></div>
+                      <div className="w-1 h-1 bg-[#103958] rounded-full"></div>
+                    </button>
+
+                    {/* Action Dialog Popover Overlay Context */}
+                    {selectedIndex === index && (
+                      <>
+                        {/* Click-away overlay to dismiss menu */}
+                        <div
+                          className="fixed inset-0 z-10"
+                          onClick={() => handleArtistOptionChange(index)}
+                        />
+
+                        <div className="absolute right-3 top-12 sm:top-auto sm:bottom-12 w-44 bg-white border border-neutral-200 rounded-xl shadow-xl z-20 flex flex-col py-1.5 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                          {songOptions.map((options, optIdx) => (
+                            <button
+                              key={optIdx}
+                              type="button"
+                              onClick={() => {
+                                options.iconFunction();
+                                setIsFilterOpen(false);
+                                setSelectedIndex(index);
+                                // handleArtistOptionChange(index); // auto-close
+                              }}
+                              className={`flex items-center gap-2.5 w-full text-left px-3 py-2 text-xs sm:text-sm font-medium transition-colors ${
+                                options.name === "Delete"
+                                  ? "text-error-600 hover:bg-error-50"
+                                  : "text-text-body hover:bg-neutral-50"
+                              }`}
+                            >
+                              <span className="text-neutral-400 w-4 h-4 flex items-center justify-center">
+                                {options.icon}
+                              </span>
+                              <span>{options.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </div>
-                  <h3 className="text-xl font-normal leading-[30px] tracking-[-1px] text-main-heading text-center">
+                ))}
+              </div>
+
+              {/* Pagination Section Bar block */}
+              <div className="mt-auto border-t border-neutral-100 pt-5 pb-2">
+                <Pagination
+                  currentPage={page}
+                  totalPages={data ? data.totalPages : 0}
+                  onChange={(p) => setPage(p)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Delete Prompt Modal Overlay Confirmation backdrop */}
+          {showDeletePopUp && data && data.data.length > 0 && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in">
+              <div className="bg-white border border-neutral-200 max-w-md w-full rounded-2xl p-6 shadow-2xl flex flex-col items-center text-center gap-4">
+                <div className="w-14 h-14 bg-error-50 border border-error-100 rounded-full flex items-center justify-center text-error-600">
+                  <Trash2 size={28} strokeWidth={1.5} />
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-main-heading">
                     Delete This Release?
                   </h3>
-                  <p className="text-body-two-regular text-text-body">
-                    Your release will be removed, this is not reversable. Are
-                    you sure you want to continue?
+                  <p className="text-sm text-text-body leading-relaxed">
+                    Your release will be permanently removed. This action is
+                    irreversible. Are you sure you want to continue?
                   </p>
-                  <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
+                  <p className="font-semibold text-xs text-warning-600 bg-warning-50 border border-warning-100 px-3 py-1.5 rounded-lg inline-block">
                     Note: Only pending and draft releases can be deleted.
                   </p>
                 </div>
-                <div className="flex gap-5 mt-5">
+
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full mt-2">
                   <button
+                    type="button"
                     aria-label="cancel delete song"
-                    disabled={false}
-                    onClick={() => {
-                      setShowDeletePopUp(false);
-                    }}
-                    className={
-                      "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/20 flex text-primary-500 outline-2 outline-primary-500 "
-                    }
+                    onClick={() => setShowDeletePopUp(false)}
+                    className="w-full sm:order-1 px-4 py-2.5 font-bold rounded-xl text-sm border-2 border-neutral-200 text-text-body bg-transparent hover:bg-neutral-50 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     aria-label="confirm delete song"
-                    disabled={false}
+                    disabled={isDeletePending}
                     onClick={() => {
-                      console.log(data?.data[selectedIndex!]);
-                      if (data && data.data.length > 0) {
-                        handleDeleteSong(data.data[selectedIndex!]);
+                      if (
+                        data &&
+                        data.data.length > 0 &&
+                        selectedIndex !== null
+                      ) {
+                        handleDeleteSong(data.data[selectedIndex]);
                       }
                     }}
-                    className={
-                      "font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-error-500/80 flex text-white bg-error-500 "
-                    }
+                    className="w-full sm:order-2 px-4 py-2.5 font-bold rounded-xl text-sm text-white bg-error-500 hover:bg-error-600 shadow-sm transition-colors cursor-pointer disabled:opacity-50"
                   >
-                    Delete
+                    {isDeletePending ? "Deleting..." : "Delete"}
                   </button>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </div>
@@ -550,9 +508,7 @@ const Song = () => {
     data?.data[selectedIndex!] && (
       <SongForm
         songFormFromApi={data.data[selectedIndex!]}
-        goBack={() => {
-          setWantsToEdit(false);
-        }}
+        goBack={() => setWantsToEdit(false)}
         refetch={refetch}
       />
     )

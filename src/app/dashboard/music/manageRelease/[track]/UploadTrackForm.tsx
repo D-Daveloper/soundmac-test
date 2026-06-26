@@ -246,14 +246,14 @@ const UploadTrackForm = ({
             <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-10 h-[64dvh]">
               {/* Song info */}
               <div>
-                <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                   Track Information
                 </h1>
-                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                   Provide the main details about your track to ensure it is
                   properly identified and distributed.
                 </p>
-                <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
+                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
                       value={track.title}
@@ -270,10 +270,10 @@ const UploadTrackForm = ({
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <div className="flex gap-1">
-                      <p className="font-medium mb-2 sm:text-sm text-lg">
-                        Genre
+                      <p className="font-medium mb-2 text-sm ">
+                        Genre <span className="text-red-500">*</span>
                       </p>
-                      <Image
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -281,7 +281,7 @@ const UploadTrackForm = ({
                         width={0}
                         height={0}
                         className="w-2 -mt-5"
-                      />
+                      /> */}
                     </div>
                     <div className="w-full">
                       <Select
@@ -295,10 +295,10 @@ const UploadTrackForm = ({
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <div className="flex gap-1">
-                      <p className="font-medium mb-2 sm:text-sm text-lg">
-                        Language
+                      <p className="font-medium mb-2 text-sm ">
+                        Language <span className="text-red-500">*</span>
                       </p>
-                      <Image
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -306,7 +306,7 @@ const UploadTrackForm = ({
                         width={0}
                         height={0}
                         className="w-2 -mt-5"
-                      />
+                      /> */}
                     </div>
                     <div className="w-full">
                       <Select
@@ -326,17 +326,17 @@ const UploadTrackForm = ({
               <div className="border border-neutral-100"></div>
               {/* Artists and Contributors */}
               <div>
-                <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                   Artists and Contributors
                 </h1>
-                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
                   Credit everyone who worked on your song. Add main artists,
                   featured acts, and other contributors.
                 </p>
 
                 {/* featured_artist */}
                 <div>
-                  <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                  <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                     Featured Artists
                   </h2>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
@@ -387,7 +387,7 @@ const UploadTrackForm = ({
                       </div>
                     </div>
                   ))}
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       disabled={track.featured_artist.length === 5}
                       onClick={() => {
@@ -418,23 +418,23 @@ const UploadTrackForm = ({
                           ),
                         });
                       }}
-                      className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                      className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                     >
-                      <Trash2 />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
 
                 {/* song writer */}
                 <div>
-                  <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-15">
+                  <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                     Songwriters
                   </h2>
 
                   {track.song_writer.map((_, index) => (
                     <div
                       key={index}
-                      className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                      className="w-full flex flex-wrap justify-between gap-y-5 mb-5"
                     >
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
@@ -464,7 +464,7 @@ const UploadTrackForm = ({
                       </div>
                     </div>
                   ))}
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       disabled={track.song_writer.length === 12}
                       onClick={() => addField("song_writer")}
@@ -493,9 +493,9 @@ const UploadTrackForm = ({
                           ),
                         });
                       }}
-                      className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                      className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                     >
-                      <Trash2 />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -526,10 +526,10 @@ const UploadTrackForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
-                            Role
+                          <p className="font-medium mb-2 text-sm ">
+                            Role <span className="text-red-500">*</span>
                           </p>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -537,7 +537,7 @@ const UploadTrackForm = ({
                             width={0}
                             height={0}
                             className="w-2 -mt-5"
-                          />
+                          /> */}
                         </div>
                         <Select
                           selected={track.performer[index].role}
@@ -556,7 +556,7 @@ const UploadTrackForm = ({
                       </div>
                     </div>
                   ))}
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       disabled={track.performer.length === 5}
                       onClick={() => addField("performer")}
@@ -584,9 +584,9 @@ const UploadTrackForm = ({
                           ),
                         });
                       }}
-                      className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                      className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                     >
-                      <Trash2 />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -617,7 +617,7 @@ const UploadTrackForm = ({
                       </div>
                     </div>
                   ))}
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <button
                       disabled={track.producer.length === 5}
                       onClick={() => addField("producer")}
@@ -645,9 +645,9 @@ const UploadTrackForm = ({
                           ),
                         });
                       }}
-                      className="font-bold text-sm rounded-lg bg-primary-red text-white px-4 py-2.5 hover:bg-primary-red/90 mt-9 flex"
+                      className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
                     >
-                      <Trash2 />
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -657,7 +657,7 @@ const UploadTrackForm = ({
               <div className="border border-neutral-100"></div>
 
               {/* upload music */}
-              <div>
+              <div className="w-">
                 <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                   Audio Upload
                 </h1>
@@ -672,10 +672,10 @@ const UploadTrackForm = ({
                 <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                   <div className="flex flex-col w-[50%] max-sm:w-full gap-2">
                     <div className="flex gap-1">
-                      <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                        Audio Upload
+                      <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                        Audio Upload <span className="text-red-500">*</span>
                       </h4>
-                      <Image
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -683,13 +683,13 @@ const UploadTrackForm = ({
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
+                      /> */}
                     </div>
 
                     <div className="flex items-center justify-between w-full flex-wrap gap-2">
                       <label
                         htmlFor="song_audio"
-                        className="flex w-60 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
+                        className="flex w-60 md:w-80 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
                       >
                         <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
                           <Image
@@ -701,7 +701,7 @@ const UploadTrackForm = ({
                         </div>
                         <div className="w-[50%]">
                           {!track.song_audio ? (
-                            <p className="mb-2 text-sm text-gray-500">
+                            <p className="mb-2 text-xs text-gray-500">
                               <span className="font-bold text-text-body">
                                 Supported Files:
                               </span>{" "}
@@ -813,7 +813,7 @@ const UploadTrackForm = ({
                         lyrics: e.target.value,
                       })
                     }
-                    className="w-full sm:w-[70%] min-h-80 border-2 rounded-2xl p-4 mt-1"
+                    className="w-full sm:w-[70%] text-xs min-h-80 border-2 rounded-2xl p-4 mt-1"
                     placeholder="Enter Lyrics here"
                   ></textarea>
                 </div>
@@ -868,7 +868,7 @@ const UploadTrackForm = ({
                   Enter these details only if you are transferring from another
                   distributor
                 </p>
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between">
                   <div className="flex w-fit gap-2 items-center mb-5">
                     <input
                       aria-label="another distribution check box"
@@ -914,10 +914,10 @@ const UploadTrackForm = ({
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <div className="flex gap-1">
-                      <p className="font-medium mb-2 sm:text-sm text-lg">
-                        Track number
+                      <p className="font-medium mb-2 text-sm">
+                        Track number <span className="text-red-500">*</span>
                       </p>
-                      <Image
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -925,7 +925,7 @@ const UploadTrackForm = ({
                         width={0}
                         height={0}
                         className="w-2 -mt-5"
-                      />
+                      /> */}
                     </div>
                     <div className="w-full">
                       <Select
