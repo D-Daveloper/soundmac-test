@@ -1,27 +1,18 @@
 "use client";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
-import PromotionCard from "@/app/components/promotionCard/PromotionCard";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import {
-  allReleaseStatusFilterOptions,
   chartFilter,
-  promotionTestData,
 } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import Select from "@/components/Select";
-import UseAxios from "@/util/customHooks/UseAxios";
 import {
-  useGetPromotionData,
-  useGetUserArtistsNames,
   useGetUserChartData,
 } from "@/util/customHooks/useQueries";
-import { isAxiosError } from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
-import { toast } from "react-toastify";
 import UserChartCard from "./UserChartCard";
 
 const MyPromotion = () => {

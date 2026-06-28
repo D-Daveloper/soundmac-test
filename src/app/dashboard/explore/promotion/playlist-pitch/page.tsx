@@ -1,3 +1,4 @@
+"use client";
 import CheckboxSelect from "@/app/components/checkBox/CheckBoxSelect";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
@@ -10,6 +11,7 @@ import {
   timeList,
   typeOfRelease,
 } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import { genreList } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
@@ -21,8 +23,9 @@ import {
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAxiosError } from "axios";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 type pitchFormArrayType = {
   name: string;
@@ -236,9 +239,8 @@ const pitchplayFormFields: pitchFormArrayType[] = [
     placeholder: "Any additional comments",
   },
 ];
-const PitchPlayForm = () => {
-  const router = useRouter()
-  const { deleteParam } = useTabQuery();
+const Page = () => {
+  const router = useRouter();
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [image, setImage] = useState("");
@@ -267,6 +269,14 @@ const PitchPlayForm = () => {
     tiktok_profile_link: "",
     focus_track: "",
   });
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setHeader({
+      title: "Explore Promotions",
+      showBackButton: true,
+    });
+  }, []);
+  
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
 
@@ -331,11 +341,20 @@ const PitchPlayForm = () => {
       } else if (!promotionForm.type_of_release) {
         toast.warn("Please select a release type.");
         return;
-      } else if ((releaseTrackNamesData && releaseTrackNamesData.length > 0) && !promotionForm.focus_track) {
+      } else if (
+        releaseTrackNamesData &&
+        releaseTrackNamesData.length > 0 &&
+        !promotionForm.focus_track
+      ) {
         toast.warn("Please select a focus track.");
         return;
-      } else if (!promotionForm.marketing_detail || promotionForm.marketing_detail.trim().length < 500) {
-        toast.warn("Please fill the market detail field with at least 500 characters.");
+      } else if (
+        !promotionForm.marketing_detail ||
+        promotionForm.marketing_detail.trim().length < 500
+      ) {
+        toast.warn(
+          "Please fill the market detail field with at least 500 characters.",
+        );
         return;
       }
       const formData = new FormData();
@@ -350,7 +369,7 @@ const PitchPlayForm = () => {
       });
 
       toast.success(res?.data?.msg);
-      router.push('/dashboard/explore/promotion?page=myPromotions')
+      router.push("/dashboard/explore/promotion?page=myPromotions");
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
@@ -377,19 +396,21 @@ const PitchPlayForm = () => {
 
   return (
     <>
-      <div className="bg-main-white min-h-[90.5dvh] h-full w-full flex flex-col ">
+      <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
         {/* back button */}
-        {isLoading || releaseNamesIsLoading || isSubmittingForm || releaseTrackNamesIsLoading? (
+        {isLoading ||
+        releaseNamesIsLoading ||
+        isSubmittingForm ||
+        releaseTrackNamesIsLoading ? (
           <InlineLoadingScreen />
         ) : (
           <>
             <div className=" sm:mb-20">
-              <div className="flex items-center mt-5">
-                <button
+              <div className="flex items-center gap-3 mt-5">
+                <Link
+                  className="max-lg:flex hidden"
                   aria-label="go back"
-                  onClick={() => {
-                    deleteParam("promotionType");
-                  }}
+                  href={"/dashboard/explore/promotion/explore-promotions"}
                 >
                   <Image
                     src={"/arrow-left.svg"}
@@ -397,8 +418,8 @@ const PitchPlayForm = () => {
                     width={20}
                     alt="arrow left"
                   />
-                </button>
-                <p className="text-text-body text-body-two-regular px-5">
+                </Link>
+                <p className="text-text-body text-body-two-regular">
                   Select the track you want to promote
                 </p>
               </div>
@@ -585,7 +606,13 @@ const PitchPlayForm = () => {
                         alt="a star marking this field as required"
                         width={0}
                         height={0}
-                        className={"w-2 -mt-3 " + ((!releaseTrackNamesData || (releaseTrackNamesData && releaseTrackNamesData.length < 1 )) && " hidden")}
+                        className={
+                          "w-2 -mt-3 " +
+                          ((!releaseTrackNamesData ||
+                            (releaseTrackNamesData &&
+                              releaseTrackNamesData.length < 1)) &&
+                            " hidden")
+                        }
                       />
                       focus track
                     </p>
@@ -852,4 +879,4 @@ const PitchPlayForm = () => {
     </>
   );
 };
-export default PitchPlayForm;
+export default Page;

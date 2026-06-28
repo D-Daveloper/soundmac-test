@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useContext, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarAdmin/sideBarCom";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname } from "next/navigation";
@@ -325,7 +325,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           ))}
           <LogoutButton />
         </div>
-        {children}
+        <Suspense fallback={<NormalLoadingScreen />}>{children}</Suspense>
       </div>
     </AdminRoute>
   );

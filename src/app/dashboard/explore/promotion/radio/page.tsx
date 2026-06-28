@@ -1,5 +1,7 @@
+"use client";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { onlinePressPackages, promotionCategory } from "@/app/constant";
+import { promotionCategory, radioPromotionPackages } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import {
@@ -9,43 +11,27 @@ import {
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
-
-const OnlinePressForm = () => {
+const Page = () => {
   const { deleteParam } = useTabQuery();
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [image, setImage] = useState("");
-  const [promotionForm, setPromotionForm] = React.useState<{
-    artist: string;
-    releaseTitle: string;
-    releaseDescription: string;
-    promotionPackage: string;
-    promotionImage: null | File;
-    promotionType: promotionCategory.onlinePress;
-  }>({
+  const [promotionForm, setPromotionForm] = React.useState({
     artist: "",
     releaseTitle: "",
     releaseDescription: "",
     promotionPackage: "",
-    promotionImage: null,
-    promotionType: promotionCategory.onlinePress,
+    promotionType: promotionCategory.radioPromotion,
   });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = e.target;
-    if (name === "promotionImage") {
-      const file =
-        e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setPromotionForm((prev) => ({ ...prev, promotionImage: file }));
-      if (file) {
-        setImage(URL.createObjectURL(file));
-      }
-    } else {
-      setPromotionForm((prev) => ({ ...prev, [name]: value }));
-    }
-  };
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setHeader({
+      title: "Radio Promotion",
+      showBackButton: true,
+    });
+  }, []);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
 
@@ -63,15 +49,6 @@ const OnlinePressForm = () => {
       enabled: !!promotionForm.artist, // ✅ only run if artist exists
     },
   );
-
-  // useEffect(() => {
-  //   if (data && data?.length > 0 && !promotionForm.artist) {
-  //     setPromotionForm((prev) => ({
-  //       ...prev,
-  //       artist: data[0],
-  //     }));
-  //   }
-  // }, [data]);
 
   const handleSubmit = async () => {
     try {
@@ -91,9 +68,6 @@ const OnlinePressForm = () => {
         return;
       } else if (!promotionForm.promotionType) {
         toast.warn("Please select a package type.");
-        return;
-      } else if (!promotionForm.promotionImage) {
-        toast.warn("Please upload an image.");
         return;
       }
       const formData = new FormData();
@@ -120,19 +94,18 @@ const OnlinePressForm = () => {
 
   return (
     <>
-      <div className="bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col ">
+      <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
         {/* back button */}
         {isLoading || releaseNamesIsLoading || isSubmittingForm ? (
           <InlineLoadingScreen />
         ) : (
           <>
             <div className="max-w-[1200px]">
-              <div className="flex items-center mt-5">
-                <button
+              <div className="flex items-center gap-3 mt-5">
+                <Link
+                className="max-lg:flex hidden"
                   aria-label="go back"
-                  onClick={() => {
-                    deleteParam("promotionType");
-                  }}
+                  href={"/dashboard/explore/promotion/explore-promotions"}
                 >
                   <Image
                     src={"/arrow-left.svg"}
@@ -140,86 +113,13 @@ const OnlinePressForm = () => {
                     width={20}
                     alt="arrow left"
                   />
-                </button>
-                <p className="text-text-body text-body-two-regular px-5">
+                </Link>
+                <p className="text-text-body text-body-two-regular">
                   Select the track you want to promote
                 </p>
               </div>
               {/* form */}
               <div className="mt-10 flex flex-col gap-5 mb-10">
-                {/* cover art */}
-                <div>
-                  <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading flex gap-2">
-                    Upload an Image of the Artist
-                    <Image
-                      priority={false}
-                      loading="lazy"
-                      src="/required.svg"
-                      alt="a star marking this field as required"
-                      width={0}
-                      height={0}
-                      className="w-2 -mt-3"
-                    />
-                  </h1>
-                  <div className="flex items-center justify-center w-60">
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
-                      <div className="flex flex-col max-sm:w-full gap-2">
-                        <div className="flex items-center justify-center w-60">
-                          <label
-                            htmlFor="promotionImage"
-                            className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
-                          >
-                            <div
-                              className={
-                                "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                                (!promotionForm.promotionImage &&
-                                  " bg-neutral-50 ")
-                              }
-                            >
-                              <Image
-                                src={image ? image : "/document-upload.svg"}
-                                width={60}
-                                height={60}
-                                alt="music note icon"
-                                className={
-                                  promotionForm.promotionImage
-                                    ? " w-full object-cover min-w-15 h-15"
-                                    : undefined
-                                }
-                              />
-                            </div>
-                            <div className="w-[50%]">
-                              {!promotionForm.promotionImage ? (
-                                <p className="mb-2 text-sm text-gray-500">
-                                  <span className="font-bold text-text-body">
-                                    Supported Files:
-                                  </span>{" "}
-                                  JPG, PNG
-                                  <br />
-                                  3000 x 3000px minimum
-                                </p>
-                              ) : (
-                                <p className="font-bold text-[16px] text-[#494949] truncate">
-                                  <span className="font-semibold">
-                                    {promotionForm.promotionImage?.name}
-                                  </span>
-                                </p>
-                              )}
-                            </div>
-                            <input
-                              id="promotionImage"
-                              name="promotionImage"
-                              type="file"
-                              accept="image/png,image/jpeg"
-                              className="hidden"
-                              onChange={handleChange}
-                            />
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
@@ -327,7 +227,7 @@ const OnlinePressForm = () => {
                           }))
                         }
                         placeholder="Select Package..."
-                        options={onlinePressPackages}
+                        options={radioPromotionPackages}
                         name="promotionPackage"
                       />
                     </div>
@@ -367,4 +267,4 @@ const OnlinePressForm = () => {
   );
 };
 
-export default OnlinePressForm;
+export default Page;

@@ -15,8 +15,8 @@ interface sideBarSection {
 interface Props {
   title: string;
   list: sideBarSection[];
-  isActive:string;
-  setIsActive: (text:string)=>void;
+  // isActive:string;
+  // setIsActive: (text:string)=>void;
 }
 
 const sideBarCom = (props: Props) => {

@@ -2,23 +2,30 @@
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import PromotionCard from "@/app/components/promotionCard/PromotionCard";
-import { promotionTestData } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { useGetPromotionData } from "@/util/customHooks/useQueries";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import Link from "next/link";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const MyPromotion = () => {
-  const router = useRouter();
   const api = UseAxios();
   const [page, setPage] = useState(1);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const { data, isLoading } = useGetPromotionData({ page });
 
-  const handleSubmit = async (id:string) => {
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setHeader({
+      title: "My Promotions",
+      showBackButton: false,
+    });
+  }, []);
+  
+  const handleSubmit = async (id: string) => {
     try {
       console.log("Attempting to submit promotion with ID:", id);
       setIsSubmittingForm(true);
@@ -27,9 +34,13 @@ const MyPromotion = () => {
         return;
       }
       let res;
-      res = await api.put("promotions", { promotionId: id }, {
-        headers: { "Content-Type": "application/json" },
-      });
+      res = await api.put(
+        "promotions",
+        { promotionId: id },
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
 
       toast.success(res?.data?.msg);
       window.location.href = res.data.url;
@@ -45,8 +56,26 @@ const MyPromotion = () => {
   };
 
   return (
-    <>
-      {isLoading || isSubmittingForm? (
+    <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
+      <div className="flex gap-3 my-5">
+        <Link
+          href={"/dashboard/explore/promotion/explore-promotions"}
+          className={
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-transparent border-2 border-text-disable text-text-disable"
+          }
+        >
+          Explore
+        </Link>
+        <Link
+          href={"/dashboard/explore/promotion/my-promotions"}
+          className={
+            "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
+          }
+        >
+          My Promotions
+        </Link>
+      </div>
+      {isLoading || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : data?.data && data.data.length > 0 ? (
         <>
@@ -60,7 +89,9 @@ const MyPromotion = () => {
                 startDate={new Date(promotionContent.startDate).toDateString()}
                 endDate={new Date(promotionContent.endDate).toDateString()}
                 promotionStatus={promotionContent.promotionStatus}
-                handleSubmit ={() => handleSubmit(promotionContent._id as string)}
+                handleSubmit={() =>
+                  handleSubmit(promotionContent._id as string)
+                }
               />
             ))}
           </div>
@@ -90,19 +121,17 @@ const MyPromotion = () => {
             You haven&apos;t started any promotions. Your active and past
             campaigns will appear here once you run one.
           </p>
-          <button
-            onClick={() => {
-              router.push("/dashboard/explore/promotion?page=explore");
-            }}
+          <Link
+            href={"/dashboard/explore/promotion?page=explore"}
             className={
               "font-bold text-sm rounded-lg px-4 py-2.5 hover:bg-primary/90 border-3 border-primary flex text-white bg-primary-500 "
             }
           >
             Go to Promotions
-          </button>
+          </Link>
         </div>
       )}
-    </>
+    </div>
   );
 };
 

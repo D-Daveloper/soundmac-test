@@ -31,7 +31,6 @@ export default function Root({
       <LoadingScreen />
       <UpgradeModal />
       {(rootScreenLinks.includes(pathname) ||
-        pathname.includes("/promotion/") ||
         pathname.includes("/blog/")) && <Header />}
       {/* <div className={styles.flexContainer}> */}
       {portalScreens.includes(pathname) && <SideBar />}
@@ -42,7 +41,6 @@ export default function Root({
       )}
       {/* </div> */}
       {(rootScreenLinks.includes(pathname) ||
-        pathname.startsWith("/promotion/") ||
         pathname.startsWith("/blog/")) && <Footer />}
     </>
   );

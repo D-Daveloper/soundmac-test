@@ -1,19 +1,20 @@
+"use client";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { boomplayPackages, promotionCategory } from "@/app/constant";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import {
   useGetUserArtistsNames,
   useGetUserReleaseNames,
 } from "@/util/customHooks/useQueries";
-import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import { isAxiosError } from "axios";
 import Image from "next/image";
-import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const BoomPlayForm = () => {
-  const { deleteParam } = useTabQuery();
+const Page = () => {
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [promotionForm, setPromotionForm] = React.useState({
@@ -23,6 +24,12 @@ const BoomPlayForm = () => {
     promotionPackage: "",
     promotionType: promotionCategory.boomplay,
   });
+
+  const dashboardContext = useContext(DashboardContext);
+  
+  useEffect(() => {
+    dashboardContext?.setHeader({ title: "Boom Play", showBackButton: true });
+  }, []);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
 
@@ -95,7 +102,7 @@ const BoomPlayForm = () => {
 
   return (
     <>
-      <div className="bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col ">
+      <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
         {/* back button */}
         {isLoading ||
         releaseNamesIsLoading ||
@@ -105,12 +112,11 @@ const BoomPlayForm = () => {
         ) : (
           <>
             <div className="max-w-[1200px]">
-              <div className="flex items-center mt-5">
-                <button
+              <div className="flex items-center gap-3 mt-5">
+                <Link
+                className="max-lg:flex hidden"
                   aria-label="go back"
-                  onClick={() => {
-                    deleteParam("promotionType");
-                  }}
+                  href={"/dashboard/explore/promotion/explore-promotions"}
                 >
                   <Image
                     src={"/arrow-left.svg"}
@@ -118,8 +124,8 @@ const BoomPlayForm = () => {
                     width={20}
                     alt="arrow left"
                   />
-                </button>
-                <p className="text-text-body text-body-two-regular px-5">
+                </Link>
+                <p className="text-text-body text-body-two-regular">
                   Select the track you want to promote
                 </p>
               </div>
@@ -272,4 +278,4 @@ const BoomPlayForm = () => {
   );
 };
 
-export default BoomPlayForm;
+export default Page;

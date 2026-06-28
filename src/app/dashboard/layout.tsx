@@ -1,8 +1,7 @@
 "use client";
-import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useContext, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState } from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
@@ -86,7 +85,7 @@ const sidebarComponents = [
       {
         title: "promotion",
         icon: "/add.svg",
-        href: "/dashboard/explore/promotion?page=explore",
+        href: "/dashboard/explore/promotion",
         query: "promotion",
       },
       {
@@ -128,10 +127,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     isLoading: isLoadingNotification,
     refetch: refetchNotifications,
   } = useGetUserNotifications();
-  const { tab } = useTabQuery("dashboard");
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
-  const [isActive, setIsActive] = useState<string>(tab);
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
@@ -310,8 +307,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             <nav className="space-y-4 md:mt-10">
               {sidebarComponents.map((component, index) => (
                 <SideBarCom
-                  isActive={isActive}
-                  setIsActive={setIsActive}
+                  // isActive={isActive}
+                  // setIsActive={setIsActive}
                   key={index}
                   title={component.title}
                   list={component.list}
@@ -374,7 +371,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </aside>
         {/* Main Content Area Execution Grid Wrapper */}
-        <main className="flex w-full">{children}</main>
+        <main className="flex w-full">
+          {" "}
+          <Suspense fallback={<NormalLoadingScreen />}>{children}</Suspense>
+        </main>
 
         {/* unsubscribed users modal */}
         {dashboardContext?.openUpgradePopUp && (
