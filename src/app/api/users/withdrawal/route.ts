@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     else if (
       !formData.amount ||
       !numRegex.test(formData.amount) ||
-      parseInt(formData.amount, 10) < 1000
+      parseInt(formData.amount, 10) < 20
     ) {
       Uploaderror = { msg: "Invalid amount.", status: 400 };
     }

@@ -120,7 +120,7 @@ const Page = () => {
       if (
         !withdrawalForm.amount ||
         !numRegex.test(withdrawalForm.amount) ||
-        parseInt(withdrawalForm.amount, 10) < 1000
+        parseInt(withdrawalForm.amount, 10) < 20
       ) {
         return toast.warn("Please enter an amount equal or above 1000");
       } else if (otp.some((digit) => digit === "" || finalOtp.length < 6)) {
