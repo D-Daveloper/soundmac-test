@@ -496,7 +496,7 @@ export interface AdminUserDetailsResponse {
 }
 
 export interface AdminWithdrawalDetailsResponse {
-  withdrawal: withdrawals;
+  withdrawal: withdrawals & { exchange_rate: { value: number } };
   msg: string;
 }
 

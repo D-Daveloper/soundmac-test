@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import withDrawalModel from "@/util/models/withDrawalModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import { inngest } from "@/util/lib/inngest/inngest";
+import { Counter } from "@/util/models/CounterModel";
 
 export async function POST(
   req: Request,
@@ -220,10 +221,13 @@ export async function GET(
 
 
 
-    const withdrawal = await withDrawalModel
+    const [withdrawal,exchange_rate] = await Promise.all([ 
+      withDrawalModel
       .findById(withdrawalId)
       .populate("user", "firstName lastName country accountDetails email -_id")
-      .lean();
+      .lean(),
+      Counter.findById("exchange_rate").select("value -_id").lean()
+    ]);
 
     if (!withdrawal) {
       return NextResponse.json(
@@ -234,7 +238,7 @@ export async function GET(
     // console.log(withdrawal);
 
     return NextResponse.json({
-      withdrawal,
+      withdrawal:{...withdrawal,exchange_rate},
       msg: "Successful.",
     });
   } catch (error) {
