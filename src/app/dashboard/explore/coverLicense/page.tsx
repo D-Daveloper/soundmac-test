@@ -8,10 +8,10 @@ import Link from "next/link";
 const Page = () => {
   const dashboardContext = useContext(DashboardContext);
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Cover Song Licensing");
+    dashboardContext?.setHeader({title:"Cover Song Licensing", showBackButton:false});
   }, []);
   return (
-    <div className="lg:pl-[300px] bg-main-white min-h-screen w-full flex flex-col px-10 pb-30 ">
+    <div className="lg:pl-[280px] bg-main-white min-h-screen w-full flex flex-col px-2 pb-30 ">
       <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 lg:max-w-[60%] text-left">
         Through our partnership with Easy Song Licensing, you can secure the
         mechanical rights needed to distribute <br /> your version of any song —
@@ -19,11 +19,11 @@ const Page = () => {
         Licenses are processed in 1–2 business days for a one-time fee starting
         at $15.99.
       </p>
-      <div className="grid grid-cols-3 max-xl:grid-cols-2 max-sm:grid-cols-1 mt-20 gap-5 justify-between">
+      <div className="grid grid-cols-3 max-xl:grid-cols-2 max-sm:grid-cols-1 mt-10 gap-5 justify-between">
         {coverLincenseCardData.map((data, index) => (
           <div
             key={index}
-            className="min-w-[350px] max-lg:min-w-[300px] w-full bg-neutral-50 border border-neutral-100 flex flex-col p-5 rounded-2xl gap-8 items-center "
+            className="w-full bg-neutral-50 border border-neutral-100 flex flex-col p-5 rounded-2xl gap-8 items-center "
           >
             <p className="text-text-disable font-bold text-2xl mr-auto">
               {data.number}

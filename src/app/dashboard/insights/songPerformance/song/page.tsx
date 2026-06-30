@@ -26,8 +26,8 @@ const Page = () => {
   const [artist, setArtist] = useState("All");
   const songTitle = useDebounce<string>(query, 500);
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Song Performance");
-  }, [dashboardContext]);
+    dashboardContext?.setHeader({title:"Song Performance", showBackButton:false});
+  }, []);
   const handleSearchQueryChange = (filter: string) => {
     setQuery(filter);
     setPage(1);
@@ -51,7 +51,7 @@ const Page = () => {
     artist,
   });
 
-  console.log(songs);
+  // console.log(songs);
 
   const handleFilterChange = (filter: string) => {
     setFilter(filter);
@@ -59,7 +59,7 @@ const Page = () => {
     setIsFilterOpen(false);
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[305px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col pb-10 lg:pb-5 lg:pl-[280px] px-5">
       <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboard/insights/songPerformance/song"}
@@ -68,7 +68,7 @@ const Page = () => {
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
           }
         >
-          Songs
+          Single
         </Link>
         <Link
           href={"/dashboard/insights/songPerformance/album"}
@@ -77,7 +77,7 @@ const Page = () => {
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer hover:bg-primary-500/10 text-sm bg-transparent border-2 border-text-disable text-text-disable"
           }
         >
-          Albums
+          Album
         </Link>
       </div>
       {isLoadingData || !songs || !artistNames || isLoadingArtistNames ? (
@@ -86,7 +86,7 @@ const Page = () => {
         <>
           {/* filters */}
           <div>
-            <div className="flex justify-between w-full mt-10 gap-2 max-[450px]:flex-col items-end">
+            <div className="flex justify-between w-full mt-5 gap-2 max-[450px]:flex-col items-end">
               <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
                 <Image
                   priority={true}
@@ -122,7 +122,7 @@ const Page = () => {
                   disabled={false}
                   aria-label="open filters button"
                   className={
-                    "outline-primary-500 outline-2 border-2 min-w-[50px] flex-1 max-w-[50px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
+                    "outline-primary-500 outline-2 border-2 min-w-[50px] flex-1 max-w-[40px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 relative " +
                     (false && " hover:!cursor-not-allowed ")
                   }
                   onClick={() => {
@@ -163,7 +163,7 @@ const Page = () => {
 
           {songs.data.length > 0 ? (
             <>
-              <div className="grid grid-cols-2 max-lg:grid-cols-1 mt-20 gap-10 sm:m-5 ">
+              <div className="grid grid-cols-2 max-lg:grid-cols-1 mt-10 gap-10  ">
                 {songs.data.map((item, index) => (
                   <PerformanceCard
                     key={index}

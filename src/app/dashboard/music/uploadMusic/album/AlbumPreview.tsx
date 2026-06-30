@@ -15,7 +15,7 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
   onEdit,
 }) => {
   return (
-    <div className="flex-1 overflow-y-auto px-4 flex flex-col gap-5 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
+    <div className="flex-3 overflow-y-auto px-4 flex flex-col gap-5 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
       {/* Header Section with Action */}
       <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
         <h1 className="text-base font-bold tracking-tight text-main-heading">

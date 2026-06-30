@@ -197,7 +197,7 @@ const Page = () => {
         <>
           <div className="flex gap-8 px-2 lg:px-0 py-5">
             {!preview ? (
-              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 pb-20 lg:pb-5 lg:h-[68dvh]">
+              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-1 pb-20 lg:pb-5 lg:h-[68dvh]">
                 {/* Song info */}
                 <div>
                   <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -396,7 +396,7 @@ const Page = () => {
               </div>
             ) : (
               // preview starts here
-              <div className="flex-1 overflow-y-auto flex flex-col gap-10 px-2 pb-6 h-[64dvh] custom-scrollbar">
+              <div className="flex-3 overflow-y-auto flex flex-col gap-10 px-2 pb-6 h-[64dvh] custom-scrollbar">
                 <div>
                   <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
                     <h1 className="text-base font-bold tracking-tight text-main-heading">

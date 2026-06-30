@@ -6,26 +6,28 @@ const PerformanceCard = ({title,featured_artist,image,date,streams,likes,downloa
   return (
     <div className="bg-neutral-50 border border-neutral-100 w-full p-3 rounded-2xl">
       <div className="flex flex-col gap-7">
-        <div className="flex gap-5">
-          <div className="relative rounded-2xl max-w-[70px] max-h-[70px] min-w-[70px] min-h-[70px] w-[70px] h-[70px] flex-2">
+        <div className="flex gap-x-3">
+          <div className="relative rounded-2xl flex-">
             <Image
               priority={true}
               src={image}
               alt="an image depicting the song image"
-              fill
-              className="object-cover rounded-lg shadow-md max-h-[80px] "
+              // fill
+              width={70}
+              height={70}
+              className="object-fit rounded-lg shadow-md max-h-[80px] "
             />
           </div>
           <div>
-            <p className="text-main-heading text-2xl font-normal line-clamp-1">
+            <p className="text-main-heading text-xl capitalize font-normal line-clamp-1">
               {title}
             </p>
             <p className="text-sm font-semibold text-text-body line-clamp-1">feat: {featured_artist}</p>
-            <p className="text-lg font-normal text-text-disable">
-              <span className="font-semibold text-primary-500">
+            <p className="text-sm w-full font-normal text-text-disable flex space-x-1 items-center">
+              <span className="font-semibold tracking-tight text-primary-500 text-xs md:text-base">
                 Release Date:
               </span>
-              {date}
+              <span className="text-xs">{date}</span>
             </p>
           </div>
         </div>

@@ -1461,7 +1461,7 @@ const SongForm = () => {
               )}
 
               {showSuccessPage && (
-                <div className="flex justify-center items-center min-h-[70dvh] w-full px-2 py-4 animate-fade-in border border-red-50">
+                <div className="flex justify-center items-center min-h-[70dvh] w-full px-2 py-4 animate-fade-in">
                   <div className="w-full flex flex-col justify-cente items-center text-center gap-6">
                     {/* Success Icon */}
                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 transition-transform hover:scale-105 duration-300">
@@ -1541,7 +1541,7 @@ const SongForm = () => {
 
               {/* the image side bar */}
               {!showSuccessPage && (
-                <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
+                <div className="bg-neutral-50 w-[20%] border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                   <div className="w-full h-[80%] flex-2">
                     {songForm.music_image ? (
                       <Image
@@ -1549,7 +1549,7 @@ const SongForm = () => {
                         width={0}
                         height={0}
                         alt="preview of the artist song cover"
-                        className="rounded-lg w-full h-full object-cover"
+                        className="rounded-lg w-full h-full object-fit"
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-100 relative z-[10]">

@@ -8,7 +8,7 @@ import useDebounce from "@/app/components/searchBox/searchBox";
 import { filterOptions } from "@/app/constant";
 import { Artist } from "@/app/type";
 import { usePaginatedArtists } from "@/util/customHooks/useQueries";
-import { FileSearchIcon, ChartNoAxesCombined } from "lucide-react";
+import { FileSearchIcon, ChartNoAxesCombined, Ellipsis} from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
@@ -124,7 +124,7 @@ const Page = () => {
 
   // Main Artist List View
   return (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 lg:px-0 lg:pl-[280px]">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 lg:px-0 lg:pl-[270px]">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : isError || !data || data.data.length === 0 ? (
@@ -147,13 +147,13 @@ const Page = () => {
           </button>
         </div>
       ) : (
-        <div className="min-h-full px-2 lg:px-0">
-          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] mt-5">
+        <div className="min-h-full md:px-2 lg:px-0">
+          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-base sm:max-w-[40%] mt-5">
             View and manage all your artist profiles. Edit details, link streaming platforms, and track performance.
           </p>
 
           {/* Search + Filter */}
-          <div className="flex justify-between w-full mt-5 items-center">
+          <div className="flex justify-between w-full mt-3 items-center">
             <div className="flex p-2 outline-1 m-2 rounded-lg mb-5 max-w-[60%] w-full">
               <Image src="/search-normal.svg" alt="search" width={20} height={20} />
               <input
@@ -168,12 +168,13 @@ const Page = () => {
             <div className="relative">
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="border-2 w-[50px] h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 md:mr-5"
+                className="border-2 border-[#11456B] w-[40px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 md:mr-5"
               >
                 <div className="bg-primary w-[25px] h-[2px]"></div>
                 <div className="bg-primary w-[15px] h-[2px]"></div>
                 <div className="bg-primary w-[10px] h-[2px]"></div>
               </button>
+
 
               {isFilterOpen && (
                 <div className="absolute mt-2 right-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
@@ -191,31 +192,37 @@ const Page = () => {
               )}
             </div>
           </div>
+          <div className="border w-full px-3"></div>
 
           {/* Artists Grid */}
-          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1 px-3">
+          <div className="grid grid-cols-2 gap-5 items-center max-md:grid-cols-1 md:px-3 mt-4">
             {data.data.map((artist, index) => (
-              <div key={index} className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-5 relative">
-                <div className="relative w-[100px] h-[100px]">
-                  <Image
-                    src={artist.artistImage}
-                    alt={artist.artistName}
-                    fill
-                    className="object-cover rounded-lg"
-                  />
-                </div>
+              <div key={index} className="bg-[#F4F4F4]/50 border-2 border-neutral-100 rounded-lg px-2 py-1 flex justify-between gap- relative">
+                <div className="flex items-center">
+                  <div className="relative w-[100px] my-1">
+                    <Image
+                      src={artist.artistImage}
+                      alt={artist.artistName}
+                      width={70}
+                      height={70}
+                      // fill
+                      className="object-fit rounded" 
+                    />
+                  </div>
 
-                <div className="flex-1">
-                  <h1 className="text-xl font-normal leading-[24px] tracking-[-0.5px] text-text-body line-clamp-2">
-                    {artist.artistName}
-                  </h1>
+                  <div className="">
+                    <h1 className="text-base font-normal leading-[24px] tracking-[-0.5px] text-text-body line-clamp-2">
+                      {artist.artistName}
+                    </h1>
+                  </div>
+
                 </div>
 
                 <button
                   onClick={() => handleArtistOptionChange(index)}
-                  className="border-2 border-neutral-200 rounded-lg w-8 h-8 flex items-center justify-center"
+                  className="border-2 border-neutral-200 bg-white rounded-lg w-8 h-8 flex items-center justify-center"
                 >
-                  ⋮
+                  <Ellipsis color="#103958" />
                 </button>
 
                 {/* Options Dropdown */}

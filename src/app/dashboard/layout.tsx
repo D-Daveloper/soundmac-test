@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { Suspense, useContext, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState , useRef} from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
@@ -15,6 +15,9 @@ import {
 import Notification from "../components/notification/Notification";
 import axios from "axios";
 import LogoutButton from "../logout/Logout";
+
+
+
 
 const sidebarComponents = [
   {
@@ -132,6 +135,25 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target as Node)
+    ) {
+      setIsProfilePopUpOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     setIsOpen(false);
@@ -318,7 +340,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           {/* Artist name modal Container Element inside Layout Panel */}
-          <div className="absolute bottom-4 inset-x-4 z-50">
+          <div className="absolute bottom-4 inset-x-4 z-50"
+          ref={profileRef}
+          >
             <button
               onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
               className="w-full h-14 bg-black/90 hover:bg-black rounded-xl flex items-center justify-between p-2.5 transition backdrop-blur-sm shadow-xl"

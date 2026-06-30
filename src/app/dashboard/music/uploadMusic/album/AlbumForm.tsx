@@ -806,7 +806,7 @@ const AlbumForm = () => {
                       width={0}
                       height={0}
                       alt="preview of the artist album cover"
-                      className="rounded-lg w-full h-full object-cover"
+                      className="rounded-lg w-full h-full object-fit"
                     />
                   ) : (
                     <div className="w-full h-full bg-neutral-100 relative z-[10]">

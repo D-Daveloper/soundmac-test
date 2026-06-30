@@ -24,7 +24,7 @@ const Page = () => {
   const [isSubmitting, setisSubmitting] = useState(false);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Help & Support");
+    dashboardContext?.setHeader({title:"Help & Support", showBackButton:false});
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,16 +78,16 @@ const Page = () => {
   };
 
   return (
-    <div className=" py-10 px-5 bg-main-white min-h-screen w-full ">
+    <div className=" py-5 px-5 bg-main-white min-h-screen w-full ">
       {isSubmitting ? (
         <InlineLoadingScreen />
       ) : (
-        <div className="flex justify-between lg:pl-[300px] max-md:flex-col-reverse">
+        <div className="flex justify-between lg:pl-[260px] max-md:flex-col-reverse">
           <div className="">
             <div className="flex flex-col gap-5 w-[70%] max-sm:w-full sm:text-sm text-lg">
-              <p className="font-medium flex">
-                What do you need help with?
-                <Image
+              <p className="font-medium flex mt-2">
+                What do you need help with? <span className="text-red-500">*</span>
+                {/* <Image
                   priority={false}
                   loading="lazy"
                   src="/required.svg"
@@ -95,7 +95,7 @@ const Page = () => {
                   width={0}
                   height={0}
                   className="w-2 -mt-5"
-                />
+                /> */}
               </p>
 
               <div className="w-full">
@@ -113,7 +113,7 @@ const Page = () => {
               <div>
                 <div className="flex gap-1 sm:text-sm text-lg">
                   <p className="font-medium relative">
-                    <Image
+                    {/* <Image
                       priority={false}
                       loading="lazy"
                       src="/required.svg"
@@ -121,8 +121,8 @@ const Page = () => {
                       width={0}
                       height={0}
                       className="w-2 left-[100%] absolute"
-                    />
-                    Describe your issue{" "}
+                    /> */}
+                    Describe your issue <span className="text-red-500">*</span>
                   </p>
                 </div>
 
@@ -140,7 +140,7 @@ const Page = () => {
               </div>
               {/* cover art */}
               <div>
-                <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                   Screenshot
                 </h1>
                 <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 ">
@@ -151,7 +151,7 @@ const Page = () => {
                 <div className="flex items-center justify-center w-60">
                   <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                     <div className="flex flex-col max-sm:w-full gap-2">
-                      <div className="flex items-center justify-center w-60">
+                      <div className="flex items-center justify-center w-64 md:w-80">
                         <label
                           htmlFor="screenshot"
                           className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -176,7 +176,7 @@ const Page = () => {
                           </div>
                           <div className="w-[50%]">
                             {!helpForm.screenshot ? (
-                              <p className="mb-2 text-sm text-gray-500">
+                              <p className="mb-2 text-xs text-gray-500">
                                 <span className="font-bold text-text-body">
                                   Supported Files:
                                 </span>{" "}
