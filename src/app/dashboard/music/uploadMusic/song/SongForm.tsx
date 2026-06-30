@@ -425,7 +425,7 @@ const SongForm = () => {
   }
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[320px]">
+    <div className="bg-main-white h-full w-full flex flex-col md:pl-[10px] lg:pl-[280px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -435,7 +435,7 @@ const SongForm = () => {
             <div className="flex gap-8 px-5 md:px-2 py-5 min-h-full h-full">
               {/* form */}
               {!preview && !showSuccessPage && (
-                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-3 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-10 lg:pb-0 lg:h-[68dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -1461,7 +1461,7 @@ const SongForm = () => {
               )}
 
               {showSuccessPage && (
-                <div className="flex justify-center items-center min-h-[70dvh] w-full px-2 py-4 animate-fade-in border border-red-50">
+                <div className="flex justify-center items-center min-h-[70dvh] w-full px-2 py-4 animate-fade-in">
                   <div className="w-full flex flex-col justify-cente items-center text-center gap-6">
                     {/* Success Icon */}
                     <div className="relative w-20 h-20 sm:w-24 sm:h-24 transition-transform hover:scale-105 duration-300">
@@ -1541,7 +1541,7 @@ const SongForm = () => {
 
               {/* the image side bar */}
               {!showSuccessPage && (
-                <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
+                <div className="bg-neutral-50 w-[20%] border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                   <div className="w-full h-[80%] flex-2">
                     {songForm.music_image ? (
                       <Image
@@ -1549,7 +1549,7 @@ const SongForm = () => {
                         width={0}
                         height={0}
                         alt="preview of the artist song cover"
-                        className="rounded-lg w-full h-full object-cover"
+                        className="rounded-lg w-full h-full object-fit"
                       />
                     ) : (
                       <div className="w-full h-full bg-neutral-100 relative z-[10]">
@@ -1560,10 +1560,10 @@ const SongForm = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
+                    <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-xl">
                       {songForm.title || "Title"}
                     </p>
-                    <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-[16px]">
+                    <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-base">
                       {songForm.artist || "Artist"}
                     </p>
                   </div>

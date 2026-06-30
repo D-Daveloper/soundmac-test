@@ -132,7 +132,7 @@ const Album = () => {
     },
   ];
 
-    const handleArtistOptionChange = (index: number) => {
+  const handleArtistOptionChange = (index: number) => {
     setIsFilterOpen(false);
     if (selectedIndex === index) {
       setSelectedIndex(null);
@@ -213,7 +213,7 @@ const Album = () => {
   }
 
   return (
-    <div className="bg-main-white max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[320px] px-5">
+    <div className="bg-main-white max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[280px] px-5">
       {/* Tab Selectors */}
       <div className="flex gap-3 mt-5">
         <button
@@ -376,7 +376,7 @@ const Album = () => {
                         }
                         alt="Album art"
                         fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="object-fit transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
 
@@ -456,7 +456,10 @@ const Album = () => {
                               key={idx}
                               onClick={() => {
                                 options.iconFunction(song);
-                                handleArtistOptionChange(index);
+                                if (options.name !== "View Album") {
+                                  handleArtistOptionChange(index);
+                                }
+                                // handleArtistOptionChange(index);
                               }}
                               className="flex items-center gap-2.5 hover:bg-neutral-50 px-3 py-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors duration-150 text-left w-full"
                             >

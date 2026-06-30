@@ -15,15 +15,15 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
   onEdit,
 }) => {
   return (
-    <div className="flex-1 overflow-y-auto flex flex-col gap-10 px-4 pb-6 h-[64dvh] custom-scrollbar">
+    <div className="flex-3 overflow-y-auto px-4 flex flex-col gap-5 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
       {/* Header Section with Action */}
-      <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+      <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
         <h1 className="text-base font-bold tracking-tight text-main-heading">
           Album Summary
         </h1>
         <button
           onClick={onEdit}
-          className="text-sm font-semibold text-primary hover:underline transition-all"
+          className="text-sm font-semibold text-primary hover:underline transition-all mr-2"
         >
           Edit Details
         </button>
@@ -42,7 +42,7 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
                   src={image}
                   fill
                   alt="Album artwork preview"
-                  className="object-cover"
+                  className="object-fit"
                 />
               </div>
               <div className="flex-1 min-w-0">
@@ -68,107 +68,107 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
       </div>
 
       {/* Album Metadata Grid */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-4 text-sm">
+      <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-2 text-sm">
         {/* Album Title */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Album Title
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className=" border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.title || "—"}
+              {albumForm.title}
             </p>
           </div>
         </div>
 
         {/* Genre */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Genre
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
-            <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.genre || "—"}
+          <div className="border-b border-neutral-100/80">
+            <p className="truncate text-text-body font-medium text-xs min-h-[32px]">
+              {albumForm.genre}
             </p>
           </div>
         </div>
 
         {/* Language */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Language
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.language || "—"}
+              {albumForm.language}
             </p>
           </div>
         </div>
 
         {/* Main Artist */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Main Artist
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.artist || "—"}
+              {albumForm.artist}
             </p>
           </div>
         </div>
 
         {/* Territories */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Territories
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className=" border-b border-neutral-100/80">
             <p
               className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]"
               title={albumForm.territories?.join(", ")}
             >
               {albumForm.territories?.length > 0
                 ? albumForm.territories.join(", ")
-                : "—"}
+                : ""}
             </p>
           </div>
         </div>
 
         {/* UPC */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             UPC Barcode
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-mono font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.upc || ""}
+              {albumForm.upc}
             </p>
           </div>
         </div>
 
         {/* Release date */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Release Date
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
               {albumForm.release_date
                 ? new Date(albumForm.release_date).toLocaleDateString(
                     undefined,
                     { dateStyle: "medium" },
                   )
-                : "—"}
+                : ""}
             </p>
           </div>
         </div>
 
         {/* Preorder Start date */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-tight text-[#103958] capitalize">
             Preorder Start Date
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
               {albumForm.preOrderDate
                 ? new Date(albumForm.preOrderDate).toLocaleDateString(
@@ -181,25 +181,25 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
         </div>
 
         {/* Copyright Holder */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Copyright Holder
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.copyRightHolder || "—"}
+              {albumForm.copyRightHolder}
             </p>
           </div>
         </div>
 
         {/* Copyright Year */}
-        <div className="flex flex-col gap-y-1 w-full">
-          <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
             Copyright Year
           </h2>
-          <div className="pb-1 border-b border-neutral-100/80">
+          <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.copyRightYear || "—"}
+              {albumForm.copyRightYear}
             </p>
           </div>
         </div>

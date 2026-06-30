@@ -55,9 +55,6 @@ const ManageAlbumForm = ({
 
   const dashboardContext = useContext(DashboardContext);
   const router = useRouter();
-  // const searchParams = useSearchParams();
-  // const preview = searchParams.get("step") === "preview";
-
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",
@@ -171,11 +168,11 @@ const ManageAlbumForm = ({
       const string_form = JSON.stringify(form);
       localStorage.setItem("albumForm", string_form);
       // router.push("?type=album&step=preview");
-    setPreview(true)
-  } else {
-    setPreview(false)
-  }
-};
+      setPreview(true);
+    } else {
+      setPreview(false);
+    }
+  };
 
   useEffect(() => {
     const string_form = localStorage.getItem("albumForm");
@@ -229,8 +226,8 @@ const ManageAlbumForm = ({
     } else {
       dashboardContext?.setHeader({
         title: "manage album",
-        showBackButton: false,
-        // onBack: () => router.push('/dashboard/music/manageRelease?type=single'),
+        showBackButton: true,
+        onBack: () => router.back(),
       });
     }
   }, [preview]);
@@ -241,7 +238,7 @@ const ManageAlbumForm = ({
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[320px]">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[280px]">
       {isLoading || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -263,7 +260,7 @@ const ManageAlbumForm = ({
             </button> */}
             <div className="flex gap-4 px-5 md:px-2 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-6 pb-3 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-6 pb-20 lg:pb-5 lg:h-[68dvh]">
                   {/* album info */}
                   <div>
                     <h1 className="text-sm md:text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -616,7 +613,7 @@ const ManageAlbumForm = ({
                                   alt="music note icon"
                                   className={
                                     albumForm.music_image
-                                      ? " w-full object-cover min-w-15 h-15"
+                                      ? " w-full object-fit min-w-15 h-15"
                                       : undefined
                                   }
                                 />
@@ -714,7 +711,8 @@ const ManageAlbumForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium text-sm mr-1">
-                            Copyright Year <span className="text-red-500">*</span>
+                            Copyright Year{" "}
+                            <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
                             priority={false}
@@ -746,18 +744,18 @@ const ManageAlbumForm = ({
                 </div>
               ) : (
                 // preview starts here
-                <div className="flex-1 overflow-y-auto flex flex-col gap-5 px- pb-6 h-[64dvh] custom-scrollbar">
+                <div className="flex-1 overflow-y-auto flex flex-col gap-5 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
                   {/* Header Section with Action */}
-                  <div className="flex items-center justify-between border- border-neutral-100 pb-4">
+                  <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
                     <h1 className="text-base font-bold tracking-tight text-main-heading">
                       Album Summary
                     </h1>
-                          {/* <button
-                    onClick= {handlePreview(albumForm)}
-                  className="text-sm font-semibold text-primary hover:underline transition-all"
-                >
-                  Edit Details
-                </button> */}
+                    <button
+                      onClick={() => setPreview(!preview)}
+                      className="text-sm font-semibold text-primary hover:underline transition-all mr-2"
+                    >
+                      Edit Details
+                    </button>
                   </div>
 
                   {/* Artwork Section */}
@@ -773,7 +771,7 @@ const ManageAlbumForm = ({
                               src={image}
                               fill
                               alt="Album artwork preview"
-                              className="object-cover"
+                              className="object-fit"
                             />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -799,109 +797,109 @@ const ManageAlbumForm = ({
                   </div>
 
                   {/* Album Metadata Grid */}
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-5 text-sm">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-2 text-sm">
                     {/* Album Title */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Album Title
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.title || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.title || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Genre */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Genre
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.genre || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.genre || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Language */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Language
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.language || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.language || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Main Artist */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Main Artist
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.artist || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.artist || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Territories */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Territories
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
+                      <div className="border-b border-neutral-100/80">
                         <p
-                          className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]"
+                          className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]"
                           title={albumForm.territories?.join(", ")}
                         >
                           {albumForm.territories?.length > 0
                             ? albumForm.territories.join(", ")
-                            : "—"}
+                            : ""}
                         </p>
                       </div>
                     </div>
 
                     {/* UPC */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         UPC Barcode
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-mono font-medium text-sm py-1 min-h-[32px]">
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-mono font-medium text-xs py-1 min-h-[32px]">
                           {albumForm.upc || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Release date */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wide text-[#103958] capitalize">
                         Release Date
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
                           {albumForm.release_date
                             ? new Date(
                                 albumForm.release_date,
                               ).toLocaleDateString(undefined, {
                                 dateStyle: "medium",
                               })
-                            : "—"}
+                            : ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Preorder Start date */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-tight text-[#103958] capitalize">
                         Preorder Start Date
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
                           {albumForm.preOrderDate
                             ? new Date(
                                 albumForm.preOrderDate,
@@ -914,25 +912,25 @@ const ManageAlbumForm = ({
                     </div>
 
                     {/* Copyright Holder */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Copyright Holder
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.copyRightHolder || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncat tracking-tighter capitalize text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.copyRightHolder || ""}
                         </p>
                       </div>
                     </div>
 
                     {/* Copyright Year */}
-                    <div className="flex flex-col gap-y-1 w-full">
-                      <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                         Copyright Year
                       </h2>
-                      <div className="pb-1 border-b border-neutral-100/80">
-                        <p className="truncate text-text-body font-medium text-sm py-1 min-h-[32px]">
-                          {albumForm.copyRightYear || "—"}
+                      <div className="border-b border-neutral-100/80">
+                        <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
+                          {albumForm.copyRightYear || ""}
                         </p>
                       </div>
                     </div>
@@ -949,7 +947,7 @@ const ManageAlbumForm = ({
                         src={image}
                         alt="album cover preview"
                         fill
-                        className="object-cover rounded-lg"
+                        className="object-fit rounded-lg"
                       />
                     </div>
                   ) : (
@@ -961,10 +959,10 @@ const ManageAlbumForm = ({
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
+                  <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-xl">
                     {albumForm.title || "Title"}
                   </p>
-                  <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-[16px]">
+                  <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-base">
                     {albumForm.artist || "Artist"}
                   </p>
                 </div>

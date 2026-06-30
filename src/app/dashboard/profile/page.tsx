@@ -32,7 +32,7 @@ const page = () => {
   const info = getParam("info");
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Account Informartion");
+    dashboardContext?.setHeader({title:"Account Informartion", showBackButton:false});
   }, []);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const page = () => {
   }, [info]);
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px] px-5">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[280px] px-5">
       <div className="flex gap-3 mt-5 flex-wrap">
        <ScrollableTabs tabs={profileInfoButtons} onChange={(index)=>{setParam("info",profileInfoButtons[index].query)}} active={active}/>
       </div>

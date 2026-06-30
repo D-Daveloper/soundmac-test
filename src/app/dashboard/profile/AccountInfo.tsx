@@ -135,7 +135,7 @@ const AccountInfo = () => {
         !false &&
         true && (
           <>
-            <div className="bg-secondary-50 rounded-xl p-5 mt-8 max-w-[600px] flex gap-5 mb-10 max-sm:flex-col sm:items-center">
+            <div className="bg-secondary-50 rounded-xl p-5 mt-8 max-w-[600px] flex gap-5 mb-5 max-sm:flex-col sm:items-center">
               <div className="flex gap-5 items-center">
                 <div className="min-w-[100px] max-w-[100px] min-h-[100px] max-h-[100px] relative">
                   <Image
@@ -166,7 +166,7 @@ const AccountInfo = () => {
               </div>
             </div>
             <div className="flex gap-8 py-5 pb-30">
-              <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 min-h-[64dvh]">
+              <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 ">
                 {/* cover art */}
                 {wantsToEdit && (
                   <div>
@@ -246,7 +246,7 @@ const AccountInfo = () => {
                   <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                     Personal Info
                   </h1>
-                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
                     {formData.map((data, index) => (
                       <div
                         key={index}

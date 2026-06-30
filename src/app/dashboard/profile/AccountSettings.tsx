@@ -101,7 +101,7 @@ const AccountSettings = () => {
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="flex gap-8 py-5 pb-20">
+          <div className="flex gap-8 py-5 pb-10">
             <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 min-h-[64dvh]">
               <div>
                 <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">

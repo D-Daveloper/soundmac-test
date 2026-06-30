@@ -37,7 +37,7 @@ const ViewArtist = ({
   };
 
   return (
-    <div className="bg-main-white  max-sm:min-h-auto minh-[90dvh] w-full flex flex-col px-10 lg:pl-[300px]">
+    <div className="bg-main-white max-sm:min-h-auto minh-[90dvh] w-full flex flex-col md:px-5 lg:pl-[280px]">
       <div
         className={
           "relative flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-full w-[full] overflow-x-hidden " +
@@ -57,13 +57,13 @@ const ViewArtist = ({
             <X />
           </button>
           <div className="flex items-center justify-center w-60">
-            <div className="w-full flex flex-wrap justify-between gap-y-10 ">
+            <div className="w-full flex flex-wrap justify-between gap-y-5 ">
               <div className="flex flex-col max-sm:w-full gap-2">
                 <div className="flex gap-1">
                   <h3 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                     Profile Image
                   </h3>
-                  <Image
+                  {/* <Image
                     priority={false}
                     loading="lazy"
                     src="/required.svg"
@@ -71,9 +71,9 @@ const ViewArtist = ({
                     width={0}
                     height={0}
                     className="w-2 -mt-3 "
-                  />
+                  /> */}
                 </div>
-                <div className="flex items-center justify-center w-60">
+                <div className="flex items-center justify-center w-64 md:w-80">
                   <label
                     htmlFor="artistImage"
                     className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -90,7 +90,7 @@ const ViewArtist = ({
                         alt="music note icon"
                         className={
                           artist?.artistImage
-                            ? " object-cover rounded-md "
+                            ? " object-fit rounded-md "
                             : undefined
                         }
                       />
@@ -124,7 +124,7 @@ const ViewArtist = ({
               </div>
             </div>
           </div>
-          <div className="w-full flex flex-wrap justify-between gap-y-10 mt-15 ">
+          <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 ">
             <div className="flex flex-col w-[40%] max-sm:w-full">
               <Input
                 value={artist.artistName || ""}
@@ -148,7 +148,7 @@ const ViewArtist = ({
         <div className="border border-neutral-100"></div>
         {/* platform id  */}
         <div>
-          <div className="w-full flex flex-wrap justify-between gap-y-10 mb-20">
+          <div className="w-full flex flex-wrap justify-between gap-y-5 mb-20">
             <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
               <Input
                 value={artist.appleId || ""}

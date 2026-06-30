@@ -50,9 +50,6 @@ const AlbumForm = () => {
     fromYear: new Date(),
     toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
   });
-  // const searchParams = useSearchParams()
-  // const preview = searchParams.get("step") === "preview";
-
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",
@@ -226,7 +223,7 @@ const AlbumForm = () => {
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[300px]">
+    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -246,9 +243,9 @@ const AlbumForm = () => {
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-8 px-5 md:px-2 py-5">
+            <div className="flex gap-8 px md:px-2 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-30 min-h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-10 lg:pb-0 lg:h-[68dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -760,7 +757,7 @@ const AlbumForm = () => {
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2 pb-10">
                         <div className="flex">
-                          <p className=" capitalize font-medium sm:text-sm text-lg mr-1">
+                          <p className=" capitalize font-medium text-sm mr-1">
                             Copyright Year{" "}
                             <span className="text-red-500">*</span>
                           </p>
@@ -809,7 +806,7 @@ const AlbumForm = () => {
                       width={0}
                       height={0}
                       alt="preview of the artist album cover"
-                      className="rounded-lg w-full h-full object-cover"
+                      className="rounded-lg w-full h-full object-fit"
                     />
                   ) : (
                     <div className="w-full h-full bg-neutral-100 relative z-[10]">
@@ -820,10 +817,10 @@ const AlbumForm = () => {
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-base">
+                  <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-xl">
                     {albumForm.title || "Title"}
                   </p>
-                  <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-sm">
+                  <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-base">
                     {albumForm.artist || "Artist"}
                   </p>
                 </div>

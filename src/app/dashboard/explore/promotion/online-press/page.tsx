@@ -129,7 +129,7 @@ const Page = () => {
 
   return (
     <>
-      <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
+      <div className="lg:pl-[280px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-5 ">
         {/* back button */}
         {isLoading || releaseNamesIsLoading || isSubmittingForm ? (
           <InlineLoadingScreen />
@@ -137,7 +137,7 @@ const Page = () => {
           <>
             <div className="max-w-[1200px]">
               <div className="flex items-center gap-3 mt-5">
-                <Link
+                {/* <Link
                   className="max-lg:flex hidden"
                   aria-label="go back"
                   href={"/dashboard/explore/promotion/explore-promotions"}
@@ -148,18 +148,18 @@ const Page = () => {
                     width={20}
                     alt="arrow left"
                   />
-                </Link>
+                </Link> */}
                 <p className="text-text-body text-body-two-regular">
                   Select the track you want to promote
                 </p>
               </div>
               {/* form */}
-              <div className="mt-10 flex flex-col gap-5 mb-10">
+              <div className="mt-5 flex flex-col gap-5 mb-10">
                 {/* cover art */}
                 <div>
-                  <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading flex gap-2">
-                    Upload an Image of the Artist
-                    <Image
+                  <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading flex gap-2">
+                    Upload an Image of the Artist <span className="text-red-500">*</span>
+                    {/* <Image
                       priority={false}
                       loading="lazy"
                       src="/required.svg"
@@ -167,12 +167,12 @@ const Page = () => {
                       width={0}
                       height={0}
                       className="w-2 -mt-3"
-                    />
+                    /> */}
                   </h1>
                   <div className="flex items-center justify-center w-60">
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-2">
                       <div className="flex flex-col max-sm:w-full gap-2">
-                        <div className="flex items-center justify-center w-60">
+                        <div className="flex items-center justify-center w-64 md:w-80">
                           <label
                             htmlFor="promotionImage"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -230,9 +230,9 @@ const Page = () => {
                 </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
-                      Artist
-                      <Image
+                    <p className="font-medium mb-2 text-sm flex gap-2">
+                      Artist <span className="text-red-500">*</span>
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -240,7 +240,7 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3"
-                      />
+                      /> */}
                     </p>
                     <div className="w-full">
                       <Select
@@ -255,9 +255,9 @@ const Page = () => {
                     </div>
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
-                      Release
-                      <Image
+                    <p className="font-medium mb-2 text-sm flex gap-2">
+                      Release <span className="text-red-500">*</span>
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -265,7 +265,7 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3"
-                      />
+                      /> */}
                     </p>
                     <div className="w-full">
                       <Select
@@ -286,8 +286,8 @@ const Page = () => {
                 <div>
                   <div className="flex gap-1 sm:text-sm text-lg">
                     <p className=" capitalize font-medium flex gap-2">
-                      Music Description{" "}
-                      <Image
+                      Music Description <span className="text-red-500">*</span>
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -295,7 +295,7 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3"
-                      />
+                      /> */}
                     </p>
                   </div>
 
@@ -313,9 +313,9 @@ const Page = () => {
                 </div>
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg flex gap-2">
-                      Package
-                      <Image
+                    <p className="font-medium mb-2 text-sm flex gap-2">
+                      Package <span className="text-red-500">*</span>
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -323,7 +323,7 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3"
-                      />
+                      /> */}
                     </p>
                     <div className="w-full">
                       <Select
@@ -343,7 +343,7 @@ const Page = () => {
                 </div>
               </div>
               {/* total */}
-              <div className="w-full border-2 border-main-icon-color p-1 rounded-2xl mb-60">
+              <div className="w-full border-2 border-main-icon-color p-1 rounded-2xl mb-20">
                 <div className="bg-neutral-50 border-2 border-neutral-100 flex flex-col p-5 rounded-2xl items-center w-full capitalize gap-5">
                   <p className="text-body-two-regular font-semibold text-text-disable">
                     Total Amount Due

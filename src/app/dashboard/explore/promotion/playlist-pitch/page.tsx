@@ -396,7 +396,7 @@ const Page = () => {
 
   return (
     <>
-      <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10  lg:ml-5 ">
+      <div className="lg:pl-[280px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-5 ">
         {/* back button */}
         {isLoading ||
         releaseNamesIsLoading ||
@@ -407,7 +407,7 @@ const Page = () => {
           <>
             <div className=" sm:mb-20">
               <div className="flex items-center gap-3 mt-5">
-                <Link
+                {/* <Link
                   className="max-lg:flex hidden"
                   aria-label="go back"
                   href={"/dashboard/explore/promotion/explore-promotions"}
@@ -418,7 +418,7 @@ const Page = () => {
                     width={20}
                     alt="arrow left"
                   />
-                </Link>
+                </Link> */}
                 <p className="text-text-body text-body-two-regular">
                   Select the track you want to promote
                 </p>
@@ -427,7 +427,7 @@ const Page = () => {
               <form
                 id="pitchForm"
                 onSubmit={handleSubmit}
-                className="mt-10 flex flex-col gap-5 mb-10"
+                className="mt-5 flex flex-col gap-5 mb-10"
               >
                 {/* artist image */}
                 <div>
@@ -437,11 +437,11 @@ const Page = () => {
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
                       Add eye-catching artwork that represents your single.{" "}
                     </p> */}
-                  <div className="flex items-center justify-center w-100">
+                  <div className="flex items-center justify-center w-full">
                     <div className="w-full flex flex-wrap justify-between gap-y-10 ">
-                      <div className="flex flex-col max-sm:w-full gap-2">
+                      <div className="flex flex-col gap-2">
                         <div className="flex gap-1">
-                          <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                          <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                             Artist press image (high resolution).
                           </h4>
                           {/* <Image
@@ -454,7 +454,7 @@ const Page = () => {
                               className="w-2 -mt-3 "
                             /> */}
                         </div>
-                        <div className="flex items-center justify-center w-80">
+                        <div className="flex items-center justify-center w-60 md:w-80">
                           <label
                             htmlFor="promotionImage"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -473,14 +473,14 @@ const Page = () => {
                                 alt="music note icon"
                                 className={
                                   promotionForm.promotionImage
-                                    ? " w-full object-cover min-w-15 h-15"
+                                    ? " w-full object-fit min-w-15 h-15"
                                     : undefined
                                 }
                               />
                             </div>
                             <div className="w-[50%]">
                               {!promotionForm.promotionImage ? (
-                                <p className="mb-2 text-sm text-gray-500">
+                                <p className="mb-2 text-xs text-gray-500">
                                   <span className="font-bold text-text-body">
                                     Supported Files:
                                   </span>{" "}
@@ -513,8 +513,8 @@ const Page = () => {
                 <div className="w-full flex flex-wrap justify-between gap-y-10">
                   {/* artist */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg flex flex-row-reverse justify-start gap-1 mr-auto">
-                      <Image
+                    <p className="font-medium mb-2 text-sm flex justify-start gap-1 mr-auto">
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -522,8 +522,8 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />{" "}
-                      Artist
+                      />{" "} */}
+                      Artist <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -539,8 +539,8 @@ const Page = () => {
                   </div>
                   {/* release title */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg flex flex-row-reverse justify-start gap-1 mr-auto">
-                      <Image
+                    <p className="font-medium mb-2 text-sm flex justify-start gap-1 mr-auto">
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -548,8 +548,8 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
-                      Release Title
+                      /> */}
+                      Release Title <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -568,8 +568,8 @@ const Page = () => {
                   </div>
                   {/* type of release */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize flex flex-row-reverse justify-start gap-1 mr-auto">
-                      <Image
+                    <p className="font-medium mb-2 text-sm capitalize flex justify-start gap-1 mr-auto">
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -577,8 +577,8 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
-                      Realease Type
+                      /> */}
+                      Realease Type <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -598,7 +598,7 @@ const Page = () => {
                   </div>
                   {/* focus Track */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize flex flex-row-reverse justify-start gap-1 mr-auto">
+                    <p className="font-medium mb-2 text-sm capitalize flex flex-row-reverse justify-start gap-1 mr-auto">
                       <Image
                         priority={false}
                         loading="lazy"
@@ -634,8 +634,8 @@ const Page = () => {
                   </div>
                   {/* priority */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize flex flex-row-reverse justify-start gap-1 mr-auto">
-                      <Image
+                    <p className="font-medium mb-2 text-sm capitalize flex justify-start gap-1 mr-auto">
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -643,8 +643,8 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
-                      priority
+                      /> */}
+                      priority <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -664,8 +664,8 @@ const Page = () => {
                   </div>
                   {/* editorial teams */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize flex flex-row-reverse justify-start gap-1 mr-auto">
-                      <Image
+                    <p className="font-medium mb-2 text-sm capitalize flex justify-start gap-1 mr-auto">
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -673,8 +673,8 @@ const Page = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
-                      Editorial teams
+                      /> */} 
+                      Editorial teams <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -694,7 +694,7 @@ const Page = () => {
                   </div>
                   {/* moods */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize">
+                    <p className="font-medium mb-2 text-sm capitalize">
                       {/* <Image
                         priority={false}
                         loading="lazy"
@@ -704,7 +704,7 @@ const Page = () => {
                         height={0}
                         className="w-2 -mt-3 "
                       /> */}
-                      Mood
+                      Mood <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -724,7 +724,7 @@ const Page = () => {
                   </div>
                   {/* artist gender */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize ">
+                    <p className="font-medium mb-2 text-sm capitalize ">
                       {/* <Image
                         priority={false}
                         loading="lazy"
@@ -734,7 +734,7 @@ const Page = () => {
                         height={0}
                         className="w-2 -mt-3 "
                       /> */}
-                      artist gender
+                      artist gender <span className="text-red-500">*</span>
                     </p>
                     <div className="w-full">
                       <Select
@@ -754,7 +754,7 @@ const Page = () => {
                   </div>
                   {/* sub genre */}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
-                    <p className="font-medium mb-2 sm:text-sm text-lg capitalize ">
+                    <p className="font-medium mb-2 text-sm capitalize ">
                       {/* <Image
                         priority={false}
                         loading="lazy"
@@ -826,9 +826,9 @@ const Page = () => {
                   </div>
                   {/* marketing details */}
                   <div className="w-[40%] max-sm:w-full">
-                    <div className="flex gap-1 sm:text-sm text-lg">
-                      <p className=" capitalize font-medium flex flex-row-reverse justify-start gap-1 mr-auto">
-                        <Image
+                    <div className="flex gap-1">
+                      <p className=" capitalize font-medium text-sm flex justify-start gap-1 mr-auto">
+                        {/* <Image
                           priority={false}
                           loading="lazy"
                           src="/required.svg"
@@ -836,8 +836,8 @@ const Page = () => {
                           width={0}
                           height={0}
                           className="w-2 -mt-3 "
-                        />
-                        Marketing Detail{" "}
+                        /> */}
+                        Marketing Detail <span className="text-red-500">*</span>
                       </p>
                     </div>
 

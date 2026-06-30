@@ -7,94 +7,72 @@ import React, { useState } from "react";
 interface sideBarSection {
   title: string;
   icon: string;
-// setSection: (text: string) => void;
-  href:string;
-  query:string
+  href: string;
+  query: string;
 }
 
 interface Props {
   title: string;
   list: sideBarSection[];
-  // isActive:string;
-  // setIsActive: (text:string)=>void;
 }
 
-const sideBarCom = (props: Props) => {
-  const [open, setOpen] = useState(false);
+const SideBarCom = (props: Props) => {
   const pathname = usePathname();
+  const isCurrentSection = pathname.includes(props.title.toLocaleLowerCase());
+  const [open, setOpen] = useState(isCurrentSection);
+
+  const isExpanded = isCurrentSection || open;
+
   return (
-    <div className="">
+    <div className="border-b border-primary-500/30 pb-3">
       <button
-        onClick={() => {setOpen(!open);}}
-        className={"w-full capitalize flex justify-between text-[16px] font-bold hover:cursor-pointer hover:bg-primary-500/90 py-2 px-4 rounded-lg focus:outline-none focus:bg-primary-500/90 "}
+        onClick={() => setOpen(!open)}
+        className="w-full capitalize flex justify-between items-center text-sm font-bold hover:cursor-pointer hover:bg-primary-500/20 py-2 px-4 rounded-lg focus:outline-none text-primary-100"
       >
         {props.title}
         <Image
           src="/arrow-down.png"
-          alt="arrow point up"
-          width={20}
-          height={20}
-          className={""+(pathname.includes(props.title.toLocaleLowerCase()) || open ? " rotate-0 " : " rotate-180 ")}
+          alt="arrow"
+          width={16}
+          height={16}
+          className={"transition-transform duration-300 " + (isExpanded ? "rotate-0" : "rotate-180")}
         />
       </button>
-      {/* <div className={""}> */}
-        <div
-          className={
-            " transition-all duration-300 ml-7 mt-4 flex-col border-b-2 border-primary-500 " +
-            (pathname.includes(props.title.toLocaleLowerCase()) || open ? (props.title === 'music'? " flex max-h-[100px] h-[100px]": props.title === "artist"||props.title === 'explore'? " max-h-[200px] h-[200px]" : " max-h-[40px] h-[40px]") : "  max-h-[0px] h-0")
-          }
-        >
+
+      <div
+        className={
+          "overflow-hidden transition-all duration-300 " +
+          (isExpanded ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0")
+        }
+      >
+        <div className="ml-4 mt-1 flex flex-col gap-1">
           {props.list.map((section, index) => (
             <Link
-            key={index}
-              // onClick={() => section.setSection(section.query)}
+              key={index}
               href={section.href}
-              // disabled={!open}
-              aria-hidden={!(open || pathname.includes(props.title.toLocaleLowerCase()))}
-              aria-disabled={!(open || pathname.includes(props.title.toLocaleLowerCase()))}
-              tabIndex={!open ? -1 : 0}
-              className={(index > 0? "mt-4 " : "") +
-                " transition-all duration-300 flex gap-5 font-extralight capitalize h-auto w-full px-3 py-2 rounded-lg " +
-                ((pathname.includes(props.title.toLocaleLowerCase()) || open)
-                  ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99 "
-                  : " opacity-0 pointer-events-none ") + (pathname.toLocaleLowerCase().includes(section.query.toLocaleLowerCase())? "bg-primary-500/90" : "bg-transparent")
+              aria-hidden={!isExpanded}
+              aria-disabled={!isExpanded}
+              tabIndex={!isExpanded ? -1 : 0}
+              className={
+                "flex items-center gap-3 font-light text-sm capitalize w-full px-3 py-2 rounded-lg transition-all duration-200 " +
+                (pathname.toLocaleLowerCase().includes(section.query.toLocaleLowerCase())
+                  ? "bg-primary-500/90 text-white"
+                  : "text-primary-100 hover:bg-primary-500/30 hover:text-white")
               }
             >
               <Image
                 src={section.icon}
-                alt="add icon"
-                width={20}
-                height={20}
-                className=""
+                alt={section.title}
+                width={18}
+                height={18}
               />
               {section.title}
             </Link>
           ))}
-          {/* <button
-            disabled={!open}
-            aria-hidden={!open}
-            aria-disabled={!open}
-            tabIndex={!open ? -1 : 0}
-            className={
-              "mt-6 transition-all duration-300 flex gap-5 font-extralight capitalize" +
-              (open
-                ? " block opacity-100 focus:outline-none focus:text-primary-500/70 hover:cursor-pointer hover:text-primary-500/99"
-                : " opacity-0")
-            }
-          >
-            <Image
-              src="/musiclibrary2.svg"
-              alt="an icon for a collection of songs"
-              width={20}
-              height={20}
-              className=""
-            />
-            manage release
-          </button> */}
-        {/* </div> */}
+        </div>
       </div>
     </div>
   );
 };
 
-export default sideBarCom;
+export default SideBarCom;

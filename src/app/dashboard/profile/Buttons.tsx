@@ -47,7 +47,7 @@ export default function ScrollableTabs({
       onMouseMove={onMouseMove}
       onMouseUp={stopDrag}
       onMouseLeave={stopDrag}
-      className="flex gap-2 overflow-x-auto scroll-smooth px-5 py-1 cursor-grab select-none
+      className="flex flex-wrap gap-2 overflow-x-auto scroll-smooth px-5 lg:px-0 py-1 cursor-grab select-none
         scrollbar-hide
         [-webkit-overflow-scrolling:touch]"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}

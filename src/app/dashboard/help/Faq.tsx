@@ -144,7 +144,7 @@ export default function FAQAccordion() {
       <div className="w-full md:max-w-[500px]">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-normal tracking-tight text-gray-900">
+          <h1 className="text-xl font-normal tracking-tight text-gray-900">
             FAQs
           </h1>
           <p className="mt-2 text-sm text-gray-400 font-light">

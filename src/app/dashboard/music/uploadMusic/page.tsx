@@ -20,7 +20,7 @@ const Page = () => {
     return <AlbumForm />;
   } else {
     return (
-    <main className="lg:pl-[320px] px-2  w-full min-h-screen bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-10 border border-red-50">
+    <main className="lg:pl-[280px] px-4 w-full min-h-screen bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-5 border border-red-50">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
             Choose Your Release Type

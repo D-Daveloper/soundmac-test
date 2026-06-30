@@ -27,7 +27,7 @@ const Page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Sales Report");
+    dashboardContext?.setHeader({title:"Sales Report", showBackButton:false});
   }, []);
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
@@ -35,7 +35,7 @@ const Page = () => {
     useGetUserSalesReportDashboardDetailsNames();
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[310px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[280px] px-5">
       {isLoading || !data || isLoadingSalesReport || !salesReport ? (
         <InlineLoadingScreen />
       ) : (
@@ -148,12 +148,12 @@ const Page = () => {
                             src={item.artist.artistImage ?? "/radio.png"}
                             alt="Profile picture"
                             fill
-                            className="object-cover rounded-full "
+                            className="object-fit rounded-full "
                           />
                         </div>
                         <p
                           className={
-                            "font-semibold text-xl flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-5 text-center! "
+                            "font-semibold text-base flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-5 text-center! "
                           }
                         >
                           {item.artist.artistName}
@@ -164,11 +164,11 @@ const Page = () => {
               </div>
             </div>
             <div className="flex-1 border-1 border-neutral-100 rounded-2xl">
-              <p className="font-semibold text-[16px] flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-5">
+              <p className="font-semibold text-[16px] flex gap-1 leading-[20px] tracking-tighter text-primary-500 p-2">
                 <Music4 color="#103958" />
                 Top Performing Songs
               </p>
-              <div className="p-5 flex flex-col gap-5">
+              <div className="p-3 flex flex-col gap-5">
                 {salesReport.topSongs.length > 0 &&
                   salesReport.topSongs.map((item, index) => (
                     <div
@@ -181,7 +181,7 @@ const Page = () => {
                           src={item.song.releaseImage ?? "/signinimage.png"}
                           alt="an image depicting the song image"
                           fill
-                          className="object-cover rounded-lg shadow-md max-h-[80px] "
+                          className="object-fit rounded-lg shadow-md max-h-[80px] "
                         />
                       </div>
                       <div className="flex flex-col flex-2">

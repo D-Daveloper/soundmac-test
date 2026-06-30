@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { Suspense, useContext, useEffect, useState } from "react";
+import React, { Suspense, useContext, useEffect, useState , useRef} from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
@@ -15,6 +15,9 @@ import {
 import Notification from "../components/notification/Notification";
 import axios from "axios";
 import LogoutButton from "../logout/Logout";
+
+
+
 
 const sidebarComponents = [
   {
@@ -132,6 +135,25 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target as Node)
+    ) {
+      setIsProfilePopUpOpen(false);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, []);
 
   useEffect(() => {
     setIsOpen(false);
@@ -151,10 +173,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <UserRoute>
-      <div className="min-h-screen bg-neutral-50 flex flex-col items-ce relative">
+      <div className="min-h-scree bg-neutral-50 flex flex-col items-ce relative">
         {/* Top Navbar Header Section */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[300px] transition-all">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[250px] transition-all">
+          <div className="flex h-16 items-center justify-between px-2 lg:px-6">
             {/* Left Side: Navigation Controls & Title */}
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               {/* Hamburger */}
@@ -181,7 +203,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       router.back();
                     }
                   }}
-                  className="p-2 w-9 h-9 border border-neutral-200 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow-2xs hidden lg:flex"
+                  className="p-2 w-9 h-9 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow- hidden lg:flex"
                 >
                   <Image
                     src="/arrow-left.svg"
@@ -193,7 +215,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </button>
               )}
 
-              <h1 className="font-bold text-base text-main-heading truncate tracking-tight py-1">
+              <h1 className="font-normal text-base md:text-xl text-main-heading truncate tracking-tight py-1">
                 {dashboardContext?.header.title || "Dashboard"}
               </h1>
             </div>
@@ -262,12 +284,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
         {/* left side of dashboard container */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[280px] lg:w-[300px] bg-primary-700 text-main-white transform lg:transform-none transition-transform duration-300 ease-in-out flex flex-col border-r border-primary-800 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[250px] lg:w-[260px] bg-primary-700 text-main-white transform lg:transform-none transition-transform duration-300 ease-in-out flex flex-col border-r border-primary-800 ${
             isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          {/* Sidebar Brand Logo Header */}
-          <div className="p-6 flex items-center justify-between h-16">
+          {/* Sidebar Brand Logo Header  */}
+          <div className="p-6 flex items-center justify-between h-16 opacity-50">
             <Link
               href="/"
               className="flex gap-3 items-center opacity-80 hover:opacity-100 transition"
@@ -304,7 +326,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </Link>
             </div>
 
-            <nav className="space-y-4 md:mt-10">
+            <nav className="space-y-3 md:mt-5">
               {sidebarComponents.map((component, index) => (
                 <SideBarCom
                   // isActive={isActive}
@@ -318,7 +340,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           {/* Artist name modal Container Element inside Layout Panel */}
-          <div className="absolute bottom-4 inset-x-4 z-50">
+          <div className="absolute bottom-4 inset-x-4 z-50"
+          ref={profileRef}
+          >
             <button
               onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
               className="w-full h-14 bg-black/90 hover:bg-black rounded-xl flex items-center justify-between p-2.5 transition backdrop-blur-sm shadow-xl"

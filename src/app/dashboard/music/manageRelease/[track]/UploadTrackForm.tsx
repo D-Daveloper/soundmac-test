@@ -243,7 +243,7 @@ const UploadTrackForm = ({
       ) : (
         <>
           <div className="flex gap-8 py-5">
-            <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-10 h-[64dvh]">
+            <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-20 lg:pb-5 lg:h-[68dvh]">
               {/* Song info */}
               <div>
                 <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -253,7 +253,7 @@ const UploadTrackForm = ({
                   Provide the main details about your track to ensure it is
                   properly identified and distributed.
                 </p>
-                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                <div className="w-full flex flex-wrap justify-between gap-y-3 mt-5 ">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
                       value={track.title}
@@ -346,7 +346,7 @@ const UploadTrackForm = ({
                   {track.featured_artist.map((_, i) => (
                     <div
                       key={i}
-                      className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                      className="w-full flex flex-wrap justify-between gap-y-3 mb-1"
                     >
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
@@ -434,7 +434,7 @@ const UploadTrackForm = ({
                   {track.song_writer.map((_, index) => (
                     <div
                       key={index}
-                      className="w-full flex flex-wrap justify-between gap-y-5 mb-5"
+                      className="w-full flex flex-wrap justify-between gap-y-3 mb-1"
                     >
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
@@ -509,7 +509,7 @@ const UploadTrackForm = ({
                   {track.performer.map((_, index) => (
                     <div
                       key={index}
-                      className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                      className="w-full flex flex-wrap justify-between gap-y-5 mb-1"
                     >
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
@@ -600,7 +600,7 @@ const UploadTrackForm = ({
                   {track.producer.map((_, index) => (
                     <div
                       key={index}
-                      className="w-full flex flex-wrap justify-between gap-y-10 mb-5"
+                      className="w-full flex flex-wrap justify-between gap-y-5 mb-1"
                     >
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
