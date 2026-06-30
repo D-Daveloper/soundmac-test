@@ -179,7 +179,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   // };
 
   return (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[320px]">
+    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[280px]">
       {isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
@@ -235,7 +235,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
               onRemove={() => removeTrack(activeTrack.id)}
               album={album.data[0]}
             />
-            <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-neutral-100 flex justify-end items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-10 z-20 shadow-lg">
+            <div className="fixed bottom-0 left-0 w-full bg-[#F0F0E7]/95 backdrop-blur-md border-t border-neutral-100 flex justify-end items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-10 z-20 shadow-lg">
               {/* Delete Track Action Button */}
               <button
                 type="button"

@@ -9,7 +9,7 @@ import { isAxiosError } from "axios";
 import { LockKeyhole } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
@@ -33,8 +33,6 @@ const Page = () => {
     label_logo: null,
     wants_to_change_name: false,
   });
-  // const searchParams = useSearchParams();
-  // const preview = searchParams.get("step") === "previewLabel";
 
   // useEffect(() => {
   //   dashboardContext?.setLayoutHeaderMessage("Create Label");
@@ -136,11 +134,11 @@ const Page = () => {
     if (preview === false) {
       const string_form = JSON.stringify(form);
       localStorage.setItem("labelForm", string_form);
-    setPreview(true);
-  } else {
-    setPreview(false)
-  }
-};
+      setPreview(true);
+    } else {
+      setPreview(false);
+    }
+  };
 
   useEffect(() => {
     const string_form = localStorage.getItem("labelForm");
@@ -178,7 +176,7 @@ const Page = () => {
   }, [data]);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[320px]">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[280px]">
       {/* <button
         aria-label="go back"
         onClick={() => {
@@ -197,9 +195,9 @@ const Page = () => {
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="flex gap-8 px-5 md:px-2 py-5">
+          <div className="flex gap-8 px-2 lg:px-0 py-5">
             {!preview ? (
-              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 pb-3 h-[64dvh]">
+              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 pb-20 lg:pb-5 lg:h-[68dvh]">
                 {/* Song info */}
                 <div>
                   <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -209,7 +207,7 @@ const Page = () => {
                     Set up a label profile to start releasing and managing music
                     on Soundmac.
                   </p>
-                  <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 items-end">
+                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 items-end">
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <Input
                         value={labelForm.label_name}
@@ -272,8 +270,8 @@ const Page = () => {
                     <div className="w-full flex flex-wrap justify-between gap-y-10">
                       <div className="flex flex-col max-sm:w-full gap-2">
                         <div className="flex gap-1">
-                          <h2 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                            Label Logo. <span className="text-red-500">*</span>
+                          <h2 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                            Label Logo <span className="text-red-500">*</span>
                           </h2>
                           {/* <Image
                             priority={false}
@@ -285,7 +283,7 @@ const Page = () => {
                             className="w-2 -mt-3 "
                           /> */}
                         </div>
-                        <div className="flex items-center justify-center w-60 md:w-80">
+                        <div className="flex items-center justify-center w-64 md:w-80">
                           <label
                             htmlFor="label_logo"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -303,7 +301,7 @@ const Page = () => {
                                 alt="music note icon"
                                 className={
                                   labelForm.label_logo
-                                    ? " w-full object-cover min-w-15 h-15 overflow-hidden"
+                                    ? " w-full object-fit min-w-15 h-15 overflow-hidden"
                                     : undefined
                                 }
                               />
@@ -352,7 +350,7 @@ const Page = () => {
                     Add Social Media Links for your Label (if any).
                   </p>
 
-                  <div className="w-full flex flex-wrap justify-between gap-y-10">
+                  <div className="w-full flex flex-wrap justify-between gap-y-5">
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <Input
                         value={labelForm.instagram_profile_link}
@@ -400,16 +398,16 @@ const Page = () => {
               // preview starts here
               <div className="flex-1 overflow-y-auto flex flex-col gap-10 px-2 pb-6 h-[64dvh] custom-scrollbar">
                 <div>
-                  <div className="flex items-center justify-between border-neutral-100 pb-4">
-                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading border-neutral-100">
-                      Artist Summary
+                  <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
+                    <h1 className="text-base font-bold tracking-tight text-main-heading">
+                      Label Summary
                     </h1>
-                    {/* <button
-            onClick={onEdit}
-            className="text-sm font-semibold text-primary hover:underline transition-all"
-          >
-            Edit Details
-          </button> */}
+                    <button
+                      onClick={() => setPreview(!preview)}
+                      className="text-sm font-semibold text-primary hover:underline transition-all mr-2"
+                    >
+                      Edit Details
+                    </button>
                   </div>
 
                   {/* Artwork / Logo file preview */}
@@ -451,93 +449,93 @@ const Page = () => {
                 {/* Metadata Fields Grid */}
                 <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-x-8 gap-y-6 px-4">
                   {/* Label Name */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                       Label Name
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.label_name}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* First Name */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                       First Name
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.first_name}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* Last Name */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
                       Last Name
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.last_name}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* Instagram Profile Link */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-tighter text-[#103958] capitalize">
                       Instagram Profile Link
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.instagram_profile_link}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* Twitter (X) Profile Link */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-tighter text-[#103958] capitalize ">
                       Twitter (X) Profile Link
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.twitter_profile_link}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* TikTok Profile Link */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-tighter text-[#103958] capitalize">
                       TikTok Profile Link
                     </h2>
                     <div className="pb-1">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.tiktok_profile_link}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
 
                   {/* LinkedIn Profile Link */}
-                  <div className="flex flex-col gap-y-1 w-full">
-                    <h2 className="text-xs font-bold tracking-wider text-neutral-400 uppercase">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-xs font-bold tracking-tighter text-[#103958] capitalize">
                       LinkedIn Profile Link
                     </h2>
-                    <div className="pb-1">
+                    <div className="">
                       <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
                         {labelForm.linkedin_profile_link}
                       </p>
-                      <div className="border border-neutral-100 mt-1"></div>
+                      <div className="border border-neutral-100"></div>
                     </div>
                   </div>
                 </div>
@@ -551,7 +549,7 @@ const Page = () => {
                     width={0}
                     height={0}
                     alt="preview of the artist song cover"
-                    className="rounded-lg w-full h-full object-cover"
+                    className="rounded-lg w-full h-full object-fit"
                   />
                 ) : (
                   <div className="w-full h-full bg-neutral-100 relative z-[10]">

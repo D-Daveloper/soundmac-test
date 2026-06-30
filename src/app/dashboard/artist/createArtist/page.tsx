@@ -7,15 +7,13 @@ import { isArtistFormValid } from "@/util/middleware/functions";
 import { isAxiosError } from "axios";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const CreateArtistForm = () => {
   const router = useRouter();
   const [image, setImage] = useState<string | null>(null);
-  // const searchParams = useSearchParams();
-  // const preview = searchParams.get("step") === "preview";
   const [preview, setPreview] = useState(false);
   const [showSuccessPage, setshowSuccessPage] = useState(false);
   const { mutateAsync, isPending } = useCreatArtistMutation();
@@ -113,10 +111,10 @@ const CreateArtistForm = () => {
       const string_form = JSON.stringify(form);
       localStorage.setItem("artistForm", string_form);
       setPreview(true);
-  } else {
-    setPreview(false)
-  }
-};
+    } else {
+      setPreview(false);
+    }
+  };
 
   useEffect(() => {
     const string_form = localStorage.getItem("artistForm");
@@ -134,7 +132,7 @@ const CreateArtistForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[300px] px-2">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[280px]">
       {/* <button
         aria-label="go back"
         onClick={() => {
@@ -152,7 +150,7 @@ const CreateArtistForm = () => {
       <div className="flex gap-6 px-2 py-5">
         {!preview ? (
           !showSuccessPage ? (
-            <div className="flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-[64dvh]">
+            <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-0 pb-20 lg:pb-5 lg:h-[68dvh]">
               {/* Song info */}
               <div>
                 <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -163,7 +161,7 @@ const CreateArtistForm = () => {
                   on Soundmac.
                 </p>
                 <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
-                  <div className="flex flex-col w-[40%] max-sm:w-full">
+                  <div className="flex flex-col w-[40%] max-sm:w-full px-1">
                     <Input
                       value={artistForm.artist_name}
                       title={"Artist Name"}
@@ -190,7 +188,7 @@ const CreateArtistForm = () => {
                   Upload your profile picture.
                 </p> */}
                 <div className="flex items-center justify-center w-64 md:w-80">
-                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
+                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-3 ">
                     <div className="flex flex-col max-sm:w-full gap-2">
                       <div className="flex gap-1">
                         <h3 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -224,7 +222,7 @@ const CreateArtistForm = () => {
                               alt="music note icon"
                               className={
                                 artistForm.artist_image
-                                  ? " w-full object-cover min-w-15 h-15 overflow-hidden"
+                                  ? " w-full object-fit min-w-15 h-15 overflow-hidden"
                                   : undefined
                               }
                             />
@@ -291,7 +289,7 @@ const CreateArtistForm = () => {
                   </p>
                 </div>
                 {/* </div> */}
-                <div className="w-full flex flex-wrap justify-between gap-y-10">
+                <div className="w-full flex flex-wrap justify-between gap-y-5 px-1">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
                       value={artistForm.apple_id}
@@ -380,9 +378,17 @@ const CreateArtistForm = () => {
           <div className="flex-1 overflow-auto flex flex-col gap-8 px-4 pb-4 h-[64dvh] scrollbar-thin">
             {/* Section Header */}
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-main-heading">
-                Artist Summary
-              </h1>
+              <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
+                <h1 className="text-base font-bold tracking-tight text-main-heading">
+                  Artist Summary
+                </h1>
+                <button
+                  onClick={() => setPreview(!preview)}
+                  className="text-sm font-semibold text-primary hover:underline transition-all mr-2"
+                >
+                  Edit Details
+                </button>
+              </div>
 
               {/* Artwork File Section */}
               <div className="w-full flex flex-col gap-2 mt-6">
@@ -398,7 +404,7 @@ const CreateArtistForm = () => {
                           src={image}
                           fill
                           alt="Artist avatar preview"
-                          className="object-cover"
+                          className="object-fit"
                         />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -425,40 +431,40 @@ const CreateArtistForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
               {/* Artist Name */}
               <div className=" p-3.5 shadow-2xs flex flex-col justify-between space-y-1.5">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <h2 className="text-xs font-semibold tracking-wide text-[#103958] capitalize">
                   Artist Name
                 </h2>
                 <p
-                  className="text-sm font-bold text-main-heading truncate"
-                  title={artistForm.artist_name || "—"}
+                  className="text-xs text-text-body truncate"
+                  title={artistForm.artist_name || ""}
                 >
-                  {artistForm.artist_name || "—"}
+                  {artistForm.artist_name || ""}
                 </p>
               </div>
 
               {/* Apple ID */}
               <div className=" p-3.5 shadow-2xs flex flex-col justify-between space-y-1.5">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <h2 className="text-xs font-semibold tracking-wider text-[#103958] capitalize">
                   Apple ID
                 </h2>
                 <p
-                  className="text-base sm:text-lg font-mono font-medium text-neutral-700 truncate"
-                  title={artistForm.apple_id || "—"}
+                  className="text-xs font-mono font-medium text-text-body truncate"
+                  title={artistForm.apple_id || ""}
                 >
-                  {artistForm.apple_id || "—"}
+                  {artistForm.apple_id || ""}
                 </p>
               </div>
 
               {/* Spotify ID */}
               <div className=" p-3.5 shadow-2xs flex flex-col justify-between space-y-1.5">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                <h2 className="text-xs font-semibold tracking-wider text-[#103958] capitalize">
                   Spotify ID
                 </h2>
                 <p
-                  className="text-base sm:text-lg font-mono font-medium text-neutral-700 truncate"
-                  title={artistForm.spotify_id || "—"}
+                  className="text-base sm:text-lg font-mono font-medium text-text-body truncate"
+                  title={artistForm.spotify_id || ""}
                 >
-                  {artistForm.spotify_id || "—"}
+                  {artistForm.spotify_id || ""}
                 </p>
               </div>
             </div>
@@ -473,7 +479,7 @@ const CreateArtistForm = () => {
                   width={0}
                   height={0}
                   alt="preview of the artist song cover"
-                  className="rounded-lg w-full h-full object-cover"
+                  className="rounded-lg w-full h-full object-fit"
                 />
               ) : (
                 <div className="w-full h-full bg-neutral-100 relative z-[10]">
@@ -484,7 +490,7 @@ const CreateArtistForm = () => {
               )}
             </div>
             <div className="flex-1">
-              <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
+              <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-xl">
                 {artistForm.artist_name || "Name"}
               </p>
             </div>

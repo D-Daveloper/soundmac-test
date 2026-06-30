@@ -32,7 +32,7 @@ import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import { useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const SongForm = ({
   songFormFromApi,
@@ -60,8 +60,6 @@ const SongForm = ({
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
   const dashboardContext = useContext(DashboardContext);
   const router = useRouter();
-  // const searchParams = useSearchParams();
-  // const preview = searchParams.get("step") === "preview";
   const [preview, setPreview] = useState(false);
 
   const [songForm, setSongForm] = useState<SongForm>({
@@ -358,12 +356,12 @@ const SongForm = ({
       localStorage.setItem("M_featured_artist", featured_artist);
       localStorage.setItem("M_performer", performer);
       localStorage.setItem("M_producer", producer);
-      setPreview(true)
+      setPreview(true);
       // router.push("?type=single&step=preview");
-  } else {
-    setPreview(false)
-  }
-};
+    } else {
+      setPreview(false);
+    }
+  };
 
   useEffect(() => {
     const string_form = localStorage.getItem("M_songForm");
@@ -460,7 +458,7 @@ const SongForm = ({
       dashboardContext?.setHeader({
         title: "manage song",
         showBackButton: false,
-        // onBack: () => router.push('/dashboard/music/manageRelease?type=single'),
+        onBack: () => router.back(),
       });
     }
   }, [preview]);
@@ -471,7 +469,7 @@ const SongForm = ({
   }
 
   return (
-    <div className="bg-main-white min-h-screen h-full w-full flex flex-col lg:pl-[320px]">
+    <div className="bg-main-white md:px-4 h-full w-full flex flex-col lg:pl-[280px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -492,9 +490,9 @@ const SongForm = ({
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-8 px-5 md:px-2 py-5">
+            <div className="flex gap-8 px-5 md:px-0 py-5">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px- pb-10 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-10 px- pb-20 lg:pb-5 lg:h-[68dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -521,7 +519,7 @@ const SongForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
+                          <p className="font-medium mb-2 text-sm">
                             Genre <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
@@ -548,7 +546,7 @@ const SongForm = ({
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
-                          <p className="font-medium mb-2 sm:text-sm text-lg">
+                          <p className="font-medium mb-2 text-sm ">
                             Language <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
@@ -710,7 +708,7 @@ const SongForm = ({
                       {songForm.featured_artist.map((_, i) => (
                         <div
                           key={i}
-                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -801,7 +799,7 @@ const SongForm = ({
                       {songForm.song_writer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -879,7 +877,7 @@ const SongForm = ({
                       {songForm.performer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-5 px-1 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -896,8 +894,9 @@ const SongForm = ({
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <div className="flex gap-1">
-                              <p className="font-medium mb-2 text-sm ">Role</p>
-                              <Image
+                              <p className="font-medium mb-2 text-sm ">Role</p>{" "}
+                              <span className="text-red-500">*</span>
+                              {/* <Image
                                 priority={false}
                                 loading="lazy"
                                 src="/required.svg"
@@ -905,7 +904,7 @@ const SongForm = ({
                                 width={0}
                                 height={0}
                                 className="w-2 -mt-5"
-                              />
+                              /> */}
                             </div>
                             <Select
                               selected={songForm.performer[index].role}
@@ -974,7 +973,7 @@ const SongForm = ({
                       {songForm.producer.map((_, index) => (
                         <div
                           key={index}
-                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-5"
+                          className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
                         >
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
@@ -1468,7 +1467,7 @@ const SongForm = ({
                                   alt="music note icon"
                                   className={
                                     image
-                                      ? " w-full object-cover min-w-15 h-15"
+                                      ? " w-full object-fill min-w-15 h-15"
                                       : undefined
                                   }
                                 />
@@ -1630,19 +1629,42 @@ const SongForm = ({
                 </div>
               ) : (
                 // preview starts here
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 pb-6 h-[64dvh] custom-scrollbar">
+                <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
                   <div>
-                    <h1 className=" text-base md:text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                      Song Summary
-                    </h1>
+                    <div className="flex items-center justify-between border-neutral-100 border-b md:border-none pb-2">
+                      <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                        Song Summary
+                      </h1>
+                      <button
+                        onClick={() => setPreview(!preview)}
+                        className="text-sm font-semibold text-primary hover:underline transition-all mr-2"
+                      >
+                        Edit Details
+                      </button>
+                    </div>
 
-                    <div className="w-full flex flex-col gap-y-3 mt-6">
+                    <div className="w-full flex flex-col gap-y-3 mt-2">
                       <p className="font-bold text-[#000000] text-sm leading-[18px] tracking-[0.5px]">
                         Artwork File
                       </p>
 
-                      <div className="max-w-70 max-h-32 flex gap-4 items-center p-3 rounded-2xl border-2 border-neutral-100 bg-neutral-50/50">
+                      <div className="w-64 md:w-80 h-24 flex gap-4 items-center p-3 rounded-2xl border-2 border-neutral-100 bg-neutral-50/50">
                         {image ? (
+                          <>
+                            <div className="w-20 h-20 relative shrink-0 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200">
+                              <Image
+                                src={image}
+                                fill
+                                alt="music note icon"
+                                className="object-fit"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-text-body font-bold text-sm truncate">
+                                {songForm.music_image?.name || "Uploaded Artwork"}
+                              </p>
+                            </div>
+                            {/* {image ? (
                           <>
                             <div className="relative w-24 h-24 flex-shrink-0">
                               <Image
@@ -1654,7 +1676,7 @@ const SongForm = ({
                             </div>
                             <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate flex-1">
                               {songForm.music_image?.name || "Uploaded Artwork"}
-                            </p>
+                            </p> */}
                           </>
                         ) : (
                           <div className="flex items-center gap-3 py-2 px-1">
@@ -1673,157 +1695,157 @@ const SongForm = ({
                   {/* Summary Meta Fields Grid */}
                   <div className="text-[#103958] font-bold text-sm leading-[18px] tracking-[0.5px] grid grid-cols-2 gap-x-10 gap-y-6 px-4 w-full">
                     {/* Song Title */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Song Title
                       </h2>
-                      <p className="truncate text-primary font-normal leading-[32px] tracking-tight">
-                        {songForm.title || "—"}
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
+                        {songForm.title}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100 "></div>
                     </div>
 
                     {/* Language */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Language
                       </h2>
-                      <p className="truncate text-text-body font-normal  leading-[32px] tracking-tight">
-                        {songForm.language || "—"}
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
+                        {songForm.language}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Main Artist */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalizefont-bold">
                         Main Artist
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
-                        {songForm.artist || "—"}
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
+                        {songForm.artist}
                       </p>
                       <div className="border-b border-neutral-100 pt-1"></div>
                     </div>
 
                     {/* Featured Artists */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Featured Artists
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.featured_artist?.length > 0
                           ? songForm.featured_artist
                               .map((item) => item.artistName)
                               .join(", ")
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Performers */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Performers
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.performer?.length > 0
                           ? songForm.performer
                               .map((item) => item.name)
                               .join(", ")
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Songwriter */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Songwriter
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.song_writer?.length > 0
                           ? songForm.song_writer
                               .map((item) => item.first_name)
                               .join(", ")
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Producer */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Producer
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.producer?.length > 0
                           ? songForm.producer
                               .map((item) => item.name)
                               .join(", ")
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Territories */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Territories
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.territories?.length > 0
                           ? songForm.territories.join(", ")
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* UPC */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         UPC
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
-                        {songForm.upc || "—"}
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
+                        {songForm.upc || ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* ISRC */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         ISRC
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
-                        {songForm.isrc || "—"}
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
+                        {songForm.isrc || ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Release date */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-wider text-[#103958] capitalize font-bold">
                         Release Date
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.release_date !== undefined
                           ? new Date(songForm.release_date).toLocaleDateString()
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
 
                     {/* Preorder Start date */}
-                    <div className="flex flex-col gap-1 w-full min-w-0">
-                      <h2 className="text-xs uppercase tracking-wider  text-neutral-400 font-bold">
+                    <div className="flex flex-col w-full min-w-0">
+                      <h2 className="text-xs tracking-tight  text-[#103958] capitalize font-bold">
                         Preorder Start Date
                       </h2>
-                      <p className="truncate text-text-body font-normal leading-[32px] tracking-tight">
+                      <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
                         {songForm.preOrderDate
                           ? new Date(songForm.preOrderDate).toLocaleDateString()
-                          : "—"}
+                          : ""}
                       </p>
-                      <div className="border-b border-neutral-100 pt-1"></div>
+                      <div className="border-b border-neutral-100"></div>
                     </div>
                   </div>
                 </div>
@@ -1837,7 +1859,7 @@ const SongForm = ({
                         src={image}
                         alt="song cover preview"
                         fill
-                        className="object-cover rounded-lg"
+                        className="object-fill rounded-lg"
                       />
                     </div>
                   ) : (
@@ -1849,10 +1871,10 @@ const SongForm = ({
                   )}
                 </div>
                 <div className="flex-1">
-                  <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-2xl">
+                  <p className="font-normal leading-[30px] tracking-[-1px] text-main-heading text-xl">
                     {songForm.title || "Title"}
                   </p>
-                  <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-[16px]">
+                  <p className="font-light leading-[20px] tracking-[-0.5px] text-main-heading text-base">
                     {songForm.artist || "Artist"}
                   </p>
                 </div>

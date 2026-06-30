@@ -124,7 +124,7 @@ const Page = () => {
 
   // Main Artist List View
   return (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-4 md:px-8 lg:pl-[320px]">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 lg:px-0 lg:pl-[280px]">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : isError || !data || data.data.length === 0 ? (
@@ -147,13 +147,13 @@ const Page = () => {
           </button>
         </div>
       ) : (
-        <div className="min-h-full">
-          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] mt-10">
+        <div className="min-h-full px-2 lg:px-0">
+          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] mt-5">
             View and manage all your artist profiles. Edit details, link streaming platforms, and track performance.
           </p>
 
           {/* Search + Filter */}
-          <div className="flex justify-between w-full mt-10 items-center">
+          <div className="flex justify-between w-full mt-5 items-center">
             <div className="flex p-2 outline-1 m-2 rounded-lg mb-5 max-w-[60%] w-full">
               <Image src="/search-normal.svg" alt="search" width={20} height={20} />
               <input
@@ -168,7 +168,7 @@ const Page = () => {
             <div className="relative">
               <button
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="border-2 w-[50px] h-[50px] rounded-lg flex flex-col justify-center items-center gap-1"
+                className="border-2 w-[50px] h-[50px] rounded-lg flex flex-col justify-center items-center gap-1 md:mr-5"
               >
                 <div className="bg-primary w-[25px] h-[2px]"></div>
                 <div className="bg-primary w-[15px] h-[2px]"></div>
@@ -193,7 +193,7 @@ const Page = () => {
           </div>
 
           {/* Artists Grid */}
-          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1">
+          <div className="grid grid-cols-2 gap-5 max-md:grid-cols-1 px-3">
             {data.data.map((artist, index) => (
               <div key={index} className="bg-neutral-50 border-2 border-neutral-100 rounded-lg p-2 flex gap-5 relative">
                 <div className="relative w-[100px] h-[100px]">

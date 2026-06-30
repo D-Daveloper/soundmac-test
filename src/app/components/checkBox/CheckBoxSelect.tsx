@@ -99,7 +99,7 @@ const CheckboxSelect: React.FC<CheckboxSelectProps> = React.memo(({
         onClick={() => setOpen(!open)}
         onKeyDown={handleKeyDown}
         className={
-          " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate " +
+          " p-[0.66em] px-3 w-full flex justify-between items-center outline-1 rounded-lg hover:cursor-pointer line-clamp-1 truncate overflow-x-auto remove-scrollbar " +
           (selected[0]
             ? ""
             : "text-gray-400 font-extralight font-(family-name:--font-figtree)")

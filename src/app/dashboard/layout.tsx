@@ -151,10 +151,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <UserRoute>
-      <div className="min-h-screen bg-neutral-50 flex flex-col items-ce relative">
+      <div className="min-h-scree bg-neutral-50 flex flex-col items-ce relative">
         {/* Top Navbar Header Section */}
-        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[300px] transition-all">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
+        <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[250px] transition-all">
+          <div className="flex h-16 items-center justify-between px-2 lg:px-6">
             {/* Left Side: Navigation Controls & Title */}
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               {/* Hamburger */}
@@ -181,7 +181,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                       router.back();
                     }
                   }}
-                  className="p-2 w-9 h-9 border border-neutral-200 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow-2xs hidden lg:flex"
+                  className="p-2 w-9 h-9 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow- hidden lg:flex"
                 >
                   <Image
                     src="/arrow-left.svg"
@@ -193,7 +193,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </button>
               )}
 
-              <h1 className="font-bold text-base text-main-heading truncate tracking-tight py-1">
+              <h1 className="font-normal text-base md:text-xl text-main-heading truncate tracking-tight py-1">
                 {dashboardContext?.header.title || "Dashboard"}
               </h1>
             </div>
@@ -262,12 +262,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
         {/* left side of dashboard container */}
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[280px] lg:w-[300px] bg-primary-700 text-main-white transform lg:transform-none transition-transform duration-300 ease-in-out flex flex-col border-r border-primary-800 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[250px] lg:w-[260px] bg-primary-700 text-main-white transform lg:transform-none transition-transform duration-300 ease-in-out flex flex-col border-r border-primary-800 ${
             isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >
-          {/* Sidebar Brand Logo Header */}
-          <div className="p-6 flex items-center justify-between h-16">
+          {/* Sidebar Brand Logo Header  */}
+          <div className="p-6 flex items-center justify-between h-16 opacity-50">
             <Link
               href="/"
               className="flex gap-3 items-center opacity-80 hover:opacity-100 transition"
@@ -304,7 +304,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               </Link>
             </div>
 
-            <nav className="space-y-4 md:mt-10">
+            <nav className="space-y-3 md:mt-5">
               {sidebarComponents.map((component, index) => (
                 <SideBarCom
                   // isActive={isActive}

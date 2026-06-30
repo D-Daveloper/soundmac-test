@@ -29,10 +29,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="w-full space-y-6 p-4 sm:p-4 ">
+    <div className= "flex-1 md:w-screen lg:w-full space-y-6 p-4 sm:p-4">
       
 {/* Top Cards Statistics Section Row Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 w-full border border-red-50">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 w-full">
         
 {/* Card 1: Upcoming Release */}
         <div className={`h-[120px] w-full rounded-3xl bg-warning-50 border border-neutral-100 overflow-hidden transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}>
@@ -169,10 +169,10 @@ const Dashboard = () => {
         <div className={`bg-neutral-50 border border-neutral-100 rounded-3xl md:h-[380px] md:w-[400px] flex flex-col overflow-hidden transition ${isLoading ? "shimmer" : ""}`}>
           {!isLoading && (
             data && data.lastRelease ? (
-              <div className="p-5 flex flex-col h-full justify-between flex-1 space-y-4">
-                <div className="space-y-3 flex-1">
+              <div className="px-2 py-3 flex flex-col h- justify-between flex-1 space-y-2 md:pb-10">
+                <div className="space-y-2 flex-1">
                   <div>
-                    <p className="text-text-disable font-medium text-xs uppercase tracking-wider mb-2">
+                    <p className="text-text-disable font-medium text-xs capitalize  mb-2">
                       Last Release
                     </p>
                     <div className="w-full h-48 relative rounded-2xl overflow-hidden bg-neutral-200 shadow-sm">
@@ -181,12 +181,13 @@ const Dashboard = () => {
                         src={data?.lastRelease.releaseImage}
                         alt="artist last release cover art"
                         fill
-                        className="object-cover"
+                        className="object-cove"
                       />
                     </div>
                   </div>
+                  
                   <div>
-                    <h2 className="text-2xl font-bold capitalize tracking-tight text-text-body truncate">
+                    <h2 className="text-xl font-bold capitalize tracking-tight text-text-body truncate">
                       {data?.lastRelease.releaseTitle || "No Release name"}
                     </h2>
                     <p className="text-text-body/70 text-sm font-medium">
@@ -195,29 +196,29 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-neutral-200/60">
-                  <p className="text-text-disable font-bold text-xs uppercase tracking-wider mb-3">
-                    Streams Summary Breakdown
+                <div className="pt-">
+                  <p className="text-text-disable font-bold text-xs tracking-wider mb-3">
+                    Streams
                   </p>
-                  <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
+                  <div className="flex items-center justify-between gap-x-2 flex-wrap sm:flex-nowrap">
                     <div className="flex items-center gap-4">
-                      <div className="flex flex-col items-center gap-1 bg-white p-2.5 rounded-xl border border-neutral-200/60 shadow-xs min-w-[55px]">
+                      <div className="flex flex-col items-center p-2.5">
                         <Image src="/applemusic.svg" priority={false} height={24} width={24} alt="apple music icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-sm mt-1">40</span>
+                        <span className="text-text-body font-bold text-xs mt-1">40</span>
                       </div>
-                      <div className="flex flex-col items-center gap-1 bg-white p-2.5 rounded-xl border border-neutral-200/60 shadow-xs min-w-[55px]">
+                      <div className="flex flex-col items-center p-2.5">
                         <Image src="/spotify.svg" priority={false} height={24} width={24} alt="spotify icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-sm mt-1">123</span>
+                        <span className="text-text-body font-bold text-xs mt-1">123</span>
                       </div>
-                      <div className="flex flex-col items-center gap-1 bg-white p-2.5 rounded-xl border border-neutral-200/60 shadow-xs min-w-[55px]">
+                      <div className="flex flex-col items-center p-2.5">
                         <Image src="/boomplay.svg" priority={false} height={24} width={24} alt="boomplay icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-sm mt-1">40</span>
+                        <span className="text-text-body font-bold text-xs mt-1">40</span>
                       </div>
                     </div>
                     
-                    <div className="bg-primary-300 py-3 px-6 rounded-2xl text-main-white text-right self-stretch flex flex-col justify-center min-w-[100px] shadow-sm ml-auto">
-                      <p className="font-black text-xl tracking-tight leading-none">319</p>
-                      <p className="font-light text-[10px] uppercase tracking-wider mt-1 opacity-90">Total</p>
+                    <div className="bg-primary-300 py-2 px-4 rounded-[15px] text-main-white items-center justify-center flex flex-col">
+                      <p className="font-black text-xs tracking-tight leading-none">319</p>
+                      <p className="font-light text-[10px] uppercase tracking-wider opacity-90">Total</p>
                     </div>
                   </div>
                 </div>

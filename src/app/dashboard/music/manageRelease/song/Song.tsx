@@ -28,6 +28,7 @@ const Song = () => {
     dashboardContext?.setHeader({
       title: "Manage Songs",
       showBackButton: false,
+      onBack: () => router.back()
     });
   }, []);
 
@@ -139,7 +140,7 @@ const Song = () => {
     !isDataLoading && (isError || !data || data.data.length === 0);
 
   return !wantsToEdit ? (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 lg:pl-[320px] px-4 sm:px-6 max-w-7xl mx-auto">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 lg:pl-[280px] px-4 sm:px-6 max-w-7xl mx-auto">
       {/* Content Type Tabs */}
       <div className="flex gap-3 mt-6">
         <button
@@ -317,7 +318,7 @@ const Song = () => {
                         src={song?.releaseImage || "/signinimage.png"}
                         alt="song release artwork cover"
                         fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="object-fill transition-transform duration-300 group-hover:scale-105"
                       />
                     </div>
 

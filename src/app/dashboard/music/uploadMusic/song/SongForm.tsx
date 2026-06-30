@@ -425,7 +425,7 @@ const SongForm = () => {
   }
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[320px]">
+    <div className="bg-main-white h-full w-full flex flex-col md:pl-[10px] lg:pl-[280px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -435,7 +435,7 @@ const SongForm = () => {
             <div className="flex gap-8 px-5 md:px-2 py-5 min-h-full h-full">
               {/* form */}
               {!preview && !showSuccessPage && (
-                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-3 h-[64dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-10 lg:pb-0 lg:h-[68dvh]">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -1560,10 +1560,10 @@ const SongForm = () => {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-2xl">
+                    <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-xl">
                       {songForm.title || "Title"}
                     </p>
-                    <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-[16px]">
+                    <p className="font-light leading-[20px] truncate max-w-50 tracking-[-0.5px] text-main-heading text-base">
                       {songForm.artist || "Artist"}
                     </p>
                   </div>
