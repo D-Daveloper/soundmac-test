@@ -19,6 +19,7 @@ import {
   getAlbumPerformanceData,
   getAlbums,
   getAlbumTracks,
+  getAllApiKeys,
   getAllArtists,
   getAllChartRegistrations,
   getAlllabels,
@@ -62,6 +63,7 @@ import {
   AllArtistResponse,
   AllLabelResponse,
   AllSupportRequestsResponse,
+  ApiKeyData,
   Artist,
   ArtistDetails,
   ArtistStat,
@@ -885,5 +887,27 @@ export function useGetAdminChartDetails(params: { chartId: string }) {
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+  });
+}
+
+
+export function usePaginatedAdminAllApiKeys(params: {
+  page: number;
+  name: string;
+  limit: string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<ApiKeyData>, Error>({
+    queryKey: [
+      "allApiKeys",
+      params.page,
+      params.name,
+      params.limit,
+    ],
+    queryFn: async () => getAllApiKeys(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }

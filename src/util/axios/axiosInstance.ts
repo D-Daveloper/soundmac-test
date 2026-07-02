@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, ApiKeyData, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -448,5 +448,19 @@ export const getAdminChartDetails = async (
   params: { chartId: string }
 ): Promise<ChartRegistration> => {
   const res = await api.get<Promise<ChartRegistration>>("admin/more/chart-registrations/" + params.chartId,);
+  return res.data;
+};
+
+export const getAllApiKeys = async (
+  api: AxiosInstance,
+  params: {
+    page: number;
+    name: string;
+    limit: string;
+  }
+): Promise<PAGINATION<ApiKeyData>> => {
+  const res = await api.get<Promise<PAGINATION<ApiKeyData>>>("admin/more/api-key", {
+    params: params,
+  });
   return res.data;
 };

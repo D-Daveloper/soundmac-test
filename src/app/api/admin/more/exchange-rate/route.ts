@@ -7,7 +7,6 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
     try {
-        await dbConnect();
         const userData = await verifyJWT();
         const userJwt = verifyUser(userData);
 

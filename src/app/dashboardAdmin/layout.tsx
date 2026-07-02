@@ -120,9 +120,9 @@ const sidebarComponents = [
         query: "sales_report",
       },
       {
-        title: "Exchange Rate",
+        title: "Extras",
         icon: "/musicplay.svg",
-        href: "/dashboardAdmin/more/exchange-rate",
+        href: "/dashboardAdmin/more/extras",
         query: "sales_report",
       },
     ],
