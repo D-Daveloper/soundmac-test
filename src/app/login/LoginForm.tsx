@@ -46,14 +46,12 @@ const LoginForm = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect");
-  const safeRedirect = redirect?.startsWith("/")
-    ? redirect
-    : "/dashboard";
+  const safeRedirect = redirect?.startsWith("/") ? redirect : "/dashboard";
   const [loginForm, setLoginForm] = useState<LoginForm>({
     password: "",
-    email: "",///
+    email: "", ///
   });
-  const {mutateAsync, isPending,isSuccess} = useLoginMutation();
+  const { mutateAsync, isPending, isSuccess } = useLoginMutation();
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -64,10 +62,9 @@ const LoginForm = () => {
     try {
       const res = await mutateAsync(loginForm);
       console.log(res);
-        localStorage.setItem("soundmacRedirectAfterOtp", safeRedirect);
-        console.log(res.data);
-        router.push("/otp");
-      
+      localStorage.setItem("soundmacRedirectAfterOtp", safeRedirect);
+      console.log(res.data);
+      router.push("/otp");
     } catch (error) {
       if (error instanceof AxiosError) {
         console.log(error);
@@ -89,7 +86,7 @@ const LoginForm = () => {
         action=""
         className=" text-p leading-5 tracking-[0.5px] text-lg w-full h-full sm:text-xl"
       >
-        <div className="w-full flex flex-wrap justify-between gap-y-10 px-10">
+        <div className="w-full flex flex-wrap justify-between gap-y-5 px-10">
           {formvals.map((item, index) => (
             <div
               key={item.name}
@@ -110,22 +107,29 @@ const LoginForm = () => {
             </div>
           ))}
         </div>
-        <p className="leading-6 text-[16px] text-p font-light text-center my-10">
-          Forgot password?
-          <span className="text-primary underline font-extrabold">
-            <Link href={"/forgot-password"}>Forgot Password</Link>
-          </span>
+        <p className="leading-6 text-[15px] text-p font-light text-center my-10">
+          Having trouble signing in?
+          <Link
+            href="/forgot-password"
+            className="text-primary underline font-extrabold text-base"
+          >
+            <span className="underline">Reset your password</span>
+          </Link>
         </p>
-        <div className="border-2 border-[#E1E1CF] my-10 w-full"></div>
+        <div className="border-2 border-[#E1E1CF] my-7 w-full"></div>
       </form>
-      <div className="flex justify-end flex-col gap-10 items-center pb-9 max-sm:text-2xl">
+      <div className="flex justify-end flex-col gap-3 items-center pb-9 max-sm:text-2xl">
         <button
-          disabled={!loginForm.password || !loginForm.email || isPending||isSuccess}
+          disabled={
+            !loginForm.password || !loginForm.email || isPending || isSuccess
+          }
           form="signup-form"
           type="submit"
           className={
             "bg-disable px-8 py-3 font-bold rounded-lg text-white text-center max-w-fit hover:cursor-pointer max-sm:text-sm " +
-            ((loginForm.password && !isPending) && " bg-primary hover:bg-primary/90")
+            (loginForm.password &&
+              !isPending &&
+              " bg-primary hover:bg-primary/90")
           }
         >
           Sign In

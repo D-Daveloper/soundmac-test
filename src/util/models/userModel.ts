@@ -185,6 +185,9 @@ export interface IUser extends mongoose.Document {
   twoFactorAuthentication: "true" | "false";
   otp: string | null;
   otpExpires: Date | null;
+  googleId?:string;
+  appleId?:string;
+  oauthProvider: "google" | "apple" | null;
   referral_code?: string; // Optional field
   reportSkip: number;
   withdrawalEligibility: boolean;
@@ -369,10 +372,35 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: [true, "Provide a password"],
+      required: [
+    function (this: any) {
+      return !this.oauthProvider; // only required if not OAuth
+    },
+    "Provide a password",
+  ],
+      // required: [true, "Provide a password"],
       minlength: [6, "Password must be at least 6 characters"],
       trim: true,
     },
+
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,    
+    },
+
+    appleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+
+    oauthProvider: {
+      type: String,
+      enum: ["google", "apple", null],
+      default: null,
+    },
+    
     twoFactorAuthentication: {
       type: String,
       default: "true",
@@ -411,7 +439,7 @@ const UserSchema = new mongoose.Schema(
 UserSchema.pre("save", async function () {
   if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  this.password = await bcrypt.hash(this.password as string, salt);
 });
 
 UserSchema.pre("validate", function (next) {
