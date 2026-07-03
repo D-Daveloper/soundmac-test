@@ -132,7 +132,7 @@ const RegisterForm = () => {
         action=""
         className=" text-p leading-5 tracking-[0.5px] text-lg  w-full h-full lg:text-xl"
       >
-        <div className="w-full flex flex-wrap justify-between gap-y-10 px-10">
+        <div className="w-full flex flex-wrap justify-between gap-y-5 px-10">
           {formvals.map((item, index) => (
             <div key={index} className="flex flex-col w-[40%] max-sm:w-full">
               <Input
@@ -153,7 +153,9 @@ const RegisterForm = () => {
             </div>
           ))}
           <div className="flex flex-col w-[40%] max-sm:w-full">
-            <p className="font-medium mb-2 sm:text-sm text-lg">Country</p>
+            <div className="flex">
+              <p className="font-medium mb-2 text-sm">Country</p> <span className="text-red-500">*</span>
+            </div>
             <div className="w-full">
               <Select
                 selected={registerForm.country}
@@ -165,10 +167,10 @@ const RegisterForm = () => {
             </div>
           </div>
         </div>
-        <div className="border-2 border-[#E1E1CF] my-10 w-full"></div>
+        <div className="border-2 border-[#E1E1CF] my-5 w-full"></div>
       </form>
       <div className="flex justify-end flex-col gap-5 items-center pb-5 max-sm:text-xl">
-        <div className="mt-10 flex gap-3 max-xs:mt-80">
+        <div className="mt- flex gap-3">
           <input
             type="checkbox"
             className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
@@ -176,7 +178,7 @@ const RegisterForm = () => {
             checked={registerForm.isChecked}
             onChange={handleChange}
           />
-          <p className="leading-6 text-sm sm:text-lg text-primary font-semibold flex gap-2">
+          <p className="leading-6 text-xs sm:text-base text-primary font-semibold flex gap-x-1">
             I agree to the 
           <span className="text-primary underline font-extrabold">
             <Link href={"https://sites.google.com/view/soundmac-legal/terms-condition"}>Terms of Service</Link>

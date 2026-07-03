@@ -116,7 +116,7 @@ const CheckboxSelect: React.FC<CheckboxSelectProps> = React.memo(
                 onChange={toggleSelectAll}
                 className="cursor-pointer"
               />
-              <span className="text-sm text-gray-700">Select All</span>
+              <span className="text-sm text-gray-700">Worldwide</span>
             </label>
 
             <div className="max-h-48 overflow-y-auto space-y-1 scrollbar-thin">

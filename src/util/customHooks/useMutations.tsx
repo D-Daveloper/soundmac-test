@@ -184,3 +184,42 @@ export const useDeleteAlbumMutation = () => {
     },
   });
 };
+
+export const useGoogleAuthMutation = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async (token: string) => {
+      const res = await api.post("auth/google", {token});
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success("Signed in successfully!");
+      queryClient.setQueryData(["authUser"], data.user);
+
+      const session = parseInt(
+        process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
+      );
+      const sessionExpiry = Date.now() + session * 1000;
+      const redirect = localStorage.getItem("soundmacRedirectAfterOtp");
+      localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
+
+      router.push(
+        redirect
+          ? redirect
+          : data.user.role === "user"
+          ? "/dashboard"
+          : "/dashboardAdmin"
+      );
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Google sign in failed.");
+    },
+  });
+};

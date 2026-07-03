@@ -454,20 +454,18 @@ const ManageAlbumForm = ({
                           </p>
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                          <div className="flex">
-                            <p className=" capitalize font-medium text-sm">
-                              territories{" "}
-                              <span className="text-red-500">*</span>
+                          <div className="flex flex-col">
+                            <div>
+                              <p className=" capitalize font-medium text-sm">
+                                territories{" "}
+                                <span className="text-red-500">*</span>
+                              </p>
+                            </div>
+                            <p className="text-xs text-warning-700 font-light italic mt-1">
+                              Choose where your music will be available. Select
+                              “Worldwide” to distribute your release to
+                              listeners around the world
                             </p>
-                            {/* <Image
-                              priority={false}
-                              loading="lazy"
-                              src="/required.svg"
-                              alt="a star marking this field as required"
-                              width={0}
-                              height={0}
-                              className="w-2 -mt-3 "
-                            /> */}
                           </div>
 
                           <CheckboxSelect
@@ -528,10 +526,12 @@ const ManageAlbumForm = ({
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Distribution Platforms
                     </h1>
-                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
-                      Choose the platforms where your release will be available.
+                    <p className="text-warning-700 italic font-light leading-[18px] tracking-[-0.5px] text-xs mt-1 sm:max-w-[40%]">
+                      Choose the streaming platforms for your release. We
+                      recommend selecting “Select All” so your music is
+                      delivered to all available streaming platforms.
                     </p>
-                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 px-1 ">
+                    <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 px-1 ">
                       <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                         <div className="flex">
                           <p className=" capitalize font-medium sm:text-sm text-lg">
