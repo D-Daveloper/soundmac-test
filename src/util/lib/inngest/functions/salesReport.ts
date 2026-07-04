@@ -8,7 +8,7 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import mongoose from "mongoose";
 import salesReportBatch from "@/util/models/saleReportBatchModel";
-import { stripQuotes, normalize } from "@/util/middleware/functions";
+import { stripQuotes, normalize, salesreportDownloadEmail, replaceTemplatePlaceholders } from "@/util/middleware/functions";
 import SongModel from "@/util/models/songModel";
 import AlbumModel from "@/util/models/AlbumModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
@@ -196,16 +196,17 @@ export const generateReport = inngest.createFunction(
 
         // 1. Fetch data
         const reports = await step.run("fetch-data", async () => {
-            return await salesReport.find({ user: userId }).lean();
+            return await salesReport.find({ user: userId }).populate("user", "firstName  email").lean();
         });
 
         // 2. Format + CSV
         const csv = await step.run("generate-csv", async () => {
             const formatted = reports.map(r => ({
-                Song: r.trackTitle,
-                Artist: r.trackArtistsRaw,
-                Revenue: r.netAmountUsd?.toString(),
-                Date: r.createdAt,
+                Song: r?.trackTitle,
+                Artist: r?.trackArtistsRaw || "",
+                Revenue: r?.netAmountUsd?.toString(),
+                Streams: r?.quantity?.toString(),
+                Sales_Month: r?.saleMonth ? new Date(r?.saleMonth)?.toLocaleDateString() : "",
             }));
 
             //   const parser = new Parser();
@@ -223,22 +224,28 @@ export const generateReport = inngest.createFunction(
         });
 
         // 3. Upload to S3
-        const { fileKey, fileUrl } = await step.run("upload", async () => {
-            const key = `salesReports/${userId}/${reportId}.csv`;
+        const { fileKey, fileUrl, fileName } = await step.run("upload", async () => {
+            const fileName = `sales_report_${reports[0]?.reportperiod?.toISOString().split('T')[0]}.csv`;
+
+            const key = `salesReports/${reports[0]?.user.email}/${fileName}`;
+
 
             await s3.send(new PutObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET!,
                 Key: key,
                 Body: Buffer.from(csv, 'utf-8'),
                 ContentType: "text/csv",
-            }));
+            }));//set expires in 1 hour, after that the user will have to request a new report
+
             const getCommand = new GetObjectCommand({
                 Bucket: process.env.AWS_S3_BUCKET!,
                 Key: key,
+                ResponseContentDisposition: `attachment; filename=${fileName}`,
             });
+            
             const signedUrl = await getSignedUrl(s3, getCommand, { expiresIn: (60 * 60) }); // 1 hour
 
-            return { fileKey: key, fileUrl: signedUrl };
+            return { fileKey: key, fileUrl: signedUrl, fileName };
         });
         console.log("filekey", fileKey, "fileurl", fileUrl);
 
@@ -248,16 +255,41 @@ export const generateReport = inngest.createFunction(
                 status: "ready",
                 fileKey,
                 fileUrl,
+                fileName,
                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h validity
+                fileUrlExpiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1h validity
             });
         });
 
         // 5. Email
         await step.run("email", async () => {
+            const salesreportEmailData = {
+                first_name: reports[0]?.user?.firstName,
+                report_period: reports[0]?.reportperiod?.toDateString(),
+                total_tracks: reports.length.toString(),
+                total_streams: reports.reduce((sum, r) => sum + (r.quantity || 0), 0).toString(),
+                total_revenue: reports.reduce((sum, r) => sum + (parseFloat(r.netAmountUsd?.toString() || "0")), 0).toFixed(2),
+                currency: '$',
+                generated_date: new Date().toDateString(),
+                report_filename: `sales_report_${reports[0]?.reportperiod?.toISOString().split('T')[0]}.csv`,
+                download_url: fileUrl,
+                link_expiry: "24 hours",
+                file_size: (Buffer.byteLength(csv, 'utf-8') / 1024).toFixed(2) + " KB",
+                dashboard_url: `${process.env.FRONTEND_URL}/dashboard` || "https://soundmac.com/dashboard",
+                support_email: process.env.SUPPORT_EMAIL || "Support@soundmac.co",
+                company_name: "SoundMac",
+                year: new Date().getFullYear().toString(),
+                company_address: process.env.COMPANY_ADDRESS || "Kusenla road ikate, Eti OSA Lagos Nigeria"
+            };
+
+            const salesreportEmailhtml = replaceTemplatePlaceholders(
+                salesreportDownloadEmail(),
+                salesreportEmailData,
+            );
             await sendEmail(
                 email,
                 "Your report is ready",
-                `Download here: ${fileUrl}, This Link expires in one hour`,
+                salesreportEmailhtml,
             );
         });
 

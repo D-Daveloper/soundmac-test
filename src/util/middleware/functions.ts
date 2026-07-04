@@ -4038,6 +4038,157 @@ export const promotionCompletionEmail = () => {
 </html>`;
 };
 
+export const salesreportDownloadEmail = () => {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Sales Report</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: #0e2e44; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">📊 Your Sales Report</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Ready to download</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Icon -->
+                    <tr>
+                        <td style="padding: 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; margin: 0 auto; background-color: #ede9fe; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2v16m7-9H5m14 0c0 7.732-6.268 14-14 14S0 16.732 0 9 6.268-5 14-5s14 6.268 14 14z" stroke="#0e2e44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M9 13l3 3 3-3" stroke="#0e2e44" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>{{first_name}}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your sales report has been generated and is ready to download. The file is in CSV format and contains detailed information about all your sales and streams.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Report Summary -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">Report Summary</h2>
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px;">Report Period</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right;">{{report_period}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Total Tracks</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{total_tracks}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Total Streams</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{total_streams}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Total Revenue</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{currency}}{{total_revenue}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">Generated Date</td>
+                                    <td style="padding: 8px 0; color: #111827; font-size: 14px; font-weight: 600; text-align: right; border-top: 1px solid #e5e7eb;">{{generated_date}}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- What's Included -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <h2 style="margin: 0 0 15px 0; color: #111827; font-size: 18px; font-weight: 600;">What's Included in Your Report</h2>
+                            <ul style="margin: 0; padding: 0 0 0 20px; color: #374151; font-size: 14px;">
+                                
+                                <li style="margin-bottom: 10px;"><strong>Track Performance:</strong> Individual stats for each of your tracks</li>
+                                <li style="margin-bottom: 10px;"><strong>Revenue Details:</strong> Earnings from all sources</li>
+                                <li style="margin-bottom: 0;"><strong>Download Counts:</strong> Total downloads from each source</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    
+                    <!-- Download Section -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background: linear-gradient(135deg, #0e2e44 0%, #11456B 100%); border: 2px solid #8b5cf6; border-radius: 8px; padding: 30px; text-align: center;">
+                                <p style="margin: 0 0 15px 0; color: #fff; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Download Your CSV File</p>
+                                <p style="margin: 0 0 20px 0; color: #fff; font-size: 16px; font-weight: 500;">{{report_filename}}</p>
+                                <a href="{{download_url}}" style="display: inline-block; padding: 14px 40px; background:#11456B; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.3);">⬇️ Download Report</a>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Link Expiration Notice -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    <strong>⚠️ Important:</strong> Your download link will expire in <strong>{{link_expiry}}</strong>. If the link has expired, you can generate a new report from your dashboard.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- File Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 15px; border-radius: 4px;">
+                                <h3 style="margin: 0 0 10px 0; color: #065f46; font-size: 14px; font-weight: 600;">File Information</h3>
+                                <p style="margin: 0 0 5px 0; color: #047857; font-size: 14px;"><strong>Format:</strong> CSV (Excel compatible)</p>
+                                <p style="margin: 0 0 5px 0; color: #047857; font-size: 14px;"><strong>File Size:</strong> {{file_size}}</p>
+                                <p style="margin: 0; color: #047857; font-size: 14px;"><strong>Encoding:</strong> UTF-8</p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+
+                    <!-- Additional Options -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+
+                            <a href="{{dashboard_url}}" style="display: inline-block; padding: 12px 28px; background-color: #f3f4f6; color: #374151; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; border: 1px solid #d1d5db;">Go to Dashboard</a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">If you need help interpreting your report or have questions, contact us at <a href="mailto:{{support_email}}" style="color: #8b5cf6; text-decoration: none;">{{support_email}}</a></p>
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Keep this report safe for your records.</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© {{year}} {{company_name}}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">{{company_address}}</p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
 // Helper function to replace placeholders
 export function replaceTemplatePlaceholders(
     html: string,
