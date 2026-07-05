@@ -202,11 +202,17 @@ export const generateReport = inngest.createFunction(
         // 2. Format + CSV
         const csv = await step.run("generate-csv", async () => {
             const formatted = reports.map(r => ({
-                Song: r?.trackTitle,
-                Artist: r?.trackArtistsRaw || "",
-                Revenue: r?.netAmountUsd?.toString(),
-                Streams: r?.quantity?.toString(),
                 Sales_Month: r?.saleMonth ? new Date(r?.saleMonth)?.toLocaleDateString() : "",
+                Type: r?.contentType || "",
+                UPC: r?.upc || "",
+                ISRC: r?.isrc || "",
+                Track_Title: r?.trackTitle || "",
+                Source_Currency: r?.sourceCurrency || "",
+                Digital_Service_Provide: r?.dsp || "",
+                Territory: r?.territory || "",
+                Artist: r?.trackArtistsRaw || "",
+                Revenue: r?.netAmountUsd?.toString() || "",
+                Streams: r?.quantity?.toString() || "",
             }));
 
             //   const parser = new Parser();
