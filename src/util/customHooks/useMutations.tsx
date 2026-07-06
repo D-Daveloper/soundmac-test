@@ -191,13 +191,15 @@ export const useGoogleAuthMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (token: string) => {
-      const res = await api.post("auth/google", {token});
+    mutationFn: async ({token, referralCode}:{token:string, referralCode:string}) => {
+      const res = await api.post("auth/google", {token, referralCode});
       return res.data;
     },
     onSuccess: (data) => {
       toast.success("Signed in successfully!");
       queryClient.setQueryData(["authUser"], data.user);
+      console.log('response from backend:', data);
+      
 
       const session = parseInt(
         process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
@@ -206,6 +208,10 @@ export const useGoogleAuthMutation = () => {
       const redirect = localStorage.getItem("soundmacRedirectAfterOtp");
       localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
 
+      if(data.user.needsProfileCompletion) {
+        toast.info('Please complete your profile info')
+        router.push("/dashboard/profile?info=profile-info")
+      } else {
       router.push(
         redirect
           ? redirect
@@ -213,6 +219,7 @@ export const useGoogleAuthMutation = () => {
           ? "/dashboard"
           : "/dashboardAdmin"
       );
+    };
     },
     onError: (error) => {
       if (isAxiosError(error)) {

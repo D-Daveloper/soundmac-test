@@ -3,13 +3,15 @@ import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
+import sendEmail from "@/util/sendMail/sendEmail";
+import Referral from "@/util/models/ReferralModel";
+import { generateReferralCode } from "@/util/referrals";
 
 const client = new OAuth2Client();
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { token } = await req.json();
-
+    const { token, referralCode: enteredReferralCode } = await req.json();
     if (!token) {
       return NextResponse.json({ msg: "Token is required" }, { status: 400 });
     }
@@ -55,7 +57,28 @@ export async function POST(req: Request) {
       "-password -otp -otpExpires -refreshToken",
     );
 
-    if (!user) {
+    const isNewUser = !user;
+    let referrer = null;
+
+    if (isNewUser && enteredReferralCode?.trim()) {
+      referrer = await User.findOne({
+        referralCode: enteredReferralCode.trim(),
+      });
+
+      if (!referrer) {
+        return NextResponse.json(
+          { msg: "Invalid referral code" },
+          { status: 400 },
+        );
+      }
+    }
+
+    if (isNewUser) {
+      let referralCode = generateReferralCode();
+
+      while (await User.findOne({ referralCode })) {
+        referralCode = generateReferralCode();
+      }
       user = await User.create({
         firstName: given_name || "User",
         lastName: family_name || "",
@@ -66,12 +89,33 @@ export async function POST(req: Request) {
         profilePic: picture || null,
         oauthProvider: "google",
         googleId,
+        referralCode,
+        referredBy: referrer?._id ?? null,
         twoFactorAuthentication: "false",
         otp: null,
         otpExpires: null,
       });
+      if (referrer) {
+        await Referral.create({
+          referrer: referrer._id,
+          referred: user._id,
+          referralCode: referrer.referralCode,
+          status: "pending",
+          conversionType: null,
+          planName: null,
+          commissionAmount: 0,
+          commissionPaid: false,
+          completedAt: null,
+          expiresAt: null,
+        });
+      }
     }
-
+    if (referrer?.email === email) {
+      return NextResponse.json(
+        { msg: "You cannot refer yourself" },
+        { status: 400 },
+      );
+    }
     if (!user) {
       return NextResponse.json(
         { msg: "Failed to create user" },
@@ -79,6 +123,43 @@ export async function POST(req: Request) {
       );
     }
 
+    if (isNewUser) {
+      try {
+        await sendEmail(
+          user.email,
+          "Welcome to SOUNDMAC!",
+          `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+              <meta charset="UTF-8" />
+              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+              <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+              <title>Welcome to Soundmac</title>
+            </head>
+            <body>
+              <div style="width: 400px; margin: auto; text-align: center;">
+                <img src="https://sconchun.sirv.com/welcome%20mail%20header.png" width="400" alt="" />
+                <div style="text-align: justify; width: 400px; margin: 20px auto;">
+                  Dear ${user.firstName}, <br /><br />
+                  Thank you for choosing Soundmac as your music distribution platform.<br /><br />
+                  We're excited to have you on board!<br /><br />
+                  Best regards,<br />
+                  SOUNDMAC Team
+                </div>
+                <img src="https://sconchun.sirv.com/welcome%20mail%20footer.png" width="400" alt="" />
+              </div>
+            </body>
+            </html>
+          `,
+        );
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+      }
+    }
+
+    const needsProfileCompletion =
+      !user?.country || user.country === "Not Provided" || user.country === "";
     // Generate tokens — same as OTP route
     const accessToken = jwt.sign(
       { userId: user._id, name: user.firstName, email: user.email },
@@ -97,6 +178,7 @@ export async function POST(req: Request) {
       user: {
         ...user.toObject(),
         password: undefined,
+        needsProfileCompletion,
       },
     });
 

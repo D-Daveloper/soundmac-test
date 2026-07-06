@@ -9,6 +9,10 @@ import { isAxiosError } from "axios";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { useGetReferralDetails } from "@/util/customHooks/useQueries";
+import { handleCopy } from "@/util/middleware/functions";
+import { Copy } from "lucide-react";
+import ReferralDetails from "./ReferralDetails";
 
 const formData = [
   {
@@ -55,7 +59,7 @@ type ProfileForm = {
 };
 
 const AccountInfo = () => {
-  const { data, isLoading,refetch } = useAuthUser();
+  const { data, isLoading, refetch } = useAuthUser();
   const api = UseAxios();
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
@@ -69,16 +73,16 @@ const AccountInfo = () => {
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, name,files } = e.target;
+    const { value, name, files } = e.target;
     if (name === "profile_pic") {
       const file = files && files.length ? files[0] : null;
-        console.log(file);
-        console.log(profileForm);
-        
-        if (file) {
-        setProfileForm((prev) => ({ ...prev, profile_pic:file }));
+      console.log(file);
+      console.log(profileForm);
+
+      if (file) {
+        setProfileForm((prev) => ({ ...prev, profile_pic: file }));
         setImage(URL.createObjectURL(file));
-          return;
+        return;
       }
     }
     setProfileForm((prev) => ({ ...prev, [name]: value }));
@@ -128,16 +132,16 @@ const AccountInfo = () => {
   }, [data]);
 
   return (
-    <div className=" w-full max-w-[800px] flex flex-col px-5">
+    <div className=" w-full max-w-[800px] flex flex-col px-2">
       {isLoading || !data || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         !false &&
         true && (
           <>
-            <div className="bg-secondary-50 rounded-xl p-5 mt-8 max-w-[600px] flex gap-5 mb-5 max-sm:flex-col sm:items-center">
+            <div className="bg-secondary-50 rounded-xl p-5 mt-8 flex gap-5 mb-5 max-sm:flex-col ">
               <div className="flex gap-5 items-center">
-                <div className="min-w-[100px] max-w-[100px] min-h-[100px] max-h-[100px] relative">
+                <div className="md:p-14 p-10 relative">
                   <Image
                     priority={true}
                     loading="eager"
@@ -145,6 +149,7 @@ const AccountInfo = () => {
                     alt="Profile picture"
                     fill
                     className="object-cover rounded-lg "
+                    unoptimized
                   />
                 </div>
                 <div className="flex flex-col">
@@ -165,6 +170,11 @@ const AccountInfo = () => {
                 {data.type}
               </div>
             </div>
+            
+{/* referral details */}
+          
+          <ReferralDetails />
+
             <div className="flex gap-8 py-5 pb-30">
               <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 ">
                 {/* cover art */}
@@ -198,6 +208,7 @@ const AccountInfo = () => {
                                   src={image ? image : "/document-upload.svg"}
                                   width={60}
                                   height={60}
+                                  unoptimized
                                   alt="music note icon"
                                   className={
                                     profileForm.profile_pic
@@ -242,7 +253,7 @@ const AccountInfo = () => {
                   </div>
                 )}
                 {/* Account info */}
-                <div>
+                <div className="md:ml-5 px-2 md:">
                   <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                     Personal Info
                   </h1>

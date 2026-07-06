@@ -450,3 +450,8 @@ export const getAdminChartDetails = async (
   const res = await api.get<Promise<ChartRegistration>>("admin/more/chart-registrations/" + params.chartId,);
   return res.data;
 };
+
+export const getReferralDetails = async (api: AxiosInstance) => {
+  const { data } = await api.get("referral");
+  return data;
+};

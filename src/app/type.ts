@@ -620,3 +620,30 @@ export type ChartRegistration = {
     isrc: string
   }
 }
+
+export interface ReferralHistory {
+  _id: string;
+  status: "pending" | "completed" | "expired";
+  commissionAmount: number;
+  commissionPaid: boolean;
+  createdAt: string;
+  completedAt: string | null;
+  referred: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+}
+export interface ReferralDetails {
+  success: boolean;
+  referralCode: string;
+  referralLink: string;
+  stats: {
+    totalReferrals: number;
+    pendingReferrals: number;
+    completedReferrals: number;
+    totalCommission: number;
+  };
+  referrals: ReferralHistory[];
+}

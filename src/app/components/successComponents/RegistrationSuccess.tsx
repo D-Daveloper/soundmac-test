@@ -13,13 +13,13 @@ const RegistrationSuccess = () => {
         <p className="text-p font-normal text-sm leading-5 tracking-[0.5px] mt-3">
           Welcome aboard! Your journey starts here.
         </p>
-        <div className="border-2 border-dashed border-[#E1E1CF] my-10"></div>
+        <div className="border-2 border-dashed border-[#E1E1CF] my-5"></div>
         <div>
           <Image
             priority={true}
             src={"/document-upload-success.svg"}
-            width={50}
-            height={50}
+            width={30}
+            height={30}
             alt="a document with a check mark"
             className="h-full w-full object-cover"
           />

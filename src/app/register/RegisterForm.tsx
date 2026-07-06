@@ -55,7 +55,7 @@ const formvals: FormField[] = [
   {
     title: "referral code",
     placeholder: "Enter your code",
-    name: "referral",
+    name: "referralCode",
   },
 ];
 
@@ -66,7 +66,7 @@ type RegisterFormType = {
   password: string;
   isChecked: boolean;
   email: string;
-  referral: string;
+  referralCode: string;
 };
 const RegisterForm = () => {
   const router = useRouter();
@@ -79,7 +79,7 @@ const RegisterForm = () => {
     password: "",
     isChecked: false,
     email: "",
-    referral: "",
+    referralCode: "",
   });
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {

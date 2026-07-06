@@ -50,6 +50,7 @@ import {
   getUserSalesReportDashboardDetails,
   getUserWithdrawalHistory,
   getWithdrawalHistory,
+  getReferralDetails
 } from "../axios/axiosInstance";
 import {
   AdminAlbumDetailsResponse,
@@ -70,6 +71,7 @@ import {
   labelResponse,
   PAGINATION,
   PayStackBankListResponse,
+  ReferralDetails,
   ReleaseRequestResponse,
   salesReportDashboardResponse,
   songFromApi,
@@ -885,5 +887,17 @@ export function useGetAdminChartDetails(params: { chartId: string }) {
     retryOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+  });
+}
+
+export function useGetReferralDetails() {
+  const api = UseAxios();
+  return useQuery<ReferralDetails, Error>({
+    queryKey: ["referral"],
+    queryFn: async () => getReferralDetails(api),
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 }
