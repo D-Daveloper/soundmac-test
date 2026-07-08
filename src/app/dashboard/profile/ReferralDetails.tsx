@@ -79,14 +79,18 @@ const ReferralDetails = () => {
             </span>
             <input
               readOnly
-              value={referralData?.referralLink ?? ""}
+              value={
+                referralData?.referralCode ? referralData.referralLink : "- - -"
+              }
+              // value={referralData?.referralLink ? referralData.referralLink: "---"}
               placeholder="No link generated"
               className="flex-1 bg-transparent text-xs font-medium text-neutral-700 outline-none truncate"
             />
             <button
-              disabled={!referralData}
+              disabled={!referralData?.referralCode}
               onClick={() =>
-                referralData && copyText(referralData.referralLink, "link")
+                referralData?.referralLink &&
+                copyText(referralData.referralLink, "link")
               }
               className="shrink-0 flex items-center gap-1.5 bg-white border border-neutral-200 hover:border-neutral-300 text-neutral-700 rounded-md px-3 py-1.5 text-xs font-semibold shadow-sm hover:bg-neutral-50 active:scale-98 transition disabled:opacity-50"
             >
@@ -115,9 +119,10 @@ const ReferralDetails = () => {
               {referralData?.referralCode || "— — —"}
             </span>
             <button
-              disabled={!referralData}
+              disabled={!referralData?.referralCode}
               onClick={() =>
-                referralData && copyText(referralData.referralCode, "code")
+                referralData?.referralCode &&
+                copyText(referralData.referralCode, "code")
               }
               className="text-primary hover:text-primary/80 font-semibold text-xs transition disabled:opacity-50 flex items-center gap-1"
             >
