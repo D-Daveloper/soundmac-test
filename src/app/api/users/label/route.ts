@@ -97,7 +97,7 @@ export async function POST(req: Request) {
 
       const imageType = (label_logo as File).type.split("/")[1]; //get the image extension
 
-      const imageStorageLocation = `testing/labellogos/${user?.email}/${label_name}.${imageType}`;
+      const imageStorageLocation = `userImages/${user?.email}/label.${imageType}`;
 
       imageUrl = await uploadImage(
         imageType,

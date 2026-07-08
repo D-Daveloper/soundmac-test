@@ -108,7 +108,7 @@ export async function PUT(req: Request) {
 
         const imageType = (profile_pic as File).type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/profilePictures/${user?.email}.${imageType}`;
+        const imageStorageLocation = `userImages/${user?.email}/profile.${imageType}`;
 
         imageUrl = await uploadImage(
           imageType,
@@ -192,7 +192,7 @@ export async function POST(req: Request) {
 
         const imageType = (payload.id_image as File).type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/userPictures/${user?.email}/identificationImage.${imageType}`;
+        const imageStorageLocation = `userImages/${user?.email}/identity.${imageType}`;
 
         idImageUrl = await uploadImage(
           imageType,
@@ -219,7 +219,7 @@ export async function POST(req: Request) {
 
         const imageType = (payload.address_image as File).type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/userPictures/${user?.email}/addressImage.${imageType}`;
+        const imageStorageLocation = `userImages/${user?.email}/address.${imageType}`;
 
         addressImageUrl = await uploadImage(
           imageType,

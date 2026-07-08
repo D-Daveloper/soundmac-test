@@ -104,7 +104,7 @@ export async function PUT(req: Request) {
 
         const imageType = (profile_pic as File).type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/userPictures/${user?.email}/profilePicture.${imageType}`;
+        const imageStorageLocation = `userImages/${user?.email}/profile.${imageType}`;
 
         imageUrl = await uploadImage(
           imageType,

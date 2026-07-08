@@ -114,7 +114,7 @@ export async function POST(req: Request) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const imageType = file.type.split("/")[1];
-    const imageStorageLocation = `testing/artistImages/${user.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+    const imageStorageLocation = `userImages/${user?.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
     const selectedImage = await uploadImage(
       imageType,
       buffer,
@@ -366,7 +366,7 @@ export async function PUT(req: Request) {
     if (file) {
       const buffer = Buffer.from(await file.arrayBuffer());
       const imageType = file.type.split("/")[1];
-      const imageStorageLocation = `testing/artistImages/${user.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const imageStorageLocation = `artistImages/${user.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
       selectedImage = await uploadImage(
         imageType,
         buffer,

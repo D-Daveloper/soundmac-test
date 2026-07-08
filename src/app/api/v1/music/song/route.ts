@@ -160,7 +160,7 @@ export async function POST(req: Request) {
 
       const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
 
-      const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
       imageUrl = await uploadImage(
         imageType,
@@ -189,7 +189,7 @@ export async function POST(req: Request) {
 
         const licenseType = payload.license!.type.split("/")[1]; //get the image extension
 
-        const licenseLocation = `testing/${payload.upc}/cover_license_${payload.upc}.${licenseType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const licenseLocation = `NewReleases/${payload.upc}/cover_license_${payload.upc}.${licenseType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
         licenseUrl = await uploadImage(
           "application/pdf",
@@ -633,7 +633,7 @@ export async function POST(req: Request) {
 
 //       const imageType = music_image.type.split("/")[1]; //get the image extension
 
-//       const imageStorageLocation = `testing/${upc}/${upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+//       const imageStorageLocation = `NewReleases/${upc}/${upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
 //       const imageUrl = await uploadImage(
 //         imageType,
@@ -1033,7 +1033,7 @@ export async function PUT(req: Request) {
 
         const imageType = payload.musicImage.type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `testing/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
         imageUrl = await uploadImage(
           imageType,
@@ -1263,7 +1263,7 @@ export async function PUT(req: Request) {
 //     .jpeg({ quality: 90 })
 //     .toBuffer();
 
-//   const key = `soundmac4/testing/${upc}.jpg`;
+//   const key = `soundmac4/NewReleases/${upc}.jpg`;
 
 //   await s3.send(
 //     new PutObjectCommand({

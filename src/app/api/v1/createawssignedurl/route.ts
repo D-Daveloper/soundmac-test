@@ -145,7 +145,7 @@ export async function POST(req: Request) {
     }
 
     // ---- 2. Generate S3 key ----
-    const s3Key = `testing/${upc}/${upc}.${fileType.split("/")[1]}`;
+    const s3Key = `NewReleases/${upc}/${upc}.${fileType.split("/")[1]}`;
 
     // ---- 3. Create signed URL ----
     const command = new PutObjectCommand({
@@ -290,7 +290,7 @@ export async function PUT(req: Request) {
         { status: 400 },
       );
     }
-    const s3key = `testing/${upc}/${upc}_01_${track_number}.${fileType.split("/")[1]}`;
+    const s3key = `NewReleases/${upc}/${upc}_01_${track_number}.${fileType.split("/")[1]}`;
 
     // ---- 3. Create signed URL ----
     const command = new PutObjectCommand({
