@@ -17,8 +17,10 @@ const salesReportDownloadSchema = new mongoose.Schema({
 
   fileKey: String, // S3 key
   fileUrl: String,
+  fileName: String, // for download filename
 
   expiresAt: Date, // for regeneration logic
+  fileUrlExpiresAt: Date, // for signed URL expiration
 
 }, { timestamps: true });
 

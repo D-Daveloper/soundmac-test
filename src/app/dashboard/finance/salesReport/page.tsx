@@ -2,11 +2,13 @@
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import Select from "@/components/Select";
+import useAxios from "@/util/customHooks/UseAxios";
 import {
   useGetUserArtistsNames,
   useGetUserSalesReportDashboardDetailsNames,
 } from "@/util/customHooks/useQueries";
 import { formatAmount } from "@/util/middleware/functions";
+import { isAxiosError } from "axios";
 import {
   CircleDollarSign,
   Clock4,
@@ -18,25 +20,54 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Page = () => {
+  const api = useAxios();
   const dashboardContext = useContext(DashboardContext);
   const [salesReportForm, setsalesReportForm] = useState({
     artist: "",
     timeLine: "",
   });
+  const [downloadingSalesReport, setdownloadingSalesReport] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    dashboardContext?.setHeader({title:"Sales Report", showBackButton:false});
+    dashboardContext?.setHeader({
+      title: "Sales Report",
+      showBackButton: false,
+    });
   }, []);
+
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =
     useGetUserArtistsNames();
+
+
   const { isLoading: isLoadingSalesReport, data: salesReport } =
     useGetUserSalesReportDashboardDetailsNames();
 
+  async function handleDownloadSalesReport() {
+    try {
+      setdownloadingSalesReport(true);
+      const res = await api.post("/v1/finance/sales-report/download", {});
+      if (res.data.status === "ready") {
+        window.open(res.data.downloadUrl, "_blank");
+      }
+      toast.success(res.data.msg);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Failed to download sales report");
+    } finally {
+      setdownloadingSalesReport(false);
+    }
+  }
+
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[280px] px-5">
-      {isLoading || !data || isLoadingSalesReport || !salesReport ? (
+      {(isLoading || !data || isLoadingSalesReport || !salesReport || downloadingSalesReport) ? (
         <InlineLoadingScreen />
       ) : (
         <div className="mt-5 flex flex-col gap-5 mb-10">
@@ -72,9 +103,7 @@ const Page = () => {
               </div>
             </div>
             <button
-              onClick={() => {
-                //   handlePreview(songForm);
-              }}
+              onClick={handleDownloadSalesReport}
               className={
                 "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
               }
@@ -108,7 +137,7 @@ const Page = () => {
               href={"salesReport/advancedRoyalty"}
               className={
                 "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
-              } 
+              }
             >
               Advance Royalties
               <FileDown strokeWidth={1} size={20} />
@@ -189,7 +218,10 @@ const Page = () => {
                           {item.song.releaseTitle}
                         </h1>
                         <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-sm line-clamp-2">
-                          feat. {item.song.featuredArtist.length > 0 ? item.song.featuredArtist[0]?.artistName : ""}
+                          feat.{" "}
+                          {item.song.featuredArtist.length > 0
+                            ? item.song.featuredArtist[0]?.artistName
+                            : ""}
                         </p>
                         <p className="mt-2">
                           <span className="text-primary-500 font-bold leading-[18px] tracking-tighter text-sm">

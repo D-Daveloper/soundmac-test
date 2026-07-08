@@ -7,7 +7,7 @@ export interface IApiKey extends Document {
   lastUsedAt: Date;
   isActive: boolean;
   userId: mongoose.Types.ObjectId;
-  expiresAt:Date
+  expiresAt: Date
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,13 +24,13 @@ const ApiKeySchema = new Schema<IApiKey>(
       type: String,
       required: [true, "Provide the hashed Key!"],
       trim: true,
-      unique:true
+      unique: true
     },
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-        required: [true, "Provide a user!"],
-        index:true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Provide a user!"],
+      index: true
     },
     isActive: {
       type: Boolean,
@@ -40,16 +40,21 @@ const ApiKeySchema = new Schema<IApiKey>(
       type: Date,
       default: new Date(),
     },
-    expiresAt:{
-        type: Date,
-        required:[true, "Provide api key expiry!"]
+    expiresAt: {
+      type: Date,
+      required: [true, "Provide api key expiry!"]
     }
   },
   {
     timestamps: true, // ✅ automatically adds createdAt & updatedAt
   },
 );
-ApiKeySchema.index({ user: 1, lastUsedAt: 1,isActive:1 }, { unique: true });
+
+ApiKeySchema.index({ userId: 1, isActive: 1 }, {
+  unique: true,
+  partialFilterExpression: { isActive: true }
+});
+
 // Middleware to ensure updatedAt updates correctly on findOneAndUpdate
 ApiKeySchema.pre("findOneAndUpdate", function (next) {
   this.set({ updatedAt: new Date() });

@@ -119,23 +119,16 @@ const sidebarComponents = [
         href: "/dashboardAdmin/more/chart-registrations?chartStatus=all",
         query: "sales_report",
       },
+      {
+        title: "Extras",
+        icon: "/musicplay.svg",
+        href: "/dashboardAdmin/more/extras",
+        query: "sales_report",
+      },
     ],
   },
 ];
-const profileLinks = [
-  {
-    title: "Help & Support",
-    href: "/dashboardAdmin/help",
-  },
-  {
-    title: "Subscription",
-    href: "/dashboard/subscription",
-  },
-  {
-    title: "Account Information",
-    href: "/dashboard/profile?info=profile-info",
-  },
-];
+
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { data, isLoading } = useAuthUser();
@@ -308,21 +301,12 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </button>
         <div
           className={
-            "fixed rounded-2xl w-55 h-55 bg-white z-30 bottom-25 left-2 flex flex-col p-2 justify-between transition-opacity duration-300 " +
+            "fixed rounded-2xl w-55 h-fit bg-white z-30 bottom-25 left-2 flex flex-col p-2 justify-between transition-opacity duration-300 " +
             (isProfilePopUpOpen
               ? "opacity-100"
               : " opacity-0 pointer-events-none")
           }
         >
-          {profileLinks.map((link, index) => (
-            <Link
-              key={index}
-              href={link.href}
-              className="text-text-body font-normal leading-[18px] -tracking-[-0.5px] text-sm capitalize p-3 hover:bg-gray-200 rounded-lg"
-            >
-              {link.title}
-            </Link>
-          ))}
           <LogoutButton />
         </div>
         <Suspense fallback={<NormalLoadingScreen />}>{children}</Suspense>

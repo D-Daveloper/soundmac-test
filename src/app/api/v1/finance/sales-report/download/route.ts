@@ -6,6 +6,9 @@ import { inngest } from "@/util/lib/inngest/inngest";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import salesReport from "@/util/models/salesReportModel";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { s3 } from "@/util/middleware/aws";
 
 function generateReportKey(userId: string, filters: any) {
     const raw = JSON.stringify({ userId, ...filters });
@@ -33,7 +36,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ msg: "Invalid Request." }, { status: 401 });
         }
         else if (user.role != "user") {
-          return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+            return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
         }
 
         const body = await req.json();
@@ -47,13 +50,28 @@ export async function POST(req: Request) {
         if (salesReportNumber < 1) {
             return NextResponse.json({
                 msg: "No sales report Found"
-            });
+            }, { status: 404 });
         }
         // 1. Check if report already exists
         let report = await salesReportDownload.findOne({ reportKey });
 
         // ✅ If exists and still valid → return existing link
         if (report && report.status === "ready" && report.expiresAt > new Date()) {
+            if (report.fileUrlExpiresAt && report.fileUrlExpiresAt < new Date()) {
+                // If the signed URL has expired, we can regenerate it or return an error
+                const getCommand = new GetObjectCommand({
+                    Bucket: process.env.AWS_S3_BUCKET!,
+                    Key: report.fileKey!,
+                    ResponseContentDisposition: `attachment; filename=${report?.fileName}`,
+
+                });
+                const signedUrl = await getSignedUrl(s3, getCommand, { expiresIn: (60 * 60) }); // 1 hour
+                return NextResponse.json({
+                    status: "ready",
+                    downloadUrl: signedUrl,
+                });
+            }
+
             return NextResponse.json({
                 status: "ready",
                 downloadUrl: report.fileUrl,

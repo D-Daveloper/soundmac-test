@@ -120,9 +120,9 @@ const Page = () => {
       if (
         !withdrawalForm.amount ||
         !numRegex.test(withdrawalForm.amount) ||
-        parseInt(withdrawalForm.amount, 10) < 1000
+        parseInt(withdrawalForm.amount, 10) < 20
       ) {
-        return toast.warn("Please enter an amount equal or above 1000");
+        return toast.warn("Please enter an amount equal or above 20 dollars");
       } else if (otp.some((digit) => digit === "" || finalOtp.length < 6)) {
         toast.warn("Please enter the complete 6-digit OTP.");
         return;

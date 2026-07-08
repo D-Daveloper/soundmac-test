@@ -7,11 +7,12 @@ import {
 } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
-import sendEmail from "@/util/sendMail/sendEmail";
 import mongoose, { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import withDrawalModel from "@/util/models/withDrawalModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
+import { inngest } from "@/util/lib/inngest/inngest";
+import { Counter } from "@/util/models/CounterModel";
 
 export async function POST(
   req: Request,
@@ -104,7 +105,7 @@ export async function POST(
 
       const withdrawalEmailData: WithdrawalEmailBody = {
         user_name: withdrawal.user.firstName,
-        currency: "NGN",
+        currency: "USD",
         amount: withdrawal.amount.toString(),
         transaction_id: withdrawal._id,
         request_date: withdrawal.createdAt.toDateString(),
@@ -119,11 +120,15 @@ export async function POST(
         withdrawalApprovalEmail(),
         withdrawalEmailData,
       );
-      // await sendEmail(
-      //   withdrawal.user.email,
-      //   "Withdrawal " + body.requestType,
-      //   withdrawalEmailhtml,
-      // )
+      //  background job
+      await inngest.send({
+        name: "send-email",
+        data: {
+          html: withdrawalEmailhtml,
+          emailTo: withdrawal.user.email,
+          title: "Royality Withdrawal"
+        },
+      });
     } else if (body.requestType == "rejected") {
       withdrawalUpdate = withDrawalModel.findByIdAndUpdate(
         withdrawalId,
@@ -133,7 +138,7 @@ export async function POST(
 
       const withdrawalEmailData: WithdrawalEmailBody = {
         user_name: withdrawal.user.firstName,
-        currency: "NGN",
+        currency: "USD",
         amount: withdrawal.amount.toString(),
         transaction_id: withdrawal._id,
         request_date: withdrawal.createdAt.toDateString(),
@@ -152,11 +157,14 @@ export async function POST(
         withdrawalEmailData,
       );
       await Promise.all([
-        sendEmail(
-          withdrawal.user.email,
-          "Withdrawal " + body.requestType,
-          withdrawalEmailhtml,
-        ),
+        inngest.send({
+          name: "send-email",
+          data: {
+            html: withdrawalEmailhtml,
+            emailTo: withdrawal.user.email,
+            title: "Royality Withdrawal"
+          },
+        }),
         withdrawalUpdate,
       ]).catch((error) => {
         console.error("failed to reject withdrawal request", error);
@@ -213,10 +221,13 @@ export async function GET(
 
 
 
-    const withdrawal = await withDrawalModel
+    const [withdrawal,exchange_rate] = await Promise.all([ 
+      withDrawalModel
       .findById(withdrawalId)
       .populate("user", "firstName lastName country accountDetails email -_id")
-      .lean();
+      .lean(),
+      Counter.findById("exchange_rate").select("value -_id").lean()
+    ]);
 
     if (!withdrawal) {
       return NextResponse.json(
@@ -227,7 +238,7 @@ export async function GET(
     // console.log(withdrawal);
 
     return NextResponse.json({
-      withdrawal,
+      withdrawal:{...withdrawal,exchange_rate},
       msg: "Successful.",
     });
   } catch (error) {

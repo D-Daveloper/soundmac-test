@@ -203,7 +203,7 @@ export default function Page({
                         Exchange rate to ₦
                       </p>
                       <p className="text-gray-900 text-lg font-medium">
-                        {withdrawalDetails.withdrawal.user.firstName}
+                        {withdrawalDetails.withdrawal.exchange_rate.value}
                       </p>
                     </div>
                   </div>

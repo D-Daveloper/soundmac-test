@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, ApiKeyData, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
