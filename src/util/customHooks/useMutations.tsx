@@ -191,13 +191,15 @@ export const useGoogleAuthMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (token: string) => {
-      const res = await api.post("auth/google", {token});
+    mutationFn: async ({token, referralCode}:{token:string, referralCode?:string}) => {
+      const res = await api.post("auth/google", {token, referralCode});
       return res.data;
     },
     onSuccess: (data) => {
       toast.success("Signed in successfully!");
       queryClient.setQueryData(["authUser"], data.user);
+      console.log('response from backend:', data);
+      
 
       const session = parseInt(
         process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
@@ -206,6 +208,10 @@ export const useGoogleAuthMutation = () => {
       const redirect = localStorage.getItem("soundmacRedirectAfterOtp");
       localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
 
+      if(data.user.needsProfileCompletion) {
+        toast.info('Please complete your profile info')
+        router.push("/dashboard/profile?info=profile-info")
+      } else {
       router.push(
         redirect
           ? redirect
@@ -213,6 +219,7 @@ export const useGoogleAuthMutation = () => {
           ? "/dashboard"
           : "/dashboardAdmin"
       );
+    };
     },
     onError: (error) => {
       if (isAxiosError(error)) {
@@ -220,6 +227,58 @@ export const useGoogleAuthMutation = () => {
         return;
       }
       toast.error("Google sign in failed.");
+    },
+  });
+};
+
+
+export const useAppleAuthMutation = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const api = useAxios();
+
+  return useMutation({
+    mutationFn: async ({identityToken, referralCode, user}:{identityToken:string, referralCode?:string, user?: {
+    name?: {
+      firstName?: string | null;
+      lastName?: string | null;
+    };
+  }}) => {
+      const res = await api.post("auth/apple", {identityToken, referralCode, user});
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success("Signed in successfully!");
+      queryClient.setQueryData(["authUser"], data.user);
+      // console.log('response from backend:', data);
+      
+
+      const session = parseInt(
+        process.env.NEXT_PUBLIC_SESSION_EXPIRY_SECONDS || "7200"
+      );
+      const sessionExpiry = Date.now() + session * 1000;
+      const redirect = localStorage.getItem("soundmacRedirectAfterOtp");
+      localStorage.setItem("soundMacAuthenticated", sessionExpiry.toString());
+
+      if(data.user.needsProfileCompletion) {
+        toast.info('Please complete your profile info')
+        router.push("/dashboard/profile?info=profile-info")
+      } else {
+      router.push(
+        redirect
+          ? redirect
+          : data.user.role === "user"
+          ? "/dashboard"
+          : "/dashboardAdmin"
+      );
+    };
+    },
+    onError: (error) => {
+      if (isAxiosError(error)) {
+        console.log(error);
+        return;
+      }
+      toast.error("Apple sign in failed.");
     },
   });
 };

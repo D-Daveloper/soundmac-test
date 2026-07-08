@@ -4,6 +4,8 @@ import User from "@/util/models/userModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import { generateOtp } from "@/util/middleware/functions";
+import { generateReferralCode } from "@/util/referrals";
+import Referral from "@/util/models/ReferralModel";
 
 export async function POST(req: Request) {
   try {
@@ -16,11 +18,11 @@ export async function POST(req: Request) {
     if (existingUser) {
       return NextResponse.json(
         { success: false, msg: "Email already exists" },
-        { status: 400 }
+        { status: 400 },
       );
     }
-	const otp = generateOtp();
-	const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
+    const otp = generateOtp();
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000); // OTP valid for 5 minutes
 
     try {
       const mailRes = await sendEmail(
@@ -81,27 +83,89 @@ export async function POST(req: Request) {
 		</div>
 	</body>
 </html>
-            `
+            `,
       );
       if (!mailRes) {
         return NextResponse.json(
           { success: false, msg: "Failed to otp email" },
-          { status: 500 }
+          { status: 500 },
         );
       }
     } catch (error) {
       console.log(error);
       return NextResponse.json(
         { success: false, msg: "Failed to send verification email" },
-        { status: 500 }
+        { status: 500 },
       );
     }
-    const user = new User({...body,firstName:body.first_name,lastName:body.last_name,otp, otpExpires });
+
+    let referrer = null;
+    const enteredReferralCode = body.referralCode?.trim();
+    console.log(body);
+    // console.log("enteredReferralCode:", enteredReferralCode);
+    if (enteredReferralCode) {
+      //  console.log("Looking for referral:", enteredReferralCode);
+      referrer = await User.findOne({
+        referralCode: enteredReferralCode,
+      });
+      console.log("Referrer found:", referrer);
+      if (!referrer) {
+        return NextResponse.json(
+          {
+            success: false,
+            msg: "Invalid referral code",
+          },
+          { status: 400 },
+        );
+      }
+    }
+
+    let referralCode = generateReferralCode();
+    // check if the referral code generated already belongs to a previous user
+    while (await User.findOne({ referralCode })) {
+      referralCode = generateReferralCode();
+    }
+    const user = new User({
+      ...body,
+      firstName: body.first_name,
+      lastName: body.last_name,
+      otp,
+      otpExpires,
+      referralCode,
+      referredBy: referrer?._id ?? null,
+    });
+    // console.log("referral code:", referralCode);
+
     await user.save();
+    if (referrer) {
+      // 		console.log({
+      //   referrer: referrer._id,
+      //   referred: user._id,
+      //   referralCode: referrer.referralCode,
+      // });
+      const referral = await Referral.create({
+        referrer: referrer?._id,
+        referred: user._id,
+        referralCode: referrer?.referralCode,
+        status: "pending",
+        conversionType: null,
+        planName: null,
+        commissionAmount: 0,
+        commissionPaid: false,
+        completedAt: null,
+        expiresAt: null,
+      });
+      console.log("Created referral:", referral);
+      // const allReferrals = await Referral.find();
+
+      // console.log("All referrals:", allReferrals);
+    }
     return NextResponse.json({
-      msg: `Please enter the otp sent to ${user.email}`,email: user.email,
+      msg: `Please enter the otp sent to ${user.email}`,
+      email: user.email,
     });
   } catch (error: unknown) {
+    console.error(error);
     return handleMongooseValidationError(error);
   }
 }
@@ -126,7 +190,7 @@ export async function POST(req: Request) {
 //         `${user.email}`,
 //         "Welcome to SOUNDMAC!",
 //         `
-        
+
 //         <!DOCTYPE html>
 // <html lang="en">
 // 	<head>
@@ -182,7 +246,7 @@ export async function POST(req: Request) {
 
 // 					If that doesn't work, copy and past the following link in your
 // 					browser: <br />
-// 					<a 
+// 					<a
 //           style="
 //           display: inline-block;
 // 								background: blue;
@@ -243,7 +307,7 @@ export async function PATCH(req: Request) {
     if (!user) {
       return NextResponse.json(
         { success: false, msg: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
     try {
@@ -333,19 +397,19 @@ export async function PATCH(req: Request) {
 		</div>
 	</body>
 </html>
-            `
+            `,
       );
       if (!mailRes) {
         return NextResponse.json(
           { success: false, msg: "Failed to send verification email" },
-          { status: 500 }
+          { status: 500 },
         );
       }
     } catch (error) {
       console.log(error);
       return NextResponse.json(
         { success: false, msg: "Failed to send verification email" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -356,7 +420,7 @@ export async function PATCH(req: Request) {
     } else {
       return NextResponse.json(
         { msg: "An unknown error occurred" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

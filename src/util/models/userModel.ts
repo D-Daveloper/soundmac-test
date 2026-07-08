@@ -1,5 +1,7 @@
 import mongoose, { Model } from "mongoose";
 import bcrypt from "bcryptjs";
+import { defaultFilter } from "cmdk";
+import { unique } from "next/dist/build/utils";
 
 export const subscriptionDetails = new mongoose.Schema(
   {
@@ -188,7 +190,8 @@ export interface IUser extends mongoose.Document {
   googleId?:string;
   appleId?:string;
   oauthProvider: "google" | "apple" | null;
-  referral_code?: string; // Optional field
+  referralCode?: string; // Optional field
+  referredBy: mongoose.Types.ObjectId;
   reportSkip: number;
   withdrawalEligibility: boolean;
   catalog_count: number;
@@ -225,7 +228,6 @@ export interface IUser extends mongoose.Document {
     verified: "pending" | "approved" | "rejected";
   } | null;
 }
-
 const UserSchema = new mongoose.Schema(
   {
     firstName: {
@@ -259,6 +261,20 @@ const UserSchema = new mongoose.Schema(
       lowercase: true,
       index: true,
     },
+
+    referralCode: {
+      type: String,
+      unique:true,
+      sparse:true,
+      index:true,
+    },
+
+    referredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref:"User",
+      default: null
+    },
+
     userStatus: {
       type: String,
       enum: ["active", "inactive"],
@@ -416,9 +432,6 @@ const UserSchema = new mongoose.Schema(
     otpExpires: {
       type: Date,
       default: null,
-    },
-    referralCode: {
-      type: String,
     },
     reportSkip: {
       type: Number,

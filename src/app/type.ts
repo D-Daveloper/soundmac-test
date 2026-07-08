@@ -621,17 +621,29 @@ export type ChartRegistration = {
   }
 }
 
-export type ApiKeyData = {
-  _id: string
-  name: string
-  hashedKey: string
-  isActive: boolean
-  lastUsedAt: string
-  expiresAt: string
-  createdAt: string
-  updatedAt: string
-  userId: {
+export interface ReferralHistory {
+  _id: string;
+  status: "pending" | "completed" | "expired";
+  commissionAmount: number;
+  commissionPaid: boolean;
+  createdAt: string;
+  completedAt: string | null;
+  referred: {
+    _id: string;
+    firstName: string;
+    lastName: string;
     email: string;
-  }
-  __v: number
+  };
+}
+export interface ReferralDetails {
+  success: boolean;
+  referralCode: string;
+  referralLink: string;
+  stats: {
+    totalReferrals: number;
+    pendingReferrals: number;
+    completedReferrals: number;
+    totalCommission: number;
+  };
+  referrals: ReferralHistory[];
 }

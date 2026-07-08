@@ -115,7 +115,7 @@ const router = useRouter()
                         {user.type || "FREE_ARTIST"}
                       </td>
                       <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {user.referral_code || "No Code"}
+                        {user.referralCode || "No Code"}
                       </td>
                       <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
                         {new Date(user.createdAt).toDateString()}

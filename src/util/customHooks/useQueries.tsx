@@ -51,6 +51,7 @@ import {
   getUserSalesReportDashboardDetails,
   getUserWithdrawalHistory,
   getWithdrawalHistory,
+  getReferralDetails
 } from "../axios/axiosInstance";
 import {
   AdminAlbumDetailsResponse,
@@ -72,6 +73,7 @@ import {
   labelResponse,
   PAGINATION,
   PayStackBankListResponse,
+  ReferralDetails,
   ReleaseRequestResponse,
   salesReportDashboardResponse,
   songFromApi,
@@ -890,24 +892,14 @@ export function useGetAdminChartDetails(params: { chartId: string }) {
   });
 }
 
-
-export function usePaginatedAdminAllApiKeys(params: {
-  page: number;
-  name: string;
-  limit: string;
-}) {
+export function useGetReferralDetails() {
   const api = UseAxios();
-  return useQuery<PAGINATION<ApiKeyData>, Error>({
-    queryKey: [
-      "allApiKeys",
-      params.page,
-      params.name,
-      params.limit,
-    ],
-    queryFn: async () => getAllApiKeys(api, params),
-    placeholderData: (prev) => prev, // avoids UI flicker
+  return useQuery<ReferralDetails, Error>({
+    queryKey: ["referral"],
+    queryFn: async () => getReferralDetails(api),
     retry: (failedCount, error) =>
       handleReactQueryApiCallError(failedCount, error),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
   });
 }

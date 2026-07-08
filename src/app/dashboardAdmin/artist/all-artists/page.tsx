@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useGetAllArtists } from "@/util/customHooks/useQueries";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
+import { log } from "console";
 
 const Page = () => {
   const dashboardContext = useContext(DashboardContext);
@@ -45,7 +46,6 @@ const Page = () => {
     artistName,
     limit: "50",
   });
-
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
       <div className="flex gap-3 mt-5">
