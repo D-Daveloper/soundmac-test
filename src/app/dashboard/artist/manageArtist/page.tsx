@@ -124,7 +124,7 @@ const Page = () => {
 
   // Main Artist List View
   return (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 lg:px-0 lg:pl-[270px]">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 md:px-3">
       {isLoading ? (
         <InlineLoadingScreen />
       ) : isError || !data || data.data.length === 0 ? (

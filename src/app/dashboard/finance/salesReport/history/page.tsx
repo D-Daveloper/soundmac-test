@@ -53,7 +53,7 @@ const page = () => {
   }, []);
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[310px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col px-5">
       <Link
         aria-label="go back"
         href={"/dashboard/finance/salesReport"}

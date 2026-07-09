@@ -238,7 +238,7 @@ const ManageAlbumForm = ({
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[280px]">
+    <div className="bg-main-white h-full w-full flex flex-col">
       {isLoading || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -258,9 +258,9 @@ const ManageAlbumForm = ({
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-4 px-5 md:px-2 py-5">
+            <div className="flex gap-4 px-5 md:px-2 py-5 min-h-full h-full">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-6 pb-20 lg:pb-5 lg:h-[68dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-6 pb-20 lg:px-5">
                   {/* album info */}
                   <div>
                     <h1 className="text-sm md:text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -744,7 +744,7 @@ const ManageAlbumForm = ({
                 </div>
               ) : (
                 // preview starts here
-                <div className="flex-1 overflow-y-auto flex flex-col gap-5 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
+                <div className="flex-3 md:px-5 overflow-y-auto flex flex-col gap-5 pb-20 h-full custom-scrollbar">
                   {/* Header Section with Action */}
                   <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
                     <h1 className="text-base font-bold tracking-tight text-main-heading">

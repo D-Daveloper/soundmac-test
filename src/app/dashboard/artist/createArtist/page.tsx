@@ -132,7 +132,7 @@ const CreateArtistForm = () => {
   }, []);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[280px]">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:px-3">
       {/* <button
         aria-label="go back"
         onClick={() => {
@@ -147,10 +147,10 @@ const CreateArtistForm = () => {
           alt="arrow left"
         />
       </button> */}
-      <div className="flex gap-6 px-2 py-5">
+      <div className="flex gap-6 px-2 py-5 min-h-full h-full">
         {!preview ? (
           !showSuccessPage ? (
-            <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-0 pb-20 lg:pb-5 lg:h-[68dvh]">
+            <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-0 pb-20">
               {/* Song info */}
               <div>
                 <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">

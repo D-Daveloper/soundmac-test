@@ -213,7 +213,7 @@ const Album = () => {
   }
 
   return (
-    <div className="bg-main-white max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[280px] px-5">
+    <div className="bg-main-white max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 px-5">
       {/* Tab Selectors */}
       <div className="flex gap-3 mt-5">
         <button

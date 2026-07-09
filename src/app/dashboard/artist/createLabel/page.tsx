@@ -176,7 +176,7 @@ const Page = () => {
   }, [data]);
 
   return (
-    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:pl-[280px]">
+    <div className="bg-main-white h-[90dvh] w-full flex flex-col lg:px-3">
       {/* <button
         aria-label="go back"
         onClick={() => {
@@ -195,9 +195,9 @@ const Page = () => {
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="flex gap-8 px-2 lg:px-0 py-5">
+          <div className="flex gap-8 px-2 lg:px-0 py-5 min-h-full h-full">
             {!preview ? (
-              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-1 pb-20 lg:pb-5 lg:h-[68dvh]">
+              <div className="flex-3 overflow-auto flex flex-col gap-10 px-2 lg:px-1 pb-20 ">
                 {/* Song info */}
                 <div>
                   <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -396,7 +396,7 @@ const Page = () => {
               </div>
             ) : (
               // preview starts here
-              <div className="flex-3 overflow-y-auto flex flex-col gap-10 px-2 pb-6 h-[64dvh] custom-scrollbar">
+              <div className="flex-3 overflow-y-auto flex flex-col gap-10 px-2 pb-6 h-full custom-scrollbar">
                 <div>
                   <div className="flex items-center justify-between border-b md:border-none border-neutral-100 pb-4">
                     <h1 className="text-base font-bold tracking-tight text-main-heading">
@@ -411,7 +411,7 @@ const Page = () => {
                   </div>
 
                   {/* Artwork / Logo file preview */}
-                  <div className="w-full flex flex-col gap-y-3">
+                  <div className="w-full flex flex-col gap-y-3 mt-2">
                     <p className="font-bold text-[#000000] text-sm leading-[18px] tracking-[0.5px]">
                       Artwork File
                     </p>

@@ -4,10 +4,10 @@ import Dashboard from "./Dashboard";
 const Page = () => {
 
   return (
-    <main className="section min-h-screen relative bg-main-white text-[14px] -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out pb-10 ">
-      <div className="flex h-full">
-        <div className="text-[#333333] lg:ml-[260px] w-full h-full">
-          <div className="h-full">
+    <main className="section relative bg-main-white text-[14px] h-fit -tracking-[0.5px] leading-5 transition-all duration-300 ease-in-out">
+      {/* <div className="flex h-full"> */}
+        {/* <div className="text-[#333333] min-h-full h-full w-full"> */}
+          <div className="h-fit">
           <Dashboard />
             {/* {tab === "Music" && (
               <>
@@ -39,8 +39,8 @@ const Page = () => {
               <Promotion />
             )} */}
           </div>
-        </div>
-      </div>
+        {/* </div> */}
+      {/* </div> */}
     </main>
   );
 };

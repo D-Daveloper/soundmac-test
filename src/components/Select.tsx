@@ -126,7 +126,7 @@ useEffect(() => {
 
       {/* Dropdown options */}
       {open && (
-        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-39 text-sm max-xs:max-h-60">
+        <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 transition-all duration-200 ease-in-out overflow-y-auto max-h-60 text-sm ">
           <div className="flex p-2 outline-1 m-2 rounded-lg mb-5">
             <Image
             priority={true}

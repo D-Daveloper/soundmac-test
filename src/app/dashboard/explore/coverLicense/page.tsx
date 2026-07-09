@@ -11,7 +11,7 @@ const Page = () => {
     dashboardContext?.setHeader({title:"Cover Song Licensing", showBackButton:false});
   }, []);
   return (
-    <div className="lg:pl-[280px] bg-main-white min-h-screen w-full flex flex-col px-2 pb-30 ">
+    <div className="bg-main-white min-h-screen w-full flex flex-col px-3 pb-30 ">
       <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 lg:max-w-[60%] text-left">
         Through our partnership with Easy Song Licensing, you can secure the
         mechanical rights needed to distribute <br /> your version of any song —

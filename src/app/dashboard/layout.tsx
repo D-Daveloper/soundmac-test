@@ -1,7 +1,13 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import React, { Suspense, useContext, useEffect, useState , useRef} from "react";
+import React, {
+  Suspense,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
@@ -15,9 +21,6 @@ import {
 import Notification from "../components/notification/Notification";
 import axios from "axios";
 import LogoutButton from "../logout/Logout";
-
-
-
 
 const sidebarComponents = [
   {
@@ -137,23 +140,22 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
-
   useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      profileRef.current &&
-      !profileRef.current.contains(event.target as Node)
-    ) {
-      setIsProfilePopUpOpen(false);
-    }
-  };
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setIsProfilePopUpOpen(false);
+      }
+    };
 
-  document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
-  return () => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  };
-}, []);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     setIsOpen(false);
@@ -173,7 +175,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <UserRoute>
-      <div className="min-h-scree bg-neutral-50 flex flex-col items-ce relative">
+      <div className="min-h-screen bg-neutral-50 flex flex-col  relative">
         {/* Top Navbar Header Section */}
         <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-neutral-100 lg:pl-[250px] transition-all">
           <div className="flex h-16 items-center justify-between px-2 lg:px-6">
@@ -340,9 +342,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           {/* Artist name modal Container Element inside Layout Panel */}
-          <div className="absolute bottom-4 inset-x-4 z-50"
-          ref={profileRef}
-          >
+          <div className="absolute bottom-4 inset-x-4 z-50" ref={profileRef}>
             <button
               onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
               className="w-full h-14 bg-black/90 hover:bg-black rounded-xl flex items-center justify-between p-2.5 transition backdrop-blur-sm shadow-xl"
@@ -395,9 +395,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </aside>
         {/* Main Content Area Execution Grid Wrapper */}
-        <main className="flex w-full">
-          {" "}
-          <Suspense fallback={<NormalLoadingScreen />}>{children}</Suspense>
+        {/* Main Content Area Execution Grid Wrapper */}
+        <main className="w-full lg:pl-[260px] h-[calc(100dvh-64px)]">
+          <div className="h-full">{children}</div>
         </main>
 
         {/* unsubscribed users modal */}

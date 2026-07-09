@@ -425,7 +425,7 @@ const SongForm = () => {
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col md:pl-[10px] lg:pl-[280px]">
+    <div className="bg-main-white h-full w-full flex flex-col md:pl-[10px]">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -435,7 +435,7 @@ const SongForm = () => {
             <div className="flex gap-8 px-5 md:px-2 py-5 min-h-full h-full">
               {/* form */}
               {!preview && !showSuccessPage && (
-                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-10 lg:pb-0 lg:h-[68dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-8 pb-10 lg:h-full">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -1470,22 +1470,22 @@ const SongForm = () => {
               )}
 
               {showSuccessPage && (
-                <div className="flex justify-center items-center min-h-[70dvh] w-full px-2 py-4 animate-fade-in">
+                <div className="flex  w-[80%] mx-auto animate-fade-in h-fit pb-5">
                   <div className="w-full flex flex-col justify-cente items-center text-center gap-6">
                     {/* Success Icon */}
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24 transition-transform hover:scale-105 duration-300">
+                    <div className="relative w-14 h-14 transition-transform hover:scale-105 duration-300">
                       <Image
                         alt="check mark"
                         fill
                         src="/tick-circle2.svg"
-                        className="object-contain w-10 h-10"
+                        className="object-contain w-5 h-5 "
                         priority
                       />
                     </div>
 
                     {/* Message Header */}
-                    <div className="space-y-2 max-w-sm">
-                      <p className="text-main-heading font-semibold text-lg sm:text-xl leading-relaxed tracking-tight">
+                    <div className="space-y-2">
+                      <p className="text-main-heading font-semibold text-base leading-relaxed tracking-tight">
                         Your single has been submitted for review. We&apos;ll
                         notify you once approved.
                       </p>
@@ -1518,11 +1518,11 @@ const SongForm = () => {
                     </div>
 
                     {/* Action Buttons Group */}
-                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full mt-2 sm:mt-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 md:w-[60%] mt-2 sm:mt-4">
                       <button
                         type="button"
                         onClick={createAnother}
-                        className="w-full sm:w-1/2 px-5 py-3 font-bold rounded-xl text-center text-sm transition-colors cursor-pointer border-2 border-primary-500 text-text-body bg-transparent hover:bg-primary-500/5 shrink-0"
+                        className="w-fit sm:w-1/2 px-5 py-3 font-bold rounded-xl text-center text-sm transition-colors cursor-pointer border-2 border-primary-500 text-text-body bg-transparent hover:bg-primary-500/5 shrink-0"
                       >
                         Upload Another
                       </button>
@@ -1530,7 +1530,7 @@ const SongForm = () => {
                         href="/dashboard/music/manageRelease?type=single"
                         className="w-full sm:w-1/2 px-5 py-3 font-bold rounded-xl text-center text-sm transition-all cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center justify-center shrink-0 shadow-sm"
                       >
-                        View Song
+                      <p className="text-white">View Song </p>
                       </Link>
                     </div>
                   </div>

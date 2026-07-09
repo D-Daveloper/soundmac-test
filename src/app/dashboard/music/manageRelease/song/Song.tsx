@@ -140,7 +140,7 @@ const Song = () => {
     !isDataLoading && (isError || !data || data.data.length === 0);
 
   return !wantsToEdit ? (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 lg:pl-[280px] px-4 sm:px-6 max-w-7xl mx-auto">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 px-4 sm:px-4 mx-auto">
       {/* Content Type Tabs */}
       <div className="flex gap-3 mt-6">
         <button
@@ -152,7 +152,7 @@ const Song = () => {
               : "bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"
           }`}
         >
-          Songs
+          Singles
         </button>
         <button
           type="button"

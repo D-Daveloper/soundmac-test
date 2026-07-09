@@ -213,7 +213,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   return isLoading || !activeTrack || !activeTrackId || isSubmittingForm ? (
     <InlineLoadingScreen />
   ) : (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-20 lg:pb-5 lg:pl-[280px]">
+    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-20 lg:pb-5">
       {/* <button
         onClick={() => {
           // saveToLocalStorage();

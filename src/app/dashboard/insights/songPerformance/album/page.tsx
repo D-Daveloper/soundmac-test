@@ -58,7 +58,7 @@ const Page = () => {
     setIsFilterOpen(false);
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[280px] px-10">
+    <div className="bg-main-white min-h-screen w-full flex flex-col px-10">
       <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboard/insights/songPerformance/song"}
