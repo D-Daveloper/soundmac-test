@@ -66,8 +66,8 @@ const Page = () => {
   }
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[280px] px-5">
-      {(isLoading || !data || isLoadingSalesReport || !salesReport || downloadingSalesReport) ? (
+    <div className="bg-main-white min-h-screen w-full flex flex-col px-5">
+      {isLoading || !data || isLoadingSalesReport || !salesReport ? (
         <InlineLoadingScreen />
       ) : (
         <div className="mt-5 flex flex-col gap-5 mb-10">

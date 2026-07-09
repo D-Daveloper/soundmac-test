@@ -224,7 +224,7 @@ const AlbumForm = () => {
   }
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[260px]">
+    <div className="bg-main-white h-full w-full flex flex-col">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -244,9 +244,9 @@ const AlbumForm = () => {
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-8 px md:px-2 py-5">
+            <div className="flex gap-8 px md:px-2 py-5 min-h-full h-full">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-10 lg:pb-0 lg:h-[68dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-5 px-5 pb-10">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -368,7 +368,7 @@ const AlbumForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <div className="flex gap-1">
                           <p className="font-medium mb-2 text-sm">
-                            Artist <span className="text-red-500">*</span>
+                            Main Artist <span className="text-red-500">*</span>
                           </p>
                           {/* <Image
                             priority={false}
@@ -801,7 +801,7 @@ const AlbumForm = () => {
               )}
 
               {/* the image side bar */}
-              <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
+              <div className="bg-main-white border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                 <div className="w-full h-[80%] flex-2">
                   {albumForm.music_image ? (
                     <Image

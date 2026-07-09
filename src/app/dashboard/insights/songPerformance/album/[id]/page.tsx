@@ -31,7 +31,7 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const songData = result.data; // Has .release and .tracks ready to map!
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[310px]">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:px-3">
       <Link
         aria-label="go back"
         href="/dashboard/insights/songPerformance/album"

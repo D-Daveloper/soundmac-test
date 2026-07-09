@@ -37,7 +37,7 @@ const ViewArtist = ({
   };
 
   return (
-    <div className="bg-main-white max-sm:min-h-auto minh-[90dvh] w-full flex flex-col md:px-5 lg:pl-[280px]">
+    <div className="bg-main-white max-sm:min-h-auto minh-[90dvh] w-full flex flex-col lg:px-3">
       <div
         className={
           "relative flex-3 overflow-auto flex flex-col gap-10 px-5 pb-3 h-full w-[full] overflow-x-hidden " +

@@ -179,7 +179,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   // };
 
   return (
-    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 lg:pl-[280px]">
+    <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
       {isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (

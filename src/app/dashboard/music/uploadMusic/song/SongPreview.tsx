@@ -40,7 +40,7 @@ const SongPreview: React.FC<SongPreviewProps> = ({
   //   }, []);
 
   return (
-    <div className="flex-3 overflow-y-auto flex flex-col gap-10 lg:h-[68dvh] pb-20 lg:pb-5 custom-scrollbar">
+    <div className="flex-1 overflow-y-auto flex flex-col gap-10 pb-20 ">
       <div>
         <div className="flex items-center justify-between border-neutral-100 border-b md:border-none pb-2">
           <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading  border-neutral-100">

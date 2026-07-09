@@ -29,7 +29,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className= "flex-1 md:w-screen lg:w-full space-y-6 p-4 sm:p-4">
+    <div className= "flex-1 space-y-6 px-4 py-3 2xl:py-0">
       
 {/* Top Cards Statistics Section Row Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 w-full">

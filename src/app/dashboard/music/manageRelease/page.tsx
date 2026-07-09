@@ -12,7 +12,7 @@ const Page = () => {
     return <Album />;
   } else {
     return (
-      <div className="bg-main-white  max-sm:min-h-auto min-h-[90dvh] h-full w-full flex flex-col px-10 lg:pl-[300px]">
+      <div className="bg-main-white  max-sm:min-h-auto min-h-[90dvh] h-full w-full flex flex-col px-10">
         {" "}
         
         <div className="flex gap-3 mt-5">

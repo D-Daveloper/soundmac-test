@@ -88,7 +88,7 @@ const Page = ({ params }: { params: Promise<{ title: string }> }) => {
 
   return (
     <>
-    <div className="lg:pl-[300px] bg-main-white h-screen w-full flex flex-col px-10">
+    <div className="bg-main-white h-screen w-full flex flex-col">
         {/* back button */}
         {isLoading ||
         releaseNamesIsLoading ||

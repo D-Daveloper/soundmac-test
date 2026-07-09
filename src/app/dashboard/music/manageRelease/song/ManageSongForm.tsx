@@ -457,7 +457,7 @@ const SongForm = ({
     } else {
       dashboardContext?.setHeader({
         title: "manage song",
-        showBackButton: false,
+        showBackButton: true,
         onBack: () => router.back(),
       });
     }
@@ -469,7 +469,7 @@ const SongForm = ({
   }
 
   return (
-    <div className="bg-main-white md:px-4 h-full w-full flex flex-col lg:pl-[280px]">
+    <div className="bg-main-white md:px-4 h-full w-full flex flex-col">
       {isLoading || isSubmittingForm || isLoadingDsp ? (
         <InlineLoadingScreen />
       ) : (
@@ -490,9 +490,9 @@ const SongForm = ({
                 alt="arrow left"
               />
             </button> */}
-            <div className="flex gap-8 px-5 md:px-0 py-5">
+            <div className="flex gap-8 px-5 md:px-0 py-5 min-h-full h-full">
               {!preview ? (
-                <div className="flex-3 overflow-auto flex flex-col gap-10 px- pb-20 lg:pb-5 lg:h-[68dvh]">
+                <div className="flex-3 overflow-auto flex flex-col gap-10 pb-20 lg:px-5">
                   {/* Song info */}
                   <div>
                     <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -1627,7 +1627,7 @@ const SongForm = ({
                 </div>
               ) : (
                 // preview starts here
-                <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 pb-20 lg:pb-5 lg:h-[68dvh] custom-scrollbar">
+                <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 pb-20 h-full custom-scrollbar">
                   <div>
                     <div className="flex items-center justify-between border-neutral-100 border-b md:border-none pb-2">
                       <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">

@@ -13,7 +13,7 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="lg:pl-[300px] bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-10 pb-20">
+    <div className="bg-main-white w-full flex flex-col pb-20">
       <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboard/explore/chartRegistration"}
