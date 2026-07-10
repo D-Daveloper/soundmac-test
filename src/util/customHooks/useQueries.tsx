@@ -877,6 +877,28 @@ export function useGetPaginatedCharts(params: {
   });
 }
 
+export function usePaginatedAdminAllApiKeys(params: {
+  page: number;
+  name: string;
+  limit: string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<ApiKeyData>, Error>({
+    queryKey: [
+      "allApiKeys",
+      params.page,
+      params.name,
+      params.limit,
+    ],
+    queryFn: async () => getAllApiKeys(api, params),
+    placeholderData: (prev) => prev, // avoids UI flicker
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+}
+
+
 export function useGetAdminChartDetails(params: { chartId: string }) {
   const api = UseAxios();
   return useQuery<ChartRegistration, Error>({

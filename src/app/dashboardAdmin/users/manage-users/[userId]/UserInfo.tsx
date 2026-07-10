@@ -74,7 +74,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
               </div>
               <div className="flex flex-col w-[30%] max-sm:w-full">
                 <Input
-                  value={userDetails.data.referral_code || "No code"}
+                  value={userDetails.data.referralCode|| "No code"}
                   title={"Referral Code"}
                   type={"text"}
                   name={"artist"}

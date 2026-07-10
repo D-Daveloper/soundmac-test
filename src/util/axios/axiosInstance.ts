@@ -451,6 +451,21 @@ export const getAdminChartDetails = async (
   return res.data;
 };
 
+export const getAllApiKeys = async (
+  api: AxiosInstance,
+  params: {
+    page: number;
+    name: string;
+    limit: string;
+  }
+): Promise<PAGINATION<ApiKeyData>> => {
+  const res = await api.get<Promise<PAGINATION<ApiKeyData>>>("admin/more/api-key", {
+    params: params,
+  });
+  return res.data;
+};
+
+
 export const getReferralDetails = async (api: AxiosInstance) => {
   const { data } = await api.get("referral");
   return data;
