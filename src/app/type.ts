@@ -620,7 +620,20 @@ export type ChartRegistration = {
     isrc: string
   }
 }
-
+export type ApiKeyData = {
+  _id: string
+  name: string
+  hashedKey: string
+  isActive: boolean
+  lastUsedAt: string
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
+  userId: {
+    email: string;
+  }
+  __v: number
+}
 export interface ReferralHistory {
   _id: string;
   status: "pending" | "completed" | "expired";
