@@ -127,7 +127,8 @@ export async function POST(req: Request) {
       .jpeg({ quality: 90 })
       .toBuffer(); //resize the image for dpm
     const imageType = payload.musicImage!.type.split("/")[1];
-    const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`;
+    const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.jpg`;
+    // const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`;
     const imageUrl = await uploadImage(
       imageType,
       resized as Buffer<ArrayBuffer>,
@@ -348,7 +349,8 @@ export async function PUT(req: Request) {
 
         const imageType = payload.musicImage!.type.split("/")[1]; //get the image extension
 
-        const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.jpg`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+        // const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
 
         imageUrl = await uploadImage(
           imageType,
