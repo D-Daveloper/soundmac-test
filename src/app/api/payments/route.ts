@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     const user = await User.findOne({ email });
     if (!user)
-      return NextResponse.json({ msg: "Invalid request" }, { status: 404 });
+      return NextResponse.json({ msg: "No account was found with this email. Please use the email associated with your SoundMac account or create an account first." }, { status: 404 });
 
     let planCode = null;
     switch (plan) {
@@ -54,7 +54,8 @@ export async function POST(req: Request) {
           plan: planCode,
           // channels:["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer"],
           channels:["card", "bank", "ussd"],
-          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName}
+          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName},
+          callback_url: `${process.env.FRONTEND_URL}/verify`,
         })
       }
     );
@@ -68,7 +69,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: data.message }, { status: 400 });
 
     return NextResponse.json({
-      url: data.data.authorization_url
+      accessCode: data.data.access_code,
+      reference: data.data.reference
     });
   } catch (err) {
     console.error("payment error",err);
@@ -167,7 +169,8 @@ export async function PATCH(req: Request) {
           plan: planCode,
           // channels:["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer"],
           channels:["card", "bank", "ussd"],
-          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName}
+          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName},
+          callback_url: `${process.env.FRONTEND_URL}/verify`,
         })
       }
     );
@@ -181,7 +184,8 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: data.message }, { status: 400 });
 
     return NextResponse.json({
-      url: data.data.authorization_url
+      accessCode: data.data.access_code,
+      reference: data.data.reference
     });
   } catch (err) {
     console.error("payment error",err);

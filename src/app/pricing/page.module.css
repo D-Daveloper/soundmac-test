@@ -3,7 +3,7 @@
     flex-direction: column;
     align-items: center;
     padding: calc(52 / 1440 * 100vw) calc(10 / 1440 * 100vw);
-    padding-top: calc(100 / 1440 * 100vw);
+    /* padding-top: calc(100 / 1440 * 100vw); */
 }
 
 .h3 {

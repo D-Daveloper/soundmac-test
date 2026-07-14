@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import si from "@/../public/signinimage.png";
 import Image from "next/image";
 import LoginForm from "./LoginForm";
@@ -12,7 +12,7 @@ import {
   useAppleAuthMutation,
 } from "@/util/customHooks/useMutations";
 import { toast } from "react-toastify";
-import { useGoogleScriptLoaded } from "../components/skeleton/GoogleScript";
+// import { useGoogleScriptLoaded } from "../components/skeleton/GoogleScript";
 import GoogleButtonSkeleton from "../components/skeleton/GoogleSkeleton";
 
 const Page = () => {
@@ -23,7 +23,7 @@ const Page = () => {
 
   const handleGoogleSuccess = (credentialResponse: any) => {
     if (credentialResponse?.credential) {
-      googleAuth(credentialResponse.credential);
+      googleAuth({token:credentialResponse.credential, referralCode:''});
       // toast.success("")
     }
   };
@@ -58,10 +58,17 @@ const Page = () => {
     toast.error("Failed to sign in with Apple");
   };
 
-  const isGoogleLoaded = useGoogleScriptLoaded();
+  const [isGoogleLoaded, setIsGoogleLoaded ]= useState(false);
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}
+        onScriptLoadSuccess={() => setIsGoogleLoaded(true)}
+        onScriptLoadError={() => {
+        console.error("Google script failed to load");
+        toast.error("Failed to load Google Sign-In");
+      }}
+    
+    >
       <main className="section flex h-[100dvh] sm:overflow-hidden max-xs:min-h-[100d">
         {googlePending && (
           <div className="absolute inset-0 bg-white/70 backdrop-blur-xs z-50 flex flex-col items-center justify-center gap-3 transition-all">
