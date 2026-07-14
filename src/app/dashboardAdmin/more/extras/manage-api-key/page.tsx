@@ -46,14 +46,14 @@ const Page = () => {
   };
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-5">
 
       {isLoadingallUsers ? (
         <InlineLoadingScreen />
       ) : (
         <>
           {/* Filters */}
-          <div className="w-full flex flex-wrap justify-between gap-5 items-end mt-10">
+          <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end mt-10">
             <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
               <Image
                 priority={true}
@@ -144,8 +144,8 @@ const Page = () => {
                 isfetching={isFetchingallUsers}
               />
               {/* Pagination */}
-              <div className="px-6">
-                <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
+              <div className="px-0 md:px-2">
+                <div className="border-t border-gray-200 py-4 px-2 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between rounded-lg">
                   <div className="text-sm text-gray-600">
                     Showing {(page - 1) * allUsers.limit + 1} to{" "}
                     {Math.min(

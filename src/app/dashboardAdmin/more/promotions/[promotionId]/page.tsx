@@ -220,7 +220,7 @@ export default function Page({
           <>
             <div className="flex mt-3 mb-50">
               {/* Content */}
-              <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
+              <div className="p-3 flex-2 md:w-[80%] overflow-hidden">
                 {/* Song Details Grid */}
                 <div className="flex flex-col gap-x-12">
                   <div className="flex ">
@@ -229,7 +229,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Promo Type
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {promotionDetails.category}
                       </p>
                     </div>
@@ -240,7 +240,7 @@ export default function Page({
                         Package
                       </p>
                       <div>
-                        <p className="text-gray-900 text-lg font-medium mb-1">
+                        <p className="text-gray-900 text-base font-medium mb-1">
                           {promotionDetails.packageName}
                         </p>
                       </div>
@@ -254,7 +254,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Song name
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {promotionDetails.releaseTitle}
                       </p>
                     </div>
@@ -264,8 +264,8 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Artist
                       </p>
-                      <div>
-                        <p className="text-gray-900 text-lg font-medium mb-1">
+                      <div className="flex flex-col md:flex-row gap-x-3 items-center">
+                        <p className="text-gray-900 text-base font-medium mb-1">
                           {promotionDetails.artist.artistName}
                         </p>
                         <div className="flex items-center gap-3">
@@ -279,7 +279,7 @@ export default function Page({
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {promotionDetails.artist.spotifyId}
+                              {promotionDetails.artist?.spotifyId || 'N/A'}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -292,7 +292,7 @@ export default function Page({
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {promotionDetails.artist.appleId}
+                              {promotionDetails.artist?.appleId || 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -311,7 +311,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Label
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {promotionDetails.pitchPlayListDetails.label}
                           </p>
                         </div>
@@ -322,7 +322,7 @@ export default function Page({
                             UPC
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {promotionDetails.pitchPlayListDetails.upc}
                             </p>
                           </div>
@@ -335,7 +335,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Artist Gender
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {promotionDetails.pitchPlayListDetails.artistGender}
                           </p>
                         </div>
@@ -346,7 +346,7 @@ export default function Page({
                             Track Langauge
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .trackLanguage
@@ -362,8 +362,8 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Country
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
-                            {promotionDetails.pitchPlayListDetails.country}
+                          <p className="text-gray-900 text-base font-medium">
+                            {promotionDetails.pitchPlayListDetails.country || "-"}
                           </p>
                         </div>
 
@@ -373,7 +373,7 @@ export default function Page({
                             Location
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {promotionDetails.pitchPlayListDetails.location}
                             </p>
                           </div>
@@ -386,7 +386,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Release Date
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {new Date(
                               promotionDetails.pitchPlayListDetails.releaseDate,
                             ).toDateString()}
@@ -399,7 +399,7 @@ export default function Page({
                             Release Time
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .releaseTime
@@ -415,7 +415,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Priority
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {promotionDetails.pitchPlayListDetails.priority}
                           </p>
                         </div>
@@ -426,7 +426,7 @@ export default function Page({
                             Configuration
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .configuration
@@ -442,7 +442,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Type Of Release
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .typeOfRelease
@@ -456,7 +456,7 @@ export default function Page({
                             Focus Track
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {promotionDetails.pitchPlayListDetails.focusTrack}
                             </p>
                           </div>
@@ -469,7 +469,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Focus Track ISRC
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .focusTrackIsrc
@@ -483,7 +483,7 @@ export default function Page({
                             Genre
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {promotionDetails.pitchPlayListDetails.genre}
                             </p>
                           </div>
@@ -496,7 +496,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             SubGenre
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {promotionDetails.pitchPlayListDetails.subgenres.join(
                               ", ",
                             )}
@@ -509,7 +509,7 @@ export default function Page({
                             Mood
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {promotionDetails.pitchPlayListDetails.mood}
                             </p>
                           </div>
@@ -522,7 +522,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Editorial Teams
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .editorialTeams
@@ -536,7 +536,7 @@ export default function Page({
                             Facebook Profile Link
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .facebookProfileLink
@@ -552,7 +552,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Instagram Profile Link
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .instagramProfileLink
@@ -566,7 +566,7 @@ export default function Page({
                             Twitter Profile Link
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .twitterProfileLink
@@ -582,7 +582,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Youtube Profile Link
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .youtubeProfileLink
@@ -596,7 +596,7 @@ export default function Page({
                             Tik Tok
                           </p>
                           <div>
-                            <p className="text-gray-900 text-lg font-medium mb-1">
+                            <p className="text-gray-900 text-base font-medium mb-1">
                               {
                                 promotionDetails.pitchPlayListDetails
                                   .tiktokProfileLink
@@ -612,7 +612,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Comment
                           </p>
-                          <p className="text-gray-900 text-lg font-medium">
+                          <p className="text-gray-900 text-base font-medium">
                             {promotionDetails.pitchPlayListDetails.comment}
                           </p>
                         </div>
@@ -622,7 +622,7 @@ export default function Page({
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Market Detail
                           </p>
-                          <p className="text-text-body text-md font-normal text-wrap break-all">
+                          <p className="text-text-body text-base font-normal text-wrap break-all">
                             {
                               promotionDetails.pitchPlayListDetails
                                 .marketingDetail
@@ -642,12 +642,12 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Release Description
                       </p>
-                      <p className="text-text-body text-md font-normal ">
+                      <p className="text-text-body text-base font-normal ">
                         {promotionDetails.releaseDescription}
                       </p>
                     </div>
                   )}
-                  <div className="flex gap-10">
+                  <div className="flex flex-col md:flex-row gap-x-10">
                     {/* cover art */}
 
                     <div className="flex items-center justify-center w-60">

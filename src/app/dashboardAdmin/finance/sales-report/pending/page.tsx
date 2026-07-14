@@ -89,7 +89,7 @@ const Page = () => {
       }
     };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-5 overflow-hidden">
+    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-2 md:px-5 overflow-hidden">
       <Link
         href={"/dashboardAdmin/finance/sales-report"}
         aria-label="go back"
@@ -103,7 +103,7 @@ const Page = () => {
         />
       </Link>
       {/* Filters */}
-      <div className="w-full flex flex-wrap justify-between gap-5 items-end">
+      <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end">
         <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
           <Image
             priority={true}
@@ -197,7 +197,7 @@ const Page = () => {
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">
                 Total Revenue
               </p>
-              <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
+              <h2 className="text-2xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
                 ${allSalesReport?.totalRevenue || 0}
               </h2>
             </div>
@@ -229,7 +229,7 @@ const Page = () => {
         </div>
       ) : (
         // button for matching using user
-        <div className="mt-5 flex flex-col mb-10">
+        <div className="mt-2 flex flex-col mb-10">
           <div className="flex justify-between items-center max-sm:flex-wrap">
             <button
               onClick={() => {

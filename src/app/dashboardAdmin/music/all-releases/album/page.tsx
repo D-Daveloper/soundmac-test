@@ -10,7 +10,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
-import { allReleaseStatusFilterOptions, withdrawalStatusFilterOptions } from "@/app/constant";
+import {
+  allReleaseStatusFilterOptions,
+  withdrawalStatusFilterOptions,
+} from "@/app/constant";
 import ReleaseTable from "./releaseTableAlbums";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import Pagination from "@/app/components/pagination/Pagination";
@@ -46,7 +49,7 @@ const page = () => {
     page,
     limit: "50",
     releaseTitle,
-    releaseType:"album"
+    releaseType: "album",
   });
 
   useEffect(() => {
@@ -59,7 +62,7 @@ const page = () => {
     setfilter((prev) => ({ ...prev, releaseStatusFilter: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-5">
       <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboardAdmin/music/all-releases/single"}
@@ -78,12 +81,12 @@ const page = () => {
           Albums
         </Link>
       </div>
-      {isLoadingAllReleases||isLoadingArtistNames || !artistNames ? (
+      {isLoadingAllReleases || isLoadingArtistNames || !artistNames ? (
         <InlineLoadingScreen />
       ) : (
         <>
           {/* Filters */}
-          <div className="w-full flex flex-wrap justify-between gap-5 items-end">
+          <div className="w-full flex flex-col md:flex-row justify-between gap-5 items-end mt-5">
             <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
               <Image
                 priority={true}
@@ -102,16 +105,16 @@ const page = () => {
                 placeholder="Search"
               />
             </div>
-            <div className="flex flex-col w-[40%] max-sm:w-full gap-2 flex-1">
+            <div className="flex flex-col w-[40%] max-sm:w-full gap-1 flex-1">
               <p className="font-medium mb-2 sm:text-sm text-lg">Artist</p>
-              <div className="w-full">
+              <div className="w-full relative z-20">
                 <Select
                   selected={filter.artist}
                   setSelected={(t) =>
                     setfilter((prev) => ({ ...prev, artist: t }))
                   }
                   placeholder="Select Artist..."
-                  options={["none",...artistNames]}
+                  options={["none", ...artistNames]}
                   name="artist"
                 />
               </div>
@@ -179,7 +182,7 @@ const page = () => {
                 />
               </div>
               <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-               No Release.
+                No Release.
               </p>
               <Link
                 href={"/dashboardAdmin/music/all-releases/album"}
@@ -192,14 +195,21 @@ const page = () => {
             </div>
           ) : (
             <div className="mt-5 flex flex-col mb-10">
-              <ReleaseTable releases={allReleases.data} isfetching={isFetchingAllReleases} />
+              <ReleaseTable
+                releases={allReleases.data}
+                isfetching={isFetchingAllReleases}
+              />
               {/* Pagination */}
-              <div className="px-6">
-                <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
+              <div className="px-0 md:px-2">
+                <div className="border-t border-gray-200 py-4 px-2 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between rounded-lg">
                   <div className="text-sm text-gray-600">
-              Showing {((page - 1) * allReleases.limit) + 1} to {Math.min(((page - 1) * allReleases.limit) + allReleases.limit, allReleases.totalCount)}{" "}
-              of {allReleases.totalCount} results
-            </div>
+                    Showing {(page - 1) * allReleases.limit + 1} to{" "}
+                    {Math.min(
+                      (page - 1) * allReleases.limit + allReleases.limit,
+                      allReleases.totalCount,
+                    )}{" "}
+                    of {allReleases.totalCount} results
+                  </div>
                   <div>
                     <Pagination
                       currentPage={page}

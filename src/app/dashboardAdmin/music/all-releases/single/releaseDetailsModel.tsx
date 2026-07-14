@@ -60,35 +60,36 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
     <>
       {/* Main Modal Backdrop */}
       {releaseDetails && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-50 flex items-center justify-center z-50">
-          {/* Main Modal */}
-          <div className="bg-white rounded-2xl w-[900px] max-h-[70vh] overflow-auto shadow-2xl p-1">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          {/* Main Modal Wrapper - Responsive width and screen constraint */}
+          <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             {isSubmitting ? (
-              <div className="h-[60vh]">
+              <div className="h-[60vh] flex items-center justify-center">
                 <ModelLoadingScreen />
               </div>
             ) : (
               <>
                 {/* Header */}
-                <div className="flex items-center justify-between p-3 border-b border-gray-200">
-                  <h2 className="text-2xl font-medium text-main-heading">
+                <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
+                  <h2 className="text-xl md:text-2xl font-semibold text-main-heading">
                     Release Details
                   </h2>
                   <button
                     onClick={onClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-all"
+                    aria-label="Close modal"
                   >
                     <X size={24} />
                   </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-3">
-                  {/* Cover Art and Download Section */}
-                  <div className="bg-secondary-50 rounded-xl p-3 mb-2 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      {/* Album Art Placeholder */}
-                      <div className=" relative overflow-hidden w-10 h-10">
+                {/* Scrollable Content Container */}
+                <div className="p-4 md:p-6 overflow-y-auto space-y-6">
+                  {/* Cover Art and Download Section (Responsive Row-to-Column) */}
+                  <div className="bg-secondary-50 rounded-xl p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    {/* Left Side: Art + Art Download */}
+                    <div className="flex items-center gap-3">
+                      <div className="relative overflow-hidden w-12 h-12 flex-shrink-0">
                         <Image
                           priority={false}
                           src={
@@ -104,210 +105,191 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
                         download="releaseImage"
                         href={releaseDetails.releaseImage || "/signinimage.png"}
                         target="_blank"
-                        className="flex items-center gap-2 text-primary-500! font-bold hover:text-primary/90! transition-colors"
+                        rel="noreferrer"
+                        className="flex items-center gap-2 text-sm text-primary-500 font-bold hover:opacity-90 transition-opacity"
                       >
-                        {/* Icon placeholder - add your download icon here */}
                         <Image
                           priority={false}
-                          src={"/arrow-down.svg"}
+                          src="/arrow-down.svg"
                           alt="download cover icon"
-                          width={20}
-                          height={20}
+                          width={18}
+                          height={18}
                         />
-                        Download Cover Art
+                        <span>Download Cover Art</span>
                       </a>
                     </div>
-                    <div className="flex items-center gap-4">
+
+                    {/* Right Side: Audio Download & Play */}
+                    <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end border-t lg:border-t-0 pt-3 lg:pt-0 border-gray-200/50">
                       <button
                         onClick={handleDownloadSong}
                         aria-label="download music"
-                        className="flex items-center gap-2 text-primary-500 font-bold hover:text-primary/90 transition-colors"
+                        className="flex items-center gap-2 text-sm text-primary-500 font-bold hover:opacity-90 transition-all"
                       >
-                        {/* Icon placeholder - add your music note icon here */}
-                        <div className="w-fit h-fit p-2 rounded-lg bg-neutral-100">
-                          <Music />
+                        <div className="p-2 rounded-lg bg-white/80 shadow-sm">
+                          <Music size={18} />
                         </div>
-                        Download Audio file
+                        <span>Download Audio File</span>
                       </button>
-                      <button className="w-fit h-fit px-4 py-2 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-colors">
-                        {/* Icon */}
+
+                      <button className="p-3 bg-primary-500 rounded-lg flex items-center justify-center text-white hover:bg-primary-500/90 transition-all">
                         <Image
                           priority={false}
-                          src={"/play-circle.svg"}
+                          src="/play-circle.svg"
                           alt="play icon"
-                          width={20}
-                          height={20}
+                          width={18}
+                          height={18}
                         />
                       </button>
                     </div>
                   </div>
 
-                  {/* Song Details Grid */}
-                  <div className="flex flex-col gap-x-12">
-                    <div className="flex ">
-                      {/* Song Name */}
-                      <div className="flex-1">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Song name
-                        </p>
-                        <p className="text-gray-900 text-lg font-medium">
-                          {releaseDetails.releaseTitle}
-                        </p>
-                      </div>
+                  {/* Song Details Grid (Uniform responsive system) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Song Name */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                        Song name
+                      </p>
+                      <p className="text-gray-900 text-base md:text-lg font-medium">
+                        {releaseDetails.releaseTitle}
+                      </p>
+                    </div>
 
-                      {/* Artist */}
-                      <div className="flex-1">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Artist
+                    {/* Artist Details & Streaming Links */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                        Artist
+                      </p>
+                      <div>
+                        <p className="text-gray-900 text-base md:text-lg font-medium">
+                          {releaseDetails.artistName}
                         </p>
-                        <div>
-                          <p className="text-gray-900 text-lg font-medium mb-1">
-                            {releaseDetails.artistName}
-                          </p>
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1.5">
-                              {/* Spotify icon placeholder */}
+                        <div className="flex flex-wrap items-center gap-3 mt-1.5">
+                          {releaseDetails.artist?.spotifyId && (
+                            <div className="flex items-center gap-1.5 bg-neutral-50 px-2 py-1 rounded border border-neutral-100">
                               <Image
-                                priority={false}
-                                src={"/spotify.svg"}
-                                alt="search icon"
-                                width={20}
-                                height={20}
+                                src="/spotify.svg"
+                                alt="Spotify"
+                                width={16}
+                                height={16}
                               />
-                              <span className="text-sm text-gray-600">
+                              <span className="text-xs text-gray-600">
                                 {releaseDetails.artist.spotifyId}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1.5">
-                              {/* Apple Music icon placeholder */}
+                          )}
+                          {releaseDetails.artist?.appleId && (
+                            <div className="flex items-center gap-1.5 bg-neutral-50 px-2 py-1 rounded border border-neutral-100">
                               <Image
-                                priority={false}
-                                src={"/applemusic.svg"}
-                                alt="search icon"
-                                width={20}
-                                height={20}
+                                src="/applemusic.svg"
+                                alt="Apple Music"
+                                width={16}
+                                height={16}
                               />
-                              <span className="text-sm text-gray-600">
+                              <span className="text-xs text-gray-600">
                                 {releaseDetails.artist.appleId}
                               </span>
                             </div>
-                          </div>
+                          )}
                         </div>
                       </div>
                     </div>
-                    {/* border line */}
-                    <div className="border border-neutral-100 mb-6"></div>
 
-                    <div className="flex">
-                      {/* Genre */}
-                      <div className="flex-1">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Genre
-                        </p>
-                        <p className="text-gray-900 text-lg font-medium">
-                          {releaseDetails.genre}
-                        </p>
-                      </div>
+                    <div className="border-b md:col-span-2 border-neutral-100 my-1"></div>
 
-                      {/* Release Date */}
-                      <div className="flex-1">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Release Date
-                        </p>
-                        <p className="text-gray-900 text-lg font-medium">
-                          {new Date(releaseDetails.releaseDate).toDateString()}
-                        </p>
-                      </div>
+                    {/* Genre */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                        Genre
+                      </p>
+                      <p className="text-gray-900 text-base md:text-lg font-medium">
+                        {releaseDetails.genre}
+                      </p>
                     </div>
-                    {/* border line */}
-                    <div className="border border-neutral-100 mb-6"></div>
-                  </div>
 
-                  {/* Featured Artists */}
-                  <div>
-                    <p className="text-text-disable font-bold text-sm mb-1">
-                      Featured Artists
-                    </p>
-                    <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
-                      {releaseDetails.featuredArtist.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
-                        >
-                          <p className="text-gray-900 text-lg font-medium min-w-fit px-2">
-                            {item.artistName} |
+                    {/* Release Date */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                        Release Date
+                      </p>
+                      <p className="text-gray-900 text-base md:text-lg font-medium">
+                        {new Date(releaseDetails.releaseDate).toDateString()}
+                      </p>
+                    </div>
+
+                    <div className="border-b md:col-span-2 border-neutral-100 my-1"></div>
+
+                    {/* Featured Artists Section (With elegant custom scroll wrapper) */}
+                    {releaseDetails.featuredArtist &&
+                      releaseDetails.featuredArtist.length > 0 && (
+                        <div className="md:col-span-2 space-y-2">
+                          <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                            Featured Artists
                           </p>
-                          <div className="flex items-center gap-1.5">
-                            <Image
-                              priority={false}
-                              src={"/spotify.svg"}
-                              alt="search icon"
-                              width={20}
-                              height={20}
-                            />
-                            <span className="text-sm text-gray-600">
-                              {"item.spotifyId"}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <Image
-                              priority={false}
-                              src={"/applemusic.svg"}
-                              alt="search icon"
-                              width={20}
-                              height={20}
-                            />
-                            <span className="text-sm text-gray-600 pr-5">
-                              {"item.appleId"}
-                            </span>
+                          <div className="flex w-full gap-2 overflow-x-auto pb-1 scrollbar-none">
+                            {releaseDetails.featuredArtist.map(
+                              (item, index) => (
+                                <div
+                                  key={index}
+                                  className="flex flex-shrink-0 items-center gap-3 bg-neutral-50 border border-neutral-150 px-3 py-1.5 rounded-lg"
+                                >
+                                  <p className="text-gray-900 text-sm font-semibold border-r border-neutral-300 pr-2.5">
+                                    {item.artistName}
+                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <Image
+                                      src="/spotify.svg"
+                                      alt="Spotify"
+                                      width={16}
+                                      height={16}
+                                    />
+                                    <span className="text-xs text-gray-600">
+                                      {item.spotifyId}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Image
+                                      src="/applemusic.svg"
+                                      alt="Apple Music"
+                                      width={16}
+                                      height={16}
+                                    />
+                                    <span className="text-xs text-gray-600">
+                                      {item.appleId}
+                                    </span>
+                                  </div>
+                                </div>
+                              ),
+                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                  {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
-                  {/* Songwriter and Producer */}
-                  <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-                    <div className="relative max-w-[400px]">
-                      <p className="text-text-disable font-bold text-sm mb-1">
+                      )}
+
+                    <div className="border-b md:col-span-2 border-neutral-100 my-1"></div>
+
+                    {/* Song Writers */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
                         Song Writers
                       </p>
-                      <div
-                        className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                        style={{
-                          scrollbarWidth: "none",
-                          msOverflowStyle: "none",
-                        }}
-                      >
-                        <style>{`div::-webkit-scrollbar { display: none; }`}</style>
+                      <p className="text-gray-900 text-base md:text-lg font-medium break-words">
                         {releaseDetails.songWriter
-                          .map((item) => item.first_name)
-                          .join(", ")}
-                      </div>
-                      {/* fade hint on the right */}
-                      <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+                          ?.map((item) => item.first_name)
+                          .join(", ") || "N/A"}
+                      </p>
                     </div>
-                    <div>
-                      <div className="relative max-w-[400px]">
-                        <p className="text-text-disable font-bold text-sm mb-1">
-                          Producers
-                        </p>
-                        <div
-                          className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
-                          style={{
-                            scrollbarWidth: "none",
-                            msOverflowStyle: "none",
-                          }}
-                        >
-                          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {releaseDetails.producer
-                            .map((item) => item.name)
-                            .join(", ")}{" "}
-                        </div>
-                        {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-                      </div>
+
+                    {/* Producers */}
+                    <div className="space-y-1">
+                      <p className="text-text-disable font-bold text-xs uppercase tracking-wider">
+                        Producers
+                      </p>
+                      <p className="text-gray-900 text-base md:text-lg font-medium break-words">
+                        {releaseDetails.producer
+                          ?.map((item) => item.name)
+                          .join(", ") || "N/A"}
+                      </p>
                     </div>
                   </div>
                 </div>

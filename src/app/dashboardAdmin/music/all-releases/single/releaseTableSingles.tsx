@@ -17,7 +17,7 @@ const ReleaseTable = ({
       pending: "bg-yellow-100 text-yellow-700 border-yellow-200",
       completed: "bg-[#2D68C4] text-white border-[#2D68C4]",
       draft: "bg-gray-100 text-gray-700 border-gray-200",
-      rejected: "bg-error-500 text-white border-gray-200",
+      rejected: "bg-red-100 text-red-700 border-red-200", // Standardized to red
     };
 
     const icons = {
@@ -30,116 +30,116 @@ const ReleaseTable = ({
 
     return (
       <span
-        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${styles[status]}`}
+        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${styles[status]}`}
       >
         <Image
           priority={false}
           src={icons[status]}
-          alt="search icon"
+          alt="status icon"
           width={10}
           height={10}
-          className="text-white!"
         />
         {status}
       </span>
     );
   };
-  const [selectedRelease, setselectedRelease] = useState<AdminRelease | null>(null)
-console.log(selectedRelease);
+
+  const [selectedRelease, setselectedRelease] = useState<AdminRelease | null>(null);
 
   return (
-    <div className="w-full bg-gray-50 p-6 pb-0">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="w-full bg-gray-50 p-2">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         {isfetching ? (
           <InlineLoadingScreen />
         ) : (
           <>
-            {/* Table */}
-            <div className="overflow-x-auto min-w-[700px]">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b border-gray-200">
-                  <tr className="bg-primary-50 border-b border-gray-200 font-extrabold text-primary-500 text-center text-xs capitalize tracking-wider">
-                    <th className="min-w-50 p-2 h-10 sticky top-0 z-5">
-                      Release Name
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Artist
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Catalog No.
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5 uppercase">
-                      ISRC
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5 uppercase">
-                      UPC
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Release Date
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Status
-                    </th>
+            {/* Unified Scrollable Container */}
+            <div className="overflow-auto max-h-[550px] w-full">
+              <table className="w-full border-collapse text-left text-sm">
+                {/* Sticky Header */}
+                <thead className="bg-gray-100 sticky top-0 z-10 border-b border-gray-200 shadow-[0_1px_0_0_rgba(229,231,235,1)]">
+                  <tr className="bg-primary-50 font-bold text-primary-500 text-xs capitalize tracking-wider">
+                    <th className="p-4 min-w-[200px]">Release Name</th>
+                    <th className="p-4 min-w-[150px]">Artist</th>
+                    <th className="p-4 min-w-[150px]">Catalog No.</th>
+                    <th className="p-4 min-w-[180px] uppercase">ISRC</th>
+                    <th className="p-4 min-w-[180px] uppercase">UPC</th>
+                    <th className="p-4 min-w-[150px]">Release Date</th>
+                    <th className="p-4 min-w-[130px]">Status</th>
                   </tr>
                 </thead>
-              </table>
-            </div>
-            {/* table body */}
-            <div className="overflow-auto max-h-[500px] h-[500px] min-w-[700px] w-full">
-              <table className="w-full">
-                <tbody className="bg-white divide-y divide-gray-100 text-text-body text-md font-medium leading-5 tracking-tight">
+
+                {/* Body */}
+                <tbody className="bg-white divide-y divide-gray-100 text-gray-700 font-medium">
                   {releases.map((release) => (
                     <tr
-                    onClick={()=> setselectedRelease(release)}
-                    tabIndex={1}
+                      onClick={() => setselectedRelease(release)}
+                      tabIndex={0}
                       key={release._id}
-                      className="hover:bg-gray-200 transition-colors cursor-pointer"
+                      className="hover:bg-gray-50 transition-colors cursor-pointer focus:outline-none focus:bg-gray-50"
                     >
-                      <td className="min-w-50 pl-2 py-4 whitespace-nowrap">
+                      {/* Release Name */}
+                      <td className="p-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={
-                              "relative max-w-[40px] max-h-[40px] min-w-[40px] h-[40px] rounded-2xl border border-neutral-100"
-                            }
-                          >
+                          <div className="relative flex-shrink-0 w-8 h-8 rounded-md overflow-hidden border border-gray-100">
                             <Image
                               src={release.releaseImage || "/signinimage.png"}
                               fill
-                              alt="music note icon"
-                              className={" object-cover rounded-md "}
+                              alt="Release cover"
+                              className="object-cover"
                             />
                           </div>
-                          <span className="">{release.releaseTitle}</span>
+                          <span className="font-semibold text-gray-900 truncate max-w-[180px]">
+                            {release.releaseTitle}
+                          </span>
                         </div>
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap font-bold">
+
+                      {/* Artist */}
+                      <td className="p-4 whitespace-nowrap text-gray-900 font-semibold truncate max-w-[150px]">
                         {release.artistName}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+
+                      {/* Catalog Number */}
+                      <td className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[150px]">
                         {release.catalogNumber}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+
+                      {/* ISRC */}
+                      <td className="p-4 whitespace-nowrap text-gray-500 select-all font-mono">
                         {release.isrc}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+
+                      {/* UPC */}
+                      <td className="p-4 whitespace-nowrap text-gray-500 select-all font-mono">
                         {release.upc}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {new Date(release.releaseDate).toDateString()}
+
+                      {/* Release Date */}
+                      <td className="p-4 whitespace-nowrap text-gray-500">
+                        {new Date(release.releaseDate).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+
+                      {/* Status */}
+                      <td className="p-4 whitespace-nowrap">
                         {getStatusBadge(release.releaseStatus)}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>              
+            </div>
+
+            {/* Modal */}
             <ReleaseDetailsModal
-                isOpen={selectedRelease != null}
-                onClose={() => setselectedRelease(null)}
-                releaseDetails={selectedRelease ? selectedRelease : undefined}
-              />
+              isOpen={selectedRelease != null}
+              onClose={() => setselectedRelease(null)}
+              releaseDetails={selectedRelease ? selectedRelease : undefined}
+            />
           </>
         )}
       </div>
