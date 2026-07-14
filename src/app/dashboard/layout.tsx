@@ -395,7 +395,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </aside>
         {/* Main Content Area Execution Grid Wrapper */}
-        {/* Main Content Area Execution Grid Wrapper */}
         <main className="w-full lg:pl-[260px] h-[calc(100dvh-64px)]">
           <div className="h-full">{children}</div>
         </main>

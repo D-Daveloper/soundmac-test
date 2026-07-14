@@ -45,7 +45,7 @@ const page = () => {
   }, [info]);
 
   return (
-    <div className="bg-main-white h-full w-full flex flex-col lg:pl-[280px]">
+    <div className="bg-main-white w-full flex flex-col lg:px-3">
       <div className="flex gap-3 mt-5 flex-wrap">
        <ScrollableTabs tabs={profileInfoButtons} onChange={(index)=>{setParam("info",profileInfoButtons[index].query)}} active={active}/>
       </div>

@@ -132,7 +132,7 @@ const AccountInfo = () => {
   }, [data]);
 
   return (
-    <div className=" w-full max-w-[800px] flex flex-col px-2">
+    <div className=" w-full max-w-[800px] 2xl:w-full flex flex-col px-2">
       {isLoading || !data || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
@@ -179,7 +179,7 @@ const AccountInfo = () => {
               <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 ">
                 {/* cover art */}
                 {wantsToEdit && (
-                  <div>
+                  <div className=" px-2 md:px-5">
                     <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                       Profile Image{" "}
                     </h1>
@@ -192,7 +192,7 @@ const AccountInfo = () => {
                           <h4 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                             Image File
                           </h4>
-                          <div className="flex items-center justify-center w-60">
+                          <div className="flex items-center justify-center w-64 md:w-80">
                             <label
                               htmlFor="profile_pic"
                               className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"

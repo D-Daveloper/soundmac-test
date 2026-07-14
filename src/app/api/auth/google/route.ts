@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   try {
     await dbConnect();
     const { token, referralCode: enteredReferralCode } = await req.json();
+    
     if (!token) {
       return NextResponse.json({ msg: "Token is required" }, { status: 400 });
     }

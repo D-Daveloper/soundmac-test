@@ -194,13 +194,13 @@ const Verification = () => {
   }, [data]);
 
   return (
-    <div className=" w-full max-w-[800px] flex flex-col px-5">
+    <div className=" w-full max-w-[800px] flex flex-col px-5 lg:px-3">
       {isLoading || !data || isSubmittingForm ? (
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="flex gap-8 py-15 pb-30">
-            <div className="flex-3 overflow-auto flex flex-col gap-10 px-1 min-h-[64dvh]">
+          <div className="flex gap-8 py-5 pb-30">
+            <div className="flex-3 overflow-auto flex flex-col gap-10">
               {/* Account info */}
               <div>
                 <div className="flex items-start gap-5 justify-between max-xs:flex-wrap">
@@ -225,7 +225,7 @@ const Verification = () => {
                     {isVerified ? "Verified" : "Not Verified"}
                   </div>
                 </div>
-                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 px-1 ">
                   {formData.map((data, index) => (
                     <div
                       key={index}
@@ -249,10 +249,10 @@ const Verification = () => {
                   ))}
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <div className="flex">
-                      <p className=" capitalize font-medium sm:text-sm text-lg">
-                        Date of Birth
+                      <p className=" capitalize font-medium text-sm">
+                        Date of Birth <span className="text-red-500">*</span>
                       </p>
-                      <Image
+                      {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -260,7 +260,7 @@ const Verification = () => {
                         width={0}
                         height={0}
                         className="w-2 -mt-3 "
-                      />
+                      /> */}
                     </div>
                     <SelectDate
                       disabled={!wantsToEdit || isVerified}
@@ -273,7 +273,7 @@ const Verification = () => {
                       value={verificationForm.dob}
                       type="first"
                     />
-                    <p className=" font-normal text-sm leading-[20px] text-warning-600 -tracking-[0.5px]">
+                    <p className=" font-normal text-xs leading-[20px] text-warning-600 -tracking-[0.5px] p-1">
                       Must be 18+
                     </p>
                   </div>
@@ -282,7 +282,7 @@ const Verification = () => {
                 {/* border line */}
                 <div className="border border-neutral-100 my-10"></div>
 
-                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
+                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 px-1">
                   {IDForm.map((data, index) => (
                     <div
                       key={index}
@@ -306,7 +306,7 @@ const Verification = () => {
                   ))}
                   {/* cover art */}
                   <div>
-                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading mt-15">
+                    <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading mt-7">
                       ID Upload{" "}
                     </h1>
                     <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 ">
@@ -317,9 +317,9 @@ const Verification = () => {
                         <div className="flex flex-col max-sm:w-full gap-2">
                           <div className="flex gap-1">
                             <h4 className="text-sm font-bold leading-[24px] tracking-[-0.5px] text-main-heading">
-                              image File
+                              image File <span className="text-red-500">*</span>
                             </h4>
-                            <Image
+                            {/* <Image
                               priority={false}
                               loading="lazy"
                               src="/required.svg"
@@ -327,9 +327,9 @@ const Verification = () => {
                               width={0}
                               height={0}
                               className="w-2 -mt-3 "
-                            />
+                            /> */}
                           </div>
-                          <div className="flex items-center justify-center w-60">
+                          <div className="flex items-center justify-center w-64 md:w-80">
                             <label
                               htmlFor="id_image"
                               className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -404,9 +404,9 @@ const Verification = () => {
                       <div className="flex flex-col max-sm:w-full gap-2">
                         <div className="flex gap-1">
                           <h4 className="text-sm font-bold leading-[24px] tracking-[-0.5px] text-main-heading">
-                            image File
+                            image File <span className="text-red-500">*</span>
                           </h4>
-                          <Image
+                          {/* <Image
                             priority={false}
                             loading="lazy"
                             src="/required.svg"
@@ -414,9 +414,9 @@ const Verification = () => {
                             width={0}
                             height={0}
                             className="w-2 -mt-3 "
-                          />
+                          /> */}
                         </div>
-                        <div className="flex items-center justify-center w-60">
+                        <div className="flex items-center justify-center w-64 md:w-80">
                           <label
                             htmlFor="address_image"
                             className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
@@ -476,7 +476,7 @@ const Verification = () => {
                     </div>
                   </div>
                 </div>
-                <p className=" font-normal text-sm leading-[20px] text-warning-600 -tracking-[0.5px]">
+                <p className=" font-normal text-xs leading-[20px] text-warning-600 -tracking-[0.5px] py-1">
                   Verification helps secure your account and enable payouts.
                   Reviews typically take 24–48 hours.
                 </p>

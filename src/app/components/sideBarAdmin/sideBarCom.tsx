@@ -1,64 +1,95 @@
-'use client';
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
 
-interface sideBarSection {
+interface SideBarSection {
   title: string;
   icon: string;
-// setSection: (text: string) => void;
-  href:string;
-  query:string
+  href: string;
+  query: string;
 }
 
 interface Props {
   title: string;
-  list: sideBarSection[];
+  list: SideBarSection[];
 }
 
-const sideBarCom = (props: Props) => {
-
+const SideBarCom = (props: Props) => {
   const pathname = usePathname();
-  const pathNameArray = pathname.split("/")
-  const newPathName = pathNameArray[2]
-  
+
+  const isCurrentSection = props.list.some((item) =>
+    pathname.toLowerCase().includes(item.query.toLowerCase())
+  );
+
+  const [open, setOpen] = useState(isCurrentSection);
+
+  const isExpanded = isCurrentSection || open;
+
   return (
-    <div className="">
-      <p
-        className={"w-full capitalize flex justify-between text-[16px] font-bold py-2 px-4 rounded-lg "}
+    <div className="border-b border-primary-500/30 pb-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full capitalize flex justify-between items-center text-sm font-bold hover:cursor-pointer hover:bg-primary-500/20 py-2 px-4 rounded-lg focus:outline-none text-primary-100"
       >
         {props.title}
-      </p>
-      {/* <div className={""}> */}
-        <div
-          className={
-            " ml-5 mt-4 flex-col gap-2 h-fit flex " +
-             (props.title === 'music'||props.title === 'explore'? " max-h-[100px] h-[100px]": props.title === "artist"? " max-h-[160px] h-[160px]" : "  min-h-fit")}
-          
-        >
-          {props.list.map((section, index) => (
-            <Link
-            key={index}
-              href={section.href}
-              aria-label={section.title}
-              tabIndex={0}
-              className={
-                " focus:bg-neutral-700/90 hover:bg-neutral-700/90 transition-all duration-300 flex gap-2 font-extralight capitalize h-auto w-full px-3 py-2 rounded-lg opacity-100 focus:outline-none hover:cursor-pointer " + (section.href.includes(pathNameArray[2]+"/"+ pathNameArray[3])? " bg-neutral-700" : " bg-transparent")
-              }
-            >
-              <Image
-                src={section.icon}
-                alt="add icon"
-                width={20}
-                height={20}
-              />
-              {section.title}
-            </Link>
-          ))}
+
+        <Image
+          src="/arrow-down.png"
+          alt="arrow"
+          width={16}
+          height={16}
+          className={`transition-transform duration-300 ${
+            isExpanded ? "rotate-0" : "rotate-180"
+          }`}
+        />
+      </button>
+
+      <div
+        className={`overflow-hidden transition-all duration-300 ${
+          isExpanded ? "max-h-[350px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="ml-4 mt-1 flex flex-col gap-1">
+          {props.list.map((section, index) => {
+            const isActive =
+              pathname
+                .toLowerCase()
+                .includes(section.query.toLowerCase()) ||
+              section.href.includes(
+                pathname.split("/")[2] + "/" + pathname.split("/")[3]
+              );
+
+            return (
+              <Link
+                key={index}
+                href={section.href}
+                aria-hidden={!isExpanded}
+                aria-disabled={!isExpanded}
+                tabIndex={!isExpanded ? -1 : 0}
+                className={`flex items-center gap-3 font-light text-sm capitalize w-full px-3 py-2 rounded-lg transition-all duration-200 ${
+                  isActive
+                    ? "bg-primary-500/90 text-white"
+                    : "text-primary-100 hover:bg-primary-500/30 hover:text-white"
+                }`}
+              >
+                <Image
+                  src={section.icon}
+                  alt={section.title}
+                  width={18}
+                  height={18}
+                />
+
+                {section.title}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
 };
 
-export default sideBarCom;
+export default SideBarCom;
