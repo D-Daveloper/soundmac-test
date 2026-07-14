@@ -3,44 +3,107 @@ import { FaRegCheckCircle } from "react-icons/fa";
 import { pricing } from "./constants";
 import classes from "./page.module.css";
 import { PricingObjects } from "./types";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { X } from "lucide-react";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { BeatLoader } from "react-spinners";
+
+declare global {
+  interface Window {
+    PaystackPop: any;
+  }
+}
 
 export default function Pricing() {
   const api = UseAxios();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [wantsToSubscribe, setWantsToSubscribe] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [selectedPlan, SetSelectedPlan] = useState<null | PricingObjects>(null);
   const [email, setEmail] = useState("");
 
+  // Load Paystack Inline script once, on mount
+  useEffect(() => {
+    if (document.getElementById("paystack-inline-js")) return;
+    const script = document.createElement("script");
+    script.id = "paystack-inline-js";
+    script.src = "https://js.paystack.co/v2/inline.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  const verifyPayment = async (reference: string) => {
+    try {
+      const res = await api.put("/payments", JSON.stringify({ reference }));
+      toast.success(res.data.msg);
+      await queryClient.invalidateQueries({ queryKey: ["authUser"] });
+      router.push("/dashboard/subscription");
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.msg || "Could not verify payment. Contact support if you were charged.",
+        );
+      } else {
+        console.error("verify error", error);
+        toast.error("Something went wrong verifying your payment.");
+      }
+    } finally {
+      setIsSubscribing(false);
+    }
+  };
+  
+
   const subscribe = async (plan: string, email: string) => {
+      if (!email) {
+      return toast.warn("Please provide a valid email.");
+    } else if (!plan) {
+      return toast.warn("Please select a plan.");
+    }
+
     try {
       setIsSubscribing(true);
       console.log(plan);
-      
-      if(!email){
-        return toast.warn("Please provide a valid email.")
-      }else if (!plan){
-        return toast.warn("Please select a plan.")
-      }
+  
       const res = await api.post(
         "/payments",
         JSON.stringify({ email: email, plan }),
       );
-      toast.info("You will be redirected now.");
-      window.location.href = res.data.url;
+    const { accessCode, reference } = res.data;
+
+      if (!window.PaystackPop) {
+        toast.error("Payment popup failed to load. Please try again.");
+        setIsSubscribing(false);
+        return;
+      }
+
+      const popup = new window.PaystackPop();
+      popup.resumeTransaction(accessCode, {
+        onSuccess: () => verifyPayment(reference),
+        onCancel: () => {
+          toast.info("Payment cancelled.");
+          setIsSubscribing(false);
+          setWantsToSubscribe(false)
+        },
+        onError: (err: any) => {
+          console.error("paystack error", err);
+          toast.error("Payment failed. Please try again.");
+          setIsSubscribing(false);
+        },
+      });
     } catch (error) {
       if (isAxiosError(error)) {
+        setIsSubscribing(false);
         return;
       } else {
         console.error("payment error", error);
         toast.error("Something went wrong.");
+        setIsSubscribing(false);
       }
-    } finally {
-      setIsSubscribing(false);
     }
   };
   return (
@@ -109,7 +172,8 @@ export default function Pricing() {
                 (isSubscribing ? " bg-disable" : " bg-primary-500")
               }
             >
-              Proceed to Payment
+              {isSubscribing ? <BeatLoader  size={12} color="#fff"/> : <p>Proceed to Payment</p>}
+              {/* Proceed to Payment */}
             </button>
           </div>
         </div>
