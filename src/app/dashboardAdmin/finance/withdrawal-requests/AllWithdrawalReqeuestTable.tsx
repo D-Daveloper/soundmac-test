@@ -3,6 +3,7 @@ import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { useRouter } from "next/navigation";
 import { withdrawals } from "@/app/type";
+import { handleCopy } from "@/util/middleware/functions";
 
 const AllWithdrawalReqeuestTable = ({
   Withdrawals,
@@ -80,7 +81,10 @@ const AllWithdrawalReqeuestTable = ({
                     className="hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     {/* Request ID */}
-                    <td className="p-4 whitespace-nowrap font-mono text-gray-900 select-all max-w-[220px] truncate">
+                    <td className="p-4 whitespace-nowrap font-mono text-gray-900 select-all max-w-[220px] truncate"
+                    onClick={() => handleCopy(String(withdrawal._id))}
+                    title="click to copy Id"
+                    >
                       {withdrawal._id}
                     </td>
 

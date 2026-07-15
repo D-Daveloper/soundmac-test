@@ -322,11 +322,11 @@ const Page = () => {
         </div>
       )}
       {showUploadSalesReportModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-60 flex items-center justify-center z-[40]">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-[40]">
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl md:w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl md:w-[700px] shadow-2xl h-[400px] md:h-[500px] overflow-y-auto remove-scrollbar m-2">
               {/* Reject Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200 mt-5">
                 <h3 className="text-xl font-semibold text-gray-900">

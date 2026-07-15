@@ -3,6 +3,7 @@ import { AdminRelease } from "@/app/type";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { ReleaseDetailsModal } from "./releaseDetailsModel";
+import { handleCopy } from "@/util/middleware/functions";
 
 const ReleaseTable = ({
   releases,
@@ -44,7 +45,9 @@ const ReleaseTable = ({
     );
   };
 
-  const [selectedRelease, setselectedRelease] = useState<AdminRelease | null>(null);
+  const [selectedRelease, setselectedRelease] = useState<AdminRelease | null>(
+    null,
+  );
 
   return (
     <div className="w-full bg-gray-50 p-2">
@@ -101,27 +104,44 @@ const ReleaseTable = ({
                       </td>
 
                       {/* Catalog Number */}
-                      <td className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[150px]">
+                      <td
+                        className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[150px]"
+                        onClick={() =>
+                          handleCopy(String(release.catalogNumber))
+                        }
+                        title="click to copy catalog number"
+                      >
                         {release.catalogNumber}
                       </td>
 
                       {/* ISRC */}
-                      <td className="p-4 whitespace-nowrap text-gray-500 select-all font-mono">
+                      <td
+                        className="p-4 whitespace-nowrap text-gray-500 select-all font-mono"
+                        onClick={() => handleCopy(String(release.isrc))}
+                        title="click to copy isrc"
+                      >
                         {release.isrc}
                       </td>
 
                       {/* UPC */}
-                      <td className="p-4 whitespace-nowrap text-gray-500 select-all font-mono">
+                      <td
+                        className="p-4 whitespace-nowrap text-gray-500 select-all font-mono"
+                        onClick={() => handleCopy(String(release.upc))}
+                        title="click to copy upc"
+                      >
                         {release.upc}
                       </td>
 
                       {/* Release Date */}
                       <td className="p-4 whitespace-nowrap text-gray-500">
-                        {new Date(release.releaseDate).toLocaleDateString(undefined, {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
+                        {new Date(release.releaseDate).toLocaleDateString(
+                          undefined,
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          },
+                        )}
                       </td>
 
                       {/* Status */}

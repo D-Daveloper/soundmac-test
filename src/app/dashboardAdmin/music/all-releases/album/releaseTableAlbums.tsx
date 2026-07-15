@@ -3,6 +3,7 @@ import { AdminRelease } from "@/app/type";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { useRouter } from "next/navigation";
+import { handleCopy } from "@/util/middleware/functions";
 
 const ReleaseTable = ({
   releases,
@@ -73,7 +74,8 @@ const ReleaseTable = ({
                   <tr
                     onClick={() =>
                       router.push(
-                        "/dashboardAdmin/music/all-releases/album/" + release._id
+                        "/dashboardAdmin/music/all-releases/album/" +
+                          release._id,
                       )
                     }
                     key={release._id}
@@ -102,22 +104,33 @@ const ReleaseTable = ({
                     </td>
 
                     {/* Catalog No. */}
-                    <td className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[140px]">
+                    <td
+                      className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[140px]"
+                      onClick={() => handleCopy(String(release.catalogNumber))}
+                      title="click to copy catalog number"
+                    >
                       {release.catalogNumber}
                     </td>
 
                     {/* UPC */}
-                    <td className="p-4 whitespace-nowrap text-gray-500 font-mono select-all">
+                    <td
+                      className="p-4 whitespace-nowrap text-gray-500 font-mono select-all"
+                      onClick={() => handleCopy(String(release.upc))}
+                      title="click to copy upc"
+                    >
                       {release.upc}
                     </td>
 
                     {/* Release Date */}
                     <td className="p-4 whitespace-nowrap text-gray-500">
-                      {new Date(release.releaseDate).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                      })}
+                      {new Date(release.releaseDate).toLocaleDateString(
+                        undefined,
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </td>
 
                     {/* Status Badge */}
