@@ -45,7 +45,7 @@ const Page = () => {
     page,
     limit: "50",
     releaseTitle,
-    releaseType:"single"
+    releaseType: "single",
   });
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const Page = () => {
     setfilter((prev) => ({ ...prev, releaseStatusFilter: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-5">
       <div className="flex gap-3 mt-5">
         <Link
           href={"/dashboardAdmin/music/all-releases/single"}
@@ -82,8 +82,8 @@ const Page = () => {
       ) : (
         <>
           {/* Filters */}
-          <div className="w-full flex flex-wrap justify-between gap-5 items-end">
-            <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
+          <div className="w-full flex flex-col md:flex-row justify-between gap-5 items-end mt-3">
+            <div className="flex p-1 outline-1 rounded-lg w-full flex-1 h-fit ">
               <Image
                 priority={true}
                 src="/search-normal.svg"
@@ -103,7 +103,7 @@ const Page = () => {
             </div>
             <div className="flex flex-col w-[40%] max-sm:w-full gap-2 flex-1">
               <p className="font-medium mb-2 sm:text-sm text-lg">Artist</p>
-              <div className="w-full">
+              <div className="w-full relative z-20">
                 <Select
                   selected={filter.artist}
                   setSelected={(t) =>
@@ -196,17 +196,27 @@ const Page = () => {
                 isfetching={isFetchingAllReleases}
               />
               {/* Pagination */}
-              <div className="px-6">
-                <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Showing {(page - 1) * allReleases.limit + 1} to{" "}
-                    {Math.min(
-                      (page - 1) * allReleases.limit + allReleases.limit,
-                      allReleases.totalCount,
-                    )}{" "}
-                    of {allReleases.totalCount} results
+              <div className="px-0 md:px-2">
+                <div className="border-t border-gray-200 py-4 px-2 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between rounded-lg">
+                  <div className="text-sm text-gray-600 text-center sm:text-left order-2 sm:order-1">
+                    Showing{" "}
+                    <span className="font-semibold">
+                      {(page - 1) * allReleases.limit + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-semibold">
+                      {Math.min(
+                        (page - 1) * allReleases.limit + allReleases.limit,
+                        allReleases.totalCount,
+                      )}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-semibold">
+                      {allReleases.totalCount}
+                    </span>{" "}
+                    results
                   </div>
-                  <div>
+                  <div className="flex justify-center w-full sm:w-auto order-1 sm:order-2">
                     <Pagination
                       currentPage={page}
                       totalPages={allReleases.totalPages}

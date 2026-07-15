@@ -159,7 +159,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <div className="bg-primary w-5 h-1"></div>
               <div className="bg-primary w-5 h-1"></div>
             </div>
-            <h1 className="font-light text-2xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
+            <h1 className="font-light text-base md:text-xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
               {dashboardContext?.layoutHeaderMessage}
             </h1>
             <div

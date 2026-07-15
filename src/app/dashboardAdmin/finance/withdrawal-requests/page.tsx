@@ -59,7 +59,7 @@ const Page = () => {
     setfilter((prev) => ({ ...prev, accountType: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-1 md:px-5 overflow-hidden">
       <div className="flex gap-3 mt-5 ">
         <button
           onClick={() => {
@@ -184,8 +184,8 @@ const Page = () => {
                 isfetching={isFetchingallWithdrawals}
               />
               {/* Pagination */}
-              <div className="px-6">
-                <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
+               <div className="px-0 md:px-2 mt-3">
+                <div className="border-t border-gray-200 py-4 px-2 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between rounded-lg">
                   <div className="text-sm text-gray-600">
                     Showing {(page - 1) * allWithdrawals.limit + 1} to{" "}
                     {Math.min(

@@ -101,8 +101,8 @@ const Page = () => {
   }
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-5 overflow-hidden">
-      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 px-1">
+    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-2 md:px-5 overflow-hidden pb-5">
+      <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 px-1">
         <div className="flex flex-col w-[40%] max-sm:w-full">
           <Input
             value={form.exchange_rate}
@@ -131,7 +131,7 @@ const Page = () => {
         </div>
       </div>
       <div>
-        <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 px-1">
+        <div className="w-full flex flex-wrap justify-between gap-y-5 mt- px-1">
           <div className="flex flex-col w-[40%] max-sm:w-full">
             <Input
               value={apiKeyForm.email}

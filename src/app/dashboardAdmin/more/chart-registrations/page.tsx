@@ -1,8 +1,6 @@
 "use client";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import {
-    useGetPaginatedCharts,
-} from "@/util/customHooks/useQueries";
+import { useGetPaginatedCharts } from "@/util/customHooks/useQueries";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
@@ -47,7 +45,7 @@ const Page = () => {
     chartStatus: chartStatus || "all",
   });
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-5 overflow-hidden">
+    <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-2 md:px-5 overflow-hidden">
       <div className="flex gap-3 mt-5">
         <button
           onClick={() => {
@@ -90,7 +88,7 @@ const Page = () => {
         </button>
       </div>
       {/* Filters */}
-      <div className="w-full flex flex-wrap justify-between gap-5 items-end">
+      <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end">
         <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
           <Image
             priority={true}
@@ -171,7 +169,8 @@ const Page = () => {
             />
           </div>
           <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center capitalize">
-            No Chart Registrations found for the selected filters. Try adjusting your search or filters to find what you're looking for.
+            No Chart Registrations found for the selected filters. Try adjusting
+            your search or filters to find what you're looking for.
           </p>
           <Link
             href={"/dashboardAdmin/more/promotions?chartStatus=all"}
@@ -184,13 +183,10 @@ const Page = () => {
         </div>
       ) : (
         <div className="flex flex-col mb-10">
-          <ChartTable
-            charts={allCharts.data}
-            isfetching={isLoadingAllCharts}
-          />
+          <ChartTable charts={allCharts.data} isfetching={isLoadingAllCharts} />
           {/* Pagination */}
-          <div className="px-6">
-            <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
+          <div className="px-0 md:px-2">
+            <div className="border-t border-gray-200 py-4 px-2 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between rounded-lg">
               <div className="text-sm text-gray-600">
                 Showing {(page - 1) * allCharts.limit + 1} to{" "}
                 {Math.min(

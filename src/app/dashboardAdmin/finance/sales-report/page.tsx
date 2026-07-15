@@ -107,14 +107,14 @@ const Page = () => {
             <Link
             href="/dashboardAdmin/finance/sales-report/pending"
               className={
-                "font-bold py-2 items-center rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
+                "font-bold py-2 items-center mt-2 rounded-lg gap-2 px-2 h-fit hover:bg-primary/20 border-2 text-primary border-primary flex bg-transparent text-xs max-sm:w-fit"
               }
             >
               <Clock4 strokeWidth={1} size={20} />
               View Pending
             </Link>
           </div>
-          <div className="flex gap-5">
+          <div className="flex flex-col md:flex-row gap-5">
             <div
               className={
                 "flex-2 bg-neutral-50 border-[1px] rounded-3xl border-neutral-100 h-[160px] w-full col-span-1 max-xl:col-span-2 max-sm:col-span-1 " +
@@ -136,10 +136,10 @@ const Page = () => {
                   className="self-start w-auto h-auto"
                 />
                 <div className="mt4 flex flex-col gap-3">
-                  <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
+                  <h2 className="text-base md:text-2xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
                     {formatAmount(data.totals[0]?.totalNetAmount || 0)}
                   </h2>
-                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
+                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] md:text-lg">
                     Total Revenue Uploaded
                   </p>
                 </div>
@@ -166,10 +166,10 @@ const Page = () => {
                   className="self-start w-auto h-auto"
                 />
                 <div className="mt4 flex flex-col gap-3">
-                  <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
+                  <h2 className="text-base md:text-2xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
                     {formatAmount(data.totalWithdrawn[0]?.totalWithdrawals || 0)}
                   </h2>
-                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
+                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] md:text-lg">
                     Total Revenue Withdrawn
                   </p>
                 </div>
@@ -197,10 +197,10 @@ const Page = () => {
                   className="self-start w-auto h-auto"
                 />
                 <div className="mt4 self-end">
-                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] text-lg">
+                  <p className="text-text-disable font-normal leading-[20px] tracking-[-0.5px] md:text-lg">
                     Total Uploads
                   </p>
-                  <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
+                  <h2 className="text-base md:text-2xl font-bold leading-[40px] tracking-tighter text-text-body text-end">
                     {data.totals[0]?.totalDocuments || 0}
                   </h2>
                 </div>
@@ -322,13 +322,13 @@ const Page = () => {
         </div>
       )}
       {showUploadSalesReportModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-60 flex items-center justify-center z-[40]">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-[40]">
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl md:w-[700px] shadow-2xl h-[400px] md:h-[500px] overflow-y-auto remove-scrollbar m-2">
               {/* Reject Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 mt-5">
                 <h3 className="text-xl font-semibold text-gray-900">
                   Upload Data
                 </h3>

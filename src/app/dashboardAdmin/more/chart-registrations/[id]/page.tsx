@@ -98,7 +98,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   return (
     <>
       {/* Main Modal */}
-      <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
+      <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-5">
         <Link
           href={"/dashboardAdmin/more/chart-registrations?chartStatus=all"}
           aria-label="go back"
@@ -115,9 +115,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <InlineLoadingScreen />
         ) : (
           <>
-            <div className="flex mt-3">
+            <div className="flex flex-col md:flex-row mt-3">
               {/* Content */}
-              <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
+              <div className="p-3 flex-2 md:w-[80%] overflow-hidden">
                 <div className="flex items-center gap-4 mb-10">
                   <button
                     onClick={handleDownloadSong}
@@ -150,7 +150,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Song name
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {chartDetails.releaseId.releaseTitle}
                       </p>
                     </div>
@@ -160,8 +160,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Artist
                       </p>
-                      <div>
-                        <p className="text-gray-900 text-lg font-medium mb-1">
+                      <div className="flex flex-col md:flex-row items-center gap-x-3">
+                        <p className="text-gray-900 text-base font-medium mb-1">
                           {chartDetails.artist.artistName}
                         </p>
                         <div className="flex items-center gap-3">
@@ -175,7 +175,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {chartDetails.artist.spotifyId}
+                              {chartDetails.artist?.spotifyId || 'N/A'}
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
@@ -188,7 +188,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                               height={20}
                             />
                             <span className="text-sm text-gray-600">
-                              {chartDetails.artist.appleId}
+                              {chartDetails.artist?.appleId || 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -204,7 +204,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         ISRC
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {chartDetails.releaseId.isrc}
                       </p>
                     </div>
@@ -213,7 +213,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         UPC
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {chartDetails.releaseId.upc}
                       </p>
                     </div>
@@ -227,7 +227,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Chart Name
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium tracking-tighter">
                         {chartDetails.chartName}
                       </p>
                     </div>
@@ -237,7 +237,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Date Submitted
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {new Date(chartDetails.createdAt).toDateString()}
                       </p>
                     </div>

@@ -39,7 +39,7 @@ const Dashboard = () => {
                   alt="music note icon"
                   className=" w-auto h-auto"
                 />
-                <h2 className="text-4xl font-bold leading-[40px] tracking-tighter text-text-body">
+                <h2 className=" text-base md:text-2xl font-bold leading-[40px] tracking-tighter text-text-body">
                   {data?.totalRelease || "0"}
                 </h2>
               </div>
@@ -48,7 +48,7 @@ const Dashboard = () => {
               </p>
               <div className="flex gap-5 w-full">
                 <div className="text-center border border-neutral-100 bg-success-50 rounded-lg w-full py-1">
-                  <h3 className="text-2xl font-medium leading-[30px] tracking-tighter text-main-heading">
+                  <h3 className="text-base font-medium leading-[30px] tracking-tighter text-main-heading">
                     {data?.totalApprovedReleases || 0}
                   </h3>
                   <p className="text-text-disable font-bold leading-[18px] tracking-[-0.5px] text-sm">
@@ -56,7 +56,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <div className="text-center border border-neutral-100 bg-warning-100 rounded-lg w-full py-1">
-                  <h3 className="text-2xl font-medium leading-[30px] tracking-tighter text-main-heading">
+                  <h3 className="text-base font-medium leading-[30px] tracking-tighter text-main-heading">
                     {data?.totalPendingReleases || 0}
                   </h3>
                   <p className="text-text-disable font-bold leading-[18px] tracking-[-0.5px] text-sm">
@@ -64,7 +64,7 @@ const Dashboard = () => {
                   </p>
                 </div>
                 <div className="text-center border border-neutral-100 bg-error-50 rounded-lg w-full py-1">
-                  <h3 className="text-2xl font-medium leading-[30px] tracking-tighter text-main-heading">
+                  <h3 className="text-base font-medium leading-[30px] tracking-tighter text-main-heading">
                     {data?.totalRejectedReleases || 0}
                   </h3>
                   <p className="text-text-disable font-bold leading-[18px] tracking-[-0.5px] text-sm">
@@ -96,7 +96,7 @@ const Dashboard = () => {
                 width={50}
                 alt="people icon"
               />
-              <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit truncate">
+              <h2 className=" text-base md:text-2xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit truncate">
                 {data?.totalUsers || 0}
               </h2>
             </div>
@@ -130,7 +130,7 @@ const Dashboard = () => {
               <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-lg w-full flex-1 text-end">
                 Total Earnings
               </p>
-              <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
+              <h2 className=" text-base md:text-2xl font-bold leading-[50px] tracking-tight text-text-body text-end w-fit self-end truncate">
                {data && formatAmount(data.totalEarnings)}
               </h2>
             </div>
@@ -195,7 +195,7 @@ const Dashboard = () => {
                 alt="micro phone icon"
               />
               <div>
-                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">
+                <h2 className="text-base md:text-2xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">
                   {data?.totalArtists || 0}
                 </h2>
                 <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-md w-full text-end">
@@ -225,7 +225,7 @@ const Dashboard = () => {
                 alt="support icon"
               />
               <div>
-                <h2 className="text-4xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">
+                <h2 className="text-sm md:text-2xl font-bold leading-[50px] tracking-tight text-text-body text-end truncate">
                   {data?.totalSupportRequests || 0}
                 </h2>
                 <p className="text-text-disable font-normal leading-[18px] tracking-tighter text-md w-full text-end">

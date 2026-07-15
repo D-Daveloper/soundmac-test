@@ -111,13 +111,13 @@ const Page = () => {
                     >
                       <div className="flex gap-2">
                         <div className="relative w-30 h-30 max-w-30 max-h-30">
-                          <Image
+                          {/* <Image
                             priority={true}
                             src={release.releaseImage}
                             alt="release Image"
                             fill
                             className="rounded-lg object-cover"
-                          />
+                          /> */}
                         </div>
                         <div>
                           <h1 className="text-2xl font-normal leading-[30px] tracking-tighter text-main-heading">
@@ -125,13 +125,13 @@ const Page = () => {
                           </h1>
                           <div className="flex gap-2 border border-neutral-100 rounded-lg items-center p-2 w-fit">
                             <div className="relative w-10 h-10 max-w-10 max-h-10">
-                              <Image
+                              {/* <Image
                                 priority={true}
                                 src={release.artist.artistImage}
                                 alt="artist Image"
                                 fill
                                 className="rounded-lg object-cover"
-                              />
+                              /> */}
                             </div>
                             <h2 className="text-sm font-bold leading-[18px] tracking-tighter text-text-body">
                               {release.artist.artistName}
