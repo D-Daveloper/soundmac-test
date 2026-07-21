@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useGetReferralDetails } from "@/util/customHooks/useQueries";
 import { handleCopy } from "@/util/middleware/functions";
 import {
@@ -14,6 +14,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
+import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 
 const getStatusStyles = (status: string) => {
   switch (status) {
@@ -38,6 +39,11 @@ const ReferralDetails = () => {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
+  const dashboardContext = useContext(DashboardContext);
+    useEffect(() => {
+      dashboardContext?.setHeader({title:"Referral Details", showBackButton:false});
+    }, []);
+
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
@@ -47,7 +53,7 @@ const ReferralDetails = () => {
   }
 
   return (
-    <div className="w-full mx-auto py-5 px- sm:px-6 space-y-7 antialiased">
+    <div className="w-full mx-auto py-5 px-2 sm:px-6 space-y-7 antialiased bg-main-white">
       <div className="relative px-2 md:px-0 ">
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider mb-3">
           <UserPlus size={12} /> Share & Earn

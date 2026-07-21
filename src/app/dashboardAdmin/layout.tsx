@@ -10,6 +10,7 @@ import { NormalLoadingScreen } from "../components/Loader/loader";
 import { useAuthUser } from "@/util/customHooks/useQueries";
 import AdminRoute from "../protectedRoute/AdminProtectedRoute";
 import LogoutButton from "../logout/Logout";
+import { useRouter } from "next/navigation";
 
 const sidebarComponents = [
   {
@@ -129,9 +130,9 @@ const sidebarComponents = [
   },
 ];
 
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { data, isLoading } = useAuthUser();
+  const router = useRouter();
   const dashboardContext = useContext(DashboardContext);
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
@@ -159,9 +160,39 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <div className="bg-primary w-5 h-1"></div>
               <div className="bg-primary w-5 h-1"></div>
             </div>
-            <h1 className="font-light text-base md:text-xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
+
+            <div className="md:mx-3 flex items-center">
+              {dashboardContext?.header.showBackButton && (
+                <button
+                  type="button"
+                  aria-label="Go back"
+                  onClick={() => {
+                    if (dashboardContext.header.onBack) {
+                      dashboardContext.header.onBack();
+                    } else {
+                      router.back();
+                    }
+                  }}
+                  className="p-2 w-9 h-9 text-neutral-600 rounded-lg hover:bg-neutral-50 hover:text-neutral-900 transition-all items-center justify-center shrink-0 shadow- hidden lg:flex"
+                >
+                  <Image
+                    src="/arrow-left.svg"
+                    height={20}
+                    width={20}
+                    alt="arrow left"
+                    className="w-5 h-5"
+                  />
+                </button>
+              )}
+
+              <h1 className="font-normal text-base md:text-xl text-main-heading truncate tracking-tight py-1">
+                {dashboardContext?.header.title || "Dashboard"}
+              </h1>
+            </div>
+
+            {/* <h1 className="font-light text-base md:text-xl tracking-[-1px] leading-8 capitalize ml-5 h-8">
               {dashboardContext?.layoutHeaderMessage}
-            </h1>
+            </h1> */}
             <div
               className={
                 " transition-all duration-300 ease-in-out flex h-[100dvh] lg:w-[250px] max-lg:w-[50%] max-sm:w-full absolute top-0 max-lg:top-18 bottom-0 left-0 right-0 " +

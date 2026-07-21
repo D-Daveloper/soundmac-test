@@ -16,6 +16,10 @@ images: {
       protocol: "https",
       hostname: "soundmac1.s3.eu-north-1.amazonaws.com",
     },
+      {
+      protocol: "https",
+      hostname: "lh3.googleusercontent.com",
+    },
   ],
 },
   eslint: {

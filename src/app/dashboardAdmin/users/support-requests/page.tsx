@@ -49,7 +49,7 @@ const Page = () => {
   const [showFullSupportRequest, setshowFullSupportRequest] = useState(false);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("support Requests");
+    dashboardContext?.setHeader({title:"support Requests", showBackButton:true});
   }, []);
 
   useEffect(() => {

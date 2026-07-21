@@ -38,7 +38,10 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     isError,
   } = useGetAdminAlbumDetails({ albumId: id });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Album Details");
+    dashboardContext?.setHeader({
+      title: "Album Details",
+      showBackButton: true,
+    });
   }, []);
   useEffect(() => {
     if (albumDetails?.release) {
@@ -146,7 +149,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     <>
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
-        <Link
+        {/* <Link
           href={"/dashboardAdmin/music/release-requests/album"}
           aria-label="go back"
           className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -157,16 +160,16 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             width={32}
             alt="arrow left"
           />
-        </Link>
+        </Link> */}
         {isSubmitting || !albumDetails || isLoadingAlbumDetails ? (
           <InlineLoadingScreen />
         ) : (
           <>
-            <div className="flex mt-3">
+            <div className="flex flex-col md:flex-row mt-3">
               {/* Content */}
-              <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
+              <div className="p-3 flex-2 md:max-w-[70%] overflow-hidden">
                 {isTrack && (
-                  <div className="flex items-center gap-4 mb-10">
+                  <div className="flex items-center gap-1 mb-10">
                     <button
                       onClick={handleDownloadSong}
                       aria-label="download music"
@@ -197,12 +200,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     <p className="text-text-disable font-bold text-sm mb-1">
                       Email
                     </p>
-                    <p className="text-gray-900 text-lg font-medium">
+                    <p className="text-gray-900 text-base font-medium">
                       {albumDetails.release.user.email}
                     </p>
                   </div>
                   <div className="border border-neutral-100 mb-6"></div>
-                  <div className="flex ">
+                  <div className="flex flex-col md:flex-row ">
                     {/* Song Name */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
@@ -212,6 +215,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         {albumDetails.release.releaseTitle}
                       </p>
                     </div>
+                    <div className="border border-neutral-100 mb-6 md:hidden"></div>
 
                     {/* Artist */}
                     <div className="flex-1">
@@ -222,7 +226,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <p className="text-gray-900 text-lg font-medium mb-1">
                           {albumDetails.release.artistName}
                         </p>
-                        <div className="flex items-center gap-3">
+                        <div className="flex  flex-wrap md:flex-nowrap items-center gap-3">
                           <div className="flex items-center gap-1.5">
                             {/* Spotify icon placeholder */}
                             <Image
@@ -254,9 +258,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </div>
                   </div>
                   {/* border line */}
-                  <div className="border border-neutral-100 mb-6"></div>
+                  <div className="border border-neutral-100 mt-2 md:pt-0 mb-6"></div>
 
-                  <div className="flex">
+                  <div className="flex flex-col md:flex-row">
                     {/* Genre */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
@@ -266,13 +270,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         {albumDetails.release.genre}
                       </p>
                     </div>
+                    <div className="border border-neutral-100 mb-6 md:hidden"></div>
 
                     {/* Release Date */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Release Date
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {new Date(
                           albumDetails.release?.releaseDate,
                         ).toDateString()}
@@ -282,16 +287,17 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   {/* border line */}
                   <div className="border border-neutral-100 mb-6"></div>
 
-                  <div className="flex">
+                  <div className="flex flex-col md:flex-row">
                     {/* upc */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
                         UPC
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {albumDetails.release.upc}
                       </p>
                     </div>
+                    <div className="border border-neutral-100 mb-6 md:hidden"></div>
 
                     {/*catalog number */}
                     {selectedTrack && isTrack ? (
@@ -300,7 +306,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           ISRC
                         </p>
                         <p className="text-gray-900 text-lg font-medium">
-                          {selectedTrack.isrc}
+                          {selectedTrack.isrc || "n/a"}
                         </p>
                       </div>
                     ) : (
@@ -308,7 +314,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <p className="text-text-disable font-bold text-sm mb-1">
                           Catalog Number
                         </p>
-                        <p className="text-gray-900 text-lg font-medium">
+                        <p className="text-gray-900 text-base font-medium">
                           {albumDetails.release.catalogNumber}
                         </p>
                       </div>
@@ -316,28 +322,30 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                   <div className="border border-neutral-100 mb-6"></div>
 
-                  <div className="flex">
+                  <div className="flex flex-col md:flex-row">
                     {/* copy right holder */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
                         CopyRightHolder
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {albumDetails.release.copyRightHolder}
                       </p>
                     </div>
+                    <div className="border border-neutral-100 mb-6 md:hidden"></div>
+
                     {/* copy right year */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
                         CopyRightYear
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {albumDetails.release.copyRightYear}
                       </p>
                     </div>
                   </div>
 
-                  <div className="border border-neutral-100 mb-6"></div>
+                  {/* <div className="border border-neutral-100 mb-6 md:hidden"></div> */}
                 </div>
 
                 {selectedTrack && isTrack && (
@@ -356,8 +364,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                               key={index}
                               className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
                             >
-                              <p className="text-gray-900 text-lg font-medium min-w-fit px-2">
-                                {item.artistName} |
+                              <p className="text-gray-900 text-base font-medium min-w-fit px-2">
+                                {item.artistName || "N/A"} |
                               </p>
                               <div className="flex items-center gap-1.5 mr-2">
                                 <Image
@@ -393,7 +401,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                             Producers
                           </p>
                           <div
-                            className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                            className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
                             style={{
                               scrollbarWidth: "none",
                               msOverflowStyle: "none",
@@ -418,7 +426,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                           Song Writers
                         </p>
                         <div
-                          className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                          className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
                           style={{
                             scrollbarWidth: "none",
                             msOverflowStyle: "none",
@@ -438,7 +446,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                             Producers
                           </p>
                           <div
-                            className="text-gray-900 text-lg font-medium whitespace-nowrap overflow-x-auto"
+                            className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
                             style={{
                               scrollbarWidth: "none",
                               msOverflowStyle: "none",
@@ -461,7 +469,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <p className="text-text-disable font-bold text-sm mb-1">
                           Catalog Number
                         </p>
-                        <p className="text-gray-900 text-lg font-medium">
+                        <p className="text-gray-900 text-base font-medium">
                           {selectedTrack.catalogNumber}
                         </p>
                       </div>
@@ -484,7 +492,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Lyrics
                       </p>
-                      <p className="text-gray-900 text-lg font-medium whitespace-pre-wrap max-h-[500] h-full overflow-y-auto">
+                      <p className="text-gray-900 text-sm font-medium whitespace-pre-wrap max-h-[500] h-full overflow-y-auto pb-10 md:pb-20 mb-5">
                         {selectedTrack?.lyrics}
                       </p>
                     </div>
@@ -511,7 +519,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
 
               {/* side bar */}
-              <div className="flex-1 flex flex-col items-end!">
+              <div className="flex-1 flex flex-col md:items-end!">
                 <div className="bg-neutral-50 p-3 rounded-lg">
                   <div className=" relative overflow-hidden w-50 h-50">
                     <Image
@@ -533,8 +541,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                     </p>
                   </div>
                 </div>
-                <div className="bg-secondary-50 rounded-xl p-3 flex items-center justify-between max-w-65 w-full max-h-14 h-full font-bold text-sm text-center mt-5">
-                  <div className="flex items-center gap-4">
+                <div className="flex flex-wrap md:w-[70%] gap-y-2">
+                  <div className="flex items-center gap-4 bg-secondary-50 rounded-xl p-3 justify-between w-full max-h-14 h-full font-bold text-sm text-center mt-5">
                     {/* Album Art Placeholder */}
                     <a
                       aria-label="download cover art"
@@ -556,22 +564,23 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       Download Cover Art
                     </a>
                   </div>
+
+                  <button
+                    onClick={() => {
+                      setisTrack(false);
+                    }}
+                    className={
+                      "rounded-xl p-3 flex items-center justify-between  w-full max-h-14 h-full font-bold text-sm text-center mb-5 " +
+                      (!isTrack
+                        ? " bg-primary-500 text-white"
+                        : " bg-neutral-50 text-text-disable")
+                    }
+                  >
+                    Album Info
+                  </button>
                 </div>
 
-                <button
-                  onClick={() => {
-                    setisTrack(false);
-                  }}
-                  className={
-                    "rounded-xl p-3 flex items-center justify-between max-w-65 w-full max-h-14 h-full font-bold text-sm text-center mt-10 mb-5 " +
-                    (!isTrack
-                      ? " bg-primary-500 text-white"
-                      : " bg-neutral-50 text-text-disable")
-                  }
-                >
-                  Album Info
-                </button>
-                <div className=" max-w-65 w-full max-h-100 overflow-y-auto ">
+                <div className=" md:max-w-65 w-full min-h-[64vdh] overflow-y-auto pb-20 mt-3">
                   {albumDetails.tracks.map((track, index) => (
                     <button
                       onClick={() => {

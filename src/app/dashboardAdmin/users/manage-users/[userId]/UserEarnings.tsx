@@ -44,8 +44,8 @@ export default function UserEarnings({ userId }: { userId: string }) {
   return (
     <div className="w-full mt-10">
       {/* Filters */}
-      <div className="w-full flex gap-5">
-        <div className="flex p-1 outline-1 rounded-lg w-full max-w-[30%] h-fit ">
+      <div className="w-full flex gap-5 justify-between">
+        <div className="flex p-1 outline-1 rounded-lg w-ful w-[80%] h-fit ">
           <Image
             priority={true}
             src="/search-normal.svg"
@@ -113,7 +113,7 @@ export default function UserEarnings({ userId }: { userId: string }) {
           </div>
         </div>
       </div>
-      <div className="bg-warning-50 flex flex-col w-full max-w-1/2 mt-10 gap-5 p-5 rounded-2xl h-fit">
+      <div className="bg-warning-50 flex flex-col w-full md:max-w-1/2 mt-10 gap-5 p-5 rounded-2xl h-fit">
         <h1 className="font-semibold text-[16px] flex gap-1 leading-[20px] tracking-tighter text-primary-500">
           <Coins color="#103958" /> Total Earnings
         </h1>
@@ -143,9 +143,9 @@ export default function UserEarnings({ userId }: { userId: string }) {
             isfetching={isLoadinguserEarnings}
           />
           {/* Pagination */}
-          <div className="px-6">
+          <div className="md:px-6 mt-2">
             <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+              <div className="text-xs md:text-sm text-gray-600">
                 Showing {(page - 1) * userEarnings.limit + 1} to{" "}
                 {Math.min(
                   (page - 1) * userEarnings.limit + userEarnings.limit,

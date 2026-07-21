@@ -103,7 +103,7 @@ const BillingInfo = ({ userId }: { userId: string }) => {
                 </div>
               </div>
               {/* payment info */}
-              <div className="bg-[#FFFFFF] rounded-lg max-w-[800px]">
+              <div className="bg-[#FFFFFF] rounded-lg max-w-[800px] p-3">
                 <h2 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
                   Payout Account
                 </h2>

@@ -170,10 +170,10 @@ const AccountInfo = () => {
                 {data.type}
               </div>
             </div>
-            
-{/* referral details */}
-          
-          <ReferralDetails />
+
+            {/* referral details */}
+
+            {/* <ReferralDetails /> */}
 
             <div className="flex gap-8 py-5 pb-30">
               <div className="flex-3 overflow-auto flex flex-col gap-5 px-1 ">

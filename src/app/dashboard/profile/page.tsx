@@ -7,6 +7,8 @@ import PaymentForm from "./Payment_Billlings";
 import ScrollableTabs from "./Buttons";
 import Verification from "./Verification";
 import AccountSettings from "./AccountSettings";
+// import Referral from "./ReferralDetails"
+// import ReferralDetails from "./ReferralDetails";
 const profileInfoButtons = [
   {
     label: "Profile info",
@@ -24,6 +26,10 @@ const profileInfoButtons = [
     label: "Account Settings",
     query: "account-settings",
   },
+  // {
+  //   label: "Share and Earn",
+  //   query: "referr",
+  // },
 ];
 const page = () => {
   const dashboardContext = useContext(DashboardContext);
@@ -53,6 +59,7 @@ const page = () => {
       {(info === "payments" && <PaymentForm />)}
       {(info === "verification" && <Verification />)}
       {(info === "account-settings" && <AccountSettings />)}
+      {/* {(info === "referr" && <ReferralDetails />)} */}
     </div>
   );
 };

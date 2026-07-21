@@ -3,7 +3,7 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import {
   useGetAdminUserDetails,
 } from "@/util/customHooks/useQueries";
-import { formatAmount } from "@/util/middleware/functions";
+import { formatAmount, handleCopy } from "@/util/middleware/functions";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -26,7 +26,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="bg-warning-50 flex justify-between w-full gap-2 p-5 rounded-2xl max-h-35">
+          <div className="bg-warning-50 flex justify-between w-full gap-2 p-3 md:p-5 rounded-2xl max-h-35">
             <div className="flex flex-col gap-3">
               <div className="flex gap-3">
                 <div className="relative w-20 h-20 max-w-20 max-h-20">
@@ -39,10 +39,13 @@ const UserInfo = ({ userId }: { userId: string }) => {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <h1 className="font-bold leading-[30px] tracking-[-1px] text-2xl text-primary-500">
+                  <h1 className="font-bold leading-[30px] tracking-[-1px] text-xl text-primary-500">
                     {userDetails.data.firstName} {userDetails.data.lastName}
                   </h1>
-                  <p className="font-normal leading-[24px] tracking-[-0.5px] text-xl text-primary-500">
+                  <p className="font-normal leading-[24px] tracking-[-0.5px] text-sm text-primary-500 cursor-pointer"
+                  onClick={() => handleCopy(String(userDetails.data.email))}
+                  
+                  >
                     {userDetails.data.email}
                   </p>
                   <p className="font-semibold leading-[18px] tracking-[-0.5px] text-sm text-text-body">
@@ -59,7 +62,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
             </span>
           </div>
           <div>
-            <div className="flex gap-15 mt-10">
+            <div className="flex flex-col md:flex-row gap-5 justify-between mt-10">
               <div className="flex flex-col w-[30%] max-sm:w-full">
                 <Input
                   value={userDetails.data.country}
@@ -85,7 +88,7 @@ const UserInfo = ({ userId }: { userId: string }) => {
                 />
               </div>
             </div>
-            <div className="flex gap-10 mt-5">
+            <div className="flex flex-col md:flex-row gap-10 mt-5">
               <div
                 className={
                   " bg-neutral-50 border-[1px] rounded-3xl border-neutral-100 h-[160px] w-full max-xl:col-span-[1.25] " +
@@ -164,8 +167,8 @@ const UserInfo = ({ userId }: { userId: string }) => {
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <p>{userDetails.artists.length} Artists</p>
-              <div className="bg-neutral-50 border border-neutral-100 rounded-lg h-[300px] overflow-y-scroll">
+              <p>{userDetails.artists.length} Artist(s)</p>
+              <div className="bg-neutral-50 border border-neutral-100 rounded-lg h-full overflow-y-scroll">
                 {userDetails.artists.map((item, index) => (
                   <Link
                     href={"/dashboardAdmin/artist/all-artists/"+item._id+"?tab=artist-info"}

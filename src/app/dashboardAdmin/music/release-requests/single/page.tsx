@@ -13,7 +13,7 @@ const Page = () => {
   const releaseTitle = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("release Requests");
+    dashboardContext?.setHeader({title: "Release Requests", showBackButton:false});
   }, []);
 
   const handleSearchQueryChange = (filter: string) => {
@@ -42,7 +42,7 @@ const Page = () => {
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
           }
         >
-          Songs
+          Single
         </Link>
         <Link
           href={"/dashboardAdmin/music/release-requests/album"}
@@ -101,7 +101,7 @@ const Page = () => {
             </div>
           ) : (
             <div className="mt-5 flex flex-col gap-5 mb-10">
-              <div className="flex flex-col gap-5 h-[500px] overflow-y-auto p-5">
+              <div className="flex flex-col gap-5 h-[500px] overflow-y-auto md:p-2">
                 {releaseRequests.pages.map((item, index) =>
                   item.data.map((release, idx) => (
                     <Link
@@ -109,7 +109,7 @@ const Page = () => {
                       key={idx}
                       className="bg-warning-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
                     >
-                      <div className="flex gap-2">
+                      <div className="flex flex-col md:flex-row gap-2">
                         <div className="relative w-30 h-30 max-w-30 max-h-30">
                           {/* <Image
                             priority={true}

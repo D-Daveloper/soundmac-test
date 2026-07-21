@@ -15,8 +15,8 @@ const Dashboard = () => {
   const dashboardContext = useContext(DashboardContext);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Welcome, " + user?.firstName);
-  }, [dashboardContext, data]);
+    dashboardContext?.setHeader({title:"Welcome, " + user?.firstName, showBackButton:false});
+  }, []);
 
   return (
     <div className="flex flex-col gap-5 w-full p-5 min-h-screen">

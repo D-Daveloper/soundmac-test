@@ -106,9 +106,10 @@ const ReleaseTable = ({
                       {/* Catalog Number */}
                       <td
                         className="p-4 whitespace-nowrap text-gray-500 truncate max-w-[150px]"
-                        onClick={() =>
+                        onClick={(e) =>{
+                          e.stopPropagation();
                           handleCopy(String(release.catalogNumber))
-                        }
+                        }}
                         title="click to copy catalog number"
                       >
                         {release.catalogNumber}
@@ -117,7 +118,9 @@ const ReleaseTable = ({
                       {/* ISRC */}
                       <td
                         className="p-4 whitespace-nowrap text-gray-500 select-all font-mono"
-                        onClick={() => handleCopy(String(release.isrc))}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCopy(String(release.isrc))}}
                         title="click to copy isrc"
                       >
                         {release.isrc}
@@ -126,7 +129,9 @@ const ReleaseTable = ({
                       {/* UPC */}
                       <td
                         className="p-4 whitespace-nowrap text-gray-500 select-all font-mono"
-                        onClick={() => handleCopy(String(release.upc))}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleCopy(String(release.upc))}}
                         title="click to copy upc"
                       >
                         {release.upc}

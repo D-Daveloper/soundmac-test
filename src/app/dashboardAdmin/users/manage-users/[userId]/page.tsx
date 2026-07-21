@@ -50,8 +50,29 @@ export default function Page({
   const dashboardContext = useContext(DashboardContext);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("User Details");
+    dashboardContext?.setHeader({
+      title: "User Details",
+      showBackButton: true,
+    });
   }, []);
+
+  useEffect(() => {
+    const anyModalOpen =
+      showChangeUserTypeModal ||
+      showDeactivateModal ||
+      showSendNotificationModal;
+
+    if (anyModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // cleanup
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showChangeUserTypeModal, showDeactivateModal, showSendNotificationModal]);
 
   if (!userId) {
     return <InlineLoadingScreen />;
@@ -100,7 +121,10 @@ export default function Page({
 
     try {
       setisSubmitting(true);
-      const res = await api.patch("admin/users/manage-users/" + userId, userRoleForm);
+      const res = await api.patch(
+        "admin/users/manage-users/" + userId,
+        userRoleForm,
+      );
       toast.success(res.data.msg);
       setisFilterOpen(false);
       setshowChangeUserTypeModal(false);
@@ -124,7 +148,10 @@ export default function Page({
 
     try {
       setisSubmitting(true);
-      const res = await api.post("admin/users/manage-users/" + userId, notifyUserForm);
+      const res = await api.post(
+        "admin/users/manage-users/" + userId,
+        notifyUserForm,
+      );
       toast.success(res.data.msg);
       setisFilterOpen(false);
       setshowSendNotificationModal(false);
@@ -175,7 +202,7 @@ export default function Page({
   };
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5 overflow-hidden">
-      <Link
+      {/* <Link
         href={"/dashboardAdmin/users/manage-users?userStatus=active"}
         aria-label="go back"
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -186,8 +213,8 @@ export default function Page({
           width={32}
           alt="arrow left"
         />
-      </Link>
-      <div className="flex gap-3 mt-5">
+      </Link> */}
+      <div className="flex flex-col md:flex-row gap-3 mt-5">
         <button
           onClick={() => {
             setParam("tab", "user-info");
@@ -277,7 +304,7 @@ export default function Page({
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
               {/* update user role Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900 capitalize">
@@ -286,6 +313,7 @@ export default function Page({
                 <button
                   onClick={() => {
                     setshowChangeUserTypeModal(false);
+                    setisFilterOpen(!isFilterOpen);
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -336,6 +364,10 @@ export default function Page({
                   <button
                     onClick={() => {
                       setshowChangeUserTypeModal(false);
+                      setisFilterOpen(!isFilterOpen);
+                      // setshowDeactivateModal(false)
+                      // setshowSendNotificationModal(false)
+                      // set
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >
@@ -360,15 +392,16 @@ export default function Page({
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
               {/* Reject Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 overflow-y-auto">
                 <h3 className="text-xl font-semibold text-gray-900">
                   Deactivate Artist Profile
                 </h3>
                 <button
                   onClick={() => {
                     setshowDeactivateModal(false);
+                    setisFilterOpen(!isFilterOpen);
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -378,7 +411,7 @@ export default function Page({
 
               {/* Reject Modal Content */}
               <div className="p-6">
-                <p className="text-gray-600 mb-4">
+                <p className="text-warning-700 mb-4 text-sm">
                   Are you sure you want to deactivate this artist&apos;s
                   profile? Choose the type of deactivation and provide a reason.
                   A notification will be sent to the user&apos;s email.
@@ -477,6 +510,7 @@ export default function Page({
                   <button
                     onClick={() => {
                       setshowDeactivateModal(false);
+                      setisFilterOpen(!isFilterOpen);
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >
@@ -505,7 +539,7 @@ export default function Page({
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
               {/* Reject Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -514,6 +548,7 @@ export default function Page({
                 <button
                   onClick={() => {
                     setshowSendNotificationModal(false);
+                    setisFilterOpen(!isFilterOpen);
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -591,6 +626,7 @@ export default function Page({
                   <button
                     onClick={() => {
                       setshowSendNotificationModal(false);
+                      setisFilterOpen(!isFilterOpen);
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >
@@ -602,7 +638,7 @@ export default function Page({
                       !notifyUserForm.notifyUserMessage ||
                       !notifyUserForm.notifyUserReason
                     }
-                    className="px-5 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-500/80 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                    className="px-5 py-2.5 bg-primary-500 text-white font-medium rounded-lg hover:bg-primary-500/80 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors tracking-tighter"
                   >
                     Confirm Notification
                   </button>
