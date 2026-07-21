@@ -6,11 +6,11 @@ import ChartCard from "./ChartCard";
 import { chartRegistrationConstants } from "@/app/constant";
 
 const Page = () => {
-  const dashboardContext = useContext(DashboardContext);
 
-  useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Chart Registration");
-  }, []);
+ const dashboardContext = useContext(DashboardContext);
+    useEffect(() => {
+      dashboardContext?.setHeader({title:"Chart Registration", showBackButton:false});
+    }, []);
 
   return (
     <div className="bg-main-white w-full flex flex-col pb-20">

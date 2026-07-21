@@ -35,7 +35,7 @@ const Page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Verification Requests");
+    dashboardContext?.setHeader({title:"Verification Requests", showBackButton:true});
   }, []);
 
   const handleSearchQueryChange = (filter: string) => {
@@ -142,9 +142,9 @@ const Page = () => {
                 isfetching={isFetchingallUsers}
               />
               {/* Pagination */}
-              <div className="px-6">
+              <div className="md:px-6 mt-2">
                 <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-xs md:text-sm text-gray-600">
                     Showing {(page - 1) * allUsers.limit + 1} to{" "}
                     {Math.min(
                       (page - 1) * allUsers.limit + allUsers.limit,

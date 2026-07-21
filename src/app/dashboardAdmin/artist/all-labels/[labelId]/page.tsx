@@ -42,7 +42,7 @@ export default function Page({
     return <InlineLoadingScreen />;
   }
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("label info");
+    dashboardContext?.setHeader({title:"label info", showBackButton:false});
   }, []);
   const {
     isLoading: isLoadinglabelDetails,

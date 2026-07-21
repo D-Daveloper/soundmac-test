@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { IUser } from "@/util/models/userModel";
@@ -11,6 +13,8 @@ const AllVerificationReqeuestTable = ({
   users: IUser[];
   isfetching: boolean;
 }) => {
+  const router = useRouter();
+
   // const getStatusBadge = (status: IUser["userStatus"]) => {
   //   const styles = {
   //     active: "bg-green-100 text-green-700 border-green-200",
@@ -45,90 +49,120 @@ const AllVerificationReqeuestTable = ({
   //   );
   // };
 
-const router = useRouter()
+  const handleRowClick = (userId: string) => {
+    router.push(`/dashboardAdmin/users/manage-users/${userId}?tab=verification`);
+  };
+
   return (
-    <div className="w-full bg-gray-50 p-6 pb-0">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="w-full bg-gray-50 md:p-2 pb-0">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         {isfetching ? (
-          <InlineLoadingScreen />
+          <div className="p-8">
+            <InlineLoadingScreen />
+          </div>
         ) : (
-          <>
-            {/* Table */}
-            <div className="overflow-x-auto min-w-[700px]">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b border-gray-200">
-                  <tr className="bg-primary-50 border-b border-gray-200 font-extrabold text-primary-500 text-center text-xs capitalize tracking-wider">
-                    <th className="min-w-50 p-2 h-10 sticky top-0 z-5">
-                       Name
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Email
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Account Type
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      data joined
-                    </th>
-                    {/* <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
+          <div className="overflow-x-auto overflow-y-auto max-h-[500px] w-full">
+            <table className="w-full min-w-[700px] border-collapse text-left">
+              <thead className="bg-primary-50 sticky top-0 z-10 border-b border-gray-200">
+                <tr className="font-extrabold text-primary-500 text-center text-xs uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 min-w-[200px] text-left">
+                    Name
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[200px] text-left">
+                    Email
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    Account Type
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    Date Joined
+                  </th>
+                  {/* <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
                       Referral code
                     </th>
                     <th className="w-30 max-w-30 p-2 h-10 sticky top-0 z-5">
                       Status
                     </th> */}
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            {/* table body */}
-            <div className="overflow-auto max-h-[500px] h-[500px] min-w-[700px] w-full">
-              <table className="w-full">
-                <tbody className="bg-white divide-y divide-gray-100 text-text-body text-md font-medium leading-5 tracking-tight">
-                  {users.map((user) => (
-                    <tr
-                    onClick={()=> router.push("/dashboardAdmin/users/manage-users/"+user._id + "?tab=verification")}
-                    tabIndex={1}
-                      key={user._id.toString()}
-                      className="hover:bg-gray-200 transition-colors cursor-pointer text-center"
-                    >
-                      <td className="min-w-50 pl-2 py-4 whitespace-nowrap overflow-hidden">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={
-                              "relative max-w-[40px] max-h-[40px] min-w-[40px] h-[40px] rounded-2xl border border-neutral-100"
-                            }
-                          >
-                            <Image
-                              src={user.profilePic ||"/signinimage.png"}
-                              fill
-                              alt="music note icon"
-                              className={" object-cover rounded-md "}
-                            />
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100 text-text-body text-sm font-medium">
+                {users && users.length > 0 ? (
+                  users.map((user) => {
+                    const dobDate = user.verificationDetails?.dob
+                      ? new Date(user.verificationDetails.dob)
+                      : null;
+                    const formattedDob =
+                      dobDate && !isNaN(dobDate.getTime())
+                        ? dobDate.toDateString()
+                        : "N/A";
+
+                    return (
+                      <tr
+                        key={user._id.toString()}
+                        onClick={() => handleRowClick(user._id.toString())}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            handleRowClick(user._id.toString());
+                          }
+                        }}
+                        tabIndex={0}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer text-center focus:outline-none focus:bg-gray-100"
+                      >
+                        {/* Name & Avatar */}
+                        <td className="px-4 py-3.5 whitespace-nowrap text-left">
+                          <div className="flex items-center gap-3">
+                            <div className="relative w-10 h-10 rounded-full border border-neutral-200 overflow-hidden flex-shrink-0">
+                              <Image
+                                src={user.profilePic || "/signinimage.png"}
+                                fill
+                                alt={`${user.firstName || "User"}'s avatar`}
+                                className="object-cover"
+                              />
+                            </div>
+                            <span className="font-semibold text-gray-900 truncate max-w-[150px]">
+                              {`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "N/A"}
+                            </span>
                           </div>
-                          <span className="">{user.firstName}</span><span className="">{user.lastName}</span>
-                        </div>
-                      </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap font-bold overflow-hidden">
-                        {user.email}
-                      </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {user.type || "FREE_ARTIST"}
-                      </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {new Date(user.verificationDetails?.dob || "").toDateString()}
-                      </td>
-                      {/* <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
+                        </td>
+
+                        {/* Email */}
+                        <td className="px-4 py-3.5 whitespace-nowrap text-left font-medium text-gray-700 truncate max-w-[200px]">
+                          {user.email}
+                        </td>
+
+                        {/* Account Type */}
+                        <td className="px-4 py-3.5 whitespace-nowrap">
+                          {user.type || "FREE_ARTIST"}
+                        </td>
+
+                        {/* Date Joined / DOB */}
+                        <td className="px-4 py-3.5 whitespace-nowrap text-gray-500">
+                          {formattedDob}
+                        </td>
+
+                        {/* <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
                         {user.referral_code || "No Code"}
                       </td>
                       <td className="w-30 max-w-30 pl-2 py-4 whitespace-nowrap">
                         {getStatusBadge(user.userStatus)}
                       </td> */}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
+                      No verification requests found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

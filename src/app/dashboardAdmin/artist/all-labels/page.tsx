@@ -16,7 +16,7 @@ const Page = () => {
   const labelName = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("all labels");
+    dashboardContext?.setHeader({title:"all labels", showBackButton:true});
   }, []);
 
   useEffect(() => {
@@ -131,13 +131,13 @@ const Page = () => {
             </div>
           ) : (
             <div className="mt-5 flex flex-col gap-5 mb-10">
-              <div className="flex flex-col gap-5 h-[500px] overflow-y-auto p-5">
+              <div className="flex flex-col gap-5 h-[500px] overflow-y-auto md:p-2">
                 {allLabels.pages.map((item, index) =>
                   item.data.map((label, idx) => (
                     <Link
                       href={"/dashboardAdmin/artist/all-labels/" + label._id}
                       key={idx}
-                      className="bg-neutral-50 border border-neutral-100 p-3 rounded-lg flex justify-between"
+                      className="bg-neutral-50 border border-neutral-100 p-3 rounded-lg flex flex-col md:flex-row gap-y-2 justify-between"
                     >
                       <div className="flex gap-2">
                         <div className="relative w-20 h-20 max-w-20 max-h-20">
@@ -150,7 +150,7 @@ const Page = () => {
                           />
                         </div>
                         <div>
-                          <h1 className="text-2xl font-normal leading-[30px] tracking-tighter text-main-heading">
+                          <h1 className="text-lg font-normal leading-[30px] tracking-tighter text-main-heading">
                             {label.labelName}
                           </h1>
                           <h2 className="text-sm font-bold leading-[18px] tracking-tighter text-primary-500">

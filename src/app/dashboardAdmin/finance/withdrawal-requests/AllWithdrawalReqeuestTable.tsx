@@ -82,7 +82,9 @@ const AllWithdrawalReqeuestTable = ({
                   >
                     {/* Request ID */}
                     <td className="p-4 whitespace-nowrap font-mono text-gray-900 select-all max-w-[220px] truncate"
-                    onClick={() => handleCopy(String(withdrawal._id))}
+                    onClick={(e) => {
+                    e.stopPropagation()
+                    handleCopy(String(withdrawal._id))}}
                     title="click to copy Id"
                     >
                       {withdrawal._id}

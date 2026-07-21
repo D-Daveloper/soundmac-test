@@ -12,7 +12,7 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, ChevronDown, ChevronUp, LockKeyhole } from "lucide-react";
+import { Bell, ChevronDown, ChevronUp, LockKeyhole, UserPlus } from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import {
   useAuthUser,
@@ -106,6 +106,12 @@ const sidebarComponents = [
         href: "/dashboard/explore/chartRegistration",
         query: "chartRegistration",
       },
+      {
+        title:"Share and Earn",
+        icon:"/repeat.svg",
+        href:"/dashboard/explore/referral",
+        query:"referralDetails",
+      }
     ],
   },
 ];

@@ -40,7 +40,7 @@ export default function ArtistInfo({ id }: { id: string }) {
   };
   return (
     <div className="w-full mt-10">
-      <div className="flex gap-5">
+      <div className="flex flex-wrap gap-5">
         <div
           className={
             "bg-neutral-50 p-3 rounded-lg flex-1 h-[250px] " +
@@ -81,7 +81,7 @@ export default function ArtistInfo({ id }: { id: string }) {
         </div>
         <div
           className={
-            "bg-secondary-50 p-3 rounded-lg flex-1 h-[250px] " +
+            "bg-secondary-50 p-3 rounded-lg flex-1 h-[250px] border-2 w-full " +
             (isLoadingAllReleases && " shimmer")
           }
         >
@@ -91,7 +91,7 @@ export default function ArtistInfo({ id }: { id: string }) {
               ((isLoadingAllReleases || !artistDetails) && "hidden")
             }
           >
-            <div className="flex justify-between">
+            <div className="flex flex-col md:flex-row gap-y-2 justify-between">
               <div className="flex flex-col gap-3">
                 <h3 className="text-text-disable font-bold leading-[18px] tracking-tighter text-sm">
                   Spotify ID
@@ -126,7 +126,7 @@ export default function ArtistInfo({ id }: { id: string }) {
               <button
                 value={"www.smartlink/kingsleyandthe...tive.io"}
                 onClick={(e) => handleCopy(e.currentTarget.value)}
-                className="text-primary-500 font-normal leading-[18px] tracking-tighter text-2xl flex gap-3"
+                className="text-primary-500 font-normal leading-[18px] tracking-tighter text-base flex gap-3"
               >
                 www.smartlink/kingsleyandthe...tive.io
                 <Copy color="#11456B" />
@@ -136,12 +136,12 @@ export default function ArtistInfo({ id }: { id: string }) {
         </div>
       </div>
       <div className="mt-10">
-        <h2 className="font-medium mb-2 text-2xl pl-6">
+        <h2 className="font-medium mb-2 text-2xl md:pl-4">
           Artist&apos;s Releases
         </h2>
         {/* Filters */}
-        <div className="w-full flex gap-5 pl-6 ">
-          <div className="flex p-1 outline-1 rounded-lg w-full max-w-[30%] h-fit ">
+        <div className="w-full flex gap-5 md:pl-4 ">
+          <div className="flex p-1 outline-1 rounded-lg w-full h-fit ">
             <Image
               priority={true}
               src="/search-normal.svg"
@@ -240,9 +240,9 @@ export default function ArtistInfo({ id }: { id: string }) {
               isfetching={isLoadingAllReleases}
             />
             {/* Pagination */}
-            <div className="px-6">
+            <div className="md:px-4 mt-2">
               <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-                <div className="text-sm text-gray-600">
+                <div className="text-xs text-gray-600">
                   Showing {(page - 1) * artistDetails.limit + 1} to{" "}
                   {Math.min(
                     (page - 1) * artistDetails.limit + artistDetails.limit,

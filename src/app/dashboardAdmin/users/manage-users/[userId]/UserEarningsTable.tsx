@@ -1,7 +1,7 @@
 import React from "react";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { AdminUserDetailsResponse } from "@/app/type";
-import { formatAmount } from "@/util/middleware/functions";
+import { formatAmount, handleCopy } from "@/util/middleware/functions";
 
 const UserEarningsTable = ({
   earningsInfo,
@@ -10,53 +10,48 @@ const UserEarningsTable = ({
   earningsInfo: AdminUserDetailsResponse["earningsArray"];
   isfetching: boolean;
 }) => {
-
   return (
-    <div className="w-full bg-gray-50 p-6 pb-0">
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+    <div className="w-full bg-gray-50 sm:p-2 pb-0">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
         {isfetching ? (
-          <InlineLoadingScreen />
+          <div className="p-8">
+            <InlineLoadingScreen />
+          </div>
         ) : (
-          <>
-            {/* Table */}
-            <div className="overflow-x-auto min-w-[700px]">
-              <table className="w-full">
-                <thead className="bg-gray-100 border-b border-gray-200">
-                  <tr className="bg-primary-50 border-b border-gray-200 font-extrabold text-primary-500 text-center text-xs capitalize tracking-wider">
-                    <th className="min-w-50 p-2 h-10 sticky top-0 z-5">
-                       Release Title
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      upc
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      label
-                    </th>
-                    <th className="w-30 max-w-30 p-2 h-10 sticky top-0 z-5">
-                     territory
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Dsp
-                    </th>
-                    <th className="w-50 max-w-50 p-2 h-10 sticky top-0 z-5">
-                      Net amount
-                    </th>
-                    {/* <th className="w-30 max-w-30 p-2 h-10 sticky top-0 z-5">
+          <div className="overflow-x-auto overflow-y-auto max-h-[500px] w-full">
+            <table className="w-full min-w-[700px] border-collapse text-left">
+              <thead className="bg-primary-50 sticky top-0 z-10 border-b border-gray-200">
+                <tr className="font-extrabold text-primary-500 text-center text-xs uppercase tracking-wider">
+                  <th scope="col" className="px-4 py-3 min-w-[200px] text-left">
+                    Release Title
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    UPC
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    Label
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[120px]">
+                    Territory
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    DSP
+                  </th>
+                  <th scope="col" className="px-4 py-3 w-[150px]">
+                    Net Amount
+                  </th>
+                  {/* <th className="w-30 max-w-30 p-2 h-10 sticky top-0 z-5">
                       Status
                     </th> */}
-                  </tr>
-                </thead>
-              </table>
-            </div>
-            {/* table body */}
-            <div className="overflow-auto max-h-[500px] h-[500px] min-w-[700px] w-full">
-              <table className="w-full">
-                <tbody className="bg-white divide-y divide-gray-100 text-text-body text-md font-medium leading-5 tracking-tight">
-                  {earningsInfo.map((item) => (
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100 text-text-body text-sm font-medium">
+                {earningsInfo && earningsInfo.length > 0 ? (
+                  earningsInfo.map((item, idx) => (
                     <tr
-                    tabIndex={1}
-                      key={item._id.toString()}
-                      className="hover:bg-gray-200 transition-colors cursor-pointer text-center"
+                      tabIndex={0}
+                      key={item._id?.toString() || idx}
+                      className="hover:bg-gray-50 transition-colors cursor-pointer text-center focus:outline-none focus:bg-gray-100"
                     >
                       {/* <td className="min-w-50 pl-2 py-4 whitespace-nowrap overflow-hidden">
                         <div className="flex items-center gap-3">
@@ -75,24 +70,42 @@ const UserEarningsTable = ({
                           <span className="">{item.firstName}</span><span className="">{item.lastName}</span>
                         </div>
                       </td> */}
-                      <td className="min-w-50 pl-2 py-4 whitespace-nowrap overflow-hidden">
-                       {item.trackTitle}
+
+                      {/* Release Title */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-left font-semibold text-gray-900 truncate max-w-[200px]">
+                        {item.trackTitle || "N/A"}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap font-bold overflow-hidden">
-                        {item?.upc}
+
+                      {/* UPC */}
+                      <td className="px-4 py-3.5 whitespace-nowrap font-bold text-gray-700"
+                      onClick={() => handleCopy(String(item?.upc))}
+                      title="copy upc number"
+                      >
+                        {item?.upc || "N/A"}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {item?.label}
+
+                      {/* Label */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-gray-600">
+                        {item?.label || "N/A"}
                       </td>
-                      <td className="w-30 max-w-30 pl-2 py-4 whitespace-nowrap">
-                        {item?.territory}
+
+                      {/* Territory */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-gray-600">
+                        {item?.territory || "N/A"}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {item?.dsp}
+
+                      {/* DSP */}
+                      <td className="px-4 py-3.5 whitespace-nowrap text-gray-600">
+                        {item?.dsp || "N/A"}
                       </td>
-                      <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
-                        {formatAmount(item?.netAmountUsd.$numberDecimal)}
+
+                      {/* Net Amount */}
+                      <td className="px-4 py-3.5 whitespace-nowrap font-bold text-gray-900">
+                        {item?.netAmountUsd?.$numberDecimal
+                          ? formatAmount(item.netAmountUsd.$numberDecimal)
+                          : "$0.00"}
                       </td>
+
                       {/* <td className="w-50 max-w-50 pl-2 py-4 whitespace-nowrap">
                         {new Date(item.createdAt).toDateString()}
                       </td>
@@ -100,11 +113,20 @@ const UserEarningsTable = ({
                         {getStatusBadge(item.userStatus)}
                       </td> */}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 py-8 text-center text-gray-500"
+                    >
+                      No earnings records found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

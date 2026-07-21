@@ -41,7 +41,7 @@ const Page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("All Users");
+    dashboardContext?.setHeader({title:"All Users", showBackButton:true});
   }, []);
 
   useEffect(() => {
@@ -163,13 +163,13 @@ const Page = () => {
           {!allUsers || allUsers.data.length < 1 ? (
             <div className="flex flex-col justify-center items-center h-[80dvh] gap-15 ">
               <div>
-                <Image
+                {/* <Image
                   priority={true}
                   src={"/manage_song_image.png"}
                   alt="an image depicting no request releases"
                   width={100}
                   height={100}
-                />
+                /> */}
               </div>
               <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
                 There are no {userStatus == "active" ? "active" : "Deactivated"}{" "}
@@ -197,9 +197,9 @@ const Page = () => {
                 isfetching={isFetchingallUsers}
               />
               {/* Pagination */}
-              <div className="px-6">
+              <div className="md:px-6 mt-2">
                 <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-xs md:text-sm text-gray-600">
                     Showing {(page - 1) * allUsers.limit + 1} to{" "}
                     {Math.min(
                       (page - 1) * allUsers.limit + allUsers.limit,
