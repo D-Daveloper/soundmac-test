@@ -12,7 +12,6 @@ import { toast } from "react-toastify";
 import { useGetReferralDetails } from "@/util/customHooks/useQueries";
 import { handleCopy } from "@/util/middleware/functions";
 import { Copy } from "lucide-react";
-import ReferralDetails from "./ReferralDetails";
 
 const formData = [
   {
