@@ -34,7 +34,7 @@ const Page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("All Api Keys");
+    dashboardContext?.setHeader({title:"All Api Keys", showBackButton:true});
   }, []);
 
 

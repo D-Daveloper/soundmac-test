@@ -33,7 +33,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     isError,
   } = useGetAdminChartDetails({ chartId: id });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Song Info");
+    dashboardContext?.setHeader({title:"Song Info", showBackButton:true});
   }, []);
 
   const handleMarkChartAsRegistered = async () => {
@@ -99,7 +99,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     <>
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-5">
-        <Link
+        {/* <Link
           href={"/dashboardAdmin/more/chart-registrations?chartStatus=all"}
           aria-label="go back"
           className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -110,7 +110,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
             width={32}
             alt="arrow left"
           />
-        </Link>
+        </Link> */}
         {isSubmitting || !chartDetails || isLoadingSingleDetails ? (
           <InlineLoadingScreen />
         ) : (
@@ -261,7 +261,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
 
               {/* side bar */}
-              <div className="flex-1 flex flex-col items-end! gap-5">
+              <div className="flex-1 flex flex-col md:items-end! gap-5">
                 <div className="bg-neutral-50 p-3 rounded-lg">
                   <div className=" relative overflow-hidden w-50 h-50">
                     <Image

@@ -35,18 +35,36 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
     onClose();
   };
 
+  //  useEffect(() => {
+  //     const anyModalOpen =
+  //       showChangeUserTypeModal ||
+  //       showDeactivateModal ||
+  //       showSendNotificationModal;
+
+  //     if (anyModalOpen) {
+  //       document.body.style.overflow = "hidden";
+  //     } else {
+  //       document.body.style.overflow = "";
+  //     }
+
+  //     // cleanup
+  //     return () => {
+  //       document.body.style.overflow = "";
+  //     };
+  //   }, [showChangeUserTypeModal, showDeactivateModal, showSendNotificationModal]);
+
   return (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-sm  bg-opacity-60 flex items-center justify-center z-[60]">
       {issubmitting ? (
         <InlineLoadingScreen />
       ) : (
-        <div className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl">
+        <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
           {/* Header */}
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-3xl font-semibold text-gray-900">
+                  <h2 className="text-base md:text-xl tracking-tight font-semibold text-gray-900">
                     {ticket.issueCategory}
                   </h2>
                   {getStatusBadge(ticket.issueStatus)}
@@ -71,7 +89,7 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
             </div>
 
             {/* User Info */}
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex flex-col md:flex-row md:items-center gap-y-3 justify-between mb-8">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-xl">
                   {ticket.user.profilePic ? (
@@ -129,8 +147,8 @@ export const SupportTicketModal: React.FC<SupportTicketModalProps> = ({
             </div>
 
             {/* Status Change Buttons */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="flex items-center gap-4">
+            <div className="border-t border-gray-200 pt-6 sm:px-3 md:px-0">
+              <div className="flex flex-wrap md:items-center gap-4">
                 <span className="text-gray-700 font-medium">Mark as:</span>
                 <button
                   onClick={() => handleStatusClick("in-progress")}

@@ -45,7 +45,7 @@ export default function Page({
   } = useGetPromotionDetails({ promotionId });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Song Info");
+    dashboardContext?.setHeader({title:"Song Info", showBackButton:true});
   }, []);
 
   console.log(promotionId);
@@ -197,8 +197,8 @@ export default function Page({
     <>
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
-        <div className="flex justify-between items-center ">
-          <Link
+        <div className="flex justify-between items-center mt-5 ">
+          {/* <Link
             href={"/dashboardAdmin/more/promotions?promotionStatus=all"}
             aria-label="go back"
             className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -209,7 +209,7 @@ export default function Page({
               width={32}
               alt="arrow left"
             />
-          </Link>
+          </Link> */}
           <div>
             {getStatusBadge(promotionDetails?.promotionStatus || "pending")}
           </div>

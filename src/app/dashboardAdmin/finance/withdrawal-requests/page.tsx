@@ -41,7 +41,7 @@ const Page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("withdrawal Requests");
+    dashboardContext?.setHeader({title:"withdrawal Requests", showBackButton:true});
   }, []);
 
   useEffect(() => {
@@ -59,8 +59,8 @@ const Page = () => {
     setfilter((prev) => ({ ...prev, accountType: "all" }));
   };
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-1 md:px-5 overflow-hidden">
-      <div className="flex gap-3 mt-5 ">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-2 md:px-10 overflow-hidden">
+      <div className="flex gap-3 mt-5 px-2">
         <button
           onClick={() => {
             setParam("withdrawalStatus", "all");
@@ -92,8 +92,8 @@ const Page = () => {
         <InlineLoadingScreen />
       ) : (
         <>
-          <div className="w-full flex flex-wrap justify-between gap-5 items-end mt-10">
-            <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
+          <div className="w-full flex flex-wrap justify-between gap-5 items-end mt-10 ">
+            <div className="flex p-1 outline-1 rounded-lg md:w-[80%] h-fit ">
               <Image
                 priority={true}
                 src="/search-normal.svg"

@@ -37,7 +37,8 @@ const Page = () => {
   const queryClient = useQueryClient();
   const api = UseAxios();
   const [isSubmitting, setisSubmitting] = useState(false);
-  const [isSubmittingSelectedticket, setisSubmittingSelectedticket] = useState(false);
+  const [isSubmittingSelectedticket, setisSubmittingSelectedticket] =
+    useState(false);
   const [selectedTickets, setSelectedTickets] = useState<string[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<ISupportRequest | null>(
     null,
@@ -49,7 +50,10 @@ const Page = () => {
   const [showFullSupportRequest, setshowFullSupportRequest] = useState(false);
 
   useEffect(() => {
-    dashboardContext?.setHeader({title:"support Requests", showBackButton:true});
+    dashboardContext?.setHeader({
+      title: "support Requests",
+      showBackButton: true,
+    });
   }, []);
 
   useEffect(() => {
@@ -187,8 +191,8 @@ const Page = () => {
   });
 
   return (
-    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
-      <div className="max-w-6xl">
+    <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[250px] px-">
+      <div className="w-full md:px-5 mb-2">
         <div className="flex gap-3 mt-5 flex-wrap">
           <ScrollableTabs
             tabs={profileInfoButtons}
@@ -200,7 +204,7 @@ const Page = () => {
         </div>
         {/* Select All Checkbox */}
         {allsupportRequests && allsupportRequests.pages[0].data.length > 0 && (
-          <div className="mb-4 flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200">
+          <div className="mb-4 mt-2 mx-1 md:mx-0 flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 lg:w-[98%] 2xl:w-full">
             <input
               type="checkbox"
               checked={
@@ -239,23 +243,27 @@ const Page = () => {
                 </p>
               </div>
             ) : (
-              <div className="flex gap-6">
+              <div className="flex flex-col md:flex-row gap-6">
                 {/* Tickets List */}
-                <div className="flex-1 space-y-4 h-[500px] overflow-y-auto pr-2">
+                <div className="flex-1 space-y-4 h-[500px] overflow-y-auto pr-2 mx-1">
                   {allsupportRequests.pages.map((page) =>
                     page.data.map((ticket) => (
                       <div
                         key={ticket._id}
-                        className={`bg-neutral-50 rounded-lg border-2 p-6 cursor-pointer transition-all ${
+                        className={`bg-neutral-50 rounded-lg border-2 p-2 md:p-6 cursor-pointer transition-all ${
                           selectedTickets.includes(ticket._id)
                             ? "border-primary-500 bg-primary-50"
                             : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
-                        <div className="flex items-start gap-4" tabIndex={0} onClick={() => {
-                          setSelectedTicket(ticket);
-                          setshowFullSupportRequest(true);
-                        }}>
+                        <div
+                          className="flex items-start gap-4"
+                          tabIndex={0}
+                          onClick={() => {
+                            setSelectedTicket(ticket);
+                            setshowFullSupportRequest(true);
+                          }}
+                        >
                           {/* Checkbox */}
                           <input
                             type="checkbox"
@@ -268,50 +276,47 @@ const Page = () => {
                           {/* Content */}
                           <div className="flex-1">
                             <div className="flex items-start justify-between mb-2">
-                              <h3 className="text-lg font-semibold text-primary-500">
+                              <h3 className="text-base tracking-tighter font-semibold text-primary-500">
                                 {ticket.issueCategory}
                               </h3>
                               {getStatusBadge(ticket.issueStatus)}
                             </div>
 
-                            <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                            <p className="text-warning-700 text-xs md:text-sm mb-4 line-clamp-2">
                               {ticket.issueDetail}
                             </p>
-
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                {ticket.user.profilePic ? (
-                                  <Image
-                                    src={ticket.user.profilePic}
-                                    alt={ticket.user.firstName}
-                                    width={32}
-                                    height={32}
-                                  />
-                                ) : (
-                                  <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                    <span className="text-xs font-bold text-gray-700">
-                                      {ticket.user.firstName.charAt(0)}
-                                    </span>
-                                  </div>
-                                )}
-                              </div>
-                              <span className="text-sm font-medium text-gray-700">
-                                {ticket.user.firstName} {ticket.user.lastName}
-                              </span>
-                              <span className="text-sm text-gray-500">
-                                {new Date(
-                                  ticket.createdAt,
-                                ).toLocaleDateString()}
-                              </span>
-                              <span className="text-sm text-gray-500">|</span>
-                              <span className="text-sm text-gray-500">
-                                {new Date(ticket.createdAt).toLocaleTimeString(
-                                  [],
-                                  { hour: "2-digit", minute: "2-digit" },
-                                )}
-                              </span>
-                            </div>
                           </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                            {ticket.user.profilePic ? (
+                              <Image
+                                src={ticket.user.profilePic}
+                                alt={ticket.user.firstName}
+                                width={32}
+                                height={32}
+                              />
+                            ) : (
+                              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-bold text-gray-700">
+                                  {ticket.user.firstName.charAt(0)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-xs md:text-sm font-medium text-gray-700">
+                            {ticket.user.firstName} {ticket.user.lastName}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(ticket.createdAt).toLocaleDateString()}
+                          </span>
+                          <span className="text-sm text-gray-500">|</span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(ticket.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
                         </div>
                       </div>
                     )),
@@ -333,7 +338,8 @@ const Page = () => {
 
                 {/* Status Change Sidebar - Only shows when tickets are selected */}
                 {selectedTickets.length > 0 && (
-                  <div className="w-64 bg-secondary-50 rounded-xl border border-neutral-100 p-6 h-fit sticky top-8">
+                  // <div className="w-64 bg-secondary-50 rounded-xl border border-neutral-100 p-6 h-fit relative md:sticky md:top-8">
+                    <div className="fixed bottom-0 left-0 right-0 md:relative md:bottom-auto bg-secondary-50 border-t md:border md:rounded-xl p-4 md:p-6 md:w-64 md:top-8 z-40">
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="font-semibold text-gray-900">Mark as:</h3>
                       <button
