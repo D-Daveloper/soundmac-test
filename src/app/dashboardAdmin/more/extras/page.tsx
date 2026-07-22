@@ -27,7 +27,7 @@ const Page = () => {
   const dashboardContext = useContext(DashboardContext);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Extras");
+    dashboardContext?.setHeader({title:"Extras", showBackButton:true});
   }, []);
 
   const handleChange = (

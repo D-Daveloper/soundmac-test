@@ -36,7 +36,7 @@ const Page = () => {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Sales Report");
+  dashboardContext?.setHeader({title:"Sales Report", showBackButton:true});
   }, []);
 
   const { isLoading, data, isFetching, isPending, isRefetching, isError } =

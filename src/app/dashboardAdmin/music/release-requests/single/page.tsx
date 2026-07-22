@@ -13,7 +13,7 @@ const Page = () => {
   const releaseTitle = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setHeader({title: "Release Requests", showBackButton:false});
+    dashboardContext?.setHeader({title: "Release Requests", showBackButton:true});
   }, []);
 
   const handleSearchQueryChange = (filter: string) => {

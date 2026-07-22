@@ -41,8 +41,8 @@ const Page = () => {
     productType: "",
   });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("All UnMatched Sales");
-  }, [dashboardContext]);
+    dashboardContext?.setHeader({title:"All UnMatched Sales", showBackButton:true});
+  }, []);
 
   const handleSearchQueryChange = (filter: string) => {
     setQuery(filter);
@@ -90,7 +90,7 @@ const Page = () => {
     };
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col gap-10 lg:pl-[260px] px-2 md:px-5 overflow-hidden">
-      <Link
+      {/* <Link
         href={"/dashboardAdmin/finance/sales-report"}
         aria-label="go back"
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary! text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -101,9 +101,9 @@ const Page = () => {
           width={32}
           alt="arrow left"
         />
-      </Link>
+      </Link> */}
       {/* Filters */}
-      <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end">
+      <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end mt-2">
         <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
           <Image
             priority={true}
@@ -248,9 +248,9 @@ const Page = () => {
             isfetching={isLoading}
           />
           {/* Pagination */}
-          <div className="px-6">
+          <div className="md:px-4">
             <div className="border-t pb-4 px-3 border-gray-200 rounded-lg bg-white flex items-center justify-between">
-              <div className="text-sm text-gray-600">
+              <div className="text-xs md:text-sm text-gray-600">
                 Showing {(page - 1) * allSalesReport.limit + 1} to{" "}
                 {Math.min(
                   (page - 1) * allSalesReport.limit + allSalesReport.limit,

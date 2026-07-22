@@ -27,8 +27,8 @@ const Page = () => {
   const releaseTitle = useDebounce<string>(query, 500);
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("All Promotions");
-  }, [dashboardContext]);
+    dashboardContext?.setHeader({title:"All Promotions", showBackButton:true});
+  }, []);
 
   const handleSearchQueryChange = (filter: string) => {
     setQuery(filter);
@@ -104,8 +104,8 @@ const Page = () => {
         </button>
       </div>
       {/* Filters */}
-      <div className="w-full flex flex-col md:flex-row flex-wrap justify-between gap-5 items-end">
-        <div className="flex p-1 outline-1 rounded-lg w-full flex-1 [450px]:max-w-[40%] h-fit ">
+      <div className="w-full flex flex-wrap justify-between gap-5 md:items-end">
+        <div className="flex p-1 outline-1 rounded-lg md:w-[80%] h-fit ">
           <Image
             priority={true}
             src="/search-normal.svg"

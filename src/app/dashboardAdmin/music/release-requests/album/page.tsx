@@ -16,7 +16,7 @@ const Page = () => {
   useEffect(() => {
     dashboardContext?.setHeader({
       title: "Release Requests",
-      showBackButton: false,
+      showBackButton: true,
     });
   }, []);
 

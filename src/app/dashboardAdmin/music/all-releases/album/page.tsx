@@ -53,7 +53,7 @@ const page = () => {
   });
 
   useEffect(() => {
-    dashboardContext?.setHeader({title:"All Releases", showBackButton:false });
+    dashboardContext?.setHeader({title:"All Releases", showBackButton:true });
   }, []);
 
   const handleSearchQueryChange = (filter: string) => {

@@ -36,7 +36,7 @@ export default function Page({
   const { isLoading: isLoadingWithdrawalDetails, data: withdrawalDetails } =
     useGetAdminWithdrawaldetails({ withdrawalId });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Withdrawal Details");
+    dashboardContext?.setHeader({title:"Withdrawal Details", showBackButton:true});
   }, []);
   console.log(withdrawalId);
 
@@ -112,7 +112,7 @@ export default function Page({
     <>
       {/* Main Modal */}
       <div className="bg-main-white min-h-screen w-full flex flex-col lg:pl-[260px] px-5">
-        <Link
+        {/* <Link
           href={
             "/dashboardAdmin/finance/withdrawal-requests?withdrawalStatus=all"
           }
@@ -125,14 +125,14 @@ export default function Page({
             width={32}
             alt="arrow left"
           />
-        </Link>
+        </Link> */}
         {isSubmitting || !withdrawalDetails || isLoadingWithdrawalDetails ? (
           <InlineLoadingScreen />
         ) : (
           <>
-            <div className="flex mt-3">
+            <div className="flex flex-wrap mt-3">
               {/* Content */}
-              <div className="p-3 flex-2 max-w-[70%] overflow-hidden">
+              <div className="p-3 flex-2  overflow-hidden">
                 {/* Song Details Grid */}
                 <div className="flex flex-col gap-x-12">
                   <div className="flex ">
@@ -141,7 +141,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         User
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {withdrawalDetails.withdrawal.user.firstName}{" "}
                         {withdrawalDetails.withdrawal.user.lastName}
                       </p>
@@ -153,7 +153,7 @@ export default function Page({
                         User Email
                       </p>
                       <div>
-                        <p className="text-gray-900 text-lg font-medium mb-1">
+                        <p className="text-gray-900 text-base font-medium mb-1">
                           {withdrawalDetails.withdrawal.user.email}
                         </p>
                       </div>
@@ -168,7 +168,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Amount Rquested
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {withdrawalDetails.withdrawal.amount}
                       </p>
                     </div>
@@ -178,7 +178,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Wallet Balance
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {withdrawalDetails.withdrawal.amount}
                       </p>
                     </div>
@@ -192,7 +192,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Payment Method
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         Transfer
                       </p>
                     </div>
@@ -202,7 +202,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Exchange rate to ₦
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {withdrawalDetails.withdrawal.exchange_rate.value}
                       </p>
                     </div>
@@ -213,18 +213,18 @@ export default function Page({
                     <p className="text-text-disable font-bold text-sm mb-1">
                       Payable Amount
                     </p>
-                    <p className="text-gray-900 text-lg font-medium">
+                    <p className="text-gray-900 text-base font-medium">
                       {withdrawalDetails.withdrawal.amount}
                     </p>
                   </div>
-                  <div className="border border-neutral-100 mb-15"></div>
+                  <div className="border border-neutral-100 mb-5"></div>
                   <div className="flex">
                     {/* upc */}
                     <div className="flex-1">
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Bank Name
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {
                           withdrawalDetails.withdrawal.user.accountDetails
                             .bankName
@@ -237,7 +237,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Account Number
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {
                           withdrawalDetails.withdrawal.user.accountDetails
                             .accountNumber
@@ -253,7 +253,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Account Name
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {
                           withdrawalDetails.withdrawal.user.accountDetails
                             .accountHolderName
@@ -266,7 +266,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Bank Country
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         Nigeria
                       </p>
                     </div>
@@ -279,7 +279,7 @@ export default function Page({
                       <p className="text-text-disable font-bold text-sm mb-1">
                         Request Date
                       </p>
-                      <p className="text-gray-900 text-lg font-medium">
+                      <p className="text-gray-900 text-base font-medium">
                         {new Date(
                           withdrawalDetails.withdrawal.createdAt
                         ).toDateString()}
@@ -342,7 +342,7 @@ export default function Page({
                   <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10 ">
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <div className="flex gap-1">
-                        <p className="font-medium mb-2 sm:text-sm text-lg">
+                        <p className="font-medium mb-2 sm:text-sm text-base">
                           Select Deactivation Option
                         </p>
                         <Image
@@ -372,7 +372,7 @@ export default function Page({
                     </div>
                   </div>
                   <div>
-                    <div className="flex gap-1 sm:text-sm text-lg mt-10">
+                    <div className="flex gap-1 sm:text-sm text-base mt-10">
                       <p className=" capitalize font-medium">
                         Additional Notes{" "}
                       </p>{" "}
