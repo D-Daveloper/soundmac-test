@@ -12,6 +12,7 @@ import {
 } from "@/util/middleware/functions";
 import ChartRegistrationModel from "@/util/models/chartRegistrationModel";
 import User from "@/util/models/userModel";
+import UserNotification from "@/util/models/userNotification";
 import sendEmail from "@/util/sendMail/sendEmail";
 import crypto from "crypto";
 import { headers } from "next/headers";
@@ -44,10 +45,20 @@ export async function POST(req: Request) {
         console.log("event handled");
       } else if (event.data.metadata && event.data.metadata.isChartRegistration) {
         console.log("chart registration payment successful");
+        const user = await User.findOne({ email: event.data.metadata.email });
         await ChartRegistrationModel.findByIdAndUpdate(
           event.data.metadata.chartId,
           { $set: { chartStatus: "pending", transactionId: event.data.reference } }
         );
+        if(user){
+            await UserNotification.create({
+              userId: user._id, 
+              reason: "Chart Registration Submitted",
+              message: `Your chart registration for "${event.data.metadata.releaseTitle}" has been submitted and is pending review.`,
+              status: "delivered",
+            });
+
+        }
       } else {
         const user = await User.findOne({ email: event.data.customer.email });
         if (!user) return;

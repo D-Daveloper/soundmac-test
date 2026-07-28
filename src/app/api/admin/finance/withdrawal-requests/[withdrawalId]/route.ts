@@ -13,6 +13,7 @@ import withDrawalModel from "@/util/models/withDrawalModel";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import { inngest } from "@/util/lib/inngest/inngest";
 import { Counter } from "@/util/models/CounterModel";
+import UserNotification from "@/util/models/userNotification";
 
 export async function POST(
   req: Request,
@@ -83,22 +84,44 @@ export async function POST(
 
         withdrawalUpdate = await withDrawalModel.findByIdAndUpdate(
           withdrawalId,
-          { withdrawalStatus: body.requestType, approvedBy: admin._id, paidAt: new Date() },
+          {
+            withdrawalStatus: body.requestType,
+            approvedBy: admin._id,
+            paidAt: new Date(),
+          },
           { runValidators: true, session },
         );
-        await salesReportLedger.create([{
-          user: withdrawal.user,
-          type: "withdrawal",
-          amountUsd: withdrawal.amount,
-          direction: "debit",
-          reference: withdrawal._id,
-        }], { session })
-        await session.commitTransaction();
+        await salesReportLedger.create(
+          [
+            {
+              user: withdrawal.user,
+              type: "withdrawal",
+              amountUsd: withdrawal.amount,
+              direction: "debit",
+              reference: withdrawal._id,
+            },
+          ],
+          { session },
+        );
 
+        await UserNotification.create(
+          [
+            {
+              userId: withdrawal.user._id,
+              adminId: admin._id,
+              reason: "Withdrawal Approved",
+              message: `Your withdrawal request for $${withdrawal.amount} has been approved and is being processed.`,
+              status: "delivered",
+            },
+          ],
+          { session },
+        );
+        await session.commitTransaction();
       } catch (error) {
         if (session.inTransaction()) {
           await session.abortTransaction();
-        } throw error;
+        }
+        throw error;
       } finally {
         await session.endSession();
       }
@@ -126,7 +149,7 @@ export async function POST(
         data: {
           html: withdrawalEmailhtml,
           emailTo: withdrawal.user.email,
-          title: "Royality Withdrawal"
+          title: "Royality Withdrawal",
         },
       });
     } else if (body.requestType == "rejected") {
@@ -162,10 +185,17 @@ export async function POST(
           data: {
             html: withdrawalEmailhtml,
             emailTo: withdrawal.user.email,
-            title: "Royality Withdrawal"
+            title: "Royality Withdrawal",
           },
         }),
         withdrawalUpdate,
+        UserNotification.create({
+          userId: withdrawal.user._id,
+          adminId: admin._id,
+          reason: "Withdrawal Rejected",
+          message: `Your withdrawal request for $${withdrawal.amount} was rejected. Reason: ${body.reason}. ${body.message}`,
+          status: "delivered",
+        }),
       ]).catch((error) => {
         console.error("failed to reject withdrawal request", error);
 
@@ -219,14 +249,15 @@ export async function GET(
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
 
-
-
-    const [withdrawal,exchange_rate] = await Promise.all([ 
+    const [withdrawal, exchange_rate] = await Promise.all([
       withDrawalModel
-      .findById(withdrawalId)
-      .populate("user", "firstName lastName country accountDetails email -_id")
-      .lean(),
-      Counter.findById("exchange_rate").select("value -_id").lean()
+        .findById(withdrawalId)
+        .populate(
+          "user",
+          "firstName lastName country accountDetails email -_id",
+        )
+        .lean(),
+      Counter.findById("exchange_rate").select("value -_id").lean(),
     ]);
 
     if (!withdrawal) {
@@ -238,7 +269,7 @@ export async function GET(
     // console.log(withdrawal);
 
     return NextResponse.json({
-      withdrawal:{...withdrawal,exchange_rate},
+      withdrawal: { ...withdrawal, exchange_rate },
       msg: "Successful.",
     });
   } catch (error) {

@@ -403,6 +403,14 @@ const SongModelSchema = new mongoose.Schema(
         message: "Time Zone must be an object",
       }
     },
+      approvedAt: { type: Date, default: null },
+     platformDelivery: [
+      {
+        platform: { type: String, enum: ["spotify", "apple_music"] },
+        status: { type: String, enum: ["pending", "live"], default: "pending" },
+        lastCheckedAt: Date,
+      }
+    ]
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -438,7 +446,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
     // 1. Update the song status
     const song: songFromApi = await this.findByIdAndUpdate(
       songId,
-      { releaseStatus: 'approved' },
+      { releaseStatus: 'approved', approvedAt: new Date()},
       { session, new: true } // Crucial: pass the session here
     );
 

@@ -51,7 +51,8 @@ import {
   getUserSalesReportDashboardDetails,
   getUserWithdrawalHistory,
   getWithdrawalHistory,
-  getReferralDetails
+  getReferralDetails,
+  getDeliveryLog
 } from "../axios/axiosInstance";
 import {
   AdminAlbumDetailsResponse,
@@ -779,9 +780,8 @@ export const useGetUserNotifications = () => {
     queryKey: ["notifications"],
     queryFn: () => getUserNotification(api),
     staleTime: 1000 * 60 * 5, // 15 minutes: consider data fresh
-    retryOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchInterval:30000,
+    refetchOnWindowFocus: true,
     retry: false,    
     enabled: isSuccess && !!authUser,
   });
@@ -923,5 +923,22 @@ export function useGetReferralDetails() {
       handleReactQueryApiCallError(failedCount, error),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+  });
+}
+
+export function usePaginatedDeliveryLog(params: {
+  page: number;
+  limit: string;
+  releaseTitle: string;
+  artist: string;
+  releaseType: string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<any>, Error>({
+    queryKey: ["deliveryLog", params.page, params.releaseTitle, params.artist, params.releaseType],
+    queryFn: async () => getDeliveryLog(api, params),
+    placeholderData: (prev) => prev,
+    retry: (failedCount, error) => handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5,
   });
 }

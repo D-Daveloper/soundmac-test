@@ -28,6 +28,19 @@ const sidebarComponents = [
         href: "/dashboardAdmin/music/release-requests/single",
         query: "manageRelease",
       },
+      {
+        title: "delivery log",
+        icon: "/musiclibrary2.svg",
+        href: "/dashboardAdmin/music/deliveryLog/single",
+        query: "deliveryLog",
+      },
+
+      // {
+      //   title: "delivery log",
+      //   icon: "/musiclibrary2.svg",
+      //   href: "/dashboardAdmin/music/deliveryLog/album",
+      //   query: "deliveryLog",
+      // },
     ],
   },
   {

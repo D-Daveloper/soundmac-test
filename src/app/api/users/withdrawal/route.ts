@@ -9,6 +9,7 @@ import withDrawalModel from "@/util/models/withDrawalModel";
 import sendEmail from "@/util/sendMail/sendEmail";
 import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import mongoose from "mongoose";
+import UserNotification from "@/util/models/userNotification";
 
 export async function GET(req: Request) {
   try {
@@ -160,6 +161,14 @@ export async function POST(req: Request) {
     user!.otp = null;
     user!.otpExpires = null;
     await user!.save();
+
+    await UserNotification.create({
+      userId: user!._id,
+      reason: "Withdrawal Requested",
+      message: `Your withdrawal request for $${formData.amount} has been placed and is pending approval.`,
+      status: "delivered",
+    });
+
 
     return NextResponse.json({ msg: "success" }, { status: 201 });
   } catch (error: unknown) {

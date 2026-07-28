@@ -21,6 +21,7 @@ import Promotion, { IPromotion } from "@/util/models/promotionModel";
 import SongModel from "@/util/models/songModel";
 import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
+import UserNotification from "@/util/models/userNotification";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
@@ -294,6 +295,14 @@ export async function POST(req: Request) {
             youtubeProfileLink: youtubeProfileLink ? youtubeProfileLink : "",
             tiktokProfileLink: tiktokProfileLink ? tiktokProfileLink : "",
           },
+        });
+
+
+        await UserNotification.create({
+          userId: user!._id,
+          reason: "Promotion Submitted",
+          message: `Your playlist pitch for "${releaseTitle}" has been submitted and is pending review.`,
+          status: "delivered",
         });
 
         return NextResponse.json({

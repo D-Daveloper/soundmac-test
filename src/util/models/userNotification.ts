@@ -20,7 +20,7 @@ const userNotificationSchema: Schema = new Schema<IUserNotification>(
     },
     adminId: {
       type: String,
-      required: [true, 'Admin ID is required'],
+      required: false,
       maxlength: [100, 'Admin ID cannot exceed 100 characters']
     },
     reason: {
@@ -55,12 +55,21 @@ userNotificationSchema.index({ userId: 1, statusWeight: 1 });
 userNotificationSchema.index({ userId: 1, statusWeight: 1, createdAt: -1 });
 
 const autoWeight = function(this: any, next: any) {
-  const update = this.getUpdate();
+  // const update = this.getUpdate();
   const weights:Record<string,number> = { 'delivered': 1, 'read': 2, 'pending': 3 };
-  
-  if (update && update.status) {
-    update.statusWeight = weights[update.status as string] || 99;
+
+  if(typeof this.getUpdate === 'function'){
+    const update =  this.getUpdate()
+    if (update && update.status) {
+      update.statusWeight = weights[update.status as string] || 99;
+    }
+
+  } else {
+     if (this.status) {
+      this.statusWeight = weights[this.status as string] || 99;
+    }
   }
+  
   next();
 };
 

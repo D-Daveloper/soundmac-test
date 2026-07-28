@@ -30,6 +30,7 @@ import { VerificationForm } from "@/app/dashboard/profile/Verification";
 import Promotion from "../models/promotionModel";
 import { handleMongooseValidationError } from "../customError/error";
 import dbConnect from "../db";
+import UserNotification from "../models/userNotification";
 // import sharp from "sharp";
 // import { s3 } from "./aws";
 // import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -2067,6 +2068,13 @@ export async function handlePromotionSuccess(data: any) {
                 startDate: new Date(),
                 endDate,
             });
+
+               await UserNotification.create({
+                 userId: user._id,
+                 reason: "Promotion Submitted",
+                 message: `Your ${data.metadata.promotionType} promotion for "${data.metadata.releaseTitle}" has been submitted and is pending review.`,
+                 status: "delivered",
+                });
         } else {
             await Promotion.findOneAndUpdate(
                 { transactionReference: data.metadata.transactionReference },

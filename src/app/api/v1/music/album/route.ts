@@ -17,6 +17,7 @@ import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
+import UserNotification from "@/util/models/userNotification";
 import mongoose, { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
@@ -162,6 +163,13 @@ export async function POST(req: Request) {
       timeZone: payload.timeZone,
     });
     await album.save();
+
+    await UserNotification.create({
+  userId: user!._id,
+  reason: "Album Upload Successful",
+  message: `Your release "${payload.title}" has been submitted and is pending review.`,
+  status: "delivered",
+});
 
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
