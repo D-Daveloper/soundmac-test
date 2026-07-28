@@ -470,3 +470,12 @@ export const getReferralDetails = async (api: AxiosInstance) => {
   const { data } = await api.get("referral");
   return data;
 };
+
+// function to get song/album delivery logs 
+export const getDeliveryLog = async (
+  api: AxiosInstance,
+  params: { page: number; limit: string; releaseTitle: string; artist: string; releaseType: string }
+) => {
+  const response = await api.get("/releases/delivery-log", { params });
+  return response.data;
+};

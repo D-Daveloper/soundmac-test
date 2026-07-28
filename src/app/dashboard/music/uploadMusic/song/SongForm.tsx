@@ -279,6 +279,9 @@ const SongForm = () => {
       queryClient.invalidateQueries({
         queryKey: ["manageSongs"],
       });
+      queryClient.invalidateQueries({
+       queryKey: ["notifications"],
+      });
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
       localStorage.removeItem("featured_artist");

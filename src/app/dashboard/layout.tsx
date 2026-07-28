@@ -38,6 +38,12 @@ const sidebarComponents = [
         href: "/dashboard/music/manageRelease?type=single",
         query: "manageRelease",
       },
+    //   {
+    //   title: "delivery log",
+    //   icon: "/musiclibrary2.svg",
+    //   href: "/dashboard/music/deliveryLog",
+    //   query: "deliveryLog",
+    // },
     ],
   },
   {
@@ -146,6 +152,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isProfilePopUpOpen, setIsProfilePopUpOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
+  // Notification refs
+  const notificationButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationPanelRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -163,9 +173,33 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  // Close notification panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      const clickedNotificationButton =
+        notificationButtonRef.current?.contains(target);
+
+      const clickedNotificationPanel =
+        notificationPanelRef.current?.contains(target);
+
+      if (!clickedNotificationButton && !clickedNotificationPanel) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   useEffect(() => {
     setIsOpen(false);
     setIsProfilePopUpOpen(false);
+    setIsNotificationOpen(false);
   }, [pathname]);
 
   if (isLoading || !data) return <NormalLoadingScreen />;
@@ -230,6 +264,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
             {/* Notification Modal Trigger */}
             <button
+              ref={notificationButtonRef}
               type="button"
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
               className="relative p-2.5 rounded-xl border border-transparent hover:border-neutral-100 hover:bg-neutral-50 transition-all shrink-0 cursor-pointer"
@@ -241,8 +276,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </button>
           </div>
         </header>
+
         {/* Notification Modal Slide Panel */}
         <div
+          ref={notificationPanelRef}
           className={`fixed inset-y-0 right-0 z-40 w-full sm:w-[400px] bg-neutral-100 shadow-2xl border-l border-neutral-200 transform transition-transform duration-300 ease-in-out flex flex-col ${
             isNotificationOpen ? "translate-x-0" : "translate-x-full"
           }`}
@@ -268,7 +305,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 remove-scrollbar">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {notification?.notifications?.map((item: any, index: number) => (
               <Notification
                 key={index}
@@ -400,6 +437,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
         </aside>
+
         {/* Main Content Area Execution Grid Wrapper */}
         <main className="w-full lg:pl-[260px] h-[calc(100dvh-64px)]">
           <div className="h-full">{children}</div>

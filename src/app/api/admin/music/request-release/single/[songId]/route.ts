@@ -7,6 +7,7 @@ import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
 import { inngest } from "@/util/lib/inngest/inngest";
+import UserNotification from "@/util/models/userNotification";
 
 export async function POST(req: Request, { params }: { params: Promise<{ songId: string }> }) {
   const { songId } = await params; // Access the dynamic 'id' parameter
@@ -44,7 +45,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     } else if (!songId || !Types.ObjectId.isValid(songId)) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    const release: songFromApi & { user: { email: string } } = await SongModel.findById(songId).populate(
+    const release: songFromApi & { user: { email: string , _id:string} } = await SongModel.findById(songId).populate(
       "user",
       "email label",
 
@@ -107,6 +108,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
             isSingle: true
           },
         });
+
+        await UserNotification.create({
+        userId: release.user._id,
+        adminId: user._id,
+        reason: "Release Approved",
+        message: `Your release "${release.releaseTitle}" has been approved and is going live! Check your email for full details.`,
+        status: "delivered",
+      });
         return NextResponse.json(
           { msg: result.msg },
           { status: 201 },
@@ -139,7 +148,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
           title: emailTitle
         },
       });
-    }
+
+       await UserNotification.create({
+    userId: release.user._id,
+    adminId: user._id,
+    reason: "Release Rejected",
+    message: `Your release "${release.releaseTitle}" was not approved. Please check your email for the reason and next steps.`,
+    status: "delivered",
+  });
+}
+    
 
     return NextResponse.json(
       { msg: "Release" + " " + body.requestType + "." },

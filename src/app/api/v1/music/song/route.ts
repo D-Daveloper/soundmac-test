@@ -16,6 +16,7 @@ import {
 import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import SongModel from "@/util/models/songModel";
+import UserNotification from "@/util/models/userNotification";
 import User from "@/util/models/userModel";
 import { addWeeks } from "date-fns";
 import mongoose, { SortOrder } from "mongoose";
@@ -259,6 +260,17 @@ export async function POST(req: Request) {
     try {
       session.startTransaction();
       await savedSong.save({ session });
+      await UserNotification.create(
+  [
+    {
+      userId: user!._id,
+      reason: "Upload Successful",
+      message: `Your release "${payload.title}" has been submitted and is pending review.`,
+      status: "delivered",
+    },
+  ],
+  { session },
+);
       await AudioUploadTrackerModel.findOneAndUpdate(
         {
           _id: payload.uploadId,

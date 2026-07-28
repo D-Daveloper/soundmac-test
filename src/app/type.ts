@@ -290,6 +290,7 @@ export type withdrawals = {
   _id: string;
   amount: string;
   user: {
+    _id:string;
     email: string;
     firstName: string;
     lastName: string;
@@ -415,7 +416,7 @@ export interface AdminAlbumDetailsResponse {
   msg: string;
 }
 export interface AdminSingleDetailsResponse {
-  release: songFromApi & { user: { email: string } };
+  release: songFromApi & { user: { email: string} };
   msg: string;
 }
 type ReleaseRequest = {
