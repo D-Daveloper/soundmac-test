@@ -1,7 +1,4 @@
-import {
-  DetactivateEmail,
-  sendUserNotificationEmailType,
-} from "@/app/type";
+import { DetactivateEmail, sendUserNotificationEmailType } from "@/app/type";
 import dbConnect from "@/util/db";
 import {
   artistDeactivationEmail,
@@ -18,6 +15,7 @@ import AlbumModel from "@/util/models/AlbumModel";
 import UserNotification from "@/util/models/userNotification";
 import EntityDeactivation from "@/util/models/deactivateEntity";
 import salesReport from "@/util/models/salesReportModel";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 export async function GET(
   req: Request,
@@ -110,24 +108,22 @@ export async function GET(
         },
       ]),
       Artist.findById(artistId).lean(),
-
     ]);
 
-    let artist_earnings =[];
-    if (artist){
-
-       artist_earnings =             
-         //total net amount
+    let artist_earnings = [];
+    if (artist) {
+      artist_earnings =
+        //total net amount
         await salesReport.aggregate([
-          { $match: { matchStatus: "matched", artist: artist._id} },
+          { $match: { matchStatus: "matched", artist: artist._id } },
           {
             $group: {
               _id: null,
               totalNetAmount: { $sum: { $toDouble: "$netAmountUsd" } },
-              totalDocuments: { $sum: 1 }
-            }
-          }
-        ])
+              totalDocuments: { $sum: 1 },
+            },
+          },
+        ]);
     }
     console.log(artist_earnings);
 
@@ -140,7 +136,8 @@ export async function GET(
       limit,
       totalCount,
       totalPages: totalCount > 0 ? Math.ceil(totalCount / limit) : 0,
-      totalRevenue: artist_earnings.length > 0 ? artist_earnings[0].totalNetAmount : 0,
+      totalRevenue:
+        artist_earnings.length > 0 ? artist_earnings[0].totalNetAmount : 0,
       msg: "Artist data fetched successfully.",
     });
   } catch (error) {
@@ -179,7 +176,7 @@ export async function PATCH(
     } else if (typeof body.spotifyId != "string" && body.spotifyId) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    
+
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
@@ -256,7 +253,9 @@ export async function PUT(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
 
-    const admin = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    const admin = userJwt.user
+      ? await User.findById(userJwt.user).lean()
+      : null;
     if (!admin) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
     } else if (admin.role != "admin" && admin.role != "super_admin") {
@@ -314,6 +313,20 @@ export async function PUT(
         { msg: "Failed to Deactivate User." },
         { status: 400 },
       );
+    });
+
+    await logAdminActivity({
+      adminId: admin._id.toString(),
+      adminName: `${admin.firstName} ${admin.lastName}`,
+      action: "artist.deactivated",
+      entityType: "artist",
+      entityId: artistId,
+      entityLabel: `${artist.artistName}`,
+      metadata: {
+        deactivationType: body.deactivateOption,
+        reason: body.deactivateReason,
+        message: body.deactivateMessage,
+      },
     });
     return NextResponse.json(
       { msg: "Artist Deactivated successfully." },

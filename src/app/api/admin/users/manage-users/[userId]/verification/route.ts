@@ -10,6 +10,7 @@ import {
   userVerifictaionRejectionEmail,
 } from "@/util/middleware/functions";
 import sendEmail from "@/util/sendMail/sendEmail";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 export async function GET(
   req: Request,
@@ -71,7 +72,7 @@ export async function POST(
       rejecteUserVerificationMessage?: string;
       rejecteUserVerificationReason?: string;
     } = await req.json();
-    console.log(body);
+    // console.log(body);
 
     const userData = await verifyJWT();
     const userJwt = verifyUser(userData);
@@ -183,6 +184,25 @@ export async function POST(
         { msg: "Failed to reject user verification." },
         { status: 400 },
       );
+    });
+
+    await logAdminActivity({
+      adminId: admin._id.toString(),
+      adminName: `${admin.firstName} ${admin.lastName}`,
+      action:
+        body.requestType === "approved"
+          ? "user.verification_approved"
+          : "user.verification_rejected",
+      entityType: "user",
+      entityId: userId,
+      entityLabel: `${user.firstName} ${user.lastName}`,
+      metadata:
+        body.requestType === "rejected"
+          ? {
+              reason: body.rejecteUserVerificationReason,
+              message: body.rejecteUserVerificationMessage,
+            }
+          : undefined,
     });
 
     return NextResponse.json(

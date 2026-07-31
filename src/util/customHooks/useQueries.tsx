@@ -52,7 +52,9 @@ import {
   getUserWithdrawalHistory,
   getWithdrawalHistory,
   getReferralDetails,
-  getDeliveryLog
+  getDeliveryLog,
+  getAdminActivityLog,
+  getAllAdminDetails
 } from "../axios/axiosInstance";
 import {
   AdminAlbumDetailsResponse,
@@ -940,5 +942,46 @@ export function usePaginatedDeliveryLog(params: {
     placeholderData: (prev) => prev,
     retry: (failedCount, error) => handleReactQueryApiCallError(failedCount, error),
     staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function usePaginatedAdminActivityLog(params: {
+  page: number;
+  limit: string;
+  admin: string;
+  action: string;
+  entityType: string;
+  startDate: string;
+  endDate: string;
+}) {
+  const api = UseAxios();
+  return useQuery<PAGINATION<any>, Error>({
+    queryKey: [
+      "adminActivityLog",
+      params.page,
+      params.admin,
+      params.action,
+      params.entityType,
+      params.startDate,
+      params.endDate,
+    ],
+    queryFn: async () => getAdminActivityLog(api, params),
+    placeholderData: (prev) => prev,
+    retry: (failedCount, error) => handleReactQueryApiCallError(failedCount, error),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useGetAllAdminDetails() {
+  const api = UseAxios();
+  return useQuery({
+    queryKey: ["adminDetails"],
+    queryFn: () => getAllAdminDetails(api),
+    staleTime: 1000 * 60 * 30, 
+    retryOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    retry: (failedCount, error) =>
+      handleReactQueryApiCallError(failedCount, error),
   });
 }

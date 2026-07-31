@@ -18,19 +18,19 @@ const sidebarComponents = [
     list: [
       {
         title: "All Releases",
-        icon: "/add.svg",
+        icon: "/musicnote.svg",
         href: "/dashboardAdmin/music/all-releases/single",
         query: "upload",
       },
       {
         title: "Release Requests",
-        icon: "/musiclibrary2.svg",
+        icon: "/clock.svg",
         href: "/dashboardAdmin/music/release-requests/single",
         query: "manageRelease",
       },
       {
         title: "delivery log",
-        icon: "/musiclibrary2.svg",
+        icon: "/truck-tick.svg",
         href: "/dashboardAdmin/music/deliveryLog/single",
         query: "deliveryLog",
       },
@@ -48,19 +48,19 @@ const sidebarComponents = [
     list: [
       {
         title: "All Artists",
-        icon: "/add.svg",
+        icon: "/microphone-2.svg",
         href: "/dashboardAdmin/artist/all-artists?artistStatus=active",
         query: "create",
       },
       {
         title: "All Labels",
-        icon: "/profile2user.svg",
+        icon: "/tag.svg",
         href: "/dashboardAdmin/artist/all-labels?labelStatus=active",
         query: "manageArtist",
       },
       {
         title: "Smartlink Requests",
-        icon: "/likeshapes.svg",
+        icon: "/link.svg",
         href: "",
         query: "collaboration",
       },
@@ -83,7 +83,7 @@ const sidebarComponents = [
       },
       {
         title: "Verification Requests",
-        icon: "/musicplay.svg",
+        icon: "/checmark.svg",
         href: "/dashboardAdmin/users/verification-requests",
         query: "song",
       },
@@ -95,7 +95,7 @@ const sidebarComponents = [
       },
       {
         title: "Support Requests",
-        icon: "/musicplay.svg",
+        icon: "/24-support.svg",
         href: "/dashboardAdmin/users/support-requests?supportStatus=all",
         query: "song",
       },
@@ -106,13 +106,13 @@ const sidebarComponents = [
     list: [
       {
         title: "sales report",
-        icon: "/musicplay.svg",
+        icon: "/diagram.svg",
         href: "/dashboardAdmin/finance/sales-report",
         query: "sales_report",
       },
       {
         title: "withdrawal requests",
-        icon: "/musicplay.svg",
+        icon: "/clock.svg",
         href: "/dashboardAdmin/finance/withdrawal-requests?withdrawalStatus=all",
         query: "sales_report",
       },
@@ -123,24 +123,36 @@ const sidebarComponents = [
     list: [
       {
         title: "Promotions",
-        icon: "/musicplay.svg",
+        icon: "/trend-up.svg",
         href: "/dashboardAdmin/more/promotions?promotionStatus=all",
         query: "sales_report",
       },
       {
         title: "Chart Registrations",
-        icon: "/musicplay.svg",
+        icon: "/chart.svg",
         href: "/dashboardAdmin/more/chart-registrations?chartStatus=all",
         query: "sales_report",
       },
       {
         title: "Extras",
-        icon: "/musicplay.svg",
+        icon: "/add.svg",
         href: "/dashboardAdmin/more/extras",
         query: "sales_report",
       },
     ],
   },
+
+  {
+  title: "My activity",
+  list: [
+    {
+      title: "Activity Log",
+      icon: "/trend-up.svg",
+      href: "/dashboardAdmin/activityLog",
+      query: "activityLog",
+    },
+  ],
+},
 ];
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
@@ -314,7 +326,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         <button
           onClick={() => setIsProfilePopUpOpen(!isProfilePopUpOpen)}
           className={
-            "transition-all duration-300 ease-in-out fixed rounded-2xl w-55 h-15 bg-black z-100 top-[90%] left-2 flex p-2 justify-between items-center " +
+            "transition-all duration-300 ease-in-out fixed rounded-2xl w-55 h-15 bg-black z-100 top-[88%] left-2 flex p-2 justify-between items-center " +
             (isOpen ? " max-lg:-translate-x-0 " : " max-lg:-translate-x-[110%]")
           }
         >
@@ -330,8 +342,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <h2 className="font-light text-lg text-white tracking-[-1px] leading-8 capitalize h-8 line-clamp-1">
                 {data.firstName}
               </h2>
-              <p className="text-primary-300 font-light leading-[18px] -tracking-[-0.5px] text-xs line-clamp-1">
-                {data.type}
+              <p className="text-primary-300 font-light leading-[18px] -tracking-[-0.5px] text-sm line-clamp-1 capitalize">
+                {data.role}
               </p>
             </div>
           </div>

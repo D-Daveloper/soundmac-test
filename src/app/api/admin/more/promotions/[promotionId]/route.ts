@@ -12,6 +12,7 @@ import {
   replaceTemplatePlaceholders,
 } from "@/util/middleware/functions";
 import sendEmail from "@/util/sendMail/sendEmail";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 export async function GET(
   req: Request,
@@ -129,13 +130,19 @@ export async function POST(
       console.log("no promotion found");
 
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (promotion.promotionStatus != "pending" && body.requestType != "completed") {
+    } else if (
+      promotion.promotionStatus != "pending" &&
+      body.requestType != "completed"
+    ) {
       console.log("promotion not pending");
       return NextResponse.json(
         { msg: "Only pending Promotions can be " + body.requestType },
         { status: 400 },
       );
-    } else if (promotion.promotionStatus != "approved" && body.requestType == "completed") {
+    } else if (
+      promotion.promotionStatus != "approved" &&
+      body.requestType == "completed"
+    ) {
       console.log("promotion not approved");
       return NextResponse.json(
         { msg: "Only approved Promotions can be " + body.requestType },
@@ -285,6 +292,24 @@ export async function POST(
         { msg: `Failed to ${body.requestType} promotion. ` },
         { status: 400 },
       );
+    });
+
+    await logAdminActivity({
+      adminId: admin._id.toString(),
+      adminName: `${admin.firstName} ${admin.lastName}`,
+      action:
+        body.requestType === "approved"
+          ? "promotion.approved"
+          : body.requestType === "rejected"
+            ? "promotion.rejected"
+            : "promotion.completed",
+      entityType: "promotion",
+      entityId: promotionId,
+      entityLabel: `${promotion.artistName} — ${promotion.releaseTitle}`,
+      metadata:
+        body.requestType === "rejected"
+          ? { reason: body.rejectReason, message: body.rejectMessage }
+          : undefined,
     });
 
     return NextResponse.json(

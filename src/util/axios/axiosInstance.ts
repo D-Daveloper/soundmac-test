@@ -397,6 +397,11 @@ export async function getUserNotification(api: AxiosInstance) {
   return res.data;
 }
 
+export async function markNotificationsAsRead(api: AxiosInstance, id?: string) {
+  const res = await api.patch("users/notification", { id: id ?? null });
+  return res.data;
+}
+
 export async function getDPMDsp(): Promise<DPMDsp> {
   const res = await axios.get(process.env.NEXT_PUBLIC_GET_DSPS_URL!, {
     headers: {
@@ -479,3 +484,26 @@ export const getDeliveryLog = async (
   const response = await api.get("/releases/delivery-log", { params });
   return response.data;
 };
+
+export const getAdminActivityLog = async (
+  api: AxiosInstance,
+  params: {
+    page: number;
+    limit: string;
+    admin: string;
+    action: string;
+    entityType: string;
+    startDate: string;
+    endDate: string;
+  }
+) => {
+  const response = await api.get("admin/adminActivityLog", { params });
+  return response.data;
+};
+
+export const getAllAdminDetails = async(
+  api:AxiosInstance
+) => {
+  const response = await api.get("admin/adminDetails")
+  return response.data
+}

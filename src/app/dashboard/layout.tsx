@@ -12,7 +12,13 @@ import SideBarCom from "../components/sideBarComponents/sideBarCom";
 import UserRoute from "../protectedRoute/protectedRoute";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, ChevronDown, ChevronUp, LockKeyhole, UserPlus } from "lucide-react";
+import {
+  Bell,
+  ChevronDown,
+  ChevronUp,
+  LockKeyhole,
+  UserPlus,
+} from "lucide-react";
 import { NormalLoadingScreen } from "../components/Loader/loader";
 import {
   useAuthUser,
@@ -21,6 +27,8 @@ import {
 import Notification from "../components/notification/Notification";
 import axios from "axios";
 import LogoutButton from "../logout/Logout";
+import { markNotificationsAsRead } from "@/util/axios/axiosInstance";
+import useAxios from "@/util/customHooks/UseAxios";
 
 const sidebarComponents = [
   {
@@ -38,12 +46,12 @@ const sidebarComponents = [
         href: "/dashboard/music/manageRelease?type=single",
         query: "manageRelease",
       },
-    //   {
-    //   title: "delivery log",
-    //   icon: "/musiclibrary2.svg",
-    //   href: "/dashboard/music/deliveryLog",
-    //   query: "deliveryLog",
-    // },
+      //   {
+      //   title: "delivery log",
+      //   icon: "/musiclibrary2.svg",
+      //   href: "/dashboard/music/deliveryLog",
+      //   query: "deliveryLog",
+      // },
     ],
   },
   {
@@ -113,11 +121,11 @@ const sidebarComponents = [
         query: "chartRegistration",
       },
       {
-        title:"Share and Earn",
-        icon:"/repeat.svg",
-        href:"/dashboard/explore/referral",
-        query:"referralDetails",
-      }
+        title: "Share and Earn",
+        icon: "/repeat.svg",
+        href: "/dashboard/explore/referral",
+        query: "referralDetails",
+      },
     ],
   },
 ];
@@ -204,14 +212,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading || !data) return <NormalLoadingScreen />;
 
+  const api = useAxios();
+
   const handleMarkAsRead = async (id?: string) => {
     try {
-      await axios.patch("api/users/notification", { id });
-      await refetchNotifications();
+      await markNotificationsAsRead(api, id);
+      refetchNotifications();
+      setIsNotificationOpen(false);
     } catch (error) {
       console.log(error);
     }
   };
+
+  // const handleMarkAsRead = async (id?: string) => {
+  //   try {
+  //     await axios.patch("api/users/notification", { id });
+  //     await refetchNotifications();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   return (
     <UserRoute>
@@ -270,9 +290,16 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               className="relative p-2.5 rounded-xl border border-transparent hover:border-neutral-100 hover:bg-neutral-50 transition-all shrink-0 cursor-pointer"
             >
               <Bell color="#11456B" stroke="#11456B" size={20} />
-              {notification?.hasNewNotification && (
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error-500 ring-2 ring-white animate-pulse"></span>
+              {notification?.unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-error-500 text-white text-xs font-bold ring-2 ring-white">
+                  {notification.unreadCount > 9
+                    ? "9+"
+                    : notification.unreadCount}
+                </span>
               )}
+              {/* {notification?.hasNewNotification && (
+                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-error-500 ring-2 ring-white animate-pulse"></span>
+              )} */}
             </button>
           </div>
         </header>

@@ -1,6 +1,10 @@
 import { rejectEmailProps, songFromApi } from "@/app/type";
 import dbConnect from "@/util/db";
-import { releaseApprovalEmail, releaseRejectionEmail, replaceTemplatePlaceholders } from "@/util/middleware/functions";
+import {
+  releaseApprovalEmail,
+  releaseRejectionEmail,
+  replaceTemplatePlaceholders,
+} from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import { Types } from "mongoose";
@@ -8,8 +12,12 @@ import { NextResponse } from "next/server";
 import SongModel from "@/util/models/songModel";
 import { inngest } from "@/util/lib/inngest/inngest";
 import UserNotification from "@/util/models/userNotification";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
-export async function POST(req: Request, { params }: { params: Promise<{ songId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ songId: string }> },
+) {
   const { songId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
@@ -26,12 +34,22 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     }
     await dbConnect();
 
-    const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
-    if (!user) {
-      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-    } else if (user.role != "admin" && user.role != "super_admin") {
-      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
-    }
+    
+        const admin = userJwt.user
+          ? await User.findById(userJwt.user).lean()
+          : null;
+        if (!admin) {
+          return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+        } else if (admin.role != "admin" && admin.role != "super_admin") {
+          return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+        }
+
+    // const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+    // if (!user) {
+    //   return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    // } else if (user.role != "admin" && user.role != "super_admin") {
+    //   return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+    // }
 
     if (!body) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -45,11 +63,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
     } else if (!songId || !Types.ObjectId.isValid(songId)) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
-    const release: songFromApi & { user: { email: string , _id:string} } = await SongModel.findById(songId).populate(
-      "user",
-      "email label",
-
-    ).lean();
+    const release: songFromApi & { user: { email: string; _id: string } } =
+      await SongModel.findById(songId).populate("user", "email label").lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -64,18 +79,20 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
 
     if (body.requestType == "approved") {
       // Execute the model method passing the session
-      const result = await SongModel.approveAndCreateMetadata(songId, release.user.label);
+      const result = await SongModel.approveAndCreateMetadata(
+        songId,
+        release.user.label,
+      );
       if (result.error) {
-        return NextResponse.json(
-          { msg: result.msg },
-          { status: 400 },
-        );
+        return NextResponse.json({ msg: result.msg }, { status: 400 });
       } else {
         const approvalEmailData = {
           artistName: release.artistName,
           releaseTitle: release.releaseTitle,
           releaseDate: new Date(release.releaseDate).toDateString(),
-          releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=single",
+          releaseUrl:
+            process.env.FRONTEND_URL +
+            "/dashboard/music/manageRelease?type=single",
           supportEmail: "",
           company_name: "Soundmac",
           year: new Date().getFullYear().toString(),
@@ -96,32 +113,38 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
           data: {
             html: approvalEmailhtml,
             emailTo: userEmail,
-            title: emailTitle
+            title: emailTitle,
           },
         });
         await inngest.send({
           name: "release/deliver",
           data: {
             upc: release.upc,
-            listDspId: release.dsp.map(item => item.value),
+            listDspId: release.dsp.map((item) => item.value),
             releaseId: release._id,
-            isSingle: true
+            isSingle: true,
           },
         });
 
         await UserNotification.create({
-        userId: release.user._id,
-        adminId: user._id,
-        reason: "Release Approved",
-        message: `Your release "${release.releaseTitle}" has been approved and is going live! Check your email for full details.`,
-        status: "delivered",
-      });
-        return NextResponse.json(
-          { msg: result.msg },
-          { status: 201 },
-        );
-      }
+          userId: release.user._id,
+          adminId: admin._id,
+          reason: "Release Approved",
+          message: `Your release "${release.releaseTitle}" has been approved and is going live! Check your email for full details.`,
+          status: "delivered",
+        });
 
+        await logAdminActivity({
+          adminId: admin._id.toString(),
+          adminName: `${admin.firstName} ${admin.lastName}`,
+          action: "release.approved",
+          entityType: "song",
+          entityId: songId,
+          entityLabel: release.releaseTitle,
+        });
+
+        return NextResponse.json({ msg: result.msg }, { status: 201 });
+      }
     } else if (body.requestType == "rejected") {
       const updateRelease = await SongModel.findByIdAndUpdate(
         songId,
@@ -145,19 +168,27 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
         data: {
           html: rejectionEmail,
           emailTo: userEmail,
-          title: emailTitle
+          title: emailTitle,
         },
       });
 
-       await UserNotification.create({
-    userId: release.user._id,
-    adminId: user._id,
-    reason: "Release Rejected",
-    message: `Your release "${release.releaseTitle}" was not approved. Please check your email for the reason and next steps.`,
-    status: "delivered",
-  });
-}
-    
+      await UserNotification.create({
+        userId: release.user._id,
+        adminId: admin._id,
+        reason: "Release Rejected",
+        message: `Your release "${release.releaseTitle}" was not approved. Please check your email for the reason and next steps.`,
+        status: "delivered",
+      });
+
+      await logAdminActivity({
+        adminId: admin._id.toString(),
+        adminName: `${admin.firstName} ${admin.lastName}`,
+        action: "release.rejected",
+        entityType: "song",
+        entityId: songId,
+        entityLabel: release.releaseTitle,
+      });
+    }
 
     return NextResponse.json(
       { msg: "Release" + " " + body.requestType + "." },
@@ -175,7 +206,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ songId:
   }
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ songId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ songId: string }> },
+) {
   const { songId } = await params; // Access the dynamic 'id' parameter
   try {
     // Check admin authorization (adjust to your auth system)
@@ -214,10 +248,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ songId: 
       lyrics: 1,
       copyRightYear: 1,
       copyRightHolder: 1,
-      license: 1
-    }
+      license: 1,
+    };
     // Get audio record from database
-    const release = await SongModel.findById(songId, projection).populate("user", "email").populate("artist", "spotifyId appleId -_id").lean();
+    const release = await SongModel.findById(songId, projection)
+      .populate("user", "email")
+      .populate("artist", "spotifyId appleId -_id")
+      .lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Audio not found" }, { status: 400 });

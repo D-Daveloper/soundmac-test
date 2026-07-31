@@ -5,6 +5,7 @@ import sendEmail from "@/util/sendMail/sendEmail";
 import { generateOtp } from "@/util/middleware/functions";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 //validate OTP
 export async function POST(req: Request) {
@@ -18,7 +19,7 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json(
         { success: false, msg: "Invalid email." },
-        { status: 404 }
+        { status: 404 },
       );
     }
     if (!user.confirmed) {
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
       if (!body.password) {
         return NextResponse.json(
           { msg: "Password is required" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       const salt = await bcrypt.genSalt(10);
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       },
       process.env.JWT_SECRET!,
       {
-        expiresIn: process.env.JWT_LIFETIME || '15m',
+        expiresIn: process.env.JWT_LIFETIME || "15m",
       } as jwt.SignOptions,
     );
     //   create token
@@ -73,9 +74,20 @@ export async function POST(req: Request) {
       },
       process.env.JWT_SECRET!,
       {
-        expiresIn: process.env.JWT_LIFETIME_REFRESH_TOKEN || '1d',
+        expiresIn: process.env.JWT_LIFETIME_REFRESH_TOKEN || "1d",
       } as jwt.SignOptions,
     );
+
+    if (user.role === "admin" || user.role === "super_admin") {
+      await logAdminActivity({
+        adminId: user._id.toString(),
+        adminName: `${user.firstName} ${user.lastName}`,
+        action: "admin.logged_in",
+        entityType: "session",
+        entityId: user._id.toString(),
+        entityLabel: `${user.firstName} ${user.lastName} logged in`,
+      });
+    }
 
     const res = NextResponse.json({ msg: "successful", user });
 
@@ -83,7 +95,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict" as const,
-      path: "/"
+      path: "/",
     };
     // Access token → 15 minutes
     res.cookies.set("accessToken", accessToken, {
@@ -107,7 +119,7 @@ export async function POST(req: Request) {
     } else {
       return NextResponse.json(
         { msg: "An unknown error occurred" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }
@@ -125,7 +137,7 @@ export async function PATCH(req: Request) {
     if (!user) {
       return NextResponse.json(
         { success: false, msg: "User not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
     if (user.otp !== null) {
@@ -144,7 +156,7 @@ export async function PATCH(req: Request) {
           runValidators: true,
           select:
             "-password -otp -otpExpires -refreshToken -refreshTokenExpires",
-        }
+        },
       );
 
       try {
@@ -169,23 +181,23 @@ export async function PATCH(req: Request) {
 		</div>
 	</body>
 </html>
-            `
+            `,
         );
         if (!mailRes) {
           return NextResponse.json(
             { msg: "Failed to send OTP. Please try again later." },
-            { status: 500 }
+            { status: 500 },
           );
         }
         return NextResponse.json(
           { msg: "An otp has been sent to your email", otp: true },
-          { status: 200 }
+          { status: 200 },
         );
       } catch (error) {
         console.log(error);
         return NextResponse.json(
           { msg: "Failed to send OTP. Please try again later." },
-          { status: 500 }
+          { status: 500 },
         );
       }
     } else {
@@ -199,7 +211,7 @@ export async function PATCH(req: Request) {
     } else {
       return NextResponse.json(
         { msg: "An unknown error occurred" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }
