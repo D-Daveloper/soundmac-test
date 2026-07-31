@@ -14,6 +14,7 @@ import salesReportLedger from "@/util/models/saleReportLedgerModel";
 import { inngest } from "@/util/lib/inngest/inngest";
 import { Counter } from "@/util/models/CounterModel";
 import UserNotification from "@/util/models/userNotification";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 export async function POST(
   req: Request,
@@ -58,6 +59,13 @@ export async function POST(
     } else if (admin.role != "admin" && admin.role != "super_admin") {
       return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
     }
+
+      const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+        if (!user) {
+          return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+        } else if (user.role != "admin" && user.role != "super_admin") {
+          return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+        }
 
     const withdrawal = await withDrawalModel
       .findById(withdrawalId)
@@ -116,6 +124,14 @@ export async function POST(
           ],
           { session },
         );
+          await logAdminActivity({
+              adminId: user._id.toString(),
+              adminName: `${user.firstName} ${user.lastName}`,
+              action: "withdrawal.approved",
+              entityType: "withdrawal",
+              entityId: withdrawalId,
+              entityLabel: withdrawal.amount,
+            });
         await session.commitTransaction();
       } catch (error) {
         if (session.inTransaction()) {
@@ -196,6 +212,16 @@ export async function POST(
           message: `Your withdrawal request for $${withdrawal.amount} was rejected. Reason: ${body.reason}. ${body.message}`,
           status: "delivered",
         }),
+
+         await logAdminActivity({
+              adminId: user._id.toString(),
+              adminName: `${user.firstName} ${user.lastName}`,
+              action: "withdrawal.rejected",
+              entityType: "withdrawal",
+              entityId: withdrawalId,
+              entityLabel: withdrawal.amount,
+            }),
+            
       ]).catch((error) => {
         console.error("failed to reject withdrawal request", error);
 

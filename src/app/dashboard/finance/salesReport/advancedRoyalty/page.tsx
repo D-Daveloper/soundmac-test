@@ -77,7 +77,7 @@ const Page = () => {
   } = useAuthUser();
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Advance Royalties");
+    dashboardContext?.setHeader({title:"Advance Royalties", showBackButton:true});
   }, []);
 
   useEffect(() => {
@@ -269,7 +269,7 @@ const Page = () => {
   }
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col px-5">
-      <Link
+      {/* <Link
         aria-label="go back"
         href={"/dashboard/finance/salesReport"}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -280,7 +280,7 @@ const Page = () => {
           width={32}
           alt="arrow left"
         />
-      </Link>
+      </Link> */}
       <div className="md:max-w-[50%] my-5">
         <p className="text-text-body font-light ">
           Get early access to a portion of your future earnings. If eligible,
@@ -323,7 +323,7 @@ const Page = () => {
                   <h2 className="text-text-disable font-semibold text-md">
                     Payment Method
                   </h2>
-                  <div className="flex gap-3 flex-wrap text-text-body text-xl font-normal">
+                  <div className="flex gap-3 flex-wrap text-text-body text-base font-normal">
                     <div className="flex items-center">
                       <input
                         id="link-checkbox"
@@ -465,7 +465,7 @@ const Page = () => {
 
           {/* otp */}
           <div className="flex flex-col gap-5">
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               {otp.map((digit, index) => (
                 <input
                   key={index}
@@ -558,7 +558,7 @@ const Page = () => {
       )}
       {/* eligibiltity Modal */}
       {showEligibilityModal && (
-        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-30">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm bg-opacity-60 flex items-center justify-center z-30 max-h-[64vh] top-20">
           {isSumbittingForm ? (
             <InlineLoadingScreen />
           ) : (

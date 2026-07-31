@@ -16,6 +16,7 @@ import Artist from "@/util/models/artistModel";
 import UserNotification from "@/util/models/userNotification";
 import EntityDeactivation from "@/util/models/deactivateEntity";
 import Label from "@/util/models/labelModel";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
 export async function GET(req: Request, { params }: { params: Promise<{ labelId: string }> },
 ) {
@@ -235,8 +236,22 @@ export async function PUT(
         { status: 400 },
       );
     });
+
+       await logAdminActivity({
+          adminId: admin._id.toString(),
+          adminName: `${admin.firstName} ${admin.lastName}`,
+          action: "label.deactivated",
+          entityType: "label",
+          entityId: labelId,
+          entityLabel: `${label.fristName}`,
+          metadata: {
+            deactivationType: body.deactivateOption,
+            reason: body.deactivateReason,
+            message: body.deactivateMessage,
+          },
+        });
     return NextResponse.json(
-      { msg: "Artist Deactivated successfully." },
+      { msg: "Label Deactivated successfully." },
       { status: 200 },
     );
   } catch (error: unknown) {

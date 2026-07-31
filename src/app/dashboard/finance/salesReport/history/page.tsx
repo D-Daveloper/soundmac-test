@@ -49,12 +49,12 @@ const page = () => {
     period: filter.period.value,
   });
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Withdrawal History");
+    dashboardContext?.setHeader({title:"Withdrawal History", showBackButton:true});
   }, []);
 
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col px-5">
-      <Link
+      {/* <Link
         aria-label="go back"
         href={"/dashboard/finance/salesReport"}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -65,7 +65,7 @@ const page = () => {
           width={32}
           alt="arrow left"
         />
-      </Link>
+      </Link> */}
 
       {isLoading ||
       !data ||
@@ -77,7 +77,7 @@ const page = () => {
       ) : (
         <>
           {/* Filters */}
-          <div className="w-full flex flex-wrap justify-between gap-5 mb-5">
+          <div className="w-full flex flex-wrap justify-between gap-5 mb-5 mt-5">
             <div className="flex flex-col w-[40%] max-sm:w-full gap-2 flex-1">
               <p className="font-medium mb-2 sm:text-sm text-lg">Period</p>
               <div className="w-full">

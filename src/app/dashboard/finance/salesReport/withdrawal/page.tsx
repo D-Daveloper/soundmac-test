@@ -74,7 +74,7 @@ const Page = () => {
   } = useAuthUser();
 
   useEffect(() => {
-    dashboardContext?.setLayoutHeaderMessage("Withdraw Royalties");
+    dashboardContext?.setHeader({title:"Withdraw Royalties", showBackButton:true});
   }, []);
 
   useEffect(() => {
@@ -267,7 +267,7 @@ const Page = () => {
   }
   return (
     <div className="bg-main-white min-h-screen w-full flex flex-col px-5">
-      <Link
+      {/* <Link
         aria-label="go back"
         href={"/dashboard/finance/salesReport"}
         className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
@@ -278,7 +278,7 @@ const Page = () => {
           width={32}
           alt="arrow left"
         />
-      </Link>
+      </Link> */}
       {isLoading ||
       !data ||
       isSumbittingForm ||
@@ -307,7 +307,7 @@ const Page = () => {
                   <h2 className="text-text-disable font-semibold text-md">
                     Payment Method
                   </h2>
-                  <div className="flex gap-3 flex-wrap text-text-body text-xl font-normal">
+                  <div className="flex gap-3 flex-wrap text-text-body text-base font-normal">
                     <div className="flex items-center">
                       <input
                         id="link-checkbox"
@@ -344,7 +344,7 @@ const Page = () => {
             </div>
           </div>
           {wantsEditAccountForm && (
-            <div className="w-full flex flex-wrap justify-between gap-y-10 mt-5 ">
+            <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
               {/* <div className="flex flex-col w-[40%] max-sm:w-full">
                 <Input
                   value={withdrawalForm.amount}
@@ -358,8 +358,8 @@ const Page = () => {
               </div> */}
               <div className="flex flex-col w-[40%] max-sm:w-full mb-5">
                 <p className="font-medium mb-2 sm:text-sm text-lg flex gap-1">
-                  Bank Name
-                  <Image
+                  Bank Name <span className="text-red-500">*</span>
+                  {/* <Image
                     priority={false}
                     loading="lazy"
                     src="/required.svg"
@@ -367,7 +367,7 @@ const Page = () => {
                     width={0}
                     height={0}
                     className="w-2 -mt-3 "
-                  />
+                  /> */}
                 </p>
                 <div className="w-full">
                   <Select
@@ -446,7 +446,7 @@ const Page = () => {
           {/* border line */}
           <div className="border border-neutral-100"></div>
           <div className="flex flex-col gap-5">
-            <div className="flex gap-4">
+            <div className="flex gap-2">
               {otp.map((digit, index) => (
                 <input
                   key={index}

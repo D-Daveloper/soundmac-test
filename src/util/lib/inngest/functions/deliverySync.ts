@@ -30,8 +30,8 @@ export const deliveryLogSync = inngest.createFunction(
     for (const song of approvedSongs) {
       await step.run(`sync-song-${song._id}`, async () => {
         const [spotifyResult, appleResult] = await Promise.all([
-          spotify.lookupTrackByIsrc(song.isrc).catch(() => ({ live: false as const })),
-          appleMusic.lookupSongByIsrc(song.isrc).catch(() => ({ live: false as const })),
+          spotify.lookupTrackByIsrc(song.isrc).catch((err) => ({ live: false as const, error:err?.message })),
+          appleMusic.lookupSongByIsrc(song.isrc).catch((err) => ({ live: false as const , error:err?.message})),
         ]);
 
         await SongModel.findByIdAndUpdate(song._id, {
@@ -40,14 +40,15 @@ export const deliveryLogSync = inngest.createFunction(
             { platform: "apple_music", status: appleResult.live ? "live" : "pending", lastCheckedAt: new Date() },
           ],
         });
+         return { isrc: song.isrc, spotifyResult, appleResult };
       });
     }
 
     for (const album of approvedAlbums) {
       await step.run(`sync-album-${album._id}`, async () => {
         const [spotifyResult, appleResult] = await Promise.all([
-          spotify.lookupAlbumByUpc(album.upc).catch(() => ({ live: false as const })),
-          appleMusic.lookupAlbumByUpc(album.upc).catch(() => ({ live: false as const })),
+          spotify.lookupAlbumByUpc(album.upc).catch((err) => ({ live: false as const, error:err?.message })),
+          appleMusic.lookupAlbumByUpc(album.upc).catch((err) => ({ live: false as const, error:err?.message})),
         ]);
 
         await AlbumModel.findByIdAndUpdate(album._id, {
@@ -56,6 +57,8 @@ export const deliveryLogSync = inngest.createFunction(
             { platform: "apple_music", status: appleResult.live ? "live" : "pending", lastCheckedAt: new Date() },
           ],
         });
+         return { upc: album.upc, spotifyResult, appleResult };
+
       });
     }
 

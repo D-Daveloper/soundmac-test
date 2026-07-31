@@ -29,7 +29,7 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
       const res = await api.get("admin/music/all-releases/singles", {
         params: { songId: releaseDetails?._id },
       });
-      console.log(res.data);
+      console.log('release detaisl', res.data);
       // 2. Create temporary link and trigger download
       const link = document.createElement("a");
       link.href = res.data.downloadUrl;
@@ -40,10 +40,10 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
       // Append to body (required for Firefox)
       document.body.appendChild(link);
       link.click();
-
+      
       // Cleanup
       document.body.removeChild(link);
-
+      
       toast.success(res.data.msg);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -55,6 +55,7 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
       setisSubmitting(false);
     }
   };
+  console.log('release detaisl', releaseDetails?._id);
 
   return (
     <>

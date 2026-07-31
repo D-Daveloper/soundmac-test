@@ -4,8 +4,12 @@ import User from "@/util/models/userModel";
 import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import ChartRegistrationModel from "@/util/models/chartRegistrationModel";
+import { logAdminActivity } from "@/util/lib/adminActivityLog/adminActivityLogHelper";
 
-export async function POST(req: Request, { params }: { params: Promise<{ chartId: string }> }) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ chartId: string }> },
+) {
   const { chartId } = await params; // Access the dynamic 'id' parameter
   try {
     const body: {
@@ -29,9 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ chartId
 
     if (!body) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
-    } else if (
-      body.requestType != "approved"
-    ) {
+    } else if (body.requestType != "approved") {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     } else if (!chartId || !Types.ObjectId.isValid(chartId)) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -47,7 +49,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ chartId
       );
     }
 
-    await ChartRegistrationModel.findByIdAndUpdate(chartId, { chartStatus: body.requestType });
+    await ChartRegistrationModel.findByIdAndUpdate(chartId, {
+      chartStatus: body.requestType,
+    });
+
+    await logAdminActivity({
+      adminId: user._id.toString(),
+      adminName: `${user.firstName} ${user.lastName}`,
+      action: "chart.approved",
+      entityType: "chart",
+      entityId: chartId,
+      entityLabel: chart.releaseTitle ?? chartId,
+    });
 
     return NextResponse.json(
       { msg: "Chart" + " " + body.requestType + "." },
@@ -65,7 +78,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ chartId
   }
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ chartId: string }> }) {
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ chartId: string }> },
+) {
   const { chartId } = await params; // Access the dynamic 'id' parameter
   try {
     // Check admin authorization (adjust to your auth system)
@@ -87,8 +103,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ chartId:
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
 
-
-    const chart = await ChartRegistrationModel.findById(chartId).populate({ path: "releaseId", select: "releaseTitle releaseImage featuredArtist upc isrc" }).populate("artist").lean();
+    const chart = await ChartRegistrationModel.findById(chartId)
+      .populate({
+        path: "releaseId",
+        select: "releaseTitle releaseImage featuredArtist upc isrc",
+      })
+      .populate("artist")
+      .lean();
 
     if (!chart) {
       return NextResponse.json({ msg: "Chart not found" }, { status: 400 });

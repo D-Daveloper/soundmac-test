@@ -45,6 +45,25 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   useEffect(() => {
     dashboardContext?.setHeader({title:"Artist Info", showBackButton:true});
   }, []);
+
+
+    useEffect(() => {
+      const anyModalOpen =
+        showDeactivateModal ||
+        showSendNotificationModal;
+  
+      if (anyModalOpen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+  
+      // cleanup
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }, [showDeactivateModal, showSendNotificationModal]);
+
   useEffect(() => {
     if (
       !tab ||
@@ -230,7 +249,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
               {/* Reject Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -239,6 +258,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   onClick={() => {
                     setshowDeactivateModal(false);
+                    setisFilterOpen(!isFilterOpen);
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -347,6 +367,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   <button
                     onClick={() => {
                       setshowDeactivateModal(false);
+                      setisFilterOpen(!isFilterOpen);
+
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >
@@ -375,7 +397,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           {isSubmitting ? (
             <InlineLoadingScreen />
           ) : (
-            <div className="bg-white rounded-2xl w-[700px] shadow-2xl h-fit">
+            <div className="bg-white rounded-2xl w-full max-w-[700px] max-h-[90vh] shadow-2xl overflow-y-auto overscroll-contain">
               {/* Reject Modal Header */}
               <div className="flex items-center justify-between p-6 border-b border-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900">
@@ -384,6 +406,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   onClick={() => {
                     setshowSendNotificationModal(false);
+                    setisFilterOpen(!isFilterOpen);
                   }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
@@ -460,7 +483,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                 <div className="flex items-center justify-end gap-3 mt-6">
                   <button
                     onClick={() => {
-                      setshowDeactivateModal(false);
+                       setshowSendNotificationModal(false);
+                       setisFilterOpen(!isFilterOpen);
+                      // setshowDeactivateModal(false);
                     }}
                     className="px-5 py-2.5 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
                   >

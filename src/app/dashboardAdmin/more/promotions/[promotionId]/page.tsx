@@ -45,7 +45,7 @@ export default function Page({
   } = useGetPromotionDetails({ promotionId });
 
   useEffect(() => {
-    dashboardContext?.setHeader({title:"Song Info", showBackButton:true});
+    dashboardContext?.setHeader({title:"Promotion Details", showBackButton:true});
   }, []);
 
   console.log(promotionId);

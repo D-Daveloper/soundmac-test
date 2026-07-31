@@ -25,10 +25,11 @@ export async function GET(req: Request) {
         }
         const notificationsQuery = UserNotification.find({ userId: userJwt.user }).sort({ statusWeight: 1 }).lean()
         const unDeliveredNotificationsQuery = UserNotification.findOne({ userId: userJwt.user, statusWeight: 1 })
-        const [notifications, unDeliveredNotifications] = await Promise.all([
-            notificationsQuery, unDeliveredNotificationsQuery
+        const unreadCountQuery = UserNotification.countDocuments({ userId: userJwt.user, statusWeight: 1 });
+        const [notifications, unDeliveredNotifications, unreadCount] = await Promise.all([
+            notificationsQuery, unDeliveredNotificationsQuery, unreadCountQuery
         ])
-        return NextResponse.json({ notifications, hasNewNotification: unDeliveredNotifications ? true : false }, { status: 200 })
+        return NextResponse.json({ notifications, unreadCount, hasNewNotification: unDeliveredNotifications ? true : false }, { status: 200 })
     } catch (error: unknown) {
         console.log(error);
 
