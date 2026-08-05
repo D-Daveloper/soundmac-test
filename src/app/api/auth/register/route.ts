@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
     await dbConnect();
     // Check if the email already exists
-    const existingUser = await User.findOne({ email: body.email });
+    const existingUser = await User.findOne({ email: body.email,});
     if (existingUser) {
       return NextResponse.json(
         { success: false, msg: "Email already exists" },
@@ -27,10 +27,9 @@ export async function POST(req: Request) {
     try {
       const mailRes = await sendEmail(
         `${body.email}`,
-        "Welcome to SOUNDMAC!",
+        "Your SoundMac Verification Code",
         `
-        
-        <!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
@@ -56,23 +55,23 @@ export async function POST(req: Request) {
 
 			<div style="width: 100%">
 				<div style="width: 400px; display: inline-block; text-align: justify">
-					Dear ${body.first_name}, <br />
+					Hello ${body.first_name}, <br /><br />
+
+					Your one-time verification code is: <br /><br />
+
+					<div style="text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 4px;">
+						${otp}
+					</div>
 					<br />
 
-					Thank you for choosing us as your music distribution platform. Our
-					goal is to provide the best experience and support. If you have any
-					questions, our team is here to assist you. <br /><br />
+					This code will expire in five minutes. <br /><br />
 
-					To complete your registration process, Please enter the otp below.<br /><br />
-					          
-		<div>
-			Here is your otp ${otp}
-			<p>Expires in 5 mins </p>
+					For your security, never share this code with anyone. SoundMac will never ask you for your verification code by email, phone, or message. <br /><br />
 
-		</div>
-    					<br />
-					Best regards,<br />
-					SOUNDMAC Team
+					If you didn't request this code, you can safely ignore this email. <br /><br />
+
+					Best,<br />
+					SoundMac Security Team
 				</div>
 			</div>
 			<img
@@ -83,11 +82,12 @@ export async function POST(req: Request) {
 		</div>
 	</body>
 </html>
-            `,
+    `,
       );
+
       if (!mailRes) {
         return NextResponse.json(
-          { success: false, msg: "Failed to otp email" },
+          { success: false, msg: "Failed to send otp email" },
           { status: 500 },
         );
       }

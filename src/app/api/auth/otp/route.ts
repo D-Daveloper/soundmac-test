@@ -52,6 +52,52 @@ export async function POST(req: Request) {
       user.otpExpires = null; // Reset otpExpires to null
       user.updatedAt = new Date(); // Update the updatedAt field
       await user.save();
+
+      try {
+        await sendEmail(
+          user.email,
+          "Welcome to SoundMac",
+          `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Welcome to Soundmac</title>
+        </head>
+        <body>
+          <div style="width: 400px; margin: auto; text-align: center;">
+            <img src="https://sconchun.sirv.com/welcome%20mail%20header.png" width="400" alt="" />
+            <div style="text-align: justify; width: 400px; margin: 20px auto;">
+              Dear ${user.firstName}, <br /><br />
+
+              I'm Micheal, Head of Artist & Label Relations here at SoundMac, and I wanted to personally welcome you. <br /><br />
+
+              We started SoundMac because we believe independent artists and record labels across Africa deserve a distribution partner that genuinely understands the music they're creating and the challenges they face. Every artist who joins us becomes part of that mission, and I'm genuinely glad you're here. <br /><br />
+
+              From this moment, you've got a team that's invested in your success. Whether you're releasing your very first single or managing a growing catalog, we're here to help make the process simple, reliable, and transparent. <br /><br />
+
+              Whenever you're ready, upload your first release and we'll take it from there. Our distribution team will carefully review it before delivering it to stores and streaming platforms around the world. <br /><br />
+
+              If you ever have a question, need advice, or simply aren't sure about something, just send us an email to support@soundmac.co and we are live on WhatsApp +1 (555) 828-4080. It comes straight to our team, and we'll make sure you get the help you need. <br /><br />
+
+              Welcome to SoundMac. We can't wait to be part of your journey. <br /><br />
+
+              Warm regards,<br />
+              Micheal<br />
+              Head of Artist & Label Relations<br />
+              SoundMac Global LTD.
+            </div>
+            <img src="https://sconchun.sirv.com/welcome%20mail%20footer.png" width="400" alt="" />
+          </div>
+        </body>
+        </html>
+      `,
+        );
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+      }
     }
     //   create token
     const accessToken = jwt.sign(
