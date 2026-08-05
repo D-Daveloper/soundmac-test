@@ -147,6 +147,7 @@ const profileLinks = [
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
+  const api = useAxios();
   const { data, isLoading } = useAuthUser();
   const {
     data: notification,
@@ -212,7 +213,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading || !data) return <NormalLoadingScreen />;
 
-  const api = useAxios();
 
   const handleMarkAsRead = async (id?: string) => {
     try {

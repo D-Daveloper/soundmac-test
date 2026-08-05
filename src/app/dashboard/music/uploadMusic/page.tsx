@@ -1,17 +1,58 @@
 "use client";
 import Image from "next/image";
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import SongForm from "./song/SongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import AlbumForm from "./album/AlbumForm";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import PopUp from "./PopUp";
 
 const Page = () => {
   const { setParam, getParam } = useTabQuery();
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedType, setSelectedType] = useState<"single" | "album" | null>(
+    null,
+  );
+
+// tracking wether the user has accepted the rules and reminding them every 30 days instead of users seeing it everytime they try to upload a song/album
+const UPLOAD_REMINDER_KEY = "soundmac_upload_disclaimer_ack";
+const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+function hasAcceptedRecently(): boolean {
+  const saved = localStorage.getItem(UPLOAD_REMINDER_KEY);
+  if (!saved) return false;
+
+  const { acceptedAt } = JSON.parse(saved);
+  const timeSinceAccepted = Date.now() - acceptedAt;
+
+  return timeSinceAccepted < THIRTY_DAYS;
+}
+
+function markAsAccepted(): void {
+  localStorage.setItem(
+    UPLOAD_REMINDER_KEY,
+    JSON.stringify({ acceptedAt: Date.now() })
+  );
+}
+
+  const handleOpenPopup = (type: "single" | "album") => {
+    if(hasAcceptedRecently()) {
+      setParam("type", type);
+      return;
+    }
+    setSelectedType(type);
+    setShowPopup(true);
+  };
+
+  console.log(showPopup);
+
   const type = getParam("type");
-    const dashboardContext = useContext(DashboardContext);
-    useEffect(() => {
-    dashboardContext?.setHeader({title: "Upload Release", showBackButton:true});
+  const dashboardContext = useContext(DashboardContext);
+  useEffect(() => {
+    dashboardContext?.setHeader({
+      title: "Upload Release",
+      showBackButton: true,
+    });
   }, [type]);
 
   if (type == "single") {
@@ -20,7 +61,7 @@ const Page = () => {
     return <AlbumForm />;
   } else {
     return (
-    <main className="px-4 w-full min-h-scree bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-5">
+      <main className="px-4 w-full min-h-scree bg-main-white text-[14px] -tracking-[0.5px] leading-5 flex flex-col py-5">
         <div>
           <h1 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
             Choose Your Release Type
@@ -46,7 +87,8 @@ const Page = () => {
               Upload one track and get it streaming everywhere.
             </p>
             <button
-              onClick={() => setParam("type", "single")}
+              onClick={() => handleOpenPopup("single")}
+              type="button"
               className="font-bold text-sm rounded-lg bg-primary text-main-white px-4 py-2.5 hover:bg-primary/80"
             >
               Upload Single
@@ -67,13 +109,27 @@ const Page = () => {
               Share a collection of songs as one complete project.
             </p>
             <button
-              onClick={() => setParam("type", "album")}
+              onClick={() => handleOpenPopup("album")}
               className="font-bold text-sm rounded-lg bg-transparent border-2 border-primary text-text-body px-4 py-2.5 hover:bg-primary/10"
             >
               Upload Album
             </button>
           </div>
         </div>
+
+        {showPopup && (
+          <PopUp
+            type={selectedType}
+            markAsAccepted = {markAsAccepted}
+            onClose={() => setShowPopup(false)}
+            onContinue={() => {
+              if (selectedType) {
+                setParam("type", selectedType);
+              }
+              setShowPopup(false);
+            }}
+          />
+        )}
       </main>
     );
   }
