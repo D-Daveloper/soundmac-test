@@ -7,7 +7,7 @@ export async function generateUPC() {
   if (process.env.NODE_ENV === "development") {
     return Math.floor(Math.random() * 9000000000) + 1000000000;
   }
-  const data = await dspFetch("https://api.dpmnetworks.com/api/v2/upc/assign/" + process.env.DPM_CLIENT_ID, {
+  const data = await dspFetch(`${process.env.DPM_HOST}v2/upc/assign/${process.env.DPM_CLIENT_ID}`, {
     method: "GET",
   });
   //   console.log("upc",data);
@@ -47,7 +47,7 @@ export async function generateCatalogNumber() {
 //   if (process.env.NODE_ENV === "development") {
 //     return Math.floor(Math.random() * 9000000000) + 1000000000;
 //   }
-//   const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID, {
+//   const data = await dspFetch(`${process.env.DPM_HOST}v2/isrc/assign/` + process.env.DPM_CLIENT_ID, {
 //     method: "GET",
 //   });
 //   //   console.log("upc",data);
@@ -86,7 +86,7 @@ export async function generateMultipleISRC(amount: number) {
 }
 
 // export async function generateMultipleISRC(amount: number) {
-//   const data = await dspFetch("https://api.dpmnetworks.com/api/v2/isrc/assign/" + process.env.DPM_CLIENT_ID + "?qty=" + amount, {
+//   const data = await dspFetch(`${process.env.DPM_HOST}v2/isrc/assign/` + process.env.DPM_CLIENT_ID + "?qty=" + amount, {
 //     method: "GET",
 //   });
 //   //   console.log("upc",data);

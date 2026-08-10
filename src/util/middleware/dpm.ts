@@ -59,10 +59,10 @@ export const getUPCs = async () => {
     return "test_"+Date.now();
     const accessToken = await getAccessToken();
     // console.log(accessToken);
-    const response = await axios.get(`${process.env.DPM_URL}/api/v2/upc/assign/${process.env.DPM_CLIENT_ID}`, {
+    const response = await axios.get(`${process.env.DPM_URL}v2/upc/assign/${process.env.DPM_CLIENT_ID}`, {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
-        'Host': 'api.dpmnetworks.com',
+        'Host': 'portal.dpmnetworks.com',
         'Content-Type': 'application/json',
         'Accept-Language': 'en-US',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36' 

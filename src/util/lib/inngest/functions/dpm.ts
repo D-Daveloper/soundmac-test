@@ -18,7 +18,7 @@ export const releaseDelivery = inngest.createFunction(
         const apiResponse = await step.run("request-release-delivery", async () => {
             // const token = Buffer.from(`${process.env.DPM_USERNAME_V1}:${process.env.DPM_PASSWORD_V1}`).toString('base64');
             try {
-                const response = await axios.post(`${process.env.DPM_HOST_V1}requestdelivery`, {
+                const response = await axios.post(`${process.env.DPM_HOST}/v1/requestdelivery`, {
                     upc: upc,
                     dspids: listDspId,
                     delivery_type: "initialDelivery"
@@ -27,7 +27,7 @@ export const releaseDelivery = inngest.createFunction(
                         'Authorization': `Basic ${process.env.DPM_HOST_V1_AUTH}`,
                         'Content-Type': 'application/json',
                         'Accept-Language': 'en-US',
-                        'Host': 'api.dpmnetworks.com',
+                        'Host': 'portal.dpmnetworks.com',
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
                     }
                 });
