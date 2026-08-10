@@ -1,4 +1,5 @@
 import dbConnect from "@/util/db";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User, { IUser } from "@/util/models/userModel";
 import { Types } from "mongoose";
@@ -18,20 +19,36 @@ export async function GET(req: Request) {
     const user = await User.findById(userJwt.user);
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
-    } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
+    } else {
+      const subError = requireActiveSubscription(user);
+      if (subError) {
+        return NextResponse.json(
+          { msg: subError.msg },
+          { status: subError.status },
+        );
+      }
+      if (!user.subscriptionDetails?.subscriptionCode) {
+        return NextResponse.json(
+          { msg: "No active card subscription to manage." },
+          { status: 400 },
+        );
+      }
     }
+
+    // else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // }
 
     const res = await fetch(
       `https://api.paystack.co/subscription/${user.subscriptionDetails.subscriptionCode}/manage/link`,
@@ -48,10 +65,13 @@ export async function GET(req: Request) {
     if (!data.status)
       return NextResponse.json({ msg: data.message }, { status: 400 });
 
-    return NextResponse.json({
-      msg: data.message,
-      url: data.data.link,
-    },{status:200});
+    return NextResponse.json(
+      {
+        msg: data.message,
+        url: data.data.link,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     console.error("jjjj", err);
     return NextResponse.json(
@@ -71,7 +91,9 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-    const user = await User.findById(userJwt.user).select("+subscriptionDetails.subscriptionCode +subscriptionDetails.emailToken");;
+    const user = await User.findById(userJwt.user).select(
+      "+subscriptionDetails.subscriptionCode +subscriptionDetails.emailToken",
+    );
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     }
@@ -81,6 +103,12 @@ export async function PUT(req: Request) {
     //     { status: 402 },
     //   );
     // }
+
+     const subError = requireActiveSubscription(user);
+    if (subError) {
+      return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+    }
+    
     const { type } = await req.json();
 
     if (!type)
@@ -105,14 +133,16 @@ export async function PUT(req: Request) {
 }
 
 async function handleDisableSubscription(
-  user:  (Document<unknown, {}, IUser, {}, {}> & IUser & Required<{
-    _id: Types.ObjectId;
-}> & {
-    __v: number;
-}),
+  user: Document<unknown, {}, IUser, {}, {}> &
+    IUser &
+    Required<{
+      _id: Types.ObjectId;
+    }> & {
+      __v: number;
+    },
 ): Promise<{ msg: string; status: number }> {
-    console.log(user);
-    
+  console.log(user);
+
   const res = await fetch("https://api.paystack.co/subscription/disable", {
     method: "POST",
     headers: {

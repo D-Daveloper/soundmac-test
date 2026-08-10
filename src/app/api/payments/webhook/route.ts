@@ -2,7 +2,7 @@ import { PaymentEmailData } from "@/app/type";
 import dbConnect from "@/util/db";
 import {
   handleChargeSuccess,
-  handleFailedPayment,
+  // handleFailedPayment,
   handlePromotionSuccess,
   handleSubscriptionCardUpdate,
   handleSubscriptionCreate,
@@ -10,6 +10,7 @@ import {
   subCancelEmail,
   subSuccessEmail,
 } from "@/util/middleware/functions";
+import { handleFailedPayment } from "@/util/middleware/subcriptionFailedPayment";
 import ChartRegistrationModel from "@/util/models/chartRegistrationModel";
 import User from "@/util/models/userModel";
 import UserNotification from "@/util/models/userNotification";

@@ -11,6 +11,7 @@ import {
   uploadImage,
   validateNonDraftAlbums,
 } from "@/util/middleware/functions";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
@@ -62,24 +63,31 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
-    } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user!.type === "EMERGING_ARTIST") {
+    } 
+    // else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } 
+    else if (user!.type === "EMERGING_ARTIST") {
       return NextResponse.json(
         { msg: "Emerging artists can not upload Album" },
         { status: 403 },
       );
+    } else {
+      const subError = requireActiveSubscription(user)
+       if (subError) {
+       return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+      }
     }
 
     [userArtist, release] = await Promise.all([

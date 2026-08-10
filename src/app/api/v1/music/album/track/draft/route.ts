@@ -3,6 +3,7 @@ import { generateMultipleCatalogNumber } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { validateDraftTracks } from "@/util/middleware/functions";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
 import TrackModel from "@/util/models/trackModel";
@@ -151,26 +152,36 @@ export async function PUT(req: Request) {
     const user = await User.findById(userJwt.user);
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
-        } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    }
+        }
+    //      else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // }
     
-    if (user!.type === "EMERGING_ARTIST") {
+    else if (user!.type === "EMERGING_ARTIST") {
       return NextResponse.json(
         { msg: "Emerging artists can not upload tracks" },
         { status: 403 },
       );
+    } else {
+      const subError = requireActiveSubscription(user) 
+      if(subError) {
+        return NextResponse.json(
+          {msg:subError.msg},
+          {status:subError.status},
+        )
+      }
+
     }
 
     const userAlbum = await AlbumModel.findOne<albumFromApi>({

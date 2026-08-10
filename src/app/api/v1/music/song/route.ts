@@ -22,6 +22,7 @@ import { addWeeks } from "date-fns";
 import mongoose, { SortOrder } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 
 const bucketName = process.env.AWS_S3_BUCKET!;
 export async function POST(req: Request) {
@@ -67,14 +68,18 @@ export async function POST(req: Request) {
       Uploaderror = { msg: "Please verify your email address", status: 400 };
     } else if (user.otp !== null) {
       Uploaderror = { msg: "Please login", status: 400 };
-    } else if (user.premium !== true) {
-      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    } else {
+      Uploaderror = requireActiveSubscription(user)
     }
+    
+    // else if (user.premium !== true) {
+    //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
+    // }
 
     if (Uploaderror != null) {
       return NextResponse.json(

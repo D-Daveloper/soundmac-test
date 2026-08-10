@@ -83,12 +83,13 @@ import {
   WithdrawalResponse,
   withdrawals,
 } from "@/app/type";
-import { handleReactQueryApiCallError } from "../middleware/functions";
-import { IPromotion } from "../models/promotionModel";
-import { IUser } from "../models/userModel";
-import { ISalesReport } from "../models/salesReportModel";
+// import { handleReactQueryApiCallError } from "../middleware/functions";
+import type { IPromotion } from "../models/promotionModel";
+import type { IUser } from "../models/userModel";
+import  type { ISalesReport } from "../models/salesReportModel";
 import { songPerformanceData } from "@/app/dashboard/insights/songPerformance/song/constants";
 import { albumPerformanceData } from "@/app/dashboard/insights/songPerformance/album/constants";
+import { handleReactQueryApiCallError } from "../reactQuery/queryUtils";
 
 export const useAuthUser = () => {
   const api = UseAxios();

@@ -3,6 +3,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { useMemo } from "react";
+import { subscriptionModalStore } from "../store/subscriptionModalStore";
 
 const useAxios = () => {
   const router = useRouter();
@@ -95,7 +96,8 @@ const useAxios = () => {
           }
           toast.error(message);
         } else if (status === 402) {
-          toast.error(message || "Payment is required.");
+          subscriptionModalStore.show()
+          // toast.error(message || "Payment is required.");
           router.push("/pricing");
         } else if (status === 403) {
           toast.error(message || "You are not authorized for this action.");

@@ -17,7 +17,7 @@ const profileInfoButtons = [
 ];
 const page = () => {
   const dashboardContext = useContext(DashboardContext);
-  const { data, isLoading,refetch } = useAuthUser();
+  const { data, isLoading, refetch } = useAuthUser();
   const info = profileInfoButtons[0].query;
   const router = useRouter();
   const [details, setDetails] = useState({
@@ -26,7 +26,10 @@ const page = () => {
   });
   const api = UseAxios();
   useEffect(() => {
-    dashboardContext?.setHeader({title:"Subscription", showBackButton:false});
+    dashboardContext?.setHeader({
+      title: "Subscription",
+      showBackButton: false,
+    });
   }, []);
 
   if (!data || isLoading) {
@@ -77,7 +80,10 @@ const page = () => {
 
   async function handleCancelSubscription() {
     try {
-      const res = await api.put("payments/subscriptions",JSON.stringify({type:"disable"}));
+      const res = await api.put(
+        "payments/subscriptions",
+        JSON.stringify({ type: "disable" }),
+      );
       await refetch();
       toast.error(res.data.msg);
     } catch (error) {
@@ -152,9 +158,12 @@ const page = () => {
                 ${details.amount}
                 <span className="text-text-disable text-sm ">/yr</span>
               </p>
-              <Link href={"/pricing"} className="text-primary-500! font-bold leading-[20px] tracking-tighter text-sm">
+              <Link
+                href={"/pricing"}
+                className="text-primary-500! font-bold leading-[20px] tracking-tighter text-sm"
+              >
                 Learn more about your plan
-              </Link> 
+              </Link>
             </div>
           </div>
           <div className="border-2 border-neutral-100 w-120 max-lg:w-full max-h-55 p-3 rounded-lg bg-neutral-50 flex items-center justify-center gap-8 flex-col flex-2">
@@ -167,18 +176,51 @@ const page = () => {
               {data.subscriptionDetails?.cardType} -{" "}
               {data.subscriptionDetails?.lastFourDigits}
             </p>
-            <button
+
+            {/* <div className="border-2 border-neutral-100 w-120 max-lg:w-full max-h-55 p-3 rounded-lg bg-neutral-50 flex items-center justify-center gap-8 flex-col flex-2"> */}
+            {/* <h2 className="text-text-disable font-semibold text-xl tracking-[-0.5px] leading-8 capitalize ml-5">
+    Your next bill is for ${details.amount} on{" "}
+    {data.premiumExpiration && new Date(data.premiumExpiration).toDateString()}
+  </h2> */}
+            {/* <p className="text-main-icon-color font-semibold leading-[18px] -tracking-tight text-xl uppercase">
+    {data.subscriptionDetails?.cardType} - {data.subscriptionDetails?.lastFourDigits}
+  </p> */}
+            <div className="flex gap-3">
+              <Link
+                href={"/pricing?mode=change"}
+                className="font-bold text-sm rounded-lg px-4 py-2.5 flex text-white bg-primary-500 hover:bg-primary-500/80"
+              >
+                <span className="text-white">Change Plan</span>
+              </Link>
+              <button
+                aria-label="cancel subscription"
+                disabled={
+                  data.subscriptionDetails?.subscriptionStatus != "ACTIVE"
+                }
+                onClick={handleCancelSubscription}
+                className={
+                  "font-bold text-sm rounded-lg px-4 py-2.5 flex text-white " +
+                  (data.subscriptionDetails?.subscriptionStatus != "ACTIVE"
+                    ? "bg-error-500/70"
+                    : " bg-error-500 hover:bg-error-500/80")
+                }
+              >
+                Cancel Subscription
+              </button>
+            </div>
+          </div>
+          {/* <button
               aria-label="cancel subscription"
-              disabled={data.subscriptionDetails?.subscriptionStatus != "active"}
+              disabled={data.subscriptionDetails?.subscriptionStatus != "ACTIVE"}
               onClick={handleCancelSubscription}
               className={
-                "font-bold text-sm rounded-lg px-4 py-2.5 flex text-white  " + (data.subscriptionDetails?.subscriptionStatus != "active" ? "bg-error-500/70" : " bg-error-500 hover:bg-error-500/80")
+                "font-bold text-sm rounded-lg px-4 py-2.5 flex text-white  " + (data.subscriptionDetails?.subscriptionStatus != "ACTIVE" ? "bg-error-500/70" : " bg-error-500 hover:bg-error-500/80")
               }
             >
               Cancel Subscription
-            </button>
-          </div>
+            </button> */}
         </div>
+        // </div>
       )}
       {/* {!info || (info === "profile-info" && <AccountInfo />)}
       {(info === "payments" && <PaymentForm />)}
