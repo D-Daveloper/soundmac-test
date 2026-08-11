@@ -52,7 +52,8 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
-    } else if (user.premium !== true) {
+    }
+     else if (user.premium !== true) {
       return NextResponse.json(
         { msg: "Please upgrade your account." },
         { status: 402 },

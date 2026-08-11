@@ -11,6 +11,7 @@ import EntityDeactivation from "@/util/models/deactivateEntity";
 import SongModel from "@/util/models/songModel";
 import AlbumModel from "@/util/models/AlbumModel";
 import TrackModel from "@/util/models/trackModel";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 
 
 export async function POST(req: Request) {
@@ -57,20 +58,27 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
-    } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
     } else {
+      const subError = requireActiveSubscription(user)
+      if(subError) {
+        return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+      }
+    }
+    //  else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } 
+     {
       artist = await Artist.find({
         user: user._id,
         artistName: artistName,
@@ -106,7 +114,7 @@ export async function POST(req: Request) {
     }
 
     if (total_artists >= total_artists_allowed) {
-      NextResponse.json(
+      return NextResponse.json(
         { msg: "Artist creation limit reached, please upgrade your account." },
         { status: 402 },
       );

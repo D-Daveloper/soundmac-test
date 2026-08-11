@@ -213,7 +213,6 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
   if (isLoading || !data) return <NormalLoadingScreen />;
 
-
   const handleMarkAsRead = async (id?: string) => {
     try {
       await markNotificationsAsRead(api, id);
@@ -483,13 +482,35 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   />
                 </div>
                 <h3 className="text-xl font-bold tracking-tight text-neutral-900">
-                  Subscription Required
+                  {data.subscriptionDetails?.subscriptionStatus === "EXPIRED"
+                    ? "Subscription Expired"
+                    : "Subscription Required"}
                 </h3>
+                {/* <h3 className="text-xl font-bold tracking-tight text-neutral-900">
+                  Subscription Required
+                </h3> */}
+
                 <p className="text-neutral-500 text-sm leading-relaxed">
+                  {data.subscriptionDetails?.subscriptionStatus ===
+                  "EXPIRED" ? (
+                    <>
+                      Your subscription has ended and premium features are now
+                      disabled.
+                      <br /> Renew to keep uploading and managing your music.
+                    </>
+                  ) : (
+                    <>
+                      This feature is available only to subscribed users.
+                      <br /> Pick a plan and start creating with Soundmac.
+                    </>
+                  )}
+                </p>
+                {/* <p className="text-neutral-500 text-sm leading-relaxed">
                   This feature is available only to subscribed users.
                   <br /> Pick a plan and start creating with Soundmac.
-                </p>
+                </p> */}
               </div>
+
               <div className="flex gap-3 w-full mt-2">
                 <button
                   onClick={() => {
@@ -505,12 +526,79 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                   aria-label="go to pricing page"
                   className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-center text-sm bg-primary hover:bg-primary/90 text-white shadow-md transition"
                 >
-                  View Plans
+                  <span className="text-white">
+                    {data.subscriptionDetails?.subscriptionStatus === "EXPIRED"
+                      ? "Renew Subscription"
+                      : "View Plans"}
+                  </span>
                 </Link>
               </div>
+
+              {/* <div className="flex gap-3 w-full mt-2">
+                <button
+                  onClick={() => {
+                    dashboardContext?.setOpenUpgradePopUp(false);
+                    router.push("/dashboard");
+                  }}
+                  className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-sm border-2 border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition"
+                >
+                  Not Now
+                </button>
+                <Link
+                  href="/pricing"
+                  aria-label="go to pricing page"
+                  className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-center text-sm bg-primary hover:bg-primary/90 text-white shadow-md transition"
+                >
+                 <span className="text-white"> View Plans </span>
+                </Link>
+              </div> */}
             </div>
           </div>
         )}
+
+        {/* greace reminder modal  */}
+        {dashboardContext?.showGraceReminder &&
+          data.subscriptionDetails?.graceEndsAt && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+              <div className="flex flex-col gap-5 w-full max-w-[360px] p-6 items-center bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex flex-col gap-3 items-center text-center">
+                  <div className="w-16 h-16 bg-warning-50 rounded-full flex items-center justify-center mb-1">
+                    <LockKeyhole
+                      size={36}
+                      className="text-warning-500"
+                      strokeWidth={2}
+                    />
+                  </div>
+                  <h3 className="text-xl font-bold tracking-tight text-neutral-900">
+                    Renewal Payment Failed
+                  </h3>
+                  <p className="text-neutral-500 text-sm leading-relaxed">
+                    Your premium features remain active until{" "}
+                    {new Date(
+                      data.subscriptionDetails.graceEndsAt,
+                    ).toDateString()}
+                    .
+                    <br /> Renew now to avoid any interruption.
+                  </p>
+                </div>
+                <div className="flex gap-3 w-full mt-2">
+                  <button
+                    onClick={() => dashboardContext?.dismissGraceReminder()}
+                    className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-sm border-2 border-neutral-200 text-neutral-700 hover:bg-neutral-50 transition"
+                  >
+                    I'll do it later
+                  </button>
+                  <Link
+                    href="/pricing"
+                    onClick={() => dashboardContext?.dismissGraceReminder()}
+                    className="flex-1 px-4 py-2.5 font-semibold rounded-xl text-center text-sm bg-primary hover:bg-primary/90 text-white shadow-md transition"
+                  >
+                    <span className="text-white">Renew Now</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     </UserRoute>
   );

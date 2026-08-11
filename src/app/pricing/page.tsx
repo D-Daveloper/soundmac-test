@@ -8,9 +8,10 @@ import { X } from "lucide-react";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { toast } from "react-toastify";
 import { isAxiosError } from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { BeatLoader } from "react-spinners";
+import { useAuthUser } from "@/util/customHooks/useQueries";
 
 declare global {
   interface Window {
@@ -21,7 +22,11 @@ declare global {
 export default function Pricing() {
   const api = UseAxios();
   const router = useRouter();
+  const { data: authUser } = useAuthUser();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const isPlanChange = searchParams.get("mode") === "change";
+
   const [wantsToSubscribe, setWantsToSubscribe] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [selectedPlan, SetSelectedPlan] = useState<null | PricingObjects>(null);
@@ -46,7 +51,8 @@ export default function Pricing() {
     } catch (error) {
       if (isAxiosError(error)) {
         toast.error(
-          error.response?.data?.msg || "Could not verify payment. Contact support if you were charged.",
+          error.response?.data?.msg ||
+            "Could not verify payment. Contact support if you were charged.",
         );
       } else {
         console.error("verify error", error);
@@ -56,24 +62,34 @@ export default function Pricing() {
       setIsSubscribing(false);
     }
   };
-  
 
   const subscribe = async (plan: string, email: string) => {
-      if (!email) {
-      return toast.warn("Please provide a valid email.");
+    if (!authUser?.email) {
+      return toast.warn(
+        "Could not determine your account email. Please try logging in again.",
+      );
     } else if (!plan) {
       return toast.warn("Please select a plan.");
     }
 
     try {
       setIsSubscribing(true);
-      console.log(plan);
-  
-      const res = await api.post(
-        "/payments",
-        JSON.stringify({ email: email, plan }),
-      );
-    const { accessCode, reference } = res.data;
+      // console.log(plan);
+
+      const res = isPlanChange
+        ? await api.patch(
+            "/payments",
+            JSON.stringify({ email: authUser.email, plan }),
+          )
+        : await api.post(
+            "/payments",
+            JSON.stringify({ email: authUser.email, plan }),
+          );
+      // = await api.post(
+      //   "/payments",
+      //   JSON.stringify({ email: email, plan }),
+      // );
+      const { accessCode, reference } = res.data;
 
       if (!window.PaystackPop) {
         toast.error("Payment popup failed to load. Please try again.");
@@ -87,7 +103,7 @@ export default function Pricing() {
         onCancel: () => {
           toast.info("Payment cancelled.");
           setIsSubscribing(false);
-          setWantsToSubscribe(false)
+          setWantsToSubscribe(false);
         },
         onError: (err: any) => {
           console.error("paystack error", err);
@@ -145,6 +161,18 @@ export default function Pricing() {
             <X width={20} height={20} />
           </button>
           <div className="flex flex-col gap-2 mb-2">
+            <h3 className="text-xl font-semibold tracking-[-0.5px] text-main-heading">
+              {isPlanChange ? "Change to" : "Subscribe to"}{" "}
+              {selectedPlan?.title}
+            </h3>
+            <p className="text-text-body text-sm">
+              {authUser?.email
+                ? `Subscribing as ${authUser.email}`
+                : "Loading your account details..."}
+            </p>
+          </div>
+
+          {/* <div className="flex flex-col gap-2 mb-2">
             <h3 className="text-xl font-semibold  tracking-[-0.5px] text-main-heading">
               Subscribe to {selectedPlan?.title}
             </h3>
@@ -159,7 +187,7 @@ export default function Pricing() {
                 console.log(e.target.value);
               }}
             />
-          </div>
+          </div> */}
           <div>
             <button
               aria-label="confirm subscription"
@@ -172,7 +200,11 @@ export default function Pricing() {
                 (isSubscribing ? " bg-disable" : " bg-primary-500")
               }
             >
-              {isSubscribing ? <BeatLoader  size={12} color="#fff"/> : <p>Proceed to Payment</p>}
+              {isSubscribing ? (
+                <BeatLoader size={12} color="#fff" />
+              ) : (
+                <p>Proceed to Payment</p>
+              )}
               {/* Proceed to Payment */}
             </button>
           </div>

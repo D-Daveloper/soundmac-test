@@ -11,6 +11,7 @@ import {
     sendUserNotificationEmailType,
     SongForm,
     SongWriter,
+    SubscriptionStatusEmailData,
     TrackForm,
 } from "@/app/type";
 import axios, { AxiosInstance, isAxiosError } from "axios";
@@ -31,6 +32,7 @@ import Promotion from "../models/promotionModel";
 import { handleMongooseValidationError } from "../customError/error";
 import dbConnect from "../db";
 import UserNotification from "../models/userNotification";
+// import sendEmail from "../sendMail/sendEmail";
 // import sharp from "sharp";
 // import { s3 } from "./aws";
 // import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -1332,18 +1334,6 @@ export function validateNonDraftTracks(
     return null;
 }
 
-export const handleReactQueryApiCallError = (
-    errorCount: number,
-    error: Error,
-): boolean => {
-    if (isAxiosError(error) && error.status === 401) {
-        return false;
-    } else if (errorCount < 2) {
-        return true;
-    }
-    return false;
-};
-
 export const createEmptyTrack = (): TrackForm => ({
     id: crypto.randomUUID(),
     title: "",
@@ -1394,22 +1384,74 @@ export async function handleChargeSuccess(data: any) {
 
     if (existing) return;
 
-    await User.updateOne(
-        { email },
-        {
-            $set: {
-                premium: true,
-                type: data.plan.name,
-                premiumExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-                "subscriptionDetails.customerCode": data.customer.customer_code,
-                "subscriptionDetails.authorizationCode":
-                    data.authorization.authorization_code,
-                "subscriptionDetails.subscriptionStatus": "active",
-                "subscriptionDetails.cardType": data.authorization?.card_type || "",
-                "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
-            },
-        },
-    );
+    // await User.updateOne(
+    //     { email },
+    //     {
+    //         $set: {
+    //             premium: true,
+    //             type: data.plan.name,
+    //             premiumExpiration: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+    //             "subscriptionDetails.customerCode": data.customer.customer_code,
+    //             "subscriptionDetails.authorizationCode":
+    //                 data.authorization.authorization_code,
+    //             "subscriptionDetails.subscriptionStatus": "active",
+    //             "subscriptionDetails.cardType": data.authorization?.card_type || "",
+    //             "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
+    //         },
+    //     },
+    // );
+
+    const user = await User.findOne({email}).select(
+        "+subscriptionDetails.subscriptionCode +subscriptionDetails.emailToken",
+    )
+    if(!user) return;
+
+    const now  = new Date()
+    const isPlanChange = data.metadata?.isPlanChange === true;
+    const paymentMethod = data.channel === "card" ? "card" : "other"
+
+//  function to track if user is already on a plan and decides to change subscription
+    if(
+        isPlanChange && user.subscriptionDetails?.subscriptionCode && user.subscriptionDetails?.emailToken
+    ) {
+        try {
+             await fetch("https://api.paystack.co/subscription/disable", {
+                method: "POST",
+                headers:{Authorization : `Bearer ${process.env.PAYSTACK_SECRET_KEY}`},
+                body: JSON.stringify({
+                    code: user.subscriptionDetails.subscriptionCode,
+                    token: user.subscriptionDetails.emailToken,
+                })
+            }) ;
+        } catch (error) {
+            console.error("Failed to disable old subscription on plan change", error)
+        }
+    }
+
+    const currentExpiration = user.premiumExpiration;
+    const baseDate = !isPlanChange && currentExpiration && currentExpiration > now ? currentExpiration: now;
+    const newExpiration = new Date(baseDate.getTime() + 365 * 24 * 60 * 60 * 1000)
+
+    await User.updateOne({email}, {
+        $set: {
+        premium: true,
+        type: data.plan.name,
+        premiumExpiration: newExpiration,
+        "subscriptionDetails.customerCode": data.customer.customer_code,
+        "subscriptionDetails.authorizationCode":
+          data.authorization.authorization_code,
+        "subscriptionDetails.subscriptionStatus": "ACTIVE",
+        "subscriptionDetails.paymentStatus": "ACTIVE",
+        "subscriptionDetails.paymentMethod": paymentMethod,
+        "subscriptionDetails.autoRenew": paymentMethod === "card",
+        "subscriptionDetails.cardType": data.authorization?.card_type || "",
+        "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
+        "subscriptionDetails.graceEndsAt": null,
+        "subscriptionDetails.failedAt": null,
+        "subscriptionDetails.renewalReminderSentAt": null,
+        "subscriptionDetails.graceEndingReminderSentAt": null,
+      },
+    })
 
     await transactionModel.create({
         reference: data.reference,
@@ -1443,7 +1485,8 @@ export async function handleSubscriptionDisabled(data: any) {
         { email },
         {
             $set: {
-                "subscriptionDetails.subscriptionStatus": "cancelled",
+                "subscriptionDetails.subscriptionStatus": "CANCELLED",
+                "subscriptionDetails.autoRenew" : false
             },
         },
     );
@@ -1460,18 +1503,6 @@ export async function handleSubscriptionCardUpdate(data: any) {
                 "subscriptionDetails.authorizationCode":
                     data.authorization.authorization_code,
             },
-        },
-    );
-}
-
-export async function handleFailedPayment(data: any) {
-    const email = data.customer.email;
-
-    await User.updateOne(
-        { email },
-        {
-            premium: false,
-            premiumExpiration: null,
         },
     );
 }
@@ -4242,4 +4273,246 @@ export function parseLabelFormData(formData: FormData) {
 export const formatNumber = (numString: string) => {
     const numInt = parseInt(numString, 10);
     return new Intl.NumberFormat('en', { notation: 'compact' }).format(numInt);
+};
+
+export const subRenewalReminderEmail = (props: SubscriptionStatusEmailData) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Renewing Soon</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: #11456B; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Renewing Soon</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your subscription renews in 2 days</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 30px 40px 0 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.customerName}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your SoundMac subscription is due to renew on <strong>${props.renewalDate}</strong>.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Payment method breakdown -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border-radius: 8px; padding: 20px;">
+                                <tr>
+                                    <td>
+                                        <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600;">If you pay by card</h3>
+                                        <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">There's nothing you need to do — your subscription renews automatically.</p>
+                                        <h3 style="margin: 0 0 8px 0; color: #111827; font-size: 14px; font-weight: 600;">If you pay another way (bank transfer, etc.)</h3>
+                                        <p style="margin: 0; color: #6b7280; font-size: 14px;">Please sign in and complete your payment before the renewal date to avoid any interruption.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Grace period note -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <div style="background-color: #fef3c7; border: 1px solid #fde047; padding: 15px; border-radius: 6px;">
+                                <p style="margin: 0; color: #713f12; font-size: 14px;">
+                                    If your renewal doesn't go through on time, you'll still have a short grace period to complete payment before premium features are affected.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="${props.dashboardUrl}" style="display: inline-block; padding: 14px 32px; background-color: #11456B; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Review Subscription</a>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Questions? Reach us at <a href="mailto:${props.support_email}" style="color: #11456B; text-decoration: none;">${props.support_email}</a></p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© ${new Date().getFullYear()}-${props.company_name}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${props.company_address}</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+export const subExpiredEmail = (props: SubscriptionStatusEmailData) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Expired</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #dc2626; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">Subscription Expired</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Premium access has ended</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 30px 40px 0 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.customerName}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Your SoundMac subscription expired on <strong>${props.renewalDate}</strong> and premium features have been disabled.</p>
+                        </td>
+                    </tr>
+
+                    <!-- What this means -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fef2f2; border-radius: 8px; padding: 20px; border: 1px solid #fecaca;">
+                                <tr>
+                                    <td>
+                                        <h3 style="margin: 0 0 10px 0; color: #991b1b; font-size: 14px; font-weight: 600;">What this means</h3>
+                                        <p style="margin: 0; color: #7f1d1d; font-size: 14px;">You can still log in and view your dashboard and past releases, but uploading new music and other premium tools are no longer available until you subscribe again.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="${props.dashboardUrl}" style="display: inline-block; padding: 14px 32px; background-color: #dc2626; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Subscribe Again</a>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Questions? Reach us at <a href="mailto:${props.support_email}" style="color: #dc2626; text-decoration: none;">${props.support_email}</a></p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© ${new Date().getFullYear()}-${props.company_name}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${props.company_address}</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+};
+
+export const subGracePeriodEmail = (props: SubscriptionStatusEmailData) => {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renewal Payment Failed</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f5; line-height: 1.6;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f5;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #f97316; padding: 40px 30px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 600;">We Couldn't Renew Your Subscription</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff; opacity: 0.9; font-size: 16px;">Your premium access is still active</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 30px 40px 0 40px;">
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">Hi <strong>${props.customerName}</strong>,</p>
+                            <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px;">We weren't able to process your subscription renewal. This can happen for a few reasons — an expired card, insufficient funds, or a payment that wasn't completed in time.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Grace period box -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #fff7ed; border-radius: 8px; padding: 20px; border: 1px solid #fdba74;">
+                                <tr>
+                                    <td>
+                                        <h3 style="margin: 0 0 10px 0; color: #9a3412; font-size: 14px; font-weight: 600;">Your premium features remain active</h3>
+                                        <p style="margin: 0; color: #9a3412; font-size: 14px;">until <strong>${props.graceEndsAt}</strong>. To avoid any interruption, please renew your subscription before then.</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px; text-align: center;">
+                            <a href="${props.dashboardUrl}" style="display: inline-block; padding: 14px 32px; background-color: #f97316; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Renew Subscription</a>
+                        </td>
+                    </tr>
+
+                    <!-- What happens after -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">If payment isn't completed by <strong>${props.graceEndsAt}</strong>, premium features — including new uploads — will be disabled until you subscribe again.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer Info -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0; color: #6b7280; font-size: 14px;">Questions? Reach us at <a href="mailto:${props.support_email}" style="color: #f97316; text-decoration: none;">${props.support_email}</a></p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">© ${new Date().getFullYear()}-${props.company_name}. All rights reserved.</p>
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">${props.company_address}</p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
 };

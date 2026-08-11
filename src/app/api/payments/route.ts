@@ -169,7 +169,7 @@ export async function PATCH(req: Request) {
           plan: planCode,
           // channels:["card", "bank", "apple_pay", "ussd", "qr", "mobile_money", "bank_transfer"],
           channels:["card", "bank", "ussd"],
-          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName},
+          metadata: { email:email ,first_name:user.firstName,last_name:user.lastName, isPlanChange: true},
           callback_url: `${process.env.FRONTEND_URL}/verify`,
         })
       }

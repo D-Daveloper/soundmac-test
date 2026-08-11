@@ -250,6 +250,15 @@ export interface PaymentEmailData {
   dashboardUrl: string;
   reactivateUrl?: string;
 }
+export interface SubscriptionStatusEmailData {
+  customerName: string;
+  renewalDate: string;
+  graceEndsAt?:string;
+  dashboardUrl: string;
+  support_email: string;
+  company_name: string;
+  company_address: string;
+}
 
 export interface CancellationEmailData {
   customerName: string;

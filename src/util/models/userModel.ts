@@ -45,10 +45,38 @@ export const subscriptionDetails = new mongoose.Schema(
     },
     subscriptionStatus: {
       type: String,
-      validate: {
-        validator: (v: any) => typeof v === "string",
-        message: "subscription Status  must be a string",
+      enum: {
+          values:["ACTIVE", "GRACE_PERIOD", "EXPIRED", "CANCELLED"],
+          message:"{VALUE} is not a valid subscription"
       },
+      default:"ACTIVE",
+
+      // validate: {
+      //   validator: (v: any) => typeof v === "string",
+      //   message: "subscription Status  must be a string",
+      // },
+    },
+    paymentMethod: {
+      type: String,
+      enum:{
+        values: ["card", "other"],
+        message: "{VALUE} is not a valid payment method",
+      },
+      default:null,
+    },
+
+    paymentStatus: {
+      type:String,
+      enum: {
+        values: [ "ACTIVE" , "FAILED", "EXPIRED"],
+        message: "{VALUE} is not a valid payment status",
+      },
+      default: "ACTIVE"
+
+    },
+    autoRenew: {
+      type:Boolean,
+      default:false,
     },
     emailToken: {
       type: String,
@@ -58,6 +86,22 @@ export const subscriptionDetails = new mongoose.Schema(
       },
       select: false,
     },
+    renewalReminderSentAt: {
+      type: Date,
+      default: null,
+    },
+    graceEndingReminderSentAt: {
+      type:Date,
+      default:null
+    },
+    failedAt: {
+      type: Date,
+      default: null
+    },
+    graceEndsAt: {
+      type: Date,
+      default: null,
+    }
   },
   { _id: false, strict: "throw" },
 );
@@ -172,11 +216,11 @@ export interface IUser extends mongoose.Document {
   warning: number;
   banned: boolean;
   type:
-  | "EMERGING_ARTIST"
-  | "MAJOR_LABEL"
-  | "FREE_ARTIST"
-  | "INDEPENDENT_ARTIST"
-  | "INDIE_LABEL";
+    | "EMERGING_ARTIST"
+    | "MAJOR_LABEL"
+    | "FREE_ARTIST"
+    | "INDEPENDENT_ARTIST"
+    | "INDIE_LABEL";
   role: "user" | "admin" | "super_admin";
   label: string;
   labelId: string | null;
@@ -187,8 +231,8 @@ export interface IUser extends mongoose.Document {
   twoFactorAuthentication: "true" | "false";
   otp: string | null;
   otpExpires: Date | null;
-  googleId?:string;
-  appleId?:string;
+  googleId?: string;
+  appleId?: string;
   oauthProvider: "google" | "apple" | null;
   referralCode?: string; // Optional field
   referredBy: mongoose.Types.ObjectId;
@@ -202,11 +246,19 @@ export interface IUser extends mongoose.Document {
   subscriptionDetails: {
     lastFourDigits?: string;
     emailToken?: string;
-    subscriptionStatus?: string;
+    // subscriptionStatus?: string;
     customerCode?: string;
     authorizationCode?: string;
     subscriptionCode?: string;
     cardType?: string;
+    subscriptionStatus?: "ACTIVE" | "GRACE_PERIOD" | "EXPIRED" | "CANCELLED";
+    paymentStatus?: "ACTIVE" | "FAILED" | "EXPIRED";
+    paymentMethod?: "card" | "other";
+    autoRenew?: Boolean;
+    renewalReminderSentAt?: Date | null;
+    graceEndingReminderSentAt?: Date | null;
+    failedAt?: Date | null;
+    graceEndsAt?: Date | null;
   };
   accountDetails: {
     accountHolderName: string;
@@ -264,15 +316,15 @@ const UserSchema = new mongoose.Schema(
 
     referralCode: {
       type: String,
-      unique:true,
-      sparse:true,
-      index:true,
+      unique: true,
+      sparse: true,
+      index: true,
     },
 
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"User",
-      default: null
+      ref: "User",
+      default: null,
     },
 
     userStatus: {
@@ -389,11 +441,11 @@ const UserSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [
-    function (this: any) {
-      return !this.oauthProvider; // only required if not OAuth
-    },
-    "Provide a password",
-  ],
+        function (this: any) {
+          return !this.oauthProvider; // only required if not OAuth
+        },
+        "Provide a password",
+      ],
       // required: [true, "Provide a password"],
       minlength: [6, "Password must be at least 6 characters"],
       trim: true,
@@ -402,7 +454,7 @@ const UserSchema = new mongoose.Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse: true,    
+      sparse: true,
     },
 
     appleId: {
@@ -416,7 +468,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["google", "apple", null],
       default: null,
     },
-    
+
     twoFactorAuthentication: {
       type: String,
       default: "true",

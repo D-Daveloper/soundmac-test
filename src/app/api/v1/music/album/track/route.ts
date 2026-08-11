@@ -4,6 +4,7 @@ import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import { validateNonDraftTracks } from "@/util/middleware/functions";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 import AlbumModel from "@/util/models/AlbumModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
@@ -99,20 +100,26 @@ export async function POST(req: Request) {
     const user = await User.findById(userJwt.user);
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
-    } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
+    } else {
+      const subError = requireActiveSubscription(user) 
+      if(subError) {
+        return NextResponse.json({msg:subError.msg}, {status:subError.status})
+      }
     }
+    //  else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // }
 
     if (user!.type === "EMERGING_ARTIST") {
       return NextResponse.json(

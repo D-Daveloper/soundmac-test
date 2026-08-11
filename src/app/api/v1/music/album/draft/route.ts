@@ -7,6 +7,7 @@ import {
   parseAlbumFormData,
   validateDraftAlbums,
 } from "@/util/middleware/functions";
+import { requireActiveSubscription } from "@/util/middleware/subscription";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import User from "@/util/models/userModel";
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
+    const subError = user ? requireActiveSubscription(user) : null;
     if (!user) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
     } else if (!user.confirmed) {
@@ -50,19 +52,22 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
-    } else if (user.premium !== true) {
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
-    } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      user.premium = false;
-      user.premiumExpiration = null;
-      await user.save();
-      return NextResponse.json(
-        { msg: "Please upgrade your account." },
-        { status: 402 },
-      );
+    } else if (subError) {
+       return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+    
+    //  else if (user.premium !== true) {
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
+    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+    //   user.premium = false;
+    //   user.premiumExpiration = null;
+    //   await user.save();
+    //   return NextResponse.json(
+    //     { msg: "Please upgrade your account." },
+    //     { status: 402 },
+    //   );
     } else {
       const userArtistQuery = Artist.findOne({
         user: userJwt.user,

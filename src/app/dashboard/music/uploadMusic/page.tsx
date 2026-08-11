@@ -15,36 +15,36 @@ const Page = () => {
   );
 
 // tracking wether the user has accepted the rules and reminding them every 30 days instead of users seeing it everytime they try to upload a song/album
-const UPLOAD_REMINDER_KEY = "soundmac_upload_disclaimer_ack";
-const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+// const UPLOAD_REMINDER_KEY = "soundmac_upload_disclaimer_ack";
+// const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
-function hasAcceptedRecently(): boolean {
-  const saved = localStorage.getItem(UPLOAD_REMINDER_KEY);
-  if (!saved) return false;
+// function hasAcceptedRecently(): boolean {
+//   const saved = localStorage.getItem(UPLOAD_REMINDER_KEY);
+//   if (!saved) return false;
 
-  const { acceptedAt } = JSON.parse(saved);
-  const timeSinceAccepted = Date.now() - acceptedAt;
+//   const { acceptedAt } = JSON.parse(saved);
+//   const timeSinceAccepted = Date.now() - acceptedAt;
 
-  return timeSinceAccepted < THIRTY_DAYS;
-}
+//   return timeSinceAccepted < THIRTY_DAYS;
+// }
 
-function markAsAccepted(): void {
-  localStorage.setItem(
-    UPLOAD_REMINDER_KEY,
-    JSON.stringify({ acceptedAt: Date.now() })
-  );
-}
+// function markAsAccepted(): void {
+//   localStorage.setItem(
+//     UPLOAD_REMINDER_KEY,
+//     JSON.stringify({ acceptedAt: Date.now() })
+//   );
+// }
 
   const handleOpenPopup = (type: "single" | "album") => {
-    if(hasAcceptedRecently()) {
-      setParam("type", type);
-      return;
-    }
+    // if(hasAcceptedRecently()) {
+    //   setParam("type", type);
+    //   return;
+    // }
     setSelectedType(type);
     setShowPopup(true);
   };
 
-  console.log(showPopup);
+  // console.log(showPopup);
 
   const type = getParam("type");
   const dashboardContext = useContext(DashboardContext);
@@ -120,7 +120,7 @@ function markAsAccepted(): void {
         {showPopup && (
           <PopUp
             type={selectedType}
-            markAsAccepted = {markAsAccepted}
+            // markAsAccepted = {markAsAccepted}
             onClose={() => setShowPopup(false)}
             onContinue={() => {
               if (selectedType) {
