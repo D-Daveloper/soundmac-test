@@ -53,6 +53,7 @@ export async function POST(req: Request) {
       user.updatedAt = new Date(); // Update the updatedAt field
       await user.save();
 
+      if(!user.confirmed) {
       try {
         await sendEmail(
           user.email,
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
       } catch (emailError) {
         console.error("Failed to send welcome email:", emailError);
       }
-    }
+    }};
     //   create token
     const accessToken = jwt.sign(
       {
