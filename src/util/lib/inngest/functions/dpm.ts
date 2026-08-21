@@ -18,7 +18,7 @@ export const releaseDelivery = inngest.createFunction(
         const apiResponse = await step.run("request-release-delivery", async () => {
             // const token = Buffer.from(`${process.env.DPM_USERNAME_V1}:${process.env.DPM_PASSWORD_V1}`).toString('base64');
             try {
-                const response = await axios.post(`${process.env.DPM_HOST}/v1/requestdelivery`, {
+                const response = await axios.post(`${process.env.DPM_HOST}v1/requestdelivery`, {
                     upc: upc,
                     dspids: listDspId,
                     delivery_type: "initialDelivery"

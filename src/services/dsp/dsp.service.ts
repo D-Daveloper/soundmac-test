@@ -12,7 +12,7 @@ export async function generateUPC() {
   });
   //   console.log("upc",data);
 
-  return data.upc_list[0]
+  return data[0]
 }
 
 export async function generateISRC() {
