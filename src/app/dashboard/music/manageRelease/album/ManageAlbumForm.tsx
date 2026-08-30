@@ -6,7 +6,7 @@ import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { languagesList, NumberOfTracks, years } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import type { AlbumForm, albumFromApi, PAGINATION } from "@/app/type";
+import type { AlbumForm, albumFromApi, CheckboxOption, PAGINATION } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
@@ -558,7 +558,7 @@ const ManageAlbumForm = ({
                               : []
                           }
                           selected={albumForm.dsp}
-                          onChange={(s: { label: string; value: number }[]) => {
+                          onChange={(s: CheckboxOption[]) => {
                             setAlbumForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

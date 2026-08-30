@@ -170,7 +170,7 @@ export const getPromotionData = async (
 };
 export const getUserChartData = async (
   api: AxiosInstance,
-  params: { page: number, limit:string }
+  params: { page: number, limit: string }
 ): Promise<PAGINATION<ChartRegistration>> => {
   const res = await api.get<Promise<PAGINATION<ChartRegistration>>>("explore/chart-registration", { params });
   return res.data;
@@ -408,16 +408,26 @@ export async function getDPMDsp(): Promise<DPMDsp> {
       Authorization: `Basic ${process.env.NEXT_PUBLIC_GET_DSPS_BASIC_AUTH_PASSWORD}`
     }
   });
-  return res.data;
+  const data: DPMDsp = res.data.dsps.map((item: any, index: number) => ({
+    apiuser_id: item.id,
+    id: item.id,
+    store_name: item.name,
+    store_identifier: item.id,
+    dsp: item.name,
+    isSelected: true,
+  }))
+  return data;
 }
 
 export const getSongPerformanceData = async (
   api: AxiosInstance,
-  params: { page: number, 
+  params: {
+    page: number,
     // sort: string,
-     songTitle: string,
-      // songStatusFilter: string,
-      artist: string, limit: string; }
+    songTitle: string,
+    // songStatusFilter: string,
+    artist: string, limit: string;
+  }
 ): Promise<PAGINATION<songPerformanceData>> => {
   const res = await api.get<Promise<PAGINATION<songPerformanceData>>>("insights/song-performance/song", {
     params: params,
@@ -426,11 +436,13 @@ export const getSongPerformanceData = async (
 };
 export const getAlbumPerformanceData = async (
   api: AxiosInstance,
-  params: { page: number, 
+  params: {
+    page: number,
     // sort: string,
-     albumTitle: string,
-      // songStatusFilter: string,
-      artist: string, limit: string; }
+    albumTitle: string,
+    // songStatusFilter: string,
+    artist: string, limit: string;
+  }
 ): Promise<PAGINATION<albumPerformanceData>> => {
   const res = await api.get<Promise<PAGINATION<albumPerformanceData>>>("insights/song-performance/album", {
     params: params,
@@ -501,8 +513,8 @@ export const getAdminActivityLog = async (
   return response.data;
 };
 
-export const getAllAdminDetails = async(
-  api:AxiosInstance
+export const getAllAdminDetails = async (
+  api: AxiosInstance
 ) => {
   const response = await api.get("admin/adminDetails")
   return response.data

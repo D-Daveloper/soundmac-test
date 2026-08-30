@@ -12,7 +12,7 @@ export const releaseDelivery = inngest.createFunction(
     { id: "deliver-release", triggers: { event: "release/deliver" } },
 
     async ({ event, step }) => {
-        const { upc, listDspId, releaseId, isSingle } = event.data as { upc: string; listDspId: number[], releaseId: string, isSingle: boolean }
+        const { upc, listDspId, releaseId, isSingle } = event.data as { upc: string; listDspId: string[], releaseId: string, isSingle: boolean }
 
         // Wrap the external API call in a step
         const apiResponse = await step.run("request-release-delivery", async () => {

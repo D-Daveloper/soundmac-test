@@ -1,6 +1,6 @@
 import mongoose, { ObjectId } from "mongoose";
 import DpmMetaData from "./DpmCallBackModel";
-import { songFromApi } from "@/app/type";
+import { CheckboxOption, songFromApi } from "@/app/type";
 
 export const featuredArtistSchema = new mongoose.Schema(
   {
@@ -294,7 +294,7 @@ const SongModelSchema = new mongoose.Schema(
       trim: true,
     },
     dsp: {
-      type: [{ label: String, value: Number }],
+      type: [{ label: String, value: String }],
       required: [
         function (this: any) {
           return this.get("releaseStatus") !== "draft";
@@ -302,11 +302,11 @@ const SongModelSchema = new mongoose.Schema(
         "DSP (Digital Service Providers) are required",
       ],
       validate: {
-        validator: function (this: any, v: { label: string; value: number }[]) {
+        validator: function (this: any, v: CheckboxOption[]) {
           if (this.get("releaseStatus") === "draft") {
             return true; // Skip validation for draft songs
           }
-          return Array.isArray(v) && v.length > 0 && v.every((d) => typeof d.label === "string" && typeof d.value === "number");
+          return Array.isArray(v) && v.length > 0 && v.every((d) => typeof d.label === "string" && typeof d.value === "string");
         },
         message: "At least one DSP is required",
       },

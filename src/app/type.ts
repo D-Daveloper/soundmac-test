@@ -73,7 +73,7 @@ interface musicFormBase {
   another_distribution_check: boolean;
   music_image: File | null;
   upc: string;
-  dsp: { label: string; value: number }[];
+  dsp: CheckboxOption[];
   copyRightHolder: string;
   copyRightYear: string;
   old_image?: string | null;
@@ -177,7 +177,7 @@ interface BaseApiResponseForRelease {
   anotherDistributionCheck: boolean;
   territories: string[];
   releaseImage: string;
-  dsp: { label: string; value: number }[];
+  dsp: CheckboxOption[];
   upc: string;
   copyRightHolder: string;
   copyRightYear: string;
@@ -602,7 +602,7 @@ export type salesReportDashboardResponse = {
 
 export type DPMDsp = {
   apiuser_id: number
-  id: number
+  id: string
   store_name: string
   store_identifier: any
   dsp: any
@@ -670,3 +670,8 @@ export interface ReferralDetails {
   };
   referrals: ReferralHistory[];
 }
+
+export type CheckboxOption = {
+  label: string;
+  value: string;
+};

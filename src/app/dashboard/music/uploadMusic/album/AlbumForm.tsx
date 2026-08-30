@@ -11,7 +11,7 @@ import {
   years,
 } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import type { AlbumForm, SongForm } from "@/app/type";
+import type { AlbumForm, CheckboxOption, SongForm } from "@/app/type";
 import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
@@ -596,7 +596,7 @@ const AlbumForm = () => {
                               : []
                           }
                           selected={albumForm.dsp}
-                          onChange={(s: { label: string; value: number }[]) => {
+                          onChange={(s: CheckboxOption[]) => {
                             setAlbumForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

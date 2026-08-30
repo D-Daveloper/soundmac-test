@@ -9,6 +9,7 @@ import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
 import { languagesList, timeZones, years } from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
+  CheckboxOption,
   FeaturedArtist,
   Performer,
   Producer,
@@ -1099,7 +1100,7 @@ const SongForm = () => {
                               : []
                           }
                           selected={songForm.dsp}
-                          onChange={(s: { label: string; value: number }[]) => {
+                          onChange={(s: CheckboxOption[]) => {
                             setSongForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

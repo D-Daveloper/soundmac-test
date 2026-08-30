@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { Search } from "lucide-react";
+import { CheckboxOption } from "@/app/type";
 
 interface CheckboxSelectProps {
-  options: { label: string; value: number }[];
-  selected: { label: string; value: number }[];
-  onChange: (selected: { label: string; value: number }[]) => void;
+  options: CheckboxOption[];
+  selected: CheckboxOption[];
+  onChange: (selected: CheckboxOption[]) => void;
   placeholder?: string;
   title?: string;
 }
@@ -25,7 +26,7 @@ const CheckboxSelectDsp: React.FC<CheckboxSelectProps> = React.memo(
     const [query, setQuery] = useState("");
 
     const uniqueSelected = useMemo(() => {
-      const seen = new Set<number>();
+      const seen = new Set<string>();
       return selected.filter((item) => {
         if (seen.has(item.value)) return false;
         seen.add(item.value);
@@ -57,7 +58,7 @@ const CheckboxSelectDsp: React.FC<CheckboxSelectProps> = React.memo(
       }
     };
 
-    const toggleOption = (opt: { label: string; value: number }) => {
+    const toggleOption = (opt: CheckboxOption) => {
       const isSelected = uniqueSelected.some((item) => item.value === opt.value);
 
       if (isSelected) {

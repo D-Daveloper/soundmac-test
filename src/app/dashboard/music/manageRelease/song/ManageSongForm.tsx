@@ -8,6 +8,7 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
 import { languagesList, timeZones, years } from "@/app/constant";
 import type {
+  CheckboxOption,
   FeaturedArtist,
   PAGINATION,
   Performer,
@@ -1224,7 +1225,7 @@ const SongForm = ({
                               : []
                           }
                           selected={songForm.dsp}
-                          onChange={(s: { label: string; value: number }[]) => {
+                          onChange={(s: CheckboxOption[]) => {
                             setSongForm((prev) => ({ ...prev, dsp: s }));
                           }}
                         />

@@ -109,11 +109,13 @@ export async function approveRelease(releaseId: string) {
 
 export async function getDsps() {
   try {
-    const res = await axios.get(process.env.DPM_HOST_V1!+"dsp", {
-      headers: {
-        Authorization: `Basic ${process.env.DPM_HOST_V1_AUTH}`
-      }
-    });
+    const res = await axios.get(process.env.DPM_HOST+"public/partners/dsps", 
+    //   {
+    //   headers: {
+    //     Authorization: `Basic ${process.env.DPM_HOST_V1_AUTH}`
+    //   }
+    // }
+  );
     return res.data;
   } catch (error) {
     console.error("Error fetching DSPs:", error);
