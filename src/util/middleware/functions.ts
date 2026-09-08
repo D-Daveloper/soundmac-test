@@ -823,7 +823,7 @@ export function validateNonDraftSongs(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
-    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "string")) {
         return "Invalid Dsp format.";
     }
 
@@ -917,7 +917,7 @@ export function validateNonDraftAlbums(
 
     if (!(payload.dsp instanceof Array) || payload.dsp.length <= 0) {
         return "Please Select a Dsp.";
-    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    } else if (payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "string")) {
         return "Invalid Dsp format.";
     }
 
@@ -1035,7 +1035,7 @@ export function validateDraftSongs(
         return "Please Select a Dsp.";
     }
 
-    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "string")) {
         return "Invalid Dsp format.";
     }
 
@@ -1142,7 +1142,7 @@ export function validateDraftAlbums(
         return "Please Select a Dsp.";
     }
 
-    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "number")) {
+    if (payload.dsp && payload.dsp.length > 0 && payload.dsp.some((d) => typeof d.label !== "string" || typeof d.value !== "string")) {
         return "Invalid Dsp format.";
     }
 
