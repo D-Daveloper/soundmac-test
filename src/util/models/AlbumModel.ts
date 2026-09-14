@@ -3,7 +3,7 @@ import DpmMetaData from "./DpmCallBackModel";
 import { albumFromApi, CheckboxOption, TrackFromApi } from "@/app/type";
 import TrackModel from "./trackModel";
 
-const AlbumSchema = new mongoose.Schema(
+export const AlbumSchema = new mongoose.Schema(
   {
     releaseTitle: {
       type: String,
@@ -187,13 +187,50 @@ const AlbumSchema = new mongoose.Schema(
       }
     },
     approvedAt: { type: Date, default: null },
-     platformDelivery: [
+    platformDelivery: [
       {
         platform: { type: String, enum: ["spotify", "apple_music"] },
         status: { type: String, enum: ["pending", "live"], default: "pending" },
         lastCheckedAt: Date,
       }
-    ]
+    ],
+    description: {
+      type: String,
+    },
+    providedBy: {
+      type: String,
+      required: [function (this: any) {
+        return this.get("providedBy") !== "draft";
+      }, "Provided by is required"],
+      trim: true,
+      validate: {
+        validator: async function (v: any) {
+          const userType = await mongoose.model("User").findById(this.user).select("type");
+          console.log("userType", userType);
+          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          }
+          return typeof v === "string" && v.trim().length > 0;
+        },
+        message: "Provided by is Invalid.",
+      }
+    },
+    courtesyLine: {
+      type: String, required: [function (this: any) {
+        return this.get("courtesyLine") !== "draft";
+      }, "Courtesy line is required"], trim: true,
+      validate: {
+        validator: async function (v: any) {
+          const userType = await mongoose.model("User").findById(this.user).select("type");
+          console.log("userType", userType);
+          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          }
+          return typeof v === "string" && v.trim().length > 0;
+        },
+        message: "Courtesy line is Invalid.",
+      }
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -226,7 +263,7 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
     // 1. Update the song status
     const song: albumFromApi = await this.findByIdAndUpdate(
       songId,
-      { releaseStatus: 'approved' , approvedAt:new Date()},
+      { releaseStatus: 'approved', approvedAt: new Date() },
       { session, new: true } // Crucial: pass the session here
     );
 
@@ -241,7 +278,7 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
     } else if (tracks.some(item => item.releaseStatus != "completed")) {
       throw new Error("Only completed Tracks can be distributed.")
     }
-    
+
     await TrackModel.updateMany(
       { upc: song.upc },
       { $set: { releaseStatus: 'approved' } }, { session }
@@ -316,12 +353,12 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
     // return { song, metadata: metadata[0] };
     await session.commitTransaction();
     return { error: false, msg: "Release Approved" }
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("failed to approve album ", error);
     // ✅ Only abort if a transaction is actually open
     if (session.inTransaction()) {
       console.log("in transmission");
-      
+
       await session.abortTransaction();
     }
     return { error: true, msg: error?.message || "Failed to approve Album" }

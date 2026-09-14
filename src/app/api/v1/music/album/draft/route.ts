@@ -35,10 +35,7 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-    const isAlbumForValid = validateDraftAlbums(payload);
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
-    }
+
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
@@ -53,22 +50,28 @@ export async function POST(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else if (subError) {
-       return NextResponse.json({ msg: subError.msg }, { status: subError.status });
-    
-    //  else if (user.premium !== true) {
-    //   return NextResponse.json(
-    //     { msg: "Please upgrade your account." },
-    //     { status: 402 },
-    //   );
-    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-    //   user.premium = false;
-    //   user.premiumExpiration = null;
-    //   await user.save();
-    //   return NextResponse.json(
-    //     { msg: "Please upgrade your account." },
-    //     { status: 402 },
-    //   );
+      return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+
+      //  else if (user.premium !== true) {
+      //   return NextResponse.json(
+      //     { msg: "Please upgrade your account." },
+      //     { status: 402 },
+      //   );
+      // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
+      //   user.premium = false;
+      //   user.premiumExpiration = null;
+      //   await user.save();
+      //   return NextResponse.json(
+      //     { msg: "Please upgrade your account." },
+      //     { status: 402 },
+      //   );
     } else {
+      const isAlbumForValid = validateDraftAlbums(payload, user.type.includes("LABEL"));
+
+      if (isAlbumForValid != null) {
+        return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+      }
+
       const userArtistQuery = Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
@@ -133,6 +136,9 @@ export async function POST(req: Request) {
       user: user._id,
       releaseStatus: "draft",
       timeZone: payload.timeZone || { label: "", value: "", name: "" },
+      providedBy: payload.providedBy || "",
+      courtesyLine: payload.courtesyLine || "",
+      description: payload.description || "",
     });
     await album.save();
 
@@ -180,6 +186,11 @@ export async function PUT(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else {
+      const isAlbumForValid = validateDraftAlbums(payload, user.type.includes("LABEL"));
+
+      if (isAlbumForValid != null) {
+        return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+      }
 
       const userArtistQuery = await Artist.findOne({
         user: userJwt.user,
@@ -188,7 +199,7 @@ export async function PUT(req: Request) {
       const releaseQuery = await AlbumModel.findOne({
         upc: payload.upc,
       }).lean<albumFromApi>();
-      
+
       [userArtist, release] = await Promise.all([
         userArtistQuery, releaseQuery
       ]).catch(err => { throw err; });
@@ -206,12 +217,6 @@ export async function PUT(req: Request) {
 
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }
-
-    const isAlbumForValid = validateDraftAlbums(payload);
-
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
     const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
@@ -246,6 +251,9 @@ export async function PUT(req: Request) {
         user: user._id,
         releaseStatus: "draft",
         timeZone: payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
+        description: payload.description || release.description || "",
+        providedBy: payload.providedBy || release.providedBy || "",
+        courtesyLine: payload.courtesyLine || release.courtesyLine || "",
       },
       { runValidators: true },
     );

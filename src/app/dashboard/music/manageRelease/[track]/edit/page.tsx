@@ -92,6 +92,9 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       track_number: item.trackNumber,
 
       explicit_content: item.explicitContent || false,
+      compositionType: item.compositionType || "",
+      instrumentalSource: item.instrumentalSource || "",
+      countryOfRecording: item.countryOfRecording || "",
     }));
 
     setTracks(mappedTracks);

@@ -1,5 +1,6 @@
 import {
     AlbumForm,
+    CheckboxOption,
     CreateArtistForm,
     DetactivateEmail,
     FeaturedArtist,
@@ -19,7 +20,7 @@ import { addWeeks, subWeeks } from "date-fns";
 import { toast } from "react-toastify";
 import { deleteSongsFromS3WithRetry, s3 } from "./aws";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { genreList, RETRY_CONFIG } from "@/app/utils/constants";
+import { compositionTypes, country_list, genreList, instrumentalSources, otherArtistRoles, performerRoles, producerRoles, RETRY_CONFIG } from "@/app/utils/constants";
 import mongoose from "mongoose";
 import Artist from "../models/artistModel";
 import SongModel from "../models/songModel";
@@ -48,15 +49,15 @@ export const generateOtp = () => {
     return otp;
 };
 
-function isValidDateString(dateStr:string) {
-  return !isNaN(Date.parse(dateStr));
+function isValidDateString(dateStr: string) {
+    return !isNaN(Date.parse(dateStr));
 }
 
-export function isDateInPast(targetDate:Date) {
+export function isDateInPast(targetDate: Date) {
     const today = new Date();
     // Reset hours to 0 to compare the actual day
     today.setHours(0, 0, 0, 0);
-    
+
     // Check if target date occurs before today
     return targetDate.setHours(0, 0, 0, 0) < today.getTime();
 }
@@ -78,7 +79,7 @@ export const isSongFormValid = (form: SongForm): string => {
     console.log(form);
     let twoWeeks = null;
 
-    if (form.release_date != undefined && !isDateInPast(form.release_date) && form.preOrderDate)
+    if (form.release_date != undefined && !isDateInPast(new Date(form.release_date)) && form.preOrderDate)
         twoWeeks = subWeeks(new Date(form.release_date), 2);
     if (form.title.length < 3 || form.title.length > 32) {
         return "Song title must be longer than 3 not more than 32";
@@ -90,24 +91,22 @@ export const isSongFormValid = (form: SongForm): string => {
         return "language is required";
     } else if (
         form.featured_artist.length > 1 &&
-        form.featured_artist.some((artist) => artist.artistName === "")
+        form.featured_artist.some((artist) => artist.artistName === "" || artist.role === "")
     ) {
-        return "Invalid featured artist.";
+        return "Other artist name and role are required";
     } else if (
-        form.song_writer.some((artist) => artist.first_name === "") ||
-        form.song_writer.some((artist) => artist.last_name === "")
+        form.song_writer.some((artist) => artist.first_name === "" || artist.last_name === "")
     ) {
-        return "song writer is required";
+        return "Song writer is required";
     } else if (
-        form.performer.some((artist) => artist.name === "") ||
-        form.performer.some((artist) => artist.role === "")
+        form.performer.some((artist) => artist.name === "" || artist.role === "")
     ) {
-        return "performer is required";
-    } else if (form.producer.some((artist) => artist.name === "")) {
-        return "producer is required";
+        return "Performer name and role are required";
+    } else if (form.producer.some((artist) => artist.name === "" || artist.role === "")) {
+        return "Producer name and role are required";
     } else if (!form.release_date) {
         return "Release date is required";
-    } else if (!(form.release_date instanceof Date) || !isValidDateString(form.release_date.toString())) {
+    } else if (!isValidDateString(form.release_date.toString())) {
         return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
@@ -140,6 +139,12 @@ export const isSongFormValid = (form: SongForm): string => {
         return "License is required";
     } else if (form.license && form.license.type != "application/pdf") {
         return "License must be a PDF";
+    } else if (!form.compositionType) {
+        return "Composition type is required";
+    } else if (!form.instrumentalSource) {
+        return "Instrumental source is required";
+    } else if (!form.countryOfRecording) {
+        return "Country of recording is required";
     } else {
         return "true";
     }
@@ -149,7 +154,7 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
     console.log(form);
     let twoWeeks = null;
 
-    if (form.release_date != undefined && !isDateInPast(form.release_date) && form.preOrderDate)
+    if (form.release_date != undefined && !isDateInPast(new Date(form.release_date)) && form.preOrderDate)
         twoWeeks = subWeeks(new Date(form.release_date), 1);
     if (form.title === "") {
         return "Album title is required";
@@ -163,7 +168,7 @@ export const isAlbumFormValid = (form: AlbumForm): string => {
         return "artist is required";
     } else if (form.release_date === undefined) {
         return "Release date is required";
-    } else if (!(form.release_date instanceof Date) || !isValidDateString(form.release_date.toString())) {
+    } else if (!isValidDateString(form.release_date.toString())) {
         return "Invalid Release Date.";
     } else if (form.territories.length <= 0) {
         return "Territories is required";
@@ -239,6 +244,12 @@ export const isTrackFormValid = (form: TrackForm): string => {
         (form.isrc === "" || form.upc === "")
     ) {
         return "ISRC and UPC is required";
+    } else if (!form.compositionType) {
+        return "Composition type is required";
+    } else if (!form.instrumentalSource) {
+        return "Instrumental source is required";
+    } else if (!form.countryOfRecording) {
+        return "Country of recording is required";
     } else {
         return "true";
     }
@@ -657,7 +668,12 @@ export function parseSongFormData(formData: FormData) {
             : { label: "", value: "", name: "" },
         isCoverSong: formData.get("cover_song") === "true",
         license: formData.get("license") as File | null,
-        oldLicense: formData.get("old_license") as string | null
+        oldLicense: formData.get("old_license") as string | null,
+        compositionType: formData.get("compositionType") as string | null,
+        instrumentalSource: formData.get("instrumentalSource") as string | null,
+        countryOfRecording: formData.get("countryOfRecording") as string | null,
+        providedBy: formData.get("providedBy") as string | null,
+        courtesyLine: formData.get("courtesyLine") as string | null,
     };
 }
 
@@ -672,7 +688,7 @@ export function parseAlbumFormData(formData: FormData) {
         artist: formData.get("artist") as string | null,
 
         territories: getArray<string>(formData, "territories"),
-        dsp: getArray<{ label: string; value: number }>(formData, "dsp"),
+        dsp: getArray<CheckboxOption>(formData, "dsp"),
 
         isrc: formData.get("isrc") as string | null,
         upc: formData.get("upc") as string | null,
@@ -692,7 +708,10 @@ export function parseAlbumFormData(formData: FormData) {
         numberOfTracks: formData.get("number_of_track") as string | null,
         timeZone: formData.get("timeZone")
             ? JSON.parse(formData.get("timeZone") as string)
-            : { label: "", value: "", name: "" }
+            : { label: "", value: "", name: "" },
+        providedBy: formData.get("providedBy") as string | null,
+        courtesyLine: formData.get("courtesyLine") as string | null,
+        description: formData.get("description") as string | null,
     };
 }
 export function parseTrackFormData(formData: FormData) {
@@ -730,7 +749,7 @@ export function parseTrackFormData(formData: FormData) {
 }
 
 export function validateNonDraftSongs(
-    payload: ReturnType<typeof parseSongFormData>,
+    payload: ReturnType<typeof parseSongFormData>, isUserALabel: boolean
 ) {
     let twoWeeks = null;
 
@@ -763,7 +782,7 @@ export function validateNonDraftSongs(
         return "Release date is required";
     }
 
-    if(!isDateInPast(new Date(payload.releaseDate))){
+    if (!isDateInPast(new Date(payload.releaseDate))) {
         twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
 
@@ -772,10 +791,10 @@ export function validateNonDraftSongs(
     // }
 
     if (
-        (payload.featured_artist && !(payload.featured_artist instanceof Array)) ||
-        payload.featured_artist.some((artist) => artist.artistName === "")
-    ) {
-        return "Invalid featured artist.";
+        (payload.featured_artist && (!(payload.featured_artist instanceof Array)) ||
+            payload.featured_artist.some((artist) => artist.artistName === "" || artist.role === "" || otherArtistRoles.includes(artist.role) === false)
+        )) {
+        return "Featured artist name and role are required.";
     }
 
     if (
@@ -790,17 +809,17 @@ export function validateNonDraftSongs(
     if (
         !payload.producer ||
         !(payload.producer instanceof Array) ||
-        payload.producer.some((artist) => artist.name === "")
+        payload.producer.some((artist) => artist.name === "" || artist.role === "" || producerRoles.includes(artist.role) === false)
     ) {
-        return "Producer is required";
+        return "Producer name and role are required";
     }
 
     if (
         !payload.performer ||
         !(payload.performer instanceof Array) ||
-        payload.performer.some((artist) => artist.name === "" || artist.role === "")
+        payload.performer.some((artist) => artist.name === "" || artist.role === "" || performerRoles.includes(artist.role) === false)
     ) {
-        return "Performer is required";
+        return "Performer name and role are required";
     }
 
     if (
@@ -861,11 +880,40 @@ export function validateNonDraftSongs(
     if (payload.license && payload.license.type != "application/pdf") {
         return "License must be a PDF";
     }
+
+    if (payload.compositionType && !compositionTypes.includes(payload.compositionType)) {
+        return "Composition type is invalid";
+    }
+
+    if (payload.instrumentalSource && !instrumentalSources.includes(payload.instrumentalSource)) {
+        return "Instrumental source is invalid";
+    }
+
+    if (payload.countryOfRecording && !country_list.includes(payload.countryOfRecording)) {
+        return "Country of recording is invalid";
+    }
+
+    if (!payload.providedBy) {
+        return "Provided by is required";
+    }
+
+    if (!isUserALabel && payload.providedBy != "SoundMac") {
+        return "Only label Accounts can provide their own name in the provided by field";
+    }
+
+    if (!payload.courtesyLine) {
+        return "Courtesy line is required";
+    }
+
+    if (!isUserALabel && payload.courtesyLine != "SoundMac") {
+        return "Only label Accounts can provide their own name in the courtesy line field";
+    }
+
     return null;
 }
 
 export function validateNonDraftAlbums(
-    payload: ReturnType<typeof parseAlbumFormData>,
+    payload: ReturnType<typeof parseAlbumFormData>, isUserALabel: boolean
 ) {
     let twoWeeks = null;
 
@@ -890,7 +938,7 @@ export function validateNonDraftAlbums(
         return "Release date is required";
     }
 
-    if(!isDateInPast(new Date(payload.releaseDate))){
+    if (!isDateInPast(new Date(payload.releaseDate))) {
         twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
     // if (new Date(payload.releaseDate) < twoWeeksFromNow) {
@@ -952,11 +1000,27 @@ export function validateNonDraftAlbums(
         return "Time zone is required";
     }
 
+    if (!payload.providedBy) {
+        return "Provided by is required";
+    }
+
+    if (!isUserALabel && payload.providedBy != "SoundMac") {
+        return "Only label Accounts can provide their own name in the provided by field";
+    }
+
+    if (!payload.courtesyLine) {
+        return "Courtesy line is required";
+    }
+
+    if (!isUserALabel && payload.courtesyLine != "SoundMac") {
+        return "Only label Accounts can provide their own name in the courtesy line field";
+    }
+
     return null;
 }
 
 export function validateDraftSongs(
-    payload: ReturnType<typeof parseSongFormData>,
+    payload: ReturnType<typeof parseSongFormData>, isUserALabel: boolean
 ) {
     let twoWeeks = null;
 
@@ -977,7 +1041,7 @@ export function validateDraftSongs(
     //     return "Release date must be at least 2 weeks ahead of upload date";
     // }
 
-    if(payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))){
+    if (payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))) {
         twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
 
@@ -988,8 +1052,7 @@ export function validateDraftSongs(
     if (
         payload.song_writer &&
         (!(payload.song_writer instanceof Array) ||
-            payload.song_writer.some((artist) => artist.first_name === "") ||
-            payload.song_writer.some((artist) => artist.last_name === ""))
+            payload.song_writer.some((artist) => artist.first_name === "" || artist.last_name === ""))
     ) {
         return "Song writer is required";
     }
@@ -997,7 +1060,7 @@ export function validateDraftSongs(
     if (
         payload.producer &&
         (!(payload.producer instanceof Array) ||
-            payload.producer.some((artist) => artist.name === ""))
+            payload.producer.some((artist) => artist.name === "" || artist.role === ""))
     ) {
         return "Producer is required";
     }
@@ -1063,6 +1126,14 @@ export function validateDraftSongs(
         }
     }
 
+    if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
+        return "Only label Accounts can provide their own name in the provided by field";
+    }
+
+    if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
+        return "Only label Accounts can provide their own name in the courtesy line field";
+    }
+
     // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
     //   return "Copy write year and Copy write holder is required";
     // }
@@ -1086,7 +1157,7 @@ export function validateDraftSongs(
 }
 
 export function validateDraftAlbums(
-    payload: ReturnType<typeof parseAlbumFormData>,
+    payload: ReturnType<typeof parseAlbumFormData>, isUserALabel: boolean
 ) {
     let twoWeeks = null;
 
@@ -1107,7 +1178,7 @@ export function validateDraftAlbums(
     //     return "Release date must be at least 2 weeks ahead of upload date";
     // }
 
-    if(payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))){
+    if (payload.releaseDate && !isDateInPast(new Date(payload.releaseDate))) {
         twoWeeks = subWeeks(new Date(payload.releaseDate), 2); //used to validate pre order date.
     }
 
@@ -1157,7 +1228,13 @@ export function validateDraftAlbums(
     ) {
         return "Number of tracks must be a valid number greater than 0.";
     }
+    if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
+        return "Only label Accounts can provide their own name in the provided by field";
+    }
 
+    if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
+        return "Only label Accounts can provide their own name in the courtesy line field";
+    }
     return null;
 }
 
@@ -1278,9 +1355,9 @@ export function validateNonDraftTracks(
         (payload.featured_artist &&
             payload.featured_artist.length > 0 &&
             !(payload.featured_artist instanceof Array)) ||
-        payload.featured_artist.some((artist) => artist.artistName === "")
+        payload.featured_artist.some((artist) => artist.artistName === "" || artist.role === "" || otherArtistRoles.includes(artist.role) === false)
     ) {
-        return "invalid featured artist.";
+        return "invalid Featured artist.";
     }
 
     if (
@@ -1295,17 +1372,17 @@ export function validateNonDraftTracks(
     if (
         !payload.producer ||
         !(payload.producer instanceof Array) ||
-        payload.producer.some((artist) => artist.name === "")
+        payload.producer.some((artist) => artist.name === "" || artist.role === "" || producerRoles.includes(artist.role) === false)
     ) {
-        return "Producer is required";
+        return "Producer name and role is required";
     }
 
     if (
         !payload.performer ||
         !(payload.performer instanceof Array) ||
-        payload.performer.some((artist) => artist.name === "" || artist.role === "")
+        payload.performer.some((artist) => artist.name === "" || artist.role === "" || performerRoles.includes(artist.role) === false)
     ) {
-        return "Performer is required";
+        return "Performer name and role is required";
     }
 
     if (
@@ -1331,6 +1408,18 @@ export function validateNonDraftTracks(
         return "Audio upload is required";
     }
 
+    if (payload.compositionType && !compositionTypes.includes(payload.compositionType)) {
+        return "Composition type is invalid";
+    }
+
+    if (payload.instrumentalSource && !instrumentalSources.includes(payload.instrumentalSource)) {
+        return "Instrumental source is invalid";
+    }
+
+    if (payload.countryOfRecording && !country_list.includes(payload.countryOfRecording)) {
+        return "Country of recording is invalid";
+    }
+
     return null;
 }
 
@@ -1344,10 +1433,10 @@ export const createEmptyTrack = (): TrackForm => ({
     artist: "",
     release_date: undefined,
     preOrderDate: undefined,
-    featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+    featured_artist: [{ artistName: "", spotifyId: "", appleId: "", role: "" }],
     performer: [{ name: "", role: "" }],
     song_writer: [{ first_name: "", last_name: "" }],
-    producer: [{ name: "" }],
+    producer: [{ name: "", role: "" }],
     pre_order_check: false,
     another_distribution_check: false,
     territories: [],
@@ -1371,7 +1460,12 @@ export const createEmptyTrack = (): TrackForm => ({
         name: "",
     },
     cover_song: false,
-    license: null
+    license: null,
+    compositionType: "",
+    instrumentalSource: "",
+    countryOfRecording: "",
+    providedBy: "",
+    courtesyLine: "",
 });
 
 export async function handleChargeSuccess(data: any) {
@@ -1401,56 +1495,56 @@ export async function handleChargeSuccess(data: any) {
     //     },
     // );
 
-    const user = await User.findOne({email}).select(
+    const user = await User.findOne({ email }).select(
         "+subscriptionDetails.subscriptionCode +subscriptionDetails.emailToken",
     )
-    if(!user) return;
+    if (!user) return;
 
-    const now  = new Date()
+    const now = new Date()
     const isPlanChange = data.metadata?.isPlanChange === true;
     const paymentMethod = data.channel === "card" ? "card" : "other"
 
-//  function to track if user is already on a plan and decides to change subscription
-    if(
+    //  function to track if user is already on a plan and decides to change subscription
+    if (
         isPlanChange && user.subscriptionDetails?.subscriptionCode && user.subscriptionDetails?.emailToken
     ) {
         try {
-             await fetch("https://api.paystack.co/subscription/disable", {
+            await fetch("https://api.paystack.co/subscription/disable", {
                 method: "POST",
-                headers:{Authorization : `Bearer ${process.env.PAYSTACK_SECRET_KEY}`},
+                headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` },
                 body: JSON.stringify({
                     code: user.subscriptionDetails.subscriptionCode,
                     token: user.subscriptionDetails.emailToken,
                 })
-            }) ;
+            });
         } catch (error) {
             console.error("Failed to disable old subscription on plan change", error)
         }
     }
 
     const currentExpiration = user.premiumExpiration;
-    const baseDate = !isPlanChange && currentExpiration && currentExpiration > now ? currentExpiration: now;
+    const baseDate = !isPlanChange && currentExpiration && currentExpiration > now ? currentExpiration : now;
     const newExpiration = new Date(baseDate.getTime() + 365 * 24 * 60 * 60 * 1000)
 
-    await User.updateOne({email}, {
+    await User.updateOne({ email }, {
         $set: {
-        premium: true,
-        type: data.plan.name,
-        premiumExpiration: newExpiration,
-        "subscriptionDetails.customerCode": data.customer.customer_code,
-        "subscriptionDetails.authorizationCode":
-          data.authorization.authorization_code,
-        "subscriptionDetails.subscriptionStatus": "ACTIVE",
-        "subscriptionDetails.paymentStatus": "ACTIVE",
-        "subscriptionDetails.paymentMethod": paymentMethod,
-        "subscriptionDetails.autoRenew": paymentMethod === "card",
-        "subscriptionDetails.cardType": data.authorization?.card_type || "",
-        "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
-        "subscriptionDetails.graceEndsAt": null,
-        "subscriptionDetails.failedAt": null,
-        "subscriptionDetails.renewalReminderSentAt": null,
-        "subscriptionDetails.graceEndingReminderSentAt": null,
-      },
+            premium: true,
+            type: data.plan.name,
+            premiumExpiration: newExpiration,
+            "subscriptionDetails.customerCode": data.customer.customer_code,
+            "subscriptionDetails.authorizationCode":
+                data.authorization.authorization_code,
+            "subscriptionDetails.subscriptionStatus": "ACTIVE",
+            "subscriptionDetails.paymentStatus": "ACTIVE",
+            "subscriptionDetails.paymentMethod": paymentMethod,
+            "subscriptionDetails.autoRenew": paymentMethod === "card",
+            "subscriptionDetails.cardType": data.authorization?.card_type || "",
+            "subscriptionDetails.lastFourDigits": data.authorization?.last4 || "",
+            "subscriptionDetails.graceEndsAt": null,
+            "subscriptionDetails.failedAt": null,
+            "subscriptionDetails.renewalReminderSentAt": null,
+            "subscriptionDetails.graceEndingReminderSentAt": null,
+        },
     })
 
     await transactionModel.create({
@@ -1486,7 +1580,7 @@ export async function handleSubscriptionDisabled(data: any) {
         {
             $set: {
                 "subscriptionDetails.subscriptionStatus": "CANCELLED",
-                "subscriptionDetails.autoRenew" : false
+                "subscriptionDetails.autoRenew": false
             },
         },
     );
@@ -2100,12 +2194,12 @@ export async function handlePromotionSuccess(data: any) {
                 endDate,
             });
 
-               await UserNotification.create({
-                 userId: user._id,
-                 reason: "Promotion Submitted",
-                 message: `Your ${data.metadata.promotionType} promotion for "${data.metadata.releaseTitle}" has been submitted and is pending review.`,
-                 status: "delivered",
-                });
+            await UserNotification.create({
+                userId: user._id,
+                reason: "Promotion Submitted",
+                message: `Your ${data.metadata.promotionType} promotion for "${data.metadata.releaseTitle}" has been submitted and is pending review.`,
+                status: "delivered",
+            });
         } else {
             await Promotion.findOneAndUpdate(
                 { transactionReference: data.metadata.transactionReference },
@@ -4276,7 +4370,7 @@ export const formatNumber = (numString: string) => {
 };
 
 export const subRenewalReminderEmail = (props: SubscriptionStatusEmailData) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4363,7 +4457,7 @@ export const subRenewalReminderEmail = (props: SubscriptionStatusEmailData) => {
 };
 
 export const subExpiredEmail = (props: SubscriptionStatusEmailData) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -4437,7 +4531,7 @@ export const subExpiredEmail = (props: SubscriptionStatusEmailData) => {
 };
 
 export const subGracePeriodEmail = (props: SubscriptionStatusEmailData) => {
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

@@ -47,6 +47,7 @@ export interface FeaturedArtist {
   artistName: string;
   spotifyId: string;
   appleId: string;
+  role: string;
 }
 export interface SongWriter {
   first_name: string;
@@ -58,7 +59,7 @@ export interface Performer {
 }
 export interface Producer {
   name: string;
-  // last_name: string;
+  role: string;
 }
 
 interface musicFormBase {
@@ -82,6 +83,8 @@ interface musicFormBase {
     value: string;
     name: string;
   };
+  courtesyLine: string;
+  providedBy: string;
 }
 
 export interface SongForm extends musicFormBase {
@@ -98,10 +101,14 @@ export interface SongForm extends musicFormBase {
   cover_song: boolean;
   license: File | null;
   old_license?: string | null;
+  compositionType: string;
+  instrumentalSource: string;
+  countryOfRecording: string;
 }
 
 export interface AlbumForm extends musicFormBase {
   number_of_track: string;
+  description: string;
 }
 
 export type CreateArtistForm = {
@@ -192,6 +199,8 @@ interface BaseApiResponseForRelease {
     value: string;
     name: string;
   };
+  providedBy: string;
+  courtesyLine: string;
 }
 
 export interface songFromApi extends BaseApiResponseForRelease {
@@ -207,11 +216,15 @@ export interface songFromApi extends BaseApiResponseForRelease {
   releaseStatus: "pending" | "approved" | "rejected" | "draft" | "completed";
   isCoverSong: boolean;
   license: string;
+  compositionType: string;
+  instrumentalSource: string;
+  countryOfRecording: string;
 }
 export interface albumFromApi extends BaseApiResponseForRelease {
   numberOfTracks: string;
   unassignedNumbers: string[];
   releaseStatus: "pending" | "completed" | "approved" | "rejected" | "draft";
+  description: string;
 }
 
 export interface NonRetryableErrorCode {
@@ -253,7 +266,7 @@ export interface PaymentEmailData {
 export interface SubscriptionStatusEmailData {
   customerName: string;
   renewalDate: string;
-  graceEndsAt?:string;
+  graceEndsAt?: string;
   dashboardUrl: string;
   support_email: string;
   company_name: string;
@@ -299,7 +312,7 @@ export type withdrawals = {
   _id: string;
   amount: string;
   user: {
-    _id:string;
+    _id: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -425,7 +438,7 @@ export interface AdminAlbumDetailsResponse {
   msg: string;
 }
 export interface AdminSingleDetailsResponse {
-  release: songFromApi & { user: { email: string} };
+  release: songFromApi & { user: { email: string } };
   msg: string;
 }
 type ReleaseRequest = {

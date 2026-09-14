@@ -1,5 +1,5 @@
 import { languagesList } from "@/app/constant";
-import { genreList } from "@/app/utils/constants";
+import { compositionTypes, country_list, genreList, instrumentalSources, otherArtistRoles, performerRoles, producerRoles } from "@/app/utils/constants";
 import { getDsps } from "@/services/dsp/dsp.service";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
@@ -24,8 +24,14 @@ export async function GET(req: Request) {
         const languages = languagesList
         const genres = genreList;
         const dsps = await getDsps();
+        const compositionTypesList = compositionTypes;
+        const countryList = country_list;
+        const instrumentalSourcesList = instrumentalSources;
+        const otherArtistRolesList = otherArtistRoles;
+        const performerRolesList = performerRoles;
+        const producerRolesList = producerRoles;
 
-        return NextResponse.json({ languages, genres, dsps, msg: "Request Successful." }, { status: 200 });
+        return NextResponse.json({ languages, genres, dsps, compositionTypesList, countryList, instrumentalSourcesList, otherArtistRolesList, performerRolesList, producerRolesList, msg: "Request Successful." }, { status: 200 });
     } catch (err) {
         console.log(err);
         return NextResponse.json({ msg: "Internal Server Error." }, { status: 500 });

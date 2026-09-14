@@ -101,9 +101,9 @@ export async function POST(req: Request) {
     if (!user || !user.confirmed || user.otp !== null) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 401 });
     } else {
-      const subError = requireActiveSubscription(user) 
-      if(subError) {
-        return NextResponse.json({msg:subError.msg}, {status:subError.status})
+      const subError = requireActiveSubscription(user)
+      if (subError) {
+        return NextResponse.json({ msg: subError.msg }, { status: subError.status })
       }
     }
     //  else if (user.premium !== true) {
@@ -174,9 +174,9 @@ export async function POST(req: Request) {
     }
     let multipleIsrc: string[] = []
     if (array_of_tracks_dont_have_isrc.length > 0) { multipleIsrc = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length); }
-    
+
     const catalogNumbers = await generateMultipleCatalogNumber(tracks.length)
-    console.log(multipleIsrc,catalogNumbers);
+    console.log(multipleIsrc, catalogNumbers);
 
     const docs = tracks.map((track, index) => ({
       releaseTitle: track.title,
@@ -201,6 +201,9 @@ export async function POST(req: Request) {
       user: user!._id,
       releaseStatus: "pending",
       catalogNumber: catalogNumbers[index],
+      compositionType: track.compositionType,
+      instrumentalSource: track.instrumentalSource,
+      countryOfRecording: track.countryOfRecording,
     }));
 
 
@@ -317,6 +320,9 @@ export async function PUT(req: Request) {
             album: userAlbum._id,
             user: user._id,
             releaseStatus: "pending",
+            compositionType: track.compositionType,
+            instrumentalSource: track.instrumentalSource,
+            countryOfRecording: track.countryOfRecording,
           }
         },
       }

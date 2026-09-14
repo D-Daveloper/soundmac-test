@@ -180,6 +180,45 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
           </div>
         </div>
 
+        {/* Provided By */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Provided By
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {albumForm.providedBy}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
+        {/* Courtesy Line */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Courtesy Line
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {albumForm.courtesyLine}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Description
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {albumForm.description}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
         {/* Copyright Holder */}
         <div className="flex flex-col w-full">
           <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">

@@ -13,7 +13,15 @@ import type {
   SongWriter,
   TrackForm,
 } from "@/app/type";
-import { genreList, performerRoles } from "@/app/utils/constants";
+import {
+  compositionTypes,
+  country_list,
+  genreList,
+  instrumentalSources,
+  otherArtistRoles,
+  performerRoles,
+  producerRoles,
+} from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { uploadAlbumTrack } from "@/util/middleware/functions";
@@ -48,7 +56,7 @@ const UploadTrackForm = ({
         onChange({
           featured_artist: [
             ...track.featured_artist,
-            { artistName: "", spotifyId: "", appleId: "" },
+            { artistName: "", spotifyId: "", appleId: "", role: "" },
           ],
         });
         break;
@@ -67,7 +75,7 @@ const UploadTrackForm = ({
         break;
       case "producer":
         onChange({
-          producer: [...track.producer, { name: "" }],
+          producer: [...track.producer, { name: "", role: "" }],
         });
         break;
 
@@ -200,7 +208,7 @@ const UploadTrackForm = ({
       // Parse with fallback to default value
       const featured_artist1 = featured_artist
         ? JSON.parse(featured_artist)
-        : [{ artistName: "", spotifyId: "", appleId: "" }];
+        : [{ artistName: "", spotifyId: "", appleId: "", role: "" }];
 
       const song_writer1 = song_writer
         ? JSON.parse(song_writer)
@@ -212,7 +220,7 @@ const UploadTrackForm = ({
 
       const producer1 = producer
         ? JSON.parse(producer)
-        : [{ first_name: "", last_name: "" }];
+        : [{ name: "", role: "" }];
 
       console.log(featured_artist1);
 
@@ -370,10 +378,10 @@ const UploadTrackForm = ({
                 {/* featured_artist */}
                 <div>
                   <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
-                    Featured Artists
+                    Other Artists
                   </h2>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
-                    You can leave blank if there are no featured artists on your
+                    You can leave blank if there are no other artists on your
                     release.
                   </p>
                   {track.featured_artist.map((_, i) => (
@@ -416,6 +424,27 @@ const UploadTrackForm = ({
                           name={"appleId"}
                           placeholder={"Enter Apple music ID"}
                           updateValue={handleDynamicChange}
+                        />
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 text-sm">
+                            Role <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <Select
+                          selected={track.featured_artist[i].role}
+                          setSelected={(t) =>
+                            onChange({
+                              ...track,
+                              featured_artist: track.featured_artist.map(
+                                (p, i) => (i === i ? { ...p, role: t } : p),
+                              ),
+                            })
+                          }
+                          placeholder="Select role..."
+                          options={otherArtistRoles}
+                          name="featured_artist"
                         />
                       </div>
                     </div>
@@ -648,6 +677,27 @@ const UploadTrackForm = ({
                           required={true}
                         />
                       </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 text-sm">
+                            Role <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <Select
+                          selected={track.producer[index].role}
+                          setSelected={(t) =>
+                            onChange({
+                              ...track,
+                              producer: track.producer.map((p, i) =>
+                                i === index ? { ...p, role: t } : p,
+                              ),
+                            })
+                          }
+                          placeholder="Select role..."
+                          options={producerRoles}
+                          name="producer"
+                        />
+                      </div>
                     </div>
                   ))}
                   <div className="flex items-center gap-2">
@@ -857,6 +907,56 @@ const UploadTrackForm = ({
                     <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       Unique code for tracking sales/streams.
                     </p>
+                  </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        Composition Type <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.compositionType}
+                        setSelected={(t) => onChange({ compositionType: t })}
+                        placeholder="Select Composition Type..."
+                        options={compositionTypes}
+                        name="compositionType"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        instrumental Source{" "}
+                        <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.instrumentalSource}
+                        setSelected={(t) => onChange({ instrumentalSource: t })}
+                        placeholder="Select instrumental Source..."
+                        options={instrumentalSources}
+                        name="instrumentalSource"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        Country of Recording{" "}
+                        <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.countryOfRecording}
+                        setSelected={(t) => onChange({ countryOfRecording: t })}
+                        placeholder="Select Country of Recording..."
+                        options={country_list}
+                        name="countryOfRecording"
+                      />
+                    </div>
                   </div>
                 </div>
                 {/* border line */}

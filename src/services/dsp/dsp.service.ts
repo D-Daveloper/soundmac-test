@@ -20,11 +20,11 @@ export async function generateISRC() {
   const isrc = await Counter.findOneAndUpdate(
     { _id: "isrc" },
     { $inc: { value: 1 } },
-    { returnDocument: "before" }
+    { returnDocument: "after" }
   );
   if (isrc) {
 
-    return 'NGASN' + new Date().getFullYear().toString().slice(2) + (isrc.value + 1).toString().padStart(5,"0")
+    return 'NGASN' + new Date().getFullYear().toString().slice(2) + isrc.value.toString().padStart(5,"0")
   }
   throw Error("Failed to generate isrc")
 }
@@ -34,11 +34,11 @@ export async function generateCatalogNumber() {
   const catalog = await Counter.findOneAndUpdate(
     { _id: "catalog" },
     { $inc: { value: 1 } },
-    { returnDocument: "before" }
+    { returnDocument: "after" }
   );
   if (catalog) {
 
-    return 'SM' + new Date().getFullYear().toString().slice(2) + catalog.value + 1
+    return 'SM' + new Date().getFullYear().toString().slice(2) + catalog.value
   }
   throw Error("Failed to generate catalog number")
 }
@@ -60,11 +60,11 @@ export async function generateMultipleCatalogNumber(amount: number) {
   const catalogNumber = await Counter.findOneAndUpdate(
     { _id: "catalog" },
     { $inc: { value: amount } },
-    { returnDocument: "before" }
+    { returnDocument: "after" }
   );
   if (catalogNumber) {
     const catalogNumbers = Array.from({ length: amount },(_,index)=>(
-     'SM' + new Date().getFullYear().toString().slice(2) + catalogNumber.value + ( index +1)));
+     'SM' + new Date().getFullYear().toString().slice(2) + (catalogNumber.value + index)));
      return catalogNumbers;
   }
   throw Error("Failed to generate catalog number")
@@ -75,11 +75,11 @@ export async function generateMultipleISRC(amount: number) {
   const isrc = await Counter.findOneAndUpdate(
     { _id: "isrc" },
     { $inc: { value: amount } },
-    { returnDocument: "before" }
+    { returnDocument: "after" }
   );
   if (isrc) {
     const isrcs = Array.from({ length: amount },(_,index)=>(
-     'NGASN' + new Date().getFullYear().toString().slice(2) + (isrc.value + ( index +1)).toString().padStart(5,"0")));
+     'NGASN' + new Date().getFullYear().toString().slice(2) + (isrc.value + index).toString().padStart(5,"0")));
      return isrcs;
   }
   throw Error("Failed to generate isrc")

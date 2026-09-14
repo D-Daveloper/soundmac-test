@@ -16,6 +16,7 @@ import { genreList, territories } from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import {
+  useAuthUser,
   useGetDPMDsp,
   useGetUserArtistsNames,
 } from "@/util/customHooks/useQueries";
@@ -30,8 +31,10 @@ import { toast } from "react-toastify";
 
 // Preview Component
 import AlbumPreview from "./AlbumPreview";
+import { Info } from "lucide-react";
 
 const AlbumForm = () => {
+  const { data: user, isLoading: loadingUser } = useAuthUser();
   const queryClient = useQueryClient();
   const dashboardContext = useContext(DashboardContext);
   const router = useRouter();
@@ -46,10 +49,8 @@ const AlbumForm = () => {
   const api = UseAxios();
   const [image, setImage] = useState<string | null>(null);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const [date, setDate] = useState({
-    fromYear: new Date(),
-    toYear: new Date(new Date().setFullYear(new Date().getFullYear() + 5)),
-  });
+  const fromYear = new Date();
+  const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
   const [preview, setPreview] = useState(false);
   const [albumForm, setAlbumForm] = useState<AlbumForm>({
     title: "",
@@ -68,6 +69,9 @@ const AlbumForm = () => {
     copyRightYear: "",
     number_of_track: "",
     timeZone: { label: "", value: "", name: "" },
+    courtesyLine: "",
+    providedBy: "",
+    description: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +95,13 @@ const AlbumForm = () => {
       if (!dashboardContext?.isPremium) {
         dashboardContext?.setOpenUpgradePopUp(true);
         return;
+      }
+      if (user?.type.includes("LABEL") === false) {
+        albumForm.providedBy = "SoundMac";
+        albumForm.courtesyLine = "SoundMac";
+      } else {
+        albumForm.providedBy = albumForm.providedBy || user?.label || "";
+        albumForm.courtesyLine = albumForm.courtesyLine || user?.label || "";
       }
       setIsSubmittingForm(true);
       console.log(form);
@@ -142,6 +153,9 @@ const AlbumForm = () => {
         copyRightYear: "",
         number_of_track: "",
         timeZone: { label: "", value: "", name: "" },
+        courtesyLine: "",
+        providedBy: "",
+        description: "",
       });
       queryClient.invalidateQueries({
         queryKey: ["manageAlbums"],
@@ -225,11 +239,14 @@ const AlbumForm = () => {
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
-      {isLoading || isSubmittingForm || isLoadingDsp ? (
+      {isLoading || isSubmittingForm || isLoadingDsp || loadingUser ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined || !dspData) && (
+        !isError &&
+        data != undefined &&
+        dspData &&
+        user && (
           <>
             {/* <button
               onClick={() => {
@@ -432,8 +449,8 @@ const AlbumForm = () => {
                             }
                             value={albumForm.release_date}
                             type="first"
-                            toYear={date.toYear}
-                            fromYear={date.fromYear}
+                            toYear={toYear}
+                            fromYear={fromYear}
                           />
                           <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mt-1">
                             Release date must be 2 weeks ahead the upload date
@@ -543,8 +560,8 @@ const AlbumForm = () => {
                               }
                               releaseDate={albumForm.release_date}
                               type="second"
-                              toYear={date.toYear}
-                              fromYear={date.fromYear}
+                              toYear={toYear}
+                              fromYear={fromYear}
                             />
                             <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                               Pre order date must be 3 weeks before the release
@@ -692,6 +709,37 @@ const AlbumForm = () => {
                   {/* border line */}
                   <div className="border border-neutral-100"></div>
 
+                  {/* add description */}
+                  <div>
+                    <h1 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                      Describe Your Release
+                    </h1>
+                    <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
+                      Add a description to your release to give listeners more
+                      context about your music. This description will be visible
+                      on streaming platforms and can help attract more
+                      listeners.
+                    </p>
+                    <div>
+                      <div className="flex gap-1 sm:text-sm text-lg mt-10">
+                        <p className=" capitalize font-medium">description </p>
+                      </div>
+
+                      <textarea
+                        value={albumForm.description}
+                        onChange={(e) =>
+                          setAlbumForm((prev) => ({
+                            ...prev,
+                            description: e.target.value,
+                          }))
+                        }
+                        className="w-full sm:w-[70%] text-xs min-h-80 border-2 rounded-2xl p-4 mt-1"
+                        placeholder="Enter Album Description here"
+                      ></textarea>
+                    </div>
+                  </div>
+                  {/* border line */}
+                  <div className="border border-neutral-100"></div>
                   {/* meta data */}
                   <div>
                     <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary">
@@ -743,6 +791,66 @@ const AlbumForm = () => {
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           Don’t have this? Soundmac will generate for you.
+                        </p>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        {user?.type.includes("LABEL") ? (
+                          <Input
+                            value={albumForm.providedBy || user.label}
+                            title={"Provided By"}
+                            type={"text"}
+                            name={"providedBy"}
+                            placeholder={"Enter Provided By"}
+                            updateValue={handleChange}
+                            disabled={false}
+                            uppercase={false}
+                            required={true}
+                          />
+                        ) : (
+                          <Input
+                            value={"SoundMac"}
+                            title={"Provided By"}
+                            type={"text"}
+                            name={"providedBy"}
+                            placeholder={"Enter Provided By"}
+                            updateValue={() => {}}
+                            disabled={true}
+                            uppercase={false}
+                            required={true}
+                          />
+                        )}
+                        <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                          Only Labels can edit.
+                        </p>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        {user?.type.includes("LABEL") ? (
+                          <Input
+                            value={albumForm.courtesyLine || user.label}
+                            title={"Courtesy Line"}
+                            type={"text"}
+                            name={"courtesyLine"}
+                            placeholder={"Enter Courtesy Line"}
+                            updateValue={handleChange}
+                            disabled={false}
+                            uppercase={false}
+                            required={true}
+                          />
+                        ) : (
+                          <Input
+                            value={"SoundMac"}
+                            title={"Courtesy Line"}
+                            type={"text"}
+                            name={"courtesyLine"}
+                            placeholder={"Enter Courtesy Line"}
+                            updateValue={() => {}}
+                            disabled={true}
+                            uppercase={false}
+                            required={true}
+                          />
+                        )}
+                        <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                          Only Labels can edit.
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">

@@ -13,7 +13,7 @@ import {
 } from "@/util/middleware/functions";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import AlbumModel from "@/util/models/AlbumModel";
+import AlbumModel, { AlbumSchema } from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
@@ -46,11 +46,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
 
-    const isAlbumForValid = validateNonDraftAlbums(payload);
-
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
-    }
     await dbConnect();
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
@@ -63,7 +58,7 @@ export async function POST(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
-    } 
+    }
     // else if (user.premium !== true) {
     //   return NextResponse.json(
     //     { msg: "Please upgrade your account." },
@@ -85,9 +80,15 @@ export async function POST(req: Request) {
       );
     } else {
       const subError = requireActiveSubscription(user)
-       if (subError) {
-       return NextResponse.json({ msg: subError.msg }, { status: subError.status });
+      if (subError) {
+        return NextResponse.json({ msg: subError.msg }, { status: subError.status });
       }
+    }
+
+    const isAlbumForValid = validateNonDraftAlbums(payload, user.type.includes("LABEL"));
+
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
     }
 
     [userArtist, release] = await Promise.all([
@@ -108,7 +109,6 @@ export async function POST(req: Request) {
     } else if (release) {
       return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
     }
-
 
     const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
 
@@ -169,15 +169,18 @@ export async function POST(req: Request) {
       user: user._id,
       catalogNumber: await generateCatalogNumber(),
       timeZone: payload.timeZone,
+      providedBy: payload.providedBy,
+      courtesyLine: payload.courtesyLine,
+      description: payload.description || "",
     });
     await album.save();
 
     await UserNotification.create({
-  userId: user!._id,
-  reason: "Album Upload Successful",
-  message: `Your release "${payload.title}" has been submitted and is pending review.`,
-  status: "delivered",
-});
+      userId: user!._id,
+      reason: "Album Upload Successful",
+      message: `Your release "${payload.title}" has been submitted and is pending review.`,
+      status: "delivered",
+    });
 
     return NextResponse.json({ msg: "success" }, { status: 200 });
   } catch (error: unknown) {
@@ -186,7 +189,6 @@ export async function POST(req: Request) {
     return handleMongooseValidationError(error);
   }
 }
-
 
 export async function GET(req: Request) {
   try {
@@ -261,7 +263,7 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     console.log({ ...formData });
     const payload = parseAlbumFormData(formData);
-    let release: albumFromApi | null = null;
+    let release = null;
 
     if (
       !payload.artist ||
@@ -291,7 +293,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     }
 
-    const isAlbumForValid = validateNonDraftAlbums(payload);
+    const isAlbumForValid = validateNonDraftAlbums(payload, user.type.includes("LABEL"));
 
     if (isAlbumForValid != null) {
       return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
@@ -311,7 +313,7 @@ export async function PUT(req: Request) {
 
     const releaseQuery = AlbumModel.findOne({
       upc: payload.upc,
-    }).lean<albumFromApi>();
+    });
 
     [userArtist, release] = await Promise.all([
       userArtistQuery, releaseQuery
@@ -343,7 +345,7 @@ export async function PUT(req: Request) {
       }
     }
 
-    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1); // check later, adds +1 to the initial number.
+    const number_of_track_array = Array.from({ length: num }, (_, i) => (i + 1).toString()); // check later, adds +1 to the initial number.
 
     let imageUrl: {
       error: string | null;
@@ -388,33 +390,37 @@ export async function PUT(req: Request) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      await AlbumModel.findByIdAndUpdate(
-        { _id: release._id },
-        {
-          releaseTitle: payload.title,
-          genre: payload.genre,
-          releaseLanguage: payload.language,
-          preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-          anotherDistributionCheck: payload.anotherDistributionCheck,
-          releaseDate: payload.releaseDate,
-          preOrderDate:
-            payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
-          copyRightHolder: payload.copyRightHolder,
-          copyRightYear: payload.copyRightYear,
-          dsp: payload.dsp,
-          upc: payload.upc,
-          territories: payload.territories,
-          releaseImage: imageUrl.coverUrl || payload.oldImage,
-          artistName: userArtist.artistName,
-          artist: userArtist._id,
-          numberOfTracks: payload.numberOfTracks,
-          unassignedNumbers: number_of_track_array,
-          user: user._id,
-          releaseStatus: "pending",
-          timeZone: payload.timeZone || release.timeZone,
-        },
-        { runValidators: true },
-      );
+      // await AlbumModel.findByIdAndUpdate(
+      //   { _id: release._id },
+      //   {
+          release.releaseTitle = payload.title!,
+          release.genre = payload.genre!,
+          release.releaseLanguage = payload.language!,
+          release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+          release.anotherDistributionCheck = payload.anotherDistributionCheck,
+          release.releaseDate = new Date(payload.releaseDate!),
+          release.preOrderDate =
+            !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
+          release.copyRightHolder = payload.copyRightHolder!,
+          release.copyRightYear = payload.copyRightYear!,
+          release.dsp = payload.dsp,
+          release.upc = payload.upc!,
+          release.territories = payload.territories,
+          release.releaseImage = imageUrl.coverUrl || payload.oldImage || release.releaseImage,
+          release.artistName = userArtist.artistName,
+          release.artist = userArtist._id,
+          release.numberOfTracks = payload.numberOfTracks!,
+          release.unassignedNumbers = number_of_track_array,
+          release.user = user._id,
+          release.releaseStatus = "pending",
+          release.timeZone = payload.timeZone || release.timeZone,
+          release.providedBy = payload.providedBy || release.providedBy,
+          release.courtesyLine = payload.courtesyLine || release.courtesyLine,
+          release.description = payload.description || release.description || "",
+      //   },
+      //   { runValidators: true },
+      // );
+      await release.save({ session });
       await TrackModel.updateMany(
         { upc: payload.upc },
         { $set: { albumName: payload.title } },

@@ -1,6 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 import DpmMetaData from "./DpmCallBackModel";
 import { CheckboxOption, songFromApi } from "@/app/type";
+import { compositionTypes, country_list, instrumentalSources, otherArtistRoles, performerRoles, producerRoles } from "@/app/utils/constants";
 
 export const featuredArtistSchema = new mongoose.Schema(
   {
@@ -20,6 +21,14 @@ export const featuredArtistSchema = new mongoose.Schema(
       type: String,
       // // required: [true, 'Apple ID is required']
     },
+    role: {
+      type: String,
+      // required: [true, "Role is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string" || otherArtistRoles.includes(v),
+        message: "Role must be a string",
+      },
+    },
   },
   { _id: false, strict: "throw" },
 );
@@ -38,7 +47,7 @@ export const performerSchema = new mongoose.Schema(
       type: String,
       required: [true, "Performer role is required"],
       validate: {
-        validator: (v: any) => typeof v === "string",
+        validator: (v: any) => typeof v === "string" || performerRoles.includes(v),
         message: "Performer role must be a string",
       },
     },
@@ -76,6 +85,14 @@ export const producerSchema = new mongoose.Schema(
       validate: {
         validator: (v: any) => typeof v === "string",
         message: "Producer name must be a string",
+      },
+    },
+    role: {
+      type: String,
+      required: [true, "Producer role is required"],
+      validate: {
+        validator: (v: any) => typeof v === "string" || producerRoles.includes(v),
+        message: "Producer role must be a string",
       },
     },
     // first_name: {
@@ -403,14 +420,63 @@ const SongModelSchema = new mongoose.Schema(
         message: "Time Zone must be an object",
       }
     },
-      approvedAt: { type: Date, default: null },
-     platformDelivery: [
+    approvedAt: { type: Date, default: null },
+    platformDelivery: [
       {
         platform: { type: String, enum: ["spotify", "apple_music"] },
         status: { type: String, enum: ["pending", "live"], default: "pending" },
         lastCheckedAt: Date,
       }
-    ]
+    ],
+    providedBy: {
+      type: String,
+      required: [function (this: any) {
+        return this.get("providedBy") !== "draft";
+      }, "Provided by is required"],
+      trim: true,
+      validate: {
+        validator: async function (v: any) {
+          const userType = await mongoose.model("User").findById(this.user).select("type");
+          console.log("userType", userType, this.user);
+          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          }
+          return typeof v === "string" && v.trim().length > 0;
+        },
+        message: "Provided by is Invalid.",
+      }
+    },
+    courtesyLine: {
+      type: String, required: [function (this: any) {
+        return this.get("courtesyLine") !== "draft";
+      }, "Courtesy line is required"], trim: true,
+      validate: {
+        validator: async function (v: any) {
+          const userType = await mongoose.model("User").findById(this.user).select("type");
+          console.log("userType", userType);
+          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          }
+          return typeof v === "string" && v.trim().length > 0;
+        },
+        message: "Courtesy line is Invalid.",
+      }
+    },
+    compositionType: {
+      type: String, required: [function (this: any) {
+        return this.get("compositionType") !== "draft";
+      }, "Composition type is required"], trim: true, enum: compositionTypes
+    },
+    instrumentalSource: {
+      type: String, required: [function (this: any) {
+        return this.get("instrumentalSource") !== "draft";
+      }, "Instrumental source is required"], trim: true, enum: instrumentalSources
+    },
+    countryOfRecording: {
+      type: String, required: [function (this: any) {
+        return this.get("countryOfRecording") !== "draft";
+      }, "Country of recording is required"], trim: true, enum: country_list
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -446,7 +512,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
     // 1. Update the song status
     const song: songFromApi = await this.findByIdAndUpdate(
       songId,
-      { releaseStatus: 'approved', approvedAt: new Date()},
+      { releaseStatus: 'approved', approvedAt: new Date() },
       { session, new: true } // Crucial: pass the session here
     );
 

@@ -5,6 +5,7 @@ import {
   producerSchema,
   songWriterSchema,
 } from "./songModel";
+import { compositionTypes, country_list, instrumentalSources } from "@/app/utils/constants";
 
 const TrackSchema = new mongoose.Schema(
   {
@@ -207,6 +208,21 @@ const TrackSchema = new mongoose.Schema(
         return this.get("releaseStatus") !== "draft";
       }, "catalog number is required"],
     },
+    compositionType: {
+      type: String, required: [function (this: any) {
+        return this.get("compositionType") !== "draft";
+      }, "Composition type is required"], trim: true, enum: compositionTypes
+    },
+    instrumentalSource: {
+      type: String, required: [function (this: any) {
+        return this.get("instrumentalSource") !== "draft";
+      }, "Instrumental source is required"], trim: true, enum: instrumentalSources
+    },
+    countryOfRecording: {
+      type: String, required: [function (this: any) {
+        return this.get("countryOfRecording") !== "draft";
+      }, "Country of recording is required"], trim: true, enum: country_list
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
@@ -214,7 +230,7 @@ const TrackSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
-TrackSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true } );
+TrackSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true });
 TrackSchema.index({ artistName: 1, releaseDate: -1 });
 TrackSchema.index({ user: 1, releaseTitle: 1 });
 TrackSchema.index({ user: 1, artist: 1 });

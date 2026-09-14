@@ -48,10 +48,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
-    const isSongValid = validateNonDraftSongs(payload);
-    if (isSongValid != null) {
-      return NextResponse.json({ msg: isSongValid }, { status: 400 });
-    }
     //  const payload = {uploadId,actionType,title,genre,language,preOrderDate,featured_artist,artist,performer,song_writer,producer,pre_order_check,another_distribution_check,territories,dsp,lyrics,start_clip,isrc,upc,release_date,s3KeyAudio,music_image,copyRightYear,copyRightHolder,explicit_content} = parseSongFormData(formData);
     await dbConnect();
 
@@ -71,7 +67,7 @@ export async function POST(req: Request) {
     } else {
       Uploaderror = requireActiveSubscription(user)
     }
-    
+
     // else if (user.premium !== true) {
     //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
@@ -107,10 +103,15 @@ export async function POST(req: Request) {
       }
     }
 
+    const isSongValid = validateNonDraftSongs(payload, user?.type.includes("LABEL") || false);
+    if (isSongValid != null) {
+      return NextResponse.json({ msg: isSongValid }, { status: 400 });
+    }
+
     const userArtistQuery = Artist.findOne({
       user: userJwt.user,
       artistName: (payload.artist as string).trim(),
-    });
+    }).lean();
 
     const releaseQuery = SongModel.findOne({
       user: user!._id,
@@ -259,7 +260,12 @@ export async function POST(req: Request) {
       catalogNumber,
       timeZone: payload.timeZone,
       isCoverSong: payload.isCoverSong,
-      license: licenseUrl.coverUrl || ""
+      license: licenseUrl.coverUrl || "",
+      compositionType: payload.compositionType,
+      instrumentalSource: payload.instrumentalSource,
+      countryOfRecording: payload.countryOfRecording,
+      providedBy: payload.providedBy,
+      courtesyLine: payload.courtesyLine,
     });
 
     const session = await mongoose.startSession();
@@ -267,16 +273,16 @@ export async function POST(req: Request) {
       session.startTransaction();
       await savedSong.save({ session });
       await UserNotification.create(
-  [
-    {
-      userId: user!._id,
-      reason: "Upload Successful",
-      message: `Your release "${payload.title}" has been submitted and is pending review.`,
-      status: "delivered",
-    },
-  ],
-  { session },
-);
+        [
+          {
+            userId: user!._id,
+            reason: "Upload Successful",
+            message: `Your release "${payload.title}" has been submitted and is pending review.`,
+            status: "delivered",
+          },
+        ],
+        { session },
+      );
       await AudioUploadTrackerModel.findOneAndUpdate(
         {
           _id: payload.uploadId,
@@ -968,7 +974,7 @@ export async function PUT(req: Request) {
       );
     } // return any errors up to this point and delete the song
 
-    const isSongValid = validateNonDraftSongs(payload);
+    const isSongValid = validateNonDraftSongs(payload, user?.type.includes("LABEL") || false);
     if (isSongValid != null) {
       return NextResponse.json({ msg: isSongValid }, { status: 400 });
     }
@@ -996,7 +1002,7 @@ export async function PUT(req: Request) {
 
     const releaseQuery = SongModel.findOne({
       upc: payload.upc,
-    }).lean();
+    });
 
     [userArtist, release] = await Promise.all([
       userArtistQuery, releaseQuery
@@ -1072,47 +1078,53 @@ export async function PUT(req: Request) {
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      await SongModel.findByIdAndUpdate(
-        { _id: release._id },
-        {
-          releaseTitle: payload.title,
-          releaseImage: imageUrl.coverUrl || payload.oldImage,
-          releaseAudio: payload.s3KeyAudio || payload.oldAudio,
-          genre: payload.genre,
-          releaseLanguage: payload.language,
-          songWriter: payload.song_writer,
-          producer: payload.producer,
-          performer: payload.performer,
-          featuredArtist: payload.featured_artist,
-          preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-          anotherDistributionCheck: payload.anotherDistributionCheck,
-          explicitContent: payload.explicitContent,
-          releaseDate:
-            user!.type === "EMERGING_ARTIST"
-              ? addWeeks(new Date(), 2)
-              : payload.releaseDate,
-          preOrderDate:
-            payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
-          copyRightHolder:
-            user!.type === "EMERGING_ARTIST"
-              ? "Distributed by SoundMac"
-              : payload.copyRightHolder,
-          copyRightYear: user!.type === "EMERGING_ARTIST"
-            ? new Date().getFullYear()
-            : payload.copyRightYear,
-          lyrics: payload.lyrics,
-          startClip: payload.startClip,
-          dsp: payload.dsp,
-          // upc: payload.upc,
-          // isrc: payload.isrc,
-          territories: payload.territories,
-          artistName: userArtist.artistName,
-          artist: userArtist._id,
-          user: user!._id,
-          releaseStatus: "pending",
-        },
-        { runValidators: true },
-      ).session(session);
+      // await SongModel.findByIdAndUpdate(
+      //   { _id: release._id },
+      //   {
+      release.releaseTitle = payload.title,
+        release.releaseImage = imageUrl.coverUrl || payload.oldImage,
+        release.releaseAudio = payload.s3KeyAudio || payload.oldAudio,
+        release.genre = payload.genre,
+        release.releaseLanguage = payload.language,
+        release.songWriter = payload.song_writer,
+        release.producer = payload.producer,
+        release.performer = payload.performer,
+        release.featuredArtist = payload.featured_artist,
+        release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+        release.anotherDistributionCheck = payload.anotherDistributionCheck,
+        release.explicitContent = payload.explicitContent,
+        release.releaseDate =
+        user!.type === "EMERGING_ARTIST"
+          ? addWeeks(new Date(), 2)
+          : payload.releaseDate,
+        release.preOrderDate =
+        release.payload?.preOrderDate ? isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate : null,
+        release.copyRightHolder =
+        release.user!.type === "EMERGING_ARTIST"
+          ? "Distributed by SoundMac"
+          : payload.copyRightHolder,
+        release.copyRightYear = user!.type === "EMERGING_ARTIST"
+          ? new Date().getFullYear()
+          : payload.copyRightYear,
+        release.lyrics = payload.lyrics,
+        release.startClip = payload.startClip,
+        release.dsp = payload.dsp,
+        // upc: payload.upc,
+        // isrc: payload.isrc,
+        release.territories = payload.territories,
+        release.artistName = userArtist.artistName,
+        release.artist = userArtist._id,
+        release.user = user!._id,
+        release.releaseStatus = "pending",
+        release.compositionType = payload.compositionType,
+        release.instrumentalSource = payload.instrumentalSource,
+        release.countryOfRecording = payload.countryOfRecording,
+        release.providedBy = payload.providedBy,
+        release.courtesyLine = payload.courtesyLine,
+        //   },
+        //   { runValidators: true },
+        // )
+        release.save({ session });
 
       if (payload.uploadId) {
         await AudioUploadTrackerModel.findOneAndUpdate(

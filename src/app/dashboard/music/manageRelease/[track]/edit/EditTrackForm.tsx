@@ -12,7 +12,15 @@ import type {
   SongWriter,
   TrackForm,
 } from "@/app/type";
-import { genreList, performerRoles } from "@/app/utils/constants";
+import {
+  compositionTypes,
+  country_list,
+  genreList,
+  instrumentalSources,
+  otherArtistRoles,
+  performerRoles,
+  producerRoles,
+} from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import { uploadAlbumTrack } from "@/util/middleware/functions";
@@ -46,7 +54,7 @@ const EditTrackForm = ({
         onChange({
           featured_artist: [
             ...track.featured_artist,
-            { artistName: "", spotifyId: "", appleId: "" },
+            { artistName: "", spotifyId: "", appleId: "", role: "" },
           ],
         });
         break;
@@ -65,7 +73,7 @@ const EditTrackForm = ({
         break;
       case "producer":
         onChange({
-          producer: [...track.producer, { name: "" }],
+          producer: [...track.producer, { name: "", role: "" }],
         });
         break;
 
@@ -75,7 +83,6 @@ const EditTrackForm = ({
   };
 
   console.log(track);
-  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
@@ -165,16 +172,16 @@ const EditTrackForm = ({
         api,
         track.track_number,
       );
-      console.log("nnnjjj",songS3Key);
+      console.log("nnnjjj", songS3Key);
       if (error != null) {
         return;
       }
-      
+
       track.s3key = songS3Key; //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
       track.song_audio = null;
       toast.success("Uploaded, please continue with the form.");
     } catch (error) {
-      if (isAxiosError(error)) { 
+      if (isAxiosError(error)) {
         return;
       }
       toast.error("Something went wrong!.");
@@ -226,7 +233,7 @@ const EditTrackForm = ({
   //     });
   //   }
   // }, []);
-// console.log(album);
+  // console.log(album);
 
   // useEffect(() => {
   //   album.unassignedNumbers = album.unassignedNumbers.filter((num,index)=> num != track.track_number )
@@ -319,7 +326,7 @@ const EditTrackForm = ({
                     </p>
                   </div>
 
-                    <div className="flex flex-col w-[40%] max-sm:w-full">
+                  <div className="flex flex-col w-[40%] max-sm:w-full">
                     <div className="flex gap-1">
                       <p className="font-medium mb-2 text-sm">
                         Track number <span className="text-red-500">*</span>
@@ -336,23 +343,21 @@ const EditTrackForm = ({
                     </div>
                     <div className="w-full">
                       <Select
-                      isDisabled={true}
-                      // isDisabled={track.s3key && track.s3key.length > 0 || false}
+                        isDisabled={true}
+                        // isDisabled={track.s3key && track.s3key.length > 0 || false}
                         selected={track.track_number}
-                        setSelected={(t) =>{ 
+                        setSelected={(t) => {
                           onChange({ track_number: t });
-                      }}
+                        }}
                         placeholder="Select track number..."
                         options={album.unassignedNumbers}
                         name="track_number"
-                        
                       />
                     </div>
                     {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       This can&apos;t be changed, except drafts
                     </p> */}
                   </div>
-
                 </div>
               </div>
               <div className="border border-neutral-100"></div>
@@ -366,13 +371,13 @@ const EditTrackForm = ({
                   featured acts, and other contributors.
                 </p>
 
-                {/* featured_artist */}
+                {/* other_artist */}
                 <div>
                   <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
-                    Featured Artists
+                    Other Artists
                   </h2>
                   <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
-                    You can leave blank if there are no featured artists on your
+                    You can leave blank if there are no other artists on your
                     release.
                   </p>
                   {track.featured_artist.map((_, i) => (
@@ -417,6 +422,27 @@ const EditTrackForm = ({
                           updateValue={handleDynamicChange}
                         />
                       </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 text-sm">
+                            Role <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <Select
+                          selected={track.featured_artist[i].role}
+                          setSelected={(t) =>
+                            onChange({
+                              ...track,
+                              featured_artist: track.featured_artist.map(
+                                (p, i) => (i === i ? { ...p, role: t } : p),
+                              ),
+                            })
+                          }
+                          placeholder="Select role..."
+                          options={otherArtistRoles}
+                          name="featured_artist"
+                        />
+                      </div>
                     </div>
                   ))}
                   <div className="flex gap-2">
@@ -451,9 +477,8 @@ const EditTrackForm = ({
                         });
                       }}
                       className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
-                      
                     >
-                      <Trash2  size={14}/>
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -527,7 +552,6 @@ const EditTrackForm = ({
                         });
                       }}
                       className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
-                      
                     >
                       <Trash2 size={14} />
                     </button>
@@ -619,7 +643,6 @@ const EditTrackForm = ({
                         });
                       }}
                       className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
-                      
                     >
                       <Trash2 size={14} />
                     </button>
@@ -648,6 +671,27 @@ const EditTrackForm = ({
                           placeholder={"Enter name"}
                           updateValue={handleDynamicChange}
                           required={true}
+                        />
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 text-sm">
+                            Role <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <Select
+                          selected={track.producer[index].role}
+                          setSelected={(t) =>
+                            onChange({
+                              ...track,
+                              producer: track.producer.map((p, i) =>
+                                i === index ? { ...p, role: t } : p,
+                              ),
+                            })
+                          }
+                          placeholder="Select role..."
+                          options={producerRoles}
+                          name="producer"
                         />
                       </div>
                     </div>
@@ -681,9 +725,8 @@ const EditTrackForm = ({
                         });
                       }}
                       className="p-2 text-white bg-red-500 hover:bg-primary-red disabled:opacity-90 disabled:cursor-not-allowed rounded-lg flex items-center justify-center transition-colors mt-9 h-9 w-9 shrink-0"
-                      
                     >
-                      <Trash2 size={14}/>
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
@@ -691,7 +734,7 @@ const EditTrackForm = ({
 
               {/* border line */}
               <div className="border border-neutral-100"></div>
-              
+
               {/* add lyrics */}
               <div>
                 <h1 className="text-base md:text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
@@ -861,31 +904,80 @@ const EditTrackForm = ({
                       Unique code for tracking sales/streams.
                     </p>
                   </div>
-                
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        Composition Type <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.compositionType}
+                        setSelected={(t) => onChange({ compositionType: t })}
+                        placeholder="Select Composition Type..."
+                        options={compositionTypes}
+                        name="compositionType"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        instrumental Source{" "}
+                        <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.instrumentalSource}
+                        setSelected={(t) => onChange({ instrumentalSource: t })}
+                        placeholder="Select instrumental Source..."
+                        options={instrumentalSources}
+                        name="instrumentalSource"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                    <div className="flex">
+                      <p className=" capitalize font-medium text-sm mr-1">
+                        Country of Recording{" "}
+                        <span className="text-red-500">*</span>
+                      </p>
+                    </div>
+                    <div className="w-full">
+                      <Select
+                        selected={track.countryOfRecording}
+                        setSelected={(t) => onChange({ countryOfRecording: t })}
+                        placeholder="Select Country of Recording..."
+                        options={country_list}
+                        name="countryOfRecording"
+                      />
+                    </div>
+                  </div>
                 </div>
-
                 {/* border line */}
-              <div className="border border-neutral-100 mt-5"></div>
-              {/* upload music */}
-              <div>
-                <h1 className="text-base md:text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading mt-5">
-                  Audio Upload
-                </h1>
-                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
-                  Upload your track in the correct format for distribution.
-                </p>
-                <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
-                  <span className="font-bold text-error-500">Note: </span>Song
-                  is only uploaded after clicking the upload button below, if
-                  audio is uploaded you can't track save to draft.
-                </p>
-                <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
-                  <div className="flex flex-col w-[50%] max-sm:w-full gap-2">
-                    <div className="flex gap-1">
-                      <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                        Audio Upload <span className="text-red-500">*</span>
-                      </h4>
-                      {/* <Image
+                <div className="border border-neutral-100 mt-5"></div>
+
+                {/* upload music */}
+                <div>
+                  <h1 className="text-base md:text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading mt-5">
+                    Audio Upload
+                  </h1>
+                  <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-sm mt-3 sm:max-w-[40%]">
+                    Upload your track in the correct format for distribution.
+                  </p>
+                  <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-xs md:text-sm mt-3 sm:max-w-[40%]">
+                    <span className="font-bold text-error-500">Note: </span>Song
+                    is only uploaded after clicking the upload button below, if
+                    audio is uploaded you can't track save to draft.
+                  </p>
+                  <div className="w-full flex flex-wrap justify-between gap-y-5 mt-5 ">
+                    <div className="flex flex-col w-[50%] max-sm:w-full gap-2">
+                      <div className="flex gap-1">
+                        <h4 className="text-base font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
+                          Audio Upload <span className="text-red-500">*</span>
+                        </h4>
+                        {/* <Image
                         priority={false}
                         loading="lazy"
                         src="/required.svg"
@@ -894,63 +986,61 @@ const EditTrackForm = ({
                         height={0}
                         className="w-2 -mt-3 "
                       /> */}
-                    </div>
+                      </div>
 
-                    <div className="flex items-center justify-between w-full flex-wrap gap-2">
-                      <label
-                        htmlFor="song_audio"
-                        className="flex w-60 md:w-80 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
-                        
-                      >
-                        <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
-                          <Image
-                            src={"/music.svg"}
-                            width={60}
-                            height={60}
-                            alt="music note icon"
+                      <div className="flex items-center justify-between w-full flex-wrap gap-2">
+                        <label
+                          htmlFor="song_audio"
+                          className="flex w-60 md:w-80 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
+                        >
+                          <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
+                            <Image
+                              src={"/music.svg"}
+                              width={60}
+                              height={60}
+                              alt="music note icon"
+                            />
+                          </div>
+                          <div className="w-[50%]">
+                            {!track.song_audio ? (
+                              <p className="mb-2 text-xs text-gray-500">
+                                <span className="font-bold text-text-body">
+                                  Supported Files:
+                                </span>{" "}
+                                WAV, FLAC, MP3
+                              </p>
+                            ) : (
+                              <p className="font-bold text-[16px] text-[#494949] truncate max-w-[50%]">
+                                <span className="font-semibold truncate">
+                                  {track.song_audio?.name}
+                                </span>
+                              </p>
+                            )}
+                          </div>
+                          <input
+                            id="song_audio"
+                            name="song_audio"
+                            type="file"
+                            accept="audio/wav,audio/flac,audio/mp3"
+                            className="hidden"
+                            onChange={handleChange}
                           />
-                        </div>
-                        <div className="w-[50%]">
-                          {!track.song_audio ? (
-                            <p className="mb-2 text-xs text-gray-500">
-                              <span className="font-bold text-text-body">
-                                Supported Files:
-                              </span>{" "}
-                              WAV, FLAC, MP3
-                            </p>
-                          ) : (
-                            <p className="font-bold text-[16px] text-[#494949] truncate max-w-[50%]">
-                              <span className="font-semibold truncate">
-                                {track.song_audio?.name}
-                              </span>
-                            </p>
-                          )}
-                        </div>
-                        <input
-                          id="song_audio"
-                          name="song_audio"
-                          type="file"
-                          accept="audio/wav,audio/flac,audio/mp3"
-                          className="hidden"
-                          onChange={handleChange}
-                        />
-                      </label>
-                      <button
-                        disabled={!track.song_audio}
-                        onClick={() => {
-                          uploadSong();
-                        }}
-                        className={
-                          "font-bold text-sm rounded-lg capitalize px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 "
-                        }
-                      >
-                        upload audio
-                      </button>
+                        </label>
+                        <button
+                          disabled={!track.song_audio}
+                          onClick={() => {
+                            uploadSong();
+                          }}
+                          className={
+                            "font-bold text-sm rounded-lg capitalize px-4 py-2.5 hover:bg-primary/20 border-3 border-primary flex text-white bg-primary-500 "
+                          }
+                        >
+                          upload audio
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-
               </div>
             </div>
           </div>

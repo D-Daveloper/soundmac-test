@@ -36,11 +36,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
-    const isDraftSongValid = validateDraftSongs(payload);
-
-    if (isDraftSongValid != null) {
-      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
-    }
     await dbConnect();
 
     const userJwt = await authenticate(req);
@@ -60,7 +55,7 @@ export async function POST(req: Request) {
     } else {
       Uploaderror = requireActiveSubscription(user);
     }
-     
+
     //  else if (user.premium !== true) {
     //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
     // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
@@ -94,7 +89,11 @@ export async function POST(req: Request) {
         );
       }
     }
+    const isDraftSongValid = validateDraftSongs(payload, user?.type.includes("LABEL") ?? false);
 
+    if (isDraftSongValid != null) {
+      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
+    }
     const userArtistQuery = Artist.findOne({
       user: userJwt.user,
       artistName: (payload.artist as string).trim(),
@@ -123,8 +122,7 @@ export async function POST(req: Request) {
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
         (payload.song_writer.length > 0 &&
-          payload.song_writer.some((artist) => artist.first_name === "") &&
-          payload.song_writer.some((artist) => artist.last_name === "")))
+          payload.song_writer.some((artist) => artist.first_name === "" && artist.last_name === "")))
     ) {
       payload.song_writer = [];
     }
@@ -132,8 +130,7 @@ export async function POST(req: Request) {
       payload.performer &&
       (!(payload.performer instanceof Array) ||
         (payload.performer.length > 0 &&
-          payload.performer.some((artist) => artist.name === "") &&
-          payload.performer.some((artist) => artist.role === "")))
+          payload.performer.some((artist) => artist.name === "" && artist.role === "")))
     ) {
       payload.performer = [];
     }
@@ -141,7 +138,7 @@ export async function POST(req: Request) {
       payload.featured_artist &&
       (!(payload.featured_artist instanceof Array) ||
         (payload.featured_artist.length > 0 &&
-          payload.featured_artist.some((artist) => artist.artistName === "")))
+          payload.featured_artist.some((artist) => artist.artistName === "" && artist.role === "")))
     ) {
       payload.featured_artist = [];
     }
@@ -149,7 +146,7 @@ export async function POST(req: Request) {
       payload.producer &&
       (!(payload.producer instanceof Array) ||
         (payload.producer.length > 0 &&
-          payload.producer.some((artist) => artist.name === "")))
+          payload.producer.some((artist) => artist.name === "" && artist.role === "")))
     ) {
       payload.producer = [];
     }
@@ -193,7 +190,12 @@ export async function POST(req: Request) {
       user: user!._id,
       releaseStatus: "draft",
       timeZone: payload?.timeZone,
-      isCoverSong: payload.isCoverSong
+      isCoverSong: payload.isCoverSong,
+      compositionType: payload.compositionType,
+      instrumentalSource: payload.instrumentalSource,
+      countryOfRecording: payload.countryOfRecording,
+      providedBy: payload.providedBy,
+      courtesyLine: payload.courtesyLine,
     });
 
     await savedSong.save();
@@ -295,8 +297,7 @@ export async function PUT(req: Request) {
       payload.song_writer &&
       (!(payload.song_writer instanceof Array) ||
         (payload.song_writer.length > 0 &&
-          payload.song_writer.some((artist) => artist.first_name === "") ||
-          payload.song_writer.some((artist) => artist.last_name === "")))
+          payload.song_writer.some((artist) => artist.first_name === "" && artist.last_name === "")))
     ) {
       payload.song_writer = [];
     }
@@ -304,8 +305,7 @@ export async function PUT(req: Request) {
       payload.performer &&
       (!(payload.performer instanceof Array) ||
         (payload.performer.length > 0 &&
-          payload.performer.some((artist) => artist.name === "") ||
-          payload.performer.some((artist) => artist.role === "")))
+          payload.performer.some((artist) => artist.name === "" && artist.role === "")))
     ) {
       payload.performer = [];
     }
@@ -313,7 +313,7 @@ export async function PUT(req: Request) {
       payload.featured_artist &&
       (!(payload.featured_artist instanceof Array) ||
         (payload.featured_artist.length > 0 &&
-          payload.featured_artist.some((artist) => artist.artistName === "")))
+          payload.featured_artist.some((artist) => artist.artistName === "" && artist.role === "")))
     ) {
       payload.featured_artist = [];
     }
@@ -321,13 +321,13 @@ export async function PUT(req: Request) {
       payload.producer &&
       (!(payload.producer instanceof Array) ||
         (payload.producer.length > 0 &&
-          payload.producer.some((artist) => artist.name === "")))
+          payload.producer.some((artist) => artist.name === "" && artist.role === "")))
     ) {
       payload.producer = [];
     }
     console.log({ ...payload });
 
-    const isDraftSongValid = validateDraftSongs(payload);
+    const isDraftSongValid = validateDraftSongs(payload, user?.type.includes("LABEL") ?? false);
 
     if (isDraftSongValid != null) {
       return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
@@ -365,7 +365,12 @@ export async function PUT(req: Request) {
         territories: payload.territories,
         artistName: userArtist.artistName,
         artist: userArtist._id,
-        releaseStatus: "draft"
+        releaseStatus: "draft",
+        compositionType: payload.compositionType,
+        instrumentalSource: payload.instrumentalSource,
+        countryOfRecording: payload.countryOfRecording,
+        providedBy: payload.providedBy,
+        courtesyLine: payload.courtesyLine,
       },
       { runValidators: true },
     );

@@ -223,6 +223,71 @@ const SongPreview: React.FC<SongPreviewProps> = ({
           </div>
         </div>
 
+        {/* Provided By */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Provided By
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {songForm.providedBy}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
+        {/* Courtesy Line */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Courtesy Line
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {songForm.courtesyLine}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
+        {/* Composition type */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Composition type
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {songForm.compositionType}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
+        {/* instrumental Source */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            instrumental Source
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {songForm.instrumentalSource}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+        
+        {/* Country of Recording */}
+        <div className="flex flex-col w-full">
+          <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">
+            Country of Recording
+          </h2>
+          <div className="">
+            <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
+              {songForm.countryOfRecording}
+            </p>
+            <div className="border border-neutral-100"></div>
+          </div>
+        </div>
+
         {/* Release date */}
         <div className="flex flex-col w-full">
           <h2 className="text-xs font-bold tracking-wider text-[#103958] capitalize">

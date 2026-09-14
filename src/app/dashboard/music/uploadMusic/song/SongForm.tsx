@@ -16,10 +16,20 @@ import type {
   SongForm,
   SongWriter,
 } from "@/app/type";
-import { genreList, performerRoles, territories } from "@/app/utils/constants";
+import {
+  compositionTypes,
+  country_list,
+  genreList,
+  instrumentalSources,
+  otherArtistRoles,
+  performerRoles,
+  producerRoles,
+  territories,
+} from "@/app/utils/constants";
 import Select from "@/components/Select";
 import UseAxios from "@/util/customHooks/UseAxios";
 import {
+  useAuthUser,
   useGetDPMDsp,
   useGetUserArtistsNames,
 } from "@/util/customHooks/useQueries";
@@ -40,6 +50,7 @@ import { toast } from "react-toastify";
 import SongPreview from "./SongPreview";
 
 const SongForm = () => {
+  const { data: user, isLoading: loadingUser } = useAuthUser();
   const queryClient = useQueryClient();
   const api = UseAxios();
   const router = useRouter();
@@ -67,10 +78,10 @@ const SongForm = () => {
     artist: "",
     release_date: undefined,
     preOrderDate: undefined,
-    featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+    featured_artist: [{ artistName: "", spotifyId: "", appleId: "", role: "" }],
     performer: [{ name: "", role: "" }],
     song_writer: [{ first_name: "", last_name: "" }],
-    producer: [{ name: "" }],
+    producer: [{ name: "", role: "" }],
     pre_order_check: false,
     another_distribution_check: false,
     territories: [],
@@ -87,6 +98,11 @@ const SongForm = () => {
     timeZone: { label: "", value: "", name: "" },
     cover_song: false,
     license: null,
+    compositionType: "",
+    instrumentalSource: "",
+    countryOfRecording: "",
+    courtesyLine: "",
+    providedBy: "",
   });
   // const { deleteParam } = useTabQuery();
 
@@ -97,7 +113,7 @@ const SongForm = () => {
           ...prev,
           featured_artist: [
             ...prev.featured_artist,
-            { artistName: "", spotifyId: "", appleId: "" },
+            { artistName: "", spotifyId: "", appleId: "", role: "" },
           ],
         }));
         break;
@@ -116,7 +132,7 @@ const SongForm = () => {
       case "producer":
         setSongForm((prev) => ({
           ...prev,
-          producer: [...prev.producer, { name: "" }],
+          producer: [...prev.producer, { name: "", role: "" }],
         }));
         break;
 
@@ -208,6 +224,14 @@ const SongForm = () => {
       dashboardContext?.setOpenUpgradePopUp(true);
       return;
     }
+    if (user?.type.includes("LABEL") === false) {
+      songForm.providedBy = "SoundMac";
+      songForm.courtesyLine = "SoundMac";
+    } else {
+      songForm.providedBy = songForm.providedBy || user?.label || "";
+      songForm.courtesyLine = songForm.courtesyLine || user?.label || "";
+    }
+    console.log(songForm);
     setIsSubmittingForm(true);
     const formData = new FormData();
     if (form.title == "") {
@@ -281,7 +305,7 @@ const SongForm = () => {
         queryKey: ["manageSongs"],
       });
       queryClient.invalidateQueries({
-       queryKey: ["notifications"],
+        queryKey: ["notifications"],
       });
       localStorage.removeItem("songForm");
       localStorage.removeItem("song_writer");
@@ -330,10 +354,12 @@ const SongForm = () => {
       artist: "",
       release_date: undefined,
       preOrderDate: undefined,
-      featured_artist: [{ artistName: "", spotifyId: "", appleId: "" }],
+      featured_artist: [
+        { artistName: "", spotifyId: "", appleId: "", role: "" },
+      ],
       performer: [{ name: "", role: "" }],
       song_writer: [{ first_name: "", last_name: "" }],
-      producer: [{ name: "" }],
+      producer: [{ name: "", role: "" }],
       pre_order_check: false,
       another_distribution_check: false,
       territories: [],
@@ -350,6 +376,11 @@ const SongForm = () => {
       timeZone: { label: "", value: "", name: "" },
       cover_song: false,
       license: null,
+      compositionType: "",
+      instrumentalSource: "",
+      countryOfRecording: "",
+      courtesyLine: "",
+      providedBy: "",
     });
     setImage(null);
     setshowSuccessPage(false);
@@ -367,7 +398,7 @@ const SongForm = () => {
 
       const featured_artist1 = featured_artist
         ? JSON.parse(featured_artist)
-        : [{ artistName: "", spotifyId: "", appleId: "" }];
+        : [{ artistName: "", spotifyId: "", appleId: "", role: "" }];
 
       const song_writer1 = song_writer
         ? JSON.parse(song_writer)
@@ -430,11 +461,11 @@ const SongForm = () => {
 
   return (
     <div className="bg-main-white h-full w-full flex flex-col md:pl-[10px]">
-      {isLoading || isSubmittingForm || isLoadingDsp ? (
+      {isLoading || isSubmittingForm || isLoadingDsp || loadingUser ? (
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError || data != undefined || !dspData) && (
+        (!isError && data != undefined && dspData && user) && (
           <>
             <div className="flex gap-8 px-5 md:px-2 py-5 min-h-full h-full">
               {/* form */}
@@ -620,10 +651,10 @@ const SongForm = () => {
                     {/* featured_artist */}
                     <div>
                       <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-5">
-                        Featured Artists
+                        Other Artists
                       </h2>
                       <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mb-5">
-                        You can leave blank if there are no featured artists on
+                        You can leave blank if there are no other artists on
                         your release.
                       </p>
                       {songForm.featured_artist.map((_, i) => (
@@ -641,7 +672,33 @@ const SongForm = () => {
                               name={"artistName"}
                               placeholder={"Enter Artist Name"}
                               updateValue={handleDynamicChange}
-                              required={false}
+                              required={true}
+                            />
+                          </div>
+                          <div className="flex flex-col w-[40%] max-sm:w-full">
+                            <div className="flex gap-1">
+                              <p className="font-medium mb-2 text-sm">
+                                Role <span className="text-red-500">*</span>
+                              </p>
+                            </div>
+                            <Select
+                              selected={songForm.featured_artist[i].role}
+                              setSelected={(t) =>
+                                setSongForm((prev) => {
+                                  const updatedList = [...prev.featured_artist];
+                                  updatedList[i] = {
+                                    ...updatedList[i],
+                                    role: t,
+                                  };
+                                  return {
+                                    ...prev,
+                                    featured_artist: updatedList,
+                                  };
+                                })
+                              }
+                              placeholder="Select role..."
+                              options={otherArtistRoles}
+                              name="featured_artist"
                             />
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -672,6 +729,7 @@ const SongForm = () => {
                       ))}
                       <div className="flex gap-2 items-center">
                         <button
+                          aria-label="add other artist"
                           disabled={songForm.featured_artist.length === 5}
                           onClick={() => {
                             addField("featured_artist");
@@ -687,10 +745,10 @@ const SongForm = () => {
                             height={0}
                             className="w-4 text-primary"
                           />
-                          Add featured Artist
+                          Add Other Artist
                         </button>
                         <button
-                          aria-label="delete featured artist"
+                          aria-label="delete other artist"
                           disabled={songForm.featured_artist.length === 1}
                           onClick={() => {
                             setSongForm((prev) => ({
@@ -887,6 +945,32 @@ const SongForm = () => {
                               placeholder={"Enter name"}
                               updateValue={handleDynamicChange}
                               required={true}
+                            />
+                          </div>
+                          <div className="flex flex-col w-[40%] max-sm:w-full">
+                            <div className="flex gap-1">
+                              <p className="font-medium mb-2 text-sm">
+                                Role <span className="text-red-500">*</span>
+                              </p>
+                            </div>
+                            <Select
+                              selected={songForm.producer[index].role}
+                              setSelected={(t) =>
+                                setSongForm((prev) => {
+                                  const updatedList = [...prev.producer];
+                                  updatedList[index] = {
+                                    ...updatedList[index],
+                                    role: t,
+                                  };
+                                  return {
+                                    ...prev,
+                                    producer: updatedList,
+                                  };
+                                })
+                              }
+                              placeholder="Select role..."
+                              options={producerRoles}
+                              name="producer"
                             />
                           </div>
                         </div>
@@ -1434,6 +1518,66 @@ const SongForm = () => {
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
+                        {user?.type.includes("LABEL") ? (
+                          <Input
+                            value={songForm.providedBy || user.label}
+                            title={"Provided By"}
+                            type={"text"}
+                            name={"providedBy"}
+                            placeholder={"Enter Provided By"}
+                            updateValue={handleChange}
+                            disabled={false}
+                            uppercase={false}
+                            required={true}
+                          />
+                        ) : (
+                          <Input
+                            value={"SoundMac"}
+                            title={"Provided By"}
+                            type={"text"}
+                            name={"providedBy"}
+                            placeholder={"Enter Provided By"}
+                            updateValue={() => {}}
+                            disabled={true}
+                            uppercase={false}
+                            required={true}
+                          />
+                        )}
+                        <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                          Only Labels can edit.
+                        </p>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
+                        {user?.type.includes("LABEL") ? (
+                          <Input
+                            value={songForm.courtesyLine || user.label}
+                            title={"Courtesy Line"}
+                            type={"text"}
+                            name={"courtesyLine"}
+                            placeholder={"Enter Courtesy Line"}
+                            updateValue={handleChange}
+                            disabled={false}
+                            uppercase={false}
+                            required={true}
+                          />
+                        ) : (
+                          <Input
+                            value={"SoundMac"}
+                            title={"Courtesy Line"}
+                            type={"text"}
+                            name={"courtesyLine"}
+                            placeholder={"Enter Courtesy Line"}
+                            updateValue={() => {}}
+                            disabled={true}
+                            uppercase={false}
+                            required={true}
+                          />
+                        )}
+                        <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                          Only Labels can edit.
+                        </p>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
                         <Input
                           value={songForm.copyRightHolder}
                           title={"Copyright Holder"}
@@ -1465,6 +1609,72 @@ const SongForm = () => {
                             placeholder="Select Copyright Year..."
                             options={years}
                             name="copyRightYear"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                        <div className="flex">
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            Composition Type{" "}
+                            <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <div className="w-full">
+                          <Select
+                            selected={songForm.compositionType}
+                            setSelected={(t) =>
+                              setSongForm((prev) => ({
+                                ...prev,
+                                compositionType: t,
+                              }))
+                            }
+                            placeholder="Select Composition Type..."
+                            options={compositionTypes}
+                            name="compositionType"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                        <div className="flex">
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            instrumental Source{" "}
+                            <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <div className="w-full">
+                          <Select
+                            selected={songForm.instrumentalSource}
+                            setSelected={(t) =>
+                              setSongForm((prev) => ({
+                                ...prev,
+                                instrumentalSource: t,
+                              }))
+                            }
+                            placeholder="Select instrumental Source..."
+                            options={instrumentalSources}
+                            name="instrumentalSource"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                        <div className="flex">
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            Country of Recording{" "}
+                            <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <div className="w-full">
+                          <Select
+                            selected={songForm.countryOfRecording}
+                            setSelected={(t) =>
+                              setSongForm((prev) => ({
+                                ...prev,
+                                countryOfRecording: t,
+                              }))
+                            }
+                            placeholder="Select Country of Recording..."
+                            options={country_list}
+                            name="countryOfRecording"
                           />
                         </div>
                       </div>
@@ -1534,7 +1744,7 @@ const SongForm = () => {
                         href="/dashboard/music/manageRelease?type=single"
                         className="w-full sm:w-1/2 px-5 py-3 font-bold rounded-xl text-center text-sm transition-all cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center justify-center shrink-0 shadow-sm"
                       >
-                      <p className="text-white">View Song </p>
+                        <p className="text-white">View Song </p>
                       </Link>
                     </div>
                   </div>

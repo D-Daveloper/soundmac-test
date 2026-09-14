@@ -22,7 +22,7 @@ export const navigationLinks = [
 
 const nL = navigationLinks.map((n) => n.link);
 // export const rootScreenLinks = [...nL];
-export const rootScreenLinks=['/'];
+export const rootScreenLinks = ['/'];
 
 export const linkRoutes: ROUTE_CONFIG = {
   Home: "/",
@@ -562,6 +562,11 @@ export const territories = [
   { label: "Zambia", value: "zm" },
   { label: "Zimbabwe", value: "zw" },
 ];
+export const otherArtistRoles = [
+  "Featured Artist",
+  "Remixer",
+  "With"
+];
 export const performerRoles = [
   "Performer",
   "Soloist",
@@ -571,13 +576,31 @@ export const performerRoles = [
   "Other Performer",
 ];
 export const producerRoles = [
-  "Performer",
-  "Soloist",
-  "Choir",
-  "Ensemble",
-  "Orchestra",
-  "Other Performer",
+  "Music-Producer",
+  "Co-Producer",
+  "Mixing-Engineer",
+  "Mastering-Engineer",
+  "Recording-Engineer",
+  "Assistant-Engineer",
+  "Engineer",
+  "Mixer",
+  "Graphic-Design",
+  "Video-Director",
+  "Video-Producer",
 ];
+
+export const compositionTypes = [
+  "Original Composition",
+  "Cover Song",
+  "Public Domain"
+];
+
+export const instrumentalSources = [
+  "Free beat (non-exclusive or promotional use)",
+  "Purchased beat",
+  "Custom / exclusive production"
+];
+
 export const country_list = [
   "Afghanistan",
   "Albania",

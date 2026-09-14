@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { redirect } from 'next/navigation'
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import { getAlbumPerformanceData } from "@/app/api/insights/song-performance/album/[id]/route";
+import { getAlbumPerformanceData } from "@/app/api/insights/song-performance/utils";
+// import { getAlbumPerformanceData } from "@/app/api/insights/song-performance/album/[id]/route";
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   // Await the params directly on the server
