@@ -175,12 +175,22 @@ export async function POST(req: Request) {
 <meta charset="UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>User Verification</title>
+<title>Your Soundmac Verification Code</title>
 </head>
 <body>
 <div>
-Here is your otp ${otp}
-<p>Expires in 10 mins </p>
+Hello ${user.firstName}
+Your one-time verification code is: ${otp}
+
+<p>This code will expire in ten(10) minutes.
+
+For your security, never share this code with anyone. SoundMac will never ask you for your verification code by email, phone, or message.
+
+If you didn’t request this code, you can safely ignore this email.
+
+Best,
+
+SoundMac Security Team </p>
 
 </div>
 </body>

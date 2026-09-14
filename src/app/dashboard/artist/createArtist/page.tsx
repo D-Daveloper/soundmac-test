@@ -192,7 +192,7 @@ const CreateArtistForm = () => {
                     <div className="flex flex-col max-sm:w-full gap-2">
                       <div className="flex gap-1">
                         <h3 className="text-xl font-semibold leading-[24px] tracking-[-0.5px] text-main-heading">
-                          Artwork File <span className="text-red-500">*</span>
+                          Profile Image <span className="text-red-500">*</span>
                         </h3>
                         {/* <Image
                           priority={false}

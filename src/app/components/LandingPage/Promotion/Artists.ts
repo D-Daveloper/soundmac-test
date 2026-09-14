@@ -39,7 +39,7 @@ export const artists = [
     image: promoArtist5,
     name: "JLGD",
     quote:
-      "My audience has grown far beyond what I imagined. Seeing listeners discover my music across different countries has been incredibly motivating.",
+      "Using Soundmac has helped me take my music beyond my expectations. Seeing my songs reach listeners in different countries and watching my audience grow has been an amazing experience.",
     bg: "#1a1a1a",
     dotOpacity: 0.4,
   },
