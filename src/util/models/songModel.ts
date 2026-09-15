@@ -304,7 +304,7 @@ const SongModelSchema = new mongoose.Schema(
       type: String,
       required: [
         function (this: any) {
-          return this.get("releaseStatus") !== "draft" && this.get("isCoverSong") != false;
+          return this.get("releaseStatus") !== "draft" && this.get("compositionType") === "Cover Song";
         },
         "License URL is required",
       ],
@@ -431,7 +431,7 @@ const SongModelSchema = new mongoose.Schema(
     providedBy: {
       type: String,
       required: [function (this: any) {
-        return this.get("providedBy") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Provided by is required"],
       trim: true,
       validate: {
@@ -448,7 +448,7 @@ const SongModelSchema = new mongoose.Schema(
     },
     courtesyLine: {
       type: String, required: [function (this: any) {
-        return this.get("courtesyLine") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Courtesy line is required"], trim: true,
       validate: {
         validator: async function (v: any) {
@@ -464,17 +464,17 @@ const SongModelSchema = new mongoose.Schema(
     },
     compositionType: {
       type: String, required: [function (this: any) {
-        return this.get("compositionType") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Composition type is required"], trim: true, enum: compositionTypes
     },
     instrumentalSource: {
       type: String, required: [function (this: any) {
-        return this.get("instrumentalSource") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Instrumental source is required"], trim: true, enum: instrumentalSources
     },
     countryOfRecording: {
       type: String, required: [function (this: any) {
-        return this.get("countryOfRecording") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Country of recording is required"], trim: true, enum: country_list
     },
   },

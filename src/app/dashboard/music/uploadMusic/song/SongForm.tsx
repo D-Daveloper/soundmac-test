@@ -465,7 +465,10 @@ const SongForm = () => {
         <InlineLoadingScreen />
       ) : (
         !isLoading &&
-        (!isError && data != undefined && dspData && user) && (
+        !isError &&
+        data != undefined &&
+        dspData &&
+        user && (
           <>
             <div className="flex gap-8 px-5 md:px-2 py-5 min-h-full h-full">
               {/* form */}
@@ -548,19 +551,29 @@ const SongForm = () => {
                       </div>
                     </div>
                     <div className="flex flex-col w-[40%] mt-10 max-sm:w-full">
-                      <p className="font-medium mb-2 sm:text-sm text-base">
-                        Cover Song?
-                      </p>
-                      <ToggleSwitch
-                        isOn={songForm.cover_song}
-                        onToggle={() =>
-                          setSongForm((prev) => ({
-                            ...prev,
-                            cover_song: !songForm.cover_song,
-                          }))
-                        }
-                      />
-                      {songForm.cover_song && (
+                      <div className="flex flex-col max-sm:w-full gap-2">
+                        <div className="flex">
+                          <p className=" capitalize font-medium text-sm mr-1">
+                            Composition Type{" "}
+                            <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <div className="w-full">
+                          <Select
+                            selected={songForm.compositionType}
+                            setSelected={(t) =>
+                              setSongForm((prev) => ({
+                                ...prev,
+                                compositionType: t,
+                              }))
+                            }
+                            placeholder="Select Composition Type..."
+                            options={compositionTypes}
+                            name="compositionType"
+                          />
+                        </div>
+                      </div>
+                      {songForm.compositionType === "Cover Song" && (
                         <>
                           <div className="flex gap-1 mt-5">
                             <p className="font-medium mb-2 text-sm">
@@ -1520,7 +1533,7 @@ const SongForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={songForm.providedBy || user.label}
+                            value={songForm.providedBy}
                             title={"Provided By"}
                             type={"text"}
                             name={"providedBy"}
@@ -1544,13 +1557,15 @@ const SongForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={songForm.courtesyLine || user.label}
+                            value={songForm.courtesyLine}
                             title={"Courtesy Line"}
                             type={"text"}
                             name={"courtesyLine"}
@@ -1574,7 +1589,9 @@ const SongForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -1609,28 +1626,6 @@ const SongForm = () => {
                             placeholder="Select Copyright Year..."
                             options={years}
                             name="copyRightYear"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                        <div className="flex">
-                          <p className=" capitalize font-medium text-sm mr-1">
-                            Composition Type{" "}
-                            <span className="text-red-500">*</span>
-                          </p>
-                        </div>
-                        <div className="w-full">
-                          <Select
-                            selected={songForm.compositionType}
-                            setSelected={(t) =>
-                              setSongForm((prev) => ({
-                                ...prev,
-                                compositionType: t,
-                              }))
-                            }
-                            placeholder="Select Composition Type..."
-                            options={compositionTypes}
-                            name="compositionType"
                           />
                         </div>
                       </div>

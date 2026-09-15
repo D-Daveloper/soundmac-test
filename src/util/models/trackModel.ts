@@ -210,17 +210,17 @@ const TrackSchema = new mongoose.Schema(
     },
     compositionType: {
       type: String, required: [function (this: any) {
-        return this.get("compositionType") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Composition type is required"], trim: true, enum: compositionTypes
     },
     instrumentalSource: {
       type: String, required: [function (this: any) {
-        return this.get("instrumentalSource") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Instrumental source is required"], trim: true, enum: instrumentalSources
     },
     countryOfRecording: {
       type: String, required: [function (this: any) {
-        return this.get("countryOfRecording") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Country of recording is required"], trim: true, enum: country_list
     },
   },

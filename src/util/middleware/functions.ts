@@ -135,12 +135,12 @@ export const isSongFormValid = (form: SongForm): string => {
         return "ISRC and UPC is required";
     } else if (form.copyRightHolder === "" || form.copyRightYear === "") {
         return "Copy right holder and year is required";
-    } else if (form.cover_song && (!form.license && !form.old_license)) {
+    } else if (!form.compositionType) {
+        return "Composition type is required";
+    } else if (form.compositionType === "Cover Song" && (!form.license && !form.old_license)) {
         return "License is required";
     } else if (form.license && form.license.type != "application/pdf") {
         return "License must be a PDF";
-    } else if (!form.compositionType) {
-        return "Composition type is required";
     } else if (!form.instrumentalSource) {
         return "Instrumental source is required";
     } else if (!form.countryOfRecording) {
@@ -873,7 +873,12 @@ export function validateNonDraftSongs(
     if (!payload.timeZone || typeof payload.timeZone !== "object" || !payload.timeZone.value) {
         return "Time zone is required";
     }
-    if (payload.isCoverSong && ((!payload.license || !(payload.license instanceof File)) && !payload.oldLicense)) {
+
+    if (!payload.compositionType || !compositionTypes.includes(payload.compositionType)) {
+        return "Composition type is invalid";
+    }
+
+    if (payload.compositionType === "Cover Song" && ((!payload.license || !(payload.license instanceof File)) && !payload.oldLicense)) {
         return "License is required."
     }
 
@@ -881,15 +886,11 @@ export function validateNonDraftSongs(
         return "License must be a PDF";
     }
 
-    if (payload.compositionType && !compositionTypes.includes(payload.compositionType)) {
-        return "Composition type is invalid";
-    }
-
-    if (payload.instrumentalSource && !instrumentalSources.includes(payload.instrumentalSource)) {
+    if (!payload.instrumentalSource || !instrumentalSources.includes(payload.instrumentalSource)) {
         return "Instrumental source is invalid";
     }
 
-    if (payload.countryOfRecording && !country_list.includes(payload.countryOfRecording)) {
+    if (!payload.countryOfRecording || !country_list.includes(payload.countryOfRecording)) {
         return "Country of recording is invalid";
     }
 
@@ -1408,15 +1409,15 @@ export function validateNonDraftTracks(
         return "Audio upload is required";
     }
 
-    if (payload.compositionType && !compositionTypes.includes(payload.compositionType)) {
+    if (!payload.compositionType || !compositionTypes.includes(payload.compositionType)) {
         return "Composition type is invalid";
     }
 
-    if (payload.instrumentalSource && !instrumentalSources.includes(payload.instrumentalSource)) {
+    if (!payload.instrumentalSource || !instrumentalSources.includes(payload.instrumentalSource)) {
         return "Instrumental source is invalid";
     }
 
-    if (payload.countryOfRecording && !country_list.includes(payload.countryOfRecording)) {
+    if (!payload.countryOfRecording || !country_list.includes(payload.countryOfRecording)) {
         return "Country of recording is invalid";
     }
 

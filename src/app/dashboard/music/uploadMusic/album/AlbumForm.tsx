@@ -820,7 +820,11 @@ const AlbumForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                            {user?.type.includes("LABEL")
+                              ? "If not provided, the label name will be used as the default value for this field."
+                              : "Only Labels can edit."}
+                          </p>
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -850,7 +854,11 @@ const AlbumForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                            {user?.type.includes("LABEL")
+                              ? "If not provided, the label name will be used as the default value for this field."
+                              : "Only Labels can edit."}
+                          </p>
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">

@@ -406,7 +406,7 @@ const SongForm = ({
       // Parse with fallback to default value
       const featured_artist1 = featured_artist
         ? JSON.parse(featured_artist)
-        : [{ artistName: "", spotifyId: "", appleId: "" }];
+        : [{ artistName: "", spotifyId: "", appleId: "", role: "" }];
 
       const song_writer1 = song_writer
         ? JSON.parse(song_writer)
@@ -418,7 +418,7 @@ const SongForm = ({
 
       const producer1 = producer
         ? JSON.parse(producer)
-        : [{ first_name: "", last_name: "" }];
+        : [{ name: "", role: "" }];
 
       console.log(featured_artist1);
 
@@ -493,7 +493,7 @@ const SongForm = ({
       dashboardContext?.setHeader({
         title: "manage song",
         showBackButton: true,
-        onBack: () => router.back(),
+        onBack: () => goBack(),
       });
     }
   }, [preview]);
@@ -614,74 +614,81 @@ const SongForm = ({
                       </div>
                     </div>
                     <div className="flex flex-col w-[40%] mt-10 max-sm:w-full">
-                      <p className="font-medium mb-2 text-sm">Cover Song?</p>
-                      <ToggleSwitch
-                        isOn={songForm.cover_song}
-                        onToggle={() =>
-                          setSongForm((prev) => ({
-                            ...prev,
-                            cover_song: !songForm.cover_song,
-                          }))
-                        }
-                      />
-                      {songForm.cover_song &&
+                      {songForm.compositionType === "Cover Song" &&
                         (songFormFromApi.releaseStatus != "approved" ? (
                           <>
-                            <div className="w-80">
-                              <div className="flex gap-1 mt-5">
-                                <p className="font-medium mb-2 text-sm">
-                                  Cover License{" "}
-                                  <span className="text-red-500">*</span>
-                                </p>
-                                {/* <Image
-                                priority={false}
-                                loading="lazy"
-                                src="/required.svg"
-                                alt="a star marking this field as required"
-                                width={0}
-                                height={0}
-                                className="w-2 -mt-5"
-                              /> */}
+                            <div className="flex flex-col mt-10 max-sm:w-full">
+                              <div className="flex flex-col max-sm:w-full gap-2">
+                                <div className="flex">
+                                  <p className=" capitalize font-medium text-sm mr-1">
+                                    Composition Type{" "}
+                                    <span className="text-red-500">*</span>
+                                  </p>
+                                </div>
+                                <div className="w-full">
+                                  <Select
+                                    selected={songForm.compositionType}
+                                    setSelected={(t) =>
+                                      setSongForm((prev) => ({
+                                        ...prev,
+                                        compositionType: t,
+                                      }))
+                                    }
+                                    placeholder="Select Composition Type..."
+                                    options={compositionTypes}
+                                    name="compositionType"
+                                  />
+                                </div>
                               </div>
-                              <div
-                                className={
-                                  "flex px-3 rounded-lg border-transparent border-10 outline-1 gap-3 mt-1 sm:text-sm text-[16px] w-60"
-                                }
-                              >
-                                <label
-                                  htmlFor="license"
-                                  className="line-clamp-1 outline-0  font-extralight h-5"
-                                >
-                                  {!songForm.license
-                                    ? "please select a file"
-                                    : songForm.license?.name}
-                                </label>
-                                <input
-                                  id="license"
-                                  name="license"
-                                  onChange={(e) =>
-                                    setSongForm((prev) => ({
-                                      ...prev,
-                                      license: e.target.files
-                                        ? e.target.files[0]
-                                        : null,
-                                    }))
-                                  }
-                                  type="file"
-                                  accept="application/pdf"
-                                  className="hidden w-full"
-                                />
-                              </div>
-                              <p className="font-light italic flex mt-2 w-[100%] gap-x-5 text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                                Don&apos;t have a license?{" "}
-                                <Link
-                                  href={"/dashboard/explore/coverLicense"}
-                                  className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
-                                >
-                                  Get License here
-                                  <ArrowRight color="#11456B" size={15} />
-                                </Link>
-                              </p>
+                              {songForm.compositionType === "Cover Song" && (
+                                <>
+                                  <div className="flex gap-1 mt-5">
+                                    <p className="font-medium mb-2 text-sm">
+                                      Cover License{" "}
+                                      <span className="text-red-500">*</span>
+                                    </p>
+                                  </div>
+                                  <div
+                                    className={
+                                      "flex px-3 mx-1 rounded-lg border-transparent border-10 outline-1 gap-3 mt-1 sm:text-sm text-[16px] "
+                                    }
+                                  >
+                                    <label
+                                      htmlFor="license"
+                                      className="line-clamp-1 outline-0  font-extralight h-5"
+                                    >
+                                      {!songForm.license
+                                        ? "please select a file"
+                                        : songForm.license?.name}
+                                    </label>
+                                    <input
+                                      id="license"
+                                      name="license"
+                                      onChange={(e) =>
+                                        setSongForm((prev) => ({
+                                          ...prev,
+                                          license: e.target.files
+                                            ? e.target.files[0]
+                                            : null,
+                                        }))
+                                      }
+                                      type="file"
+                                      accept="application/pdf"
+                                      className="hidden w-full"
+                                    />
+                                  </div>
+                                  <p className="font-light italic flex gap-3 text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
+                                    Don&apos;t have a license?{" "}
+                                    <Link
+                                      href={"/dashboard/explore/coverLicense"}
+                                      className="text-primary-500! items-center gap-2 flex font-bold leading-[20px] tracking-tighter text-sm"
+                                    >
+                                      Get License here
+                                      <ArrowRight color="#11456B" size={15} />
+                                    </Link>
+                                  </p>
+                                </>
+                              )}
                             </div>
                           </>
                         ) : (
@@ -1621,7 +1628,7 @@ const SongForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={songForm.providedBy || user.label}
+                            value={songForm.providedBy}
                             title={"Provided By"}
                             type={"text"}
                             name={"providedBy"}
@@ -1645,13 +1652,15 @@ const SongForm = ({
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={songForm.courtesyLine || user.label}
+                            value={songForm.courtesyLine}
                             title={"Courtesy Line"}
                             type={"text"}
                             name={"courtesyLine"}
@@ -1675,7 +1684,9 @@ const SongForm = ({
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          Only Labels can edit.
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -1719,28 +1730,6 @@ const SongForm = ({
                             placeholder="Select Copyright Year..."
                             options={years}
                             name="copyRightYear"
-                          />
-                        </div>
-                      </div>
-                      <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
-                        <div className="flex">
-                          <p className=" capitalize font-medium text-sm mr-1">
-                            Composition Type{" "}
-                            <span className="text-red-500">*</span>
-                          </p>
-                        </div>
-                        <div className="w-full">
-                          <Select
-                            selected={songForm.compositionType}
-                            setSelected={(t) =>
-                              setSongForm((prev) => ({
-                                ...prev,
-                                compositionType: t,
-                              }))
-                            }
-                            placeholder="Select Composition Type..."
-                            options={compositionTypes}
-                            name="compositionType"
                           />
                         </div>
                       </div>

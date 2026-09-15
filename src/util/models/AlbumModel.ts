@@ -200,7 +200,7 @@ export const AlbumSchema = new mongoose.Schema(
     providedBy: {
       type: String,
       required: [function (this: any) {
-        return this.get("providedBy") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Provided by is required"],
       trim: true,
       validate: {
@@ -217,7 +217,7 @@ export const AlbumSchema = new mongoose.Schema(
     },
     courtesyLine: {
       type: String, required: [function (this: any) {
-        return this.get("courtesyLine") !== "draft";
+        return this.get("releaseStatus") !== "draft";
       }, "Courtesy line is required"], trim: true,
       validate: {
         validator: async function (v: any) {
