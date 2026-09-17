@@ -220,6 +220,8 @@ export async function GET(req: Request) {
       releaseDate: 1,
       upc: 1,
       catalogNumber: 1,
+      providedBy: 1,
+      courtesyLine: 1,
       copyRightYear: 1,
       copyRightHolder: 1,
     }).populate("artist", "spotifyId appleId -_id").populate("user", "email").lean();
@@ -239,7 +241,11 @@ export async function GET(req: Request) {
         featuredArtist: 1,
         songWriter: 1,
         producer: 1,
+        performer: 1,
         catalogNumber: 1,
+        compositionType: 1,
+        instrumentalSource: 1,
+        countryOfRecording: 1,
         explicitContent: 1,
         lyrics: 1
       },

@@ -3,7 +3,7 @@ import React, { use, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import { AdminAlbumDetails, AdminTrackDetails } from "@/app/type";
+import { AdminAlbumDetails, TrackFromApi, albumFromApi } from "@/app/type";
 import { CircleCheck, Music, X } from "lucide-react";
 import { useGetAdminAlbumDetails } from "@/util/customHooks/useQueries";
 import UseAxios from "@/util/customHooks/UseAxios";
@@ -21,10 +21,8 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [showRejectModal, setshowRejectModal] = useState(false);
   const [rejectReason, setrejectReason] = useState("");
   const [isTrack, setisTrack] = useState(false);
-  const [album, setalbum] = useState<AdminAlbumDetails | null>(null);
-  const [selectedTrack, setselectedTrack] = useState<AdminTrackDetails | null>(
-    null,
-  );
+  const [album, setalbum] = useState<albumFromApi | null>(null);
+  const [selectedTrack, setselectedTrack] = useState<TrackFromApi | null>(null);
   const { id } = use(params);
   if (!id) {
     return <InlineLoadingScreen />;
@@ -50,7 +48,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [albumDetails]);
   console.log(id);
-  const handleSelectTrack = (track: AdminTrackDetails) => {
+  const handleSelectTrack = (track: TrackFromApi) => {
     setisTrack(true);
     setselectedTrack(track);
   };
@@ -165,9 +163,9 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
           <InlineLoadingScreen />
         ) : (
           <>
-            <div className="flex flex-col md:flex-row mt-3">
+            <div className="flex flex-col md:flex-row mt-3 gap-5">
               {/* Content */}
-              <div className="p-3 flex-2 md:max-w-[70%] overflow-hidden">
+              <div className="p-1 md:p-3 max-w-[75%] min-w-[75%] md:max-w-[70%] w-full overflow-hidden">
                 {isTrack && (
                   <div className="flex items-center gap-1 mb-10">
                     <button
@@ -322,6 +320,29 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                   </div>
                   <div className="border border-neutral-100 mb-6"></div>
 
+                  {/* Courtesy Line */}
+                  <div className="flex">
+                    <div className="flex-1">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        Courtesy Line
+                      </p>
+                      <p className="text-gray-900 text-base font-medium">
+                        {albumDetails.release.courtesyLine}
+                      </p>
+                    </div>
+
+                    <div className="flex-1">
+                      <p className="text-text-disable font-bold text-sm mb-1">
+                        Privided By
+                      </p>
+                      <p className="text-gray-900 text-lg font-medium">
+                        {albumDetails.release.providedBy}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-neutral-100 mb-6"></div>
+
                   <div className="flex flex-col md:flex-row">
                     {/* copy right holder */}
                     <div className="flex-1">
@@ -358,110 +379,103 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         <p className="text-text-disable font-bold text-sm mb-1">
                           Featured Artists
                         </p>
-                        <div className="flex w-full gap-2 overflow-x-auto max-w-[700px]">
+                        <div className="max-h-60 overflow-auto">
                           {selectedTrack.featuredArtist.map((item, index) => (
                             <div
                               key={index}
-                              className="flex items-center gap-5 bg-neutral-100 px-2 rounded-md w-fit whitespace-nowrap"
+                              className="flex w-full gap-2 my-2 max-w-[700px]"
                             >
-                              <p className="text-gray-900 text-base font-medium min-w-fit px-2">
-                                {item.artistName || "N/A"} |
-                              </p>
-                              <div className="flex items-center gap-1.5 mr-2">
-                                <Image
-                                  priority={false}
-                                  src={"/spotify.svg"}
-                                  alt="search icon"
-                                  width={20}
-                                  height={20}
-                                />
-                                <span className="text-sm text-gray-600">
-                                  {item.spotifyId}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-1.5">
-                                <Image
-                                  priority={false}
-                                  src={"/applemusic.svg"}
-                                  alt="search icon"
-                                  width={20}
-                                  height={20}
-                                />
-                                <span className="text-sm text-gray-600 pr-5">
-                                  {item.appleId}
-                                </span>
+                              <div className="flex flex-col gap-1 bg-neutral-100 px-2 rounded-md w-full text-wrap">
+                                <p className="text-gray-900 text-base font-medium min-w-fit">
+                                  {item.artistName}
+                                </p>
+                                <div className="flex items-start gap-1.5 mr-2">
+                                  <Image
+                                    priority={false}
+                                    src={"/spotify.svg"}
+                                    alt="search icon"
+                                    width={20}
+                                    height={20}
+                                  />
+                                  <span className="text-sm text-gray-600">
+                                    {item.spotifyId || "N/A"}
+                                  </span>
+                                </div>
+                                <div className="flex items-start gap-1.5">
+                                  <Image
+                                    priority={false}
+                                    src={"/applemusic.svg"}
+                                    alt="search icon"
+                                    width={20}
+                                    height={20}
+                                  />
+                                  <span className="text-sm text-gray-600 pr-5">
+                                    {item.appleId || "N/A"}
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
                       <div className="flex-1 max-w-[50%]">
-                        <div className="relative max-w-[350px]">
+                        <div className="relative">
                           <p className="text-text-disable font-bold text-sm mb-1">
-                            Producers
+                            Performers
                           </p>
-                          <div
-                            className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
-                            style={{
-                              scrollbarWidth: "none",
-                              msOverflowStyle: "none",
-                            }}
-                          >
-                            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                            {selectedTrack.producer
-                              .map((item) => item.name)
-                              .join(", ")}{" "}
+                          <div className="max-h-60 overflow-auto">
+                            {selectedTrack.performer.map((item, index) => (
+                              <div
+                                key={index}
+                                className="text-gray-900 text-base font-medium bg-neutral-100 my-2 rounded-md px-2"
+                              >
+                                {item.name} - {item.role}
+                              </div>
+                            ))}
                           </div>
-                          {/* fade hint on the right */}
-                          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
                         </div>
                       </div>
                     </div>
-                    {/* border line */}
                     <div className="border border-neutral-100 mb-6"></div>
+
                     {/* Songwriter and Producer */}
                     <div className="grid grid-cols-2">
                       <div className="relative max-w-[400px]">
                         <p className="text-text-disable font-bold text-sm mb-1">
                           Song Writers
                         </p>
-                        <div
-                          className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
-                          style={{
-                            scrollbarWidth: "none",
-                            msOverflowStyle: "none",
-                          }}
-                        >
-                          <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                          {selectedTrack.songWriter
-                            .map((item) => item.first_name)
-                            .join(", ")}
+                        <div className="max-h-60 overflow-auto">
+                          {selectedTrack.songWriter.map((item, index) => (
+                            <div
+                              key={index}
+                              className="text-gray-900 text-base font-medium bg-neutral-100 my-2 rounded-md px-2"
+                            >
+                              <p>
+                                {item.last_name} {item.first_name}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-                        {/* fade hint on the right */}
-                        <div className="absolute right-0 top-0 h-full w-4 bg-gradient-to-l from-white to-transparent pointer-events-none" />
                       </div>
                       <div>
                         <div className="relative max-w-[400px]">
                           <p className="text-text-disable font-bold text-sm mb-1">
                             Producers
                           </p>
-                          <div
-                            className="text-gray-900 text-base font-medium whitespace-nowrap overflow-x-auto"
-                            style={{
-                              scrollbarWidth: "none",
-                              msOverflowStyle: "none",
-                            }}
-                          >
-                            <style>{`div::-webkit-scrollbar { display: none; }`}</style>
-                            {selectedTrack.producer
-                              .map((item) => item.name)
-                              .join(", ")}{" "}
+                          <div className="max-h-60 overflow-auto">
+                            {selectedTrack.producer.map((item, index) => (
+                              <div
+                                key={index}
+                                className="text-gray-900 text-base font-medium bg-neutral-100 my-2 rounded-md px-2"
+                              >
+                                {item.name} - {item.role}
+                              </div>
+                            ))}
                           </div>
-                          {/* fade hint on the right */}
-                          <div className="absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white to-transparent pointer-events-none" />
                         </div>
                       </div>
                     </div>
+
                     <div className="border border-neutral-100 mb-6"></div>
                     <div className="flex">
                       {/*catalog number */}
@@ -486,6 +500,45 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                         />
                       </div>
                     </div>
+
+                    {/* border line */}
+                    <div className="border border-neutral-100 mb-6"></div>
+
+                    {/* composition type */}
+                    <div className="flex">
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Composition Type
+                        </p>
+                        <p className="text-gray-900 text-base font-medium">
+                          {selectedTrack.compositionType}
+                        </p>
+                      </div>
+
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Instrumental Source
+                        </p>
+                        <p className="text-gray-900 text-lg font-medium">
+                          {selectedTrack.instrumentalSource}
+                        </p>
+                      </div>
+                    </div>
+                    {/* border line */}
+                    <div className="border border-neutral-100 mb-6"></div>
+
+                    {/* Country of Recording */}
+                    <div className="flex">
+                      <div className="flex-1">
+                        <p className="text-text-disable font-bold text-sm mb-1">
+                          Country of Recording
+                        </p>
+                        <p className="text-gray-900 text-base font-medium">
+                          {selectedTrack.countryOfRecording}
+                        </p>
+                      </div>
+                    </div>
+
                     <div className="border border-neutral-100 mb-6"></div>
                     {/*Lyrics */}
                     <div className="flex-1">
@@ -519,7 +572,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
               </div>
 
               {/* side bar */}
-              <div className="flex-1 flex flex-col md:items-end!">
+              <div className="max-w-[25%] flex flex-col md:items-end! gap-5 mb-5 ">
                 <div className="bg-neutral-50 p-3 rounded-lg">
                   <div className=" relative overflow-hidden w-50 h-50">
                     <Image

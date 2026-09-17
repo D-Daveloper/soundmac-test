@@ -34,15 +34,15 @@ export async function POST(
     }
     await dbConnect();
 
-    
-        const admin = userJwt.user
-          ? await User.findById(userJwt.user).lean()
-          : null;
-        if (!admin) {
-          return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
-        } else if (admin.role != "admin" && admin.role != "super_admin") {
-          return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
-        }
+
+    const admin = userJwt.user
+      ? await User.findById(userJwt.user).lean()
+      : null;
+    if (!admin) {
+      return NextResponse.json({ msg: "Invalid Request." }, { status: 404 });
+    } else if (admin.role != "admin" && admin.role != "super_admin") {
+      return NextResponse.json({ msg: "Request Forbidden." }, { status: 403 });
+    }
 
     // const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     // if (!user) {
@@ -243,11 +243,17 @@ export async function GET(
       featuredArtist: 1,
       songWriter: 1,
       producer: 1,
+      performer: 1,
       catalogNumber: 1,
       explicitContent: 1,
       lyrics: 1,
       copyRightYear: 1,
       copyRightHolder: 1,
+      providedBy: 1,
+      courtesyLine: 1,
+      compositionType: 1,
+      instrumentalSource: 1,
+      countryOfRecording: 1,
       license: 1,
     };
     // Get audio record from database

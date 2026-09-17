@@ -5,6 +5,7 @@ import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import {
   AdminTrackDetails,
+  TrackFromApi,
 } from "@/app/type";
 import { Music } from "lucide-react";
 import { useGetAdminAlbumDetails } from "@/util/customHooks/useQueries";
@@ -19,7 +20,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const [isSubmitting, setisSubmitting] = useState(false);
   const [isTrack, setisTrack] = useState(false);
   const [selectedTrack, setselectedTrack] = useState<
-    AdminTrackDetails | null
+    TrackFromApi | null
   >(null);
   const { id } = use(params);
   if (!id) {
@@ -38,7 +39,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
     }
   }, [albumDetails]);
   console.log(id);
-  const handleSelectTrack = (track: AdminTrackDetails) => {
+  const handleSelectTrack = (track: TrackFromApi) => {
     setisTrack(true);
     setselectedTrack(track);
   };

@@ -433,8 +433,8 @@ export interface AdminTrackDetails {
   lyrics: string;
 }
 export interface AdminAlbumDetailsResponse {
-  release: AdminAlbumDetails & { user: { email: string } };
-  tracks: AdminTrackDetails[];
+  release: albumFromApi & { user: { email: string } };
+  tracks: TrackFromApi[];
   msg: string;
 }
 export interface AdminSingleDetailsResponse {
