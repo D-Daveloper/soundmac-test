@@ -19,10 +19,10 @@ const CreateArtistForm = () => {
   const { mutateAsync, isPending } = useCreatArtistMutation();
   const dashboardContext = useContext(DashboardContext);
   const [artistForm, setArtistForm] = useState<CreateArtistForm>({
-    artist_name: "",
-    apple_id: "",
-    spotify_id: "",
-    artist_image: null,
+    artistName: "",
+    appleId: "",
+    spotifyId: "",
+    artistImage: null,
     hasPlatformId: false,
   });
   // useEffect(() => {
@@ -49,10 +49,10 @@ const CreateArtistForm = () => {
     const { value, name, checked } = e.target;
     if (name === "hasPlatformId") {
       setArtistForm((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "artist_image") {
+    } else if (name === "artistImage") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setArtistForm((prev) => ({ ...prev, artist_image: file }));
+      setArtistForm((prev) => ({ ...prev, artistImage: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -73,8 +73,8 @@ const CreateArtistForm = () => {
         formData.append(key, String(value));
       }
     });
-    if (artistForm.artist_image)
-      formData.append("artist_image", artistForm.artist_image);
+    if (artistForm.artistImage)
+      formData.append("artistImage", artistForm.artistImage);
     console.log(...formData);
     try {
       await mutateAsync(form);
@@ -92,10 +92,10 @@ const CreateArtistForm = () => {
 
   const createAnother = () => {
     setArtistForm({
-      artist_name: "",
-      apple_id: "",
-      spotify_id: "",
-      artist_image: null,
+      artistName: "",
+      appleId: "",
+      spotifyId: "",
+      artistImage: null,
       hasPlatformId: false,
     });
     setImage(null);
@@ -126,7 +126,7 @@ const CreateArtistForm = () => {
 
       setArtistForm({
         ...artistForm,
-        artist_image: null,
+        artistImage: null,
       });
     }
   }, []);
@@ -163,10 +163,10 @@ const CreateArtistForm = () => {
                 <div className="w-full flex flex-wrap justify-between gap-y-5 mt-10 ">
                   <div className="flex flex-col w-[40%] max-sm:w-full px-1">
                     <Input
-                      value={artistForm.artist_name}
+                      value={artistForm.artistName}
                       title={"Artist Name"}
                       type={"text"}
-                      name={"artist_name"}
+                      name={"artistName"}
                       placeholder={"Enter Artist Name"}
                       updateValue={handleChange}
                       required={true}
@@ -206,13 +206,13 @@ const CreateArtistForm = () => {
                       </div>
                       <div className="flex items-center justify-center w-64 md:w-80">
                         <label
-                          htmlFor="artist_image"
+                          htmlFor="artistImage"
                           className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                         >
                           <div
                             className={
                               "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                              (!artistForm.artist_image && " bg-neutral-50 ")
+                              (!artistForm.artistImage && " bg-neutral-50 ")
                             }
                           >
                             <Image
@@ -221,14 +221,14 @@ const CreateArtistForm = () => {
                               height={60}
                               alt="music note icon"
                               className={
-                                artistForm.artist_image
+                                artistForm.artistImage
                                   ? " w-full object-fit min-w-15 h-15 overflow-hidden"
                                   : undefined
                               }
                             />
                           </div>
                           <div className="w-[50%]">
-                            {!artistForm.artist_image ? (
+                            {!artistForm.artistImage ? (
                               <p className="mb-2 text-xs text-gray-500">
                                 <span className="font-bold text-text-body">
                                   Supported Files:
@@ -240,14 +240,14 @@ const CreateArtistForm = () => {
                             ) : (
                               <p className="font-bold text-[16px] text-[#494949] truncate">
                                 <span className="font-semibold">
-                                  {artistForm.artist_image?.name}
+                                  {artistForm.artistImage?.name}
                                 </span>
                               </p>
                             )}
                           </div>
                           <input
-                            id="artist_image"
-                            name="artist_image"
+                            id="artistImage"
+                            name="artistImage"
                             type="file"
                             accept="image/png,image/jpeg"
                             className="hidden"
@@ -292,10 +292,10 @@ const CreateArtistForm = () => {
                 <div className="w-full flex flex-wrap justify-between gap-y-5 px-1">
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
-                      value={artistForm.apple_id}
+                      value={artistForm.appleId}
                       title={"Apple ID"}
                       type={"text"}
-                      name={"apple_id"}
+                      name={"appleId"}
                       placeholder={"Enter Apple ID"}
                       updateValue={handleChange}
                       disabled={!artistForm.hasPlatformId}
@@ -307,10 +307,10 @@ const CreateArtistForm = () => {
                   </div>
                   <div className="flex flex-col w-[40%] max-sm:w-full">
                     <Input
-                      value={artistForm.spotify_id}
+                      value={artistForm.spotifyId}
                       title={"spotify id"}
                       type={"text"}
-                      name={"spotify_id"}
+                      name={"spotifyId"}
                       placeholder={"Enter spotify id"}
                       updateValue={handleChange}
                       disabled={!artistForm.hasPlatformId}
@@ -346,7 +346,7 @@ const CreateArtistForm = () => {
                   />
                   <div className="text-main-heading flex-1 line-clamp-1 flex items-center w-full">
                     <p className="text-xl font-normal w-full">
-                      {artistForm.artist_name}
+                      {artistForm.artistName}
                     </p>
                   </div>
                 </div>
@@ -409,7 +409,7 @@ const CreateArtistForm = () => {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-neutral-700 font-semibold text-sm truncate">
-                          {artistForm.artist_image?.name || "Uploaded Image"}
+                          {artistForm.artistImage?.name || "Uploaded Image"}
                         </p>
                         <p className="text-xs text-neutral-400 mt-0.5">
                           Profile image loaded
@@ -436,9 +436,9 @@ const CreateArtistForm = () => {
                 </h2>
                 <p
                   className="text-xs text-text-body truncate"
-                  title={artistForm.artist_name || ""}
+                  title={artistForm.artistName || ""}
                 >
-                  {artistForm.artist_name || ""}
+                  {artistForm.artistName || ""}
                 </p>
               </div>
 
@@ -449,9 +449,9 @@ const CreateArtistForm = () => {
                 </h2>
                 <p
                   className="text-xs font-mono font-medium text-text-body truncate"
-                  title={artistForm.apple_id || ""}
+                  title={artistForm.appleId || ""}
                 >
-                  {artistForm.apple_id || ""}
+                  {artistForm.appleId || ""}
                 </p>
               </div>
 
@@ -462,9 +462,9 @@ const CreateArtistForm = () => {
                 </h2>
                 <p
                   className="text-base sm:text-lg font-mono font-medium text-text-body truncate"
-                  title={artistForm.spotify_id || ""}
+                  title={artistForm.spotifyId || ""}
                 >
-                  {artistForm.spotify_id || ""}
+                  {artistForm.spotifyId || ""}
                 </p>
               </div>
             </div>
@@ -473,7 +473,7 @@ const CreateArtistForm = () => {
         {!showSuccessPage && (
           <div className="bg-neutral-50 border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
             <div className="w-full h-[80%] flex-2">
-              {artistForm.artist_image ? (
+              {artistForm.artistImage ? (
                 <Image
                   src={image ? image : ""}
                   width={0}
@@ -491,7 +491,7 @@ const CreateArtistForm = () => {
             </div>
             <div className="flex-1">
               <p className="font-normal leading-[30px] truncate max-w-50 tracking-[-1px] text-main-heading text-xl">
-                {artistForm.artist_name || "Name"}
+                {artistForm.artistName || "Name"}
               </p>
             </div>
           </div>

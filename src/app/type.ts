@@ -67,17 +67,17 @@ interface musicFormBase {
   genre: string;
   language: string;
   artist: string;
-  release_date: undefined | Date;
+  releaseDate: undefined | Date;
   preOrderDate: undefined | Date;
   territories: string[];
-  pre_order_check: boolean;
-  another_distribution_check: boolean;
-  music_image: File | null;
+  preOrderCheck: boolean;
+  anotherDistributionCheck: boolean;
+  musicImage: File | null;
   upc: string;
   dsp: CheckboxOption[];
   copyRightHolder: string;
   copyRightYear: string;
-  old_image?: string | null;
+  oldImage?: string | null;
   timeZone: {
     label: string;
     value: string;
@@ -88,19 +88,19 @@ interface musicFormBase {
 }
 
 export interface SongForm extends musicFormBase {
-  featured_artist: FeaturedArtist[];
+  featuredArtist: FeaturedArtist[];
   performer: Performer[];
-  song_writer: SongWriter[];
+  songWriter: SongWriter[];
   producer: Producer[];
-  song_audio: File | null;
+  songAudio: File | null;
   lyrics: string;
-  start_clip: string;
+  startClip: string;
   isrc: string;
-  explicit_content: boolean;
-  old_audio?: string | null;
-  cover_song: boolean;
+  explicitContent: boolean;
+  oldAudio?: string | null;
+  coverSong: boolean;
   license: File | null;
-  old_license?: string | null;
+  oldLicense?: string | null;
   compositionType: string;
   instrumentalSource: string;
   countryOfRecording: string;
@@ -112,10 +112,10 @@ export interface AlbumForm extends musicFormBase {
 }
 
 export type CreateArtistForm = {
-  artist_name: string;
-  apple_id: string;
-  spotify_id: string;
-  artist_image: File | null;
+  artistName: string;
+  appleId: string;
+  spotifyId: string;
+  artistImage: File | null;
   hasPlatformId: boolean;
 };
 
@@ -176,7 +176,7 @@ interface BaseApiResponseForRelease {
   releaseTitle: string;
   genre: string;
   releaseLanguage: string;
-  artistName: string;
+  // artistName: string;
   artist: Artist;
   releaseDate: Date;
   preOrderDate: Date | null;
@@ -213,7 +213,7 @@ export interface songFromApi extends BaseApiResponseForRelease {
   startClip: string;
   isrc: string;
   explicitContent: boolean;
-  releaseStatus: "pending" | "approved" | "rejected" | "draft" | "completed";
+  releaseStatus: "pending" | "approved" | "rejected" | "draft";
   isCoverSong: boolean;
   license: string;
   compositionType: string;
@@ -223,7 +223,7 @@ export interface songFromApi extends BaseApiResponseForRelease {
 export interface albumFromApi extends BaseApiResponseForRelease {
   numberOfTracks: string;
   unassignedNumbers: string[];
-  releaseStatus: "pending" | "completed" | "approved" | "rejected" | "draft";
+  releaseStatus: "pending" | "completed" | "approved" | "rejected" | "draft" | "inactive";
   description: string;
 }
 
@@ -235,17 +235,40 @@ export interface NonRetryableErrorCode {
   };
 }
 
-export interface TrackForm extends SongForm {
+export interface TrackForm {
+  title: string;
+  genre: string;
+  language: string;
+  featuredArtist: FeaturedArtist[];
+  performer: Performer[];
+  songWriter: SongWriter[];
+  producer: Producer[];
+  lyrics: string;
+  startClip: string;
+  isrc: string;
+  explicitContent: boolean;
+  oldAudio?: string | null;
+  compositionType: string;
+  instrumentalSource: string;
+  countryOfRecording: string;
+  anotherDistributionCheck: boolean;
   id: string; // frontend-only (uuid)
-  track_number: string;
+  trackNumber: string;
   validationError: string | null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
   s3key: string;
+  songAudio: File | null;
 }
+
 export interface TrackFromApi extends songFromApi {
   trackNumber: string;
   validationError: string | null;
   uploadStatus?: "idle" | "uploading" | "done" | "error";
+}
+
+export interface ViewTracksResponse {
+  data: TrackFromApi[]
+  album: albumFromApi
 }
 
 export interface PaymentEmailData {
@@ -365,7 +388,7 @@ export type producerType = {
 export interface AdminRelease {
   _id: string;
   releaseTitle: string;
-  artistName: string;
+  // artistName: string;
   catalogNumber: string;
   isrc: string;
   upc: string;
@@ -376,10 +399,7 @@ export interface AdminRelease {
   featuredArtist: featuredArtistType[];
   songWriter: songWriterType[];
   producer: producerType[];
-  artist: {
-    appleId: string;
-    spotifyId: string;
-  };
+  artist: Artist
 }
 export interface admingAllReleaseResponse {
   releases: AdminRelease[];
@@ -402,24 +422,21 @@ export interface AdminAlbumDetails {
   releaseTitle: string;
   releaseStatus: string;
   releaseImage: string;
-  artistName: string;
+  // artistName: string;
   genre: string;
   releaseDate: string;
   upc: string;
   catalogNumber: string;
   copyRightYear: string;
   copyRightHolder: string;
-  artist: {
-    spotifyId: string;
-    appleId: string;
-  };
+  artist: Artist
 }
 export interface AdminTrackDetails {
   _id: string;
   releaseTitle: string;
   releaseAudio: string;
   releaseStatus: string;
-  artistName: string;
+  // artistName: string;
   genre: string;
   releaseDate: string;
   upc: string;
@@ -431,6 +448,7 @@ export interface AdminTrackDetails {
   explicitContent: boolean;
   trackNumber: number;
   lyrics: string;
+  artist: Artist
 }
 export interface AdminAlbumDetailsResponse {
   release: albumFromApi & { user: { email: string } };
@@ -470,7 +488,7 @@ export type AllArtistResponse = {
 export type ArtistDetails = PAGINATION<AdminRelease> & { artist: Artist };
 
 export type DetactivateEmail = {
-  artist_name: string; // "Artist Name"
+  artistName: string; // "Artist Name"
   first_name: string; // "Artist Name"
   deactivation_type: string; // Dropdown: "Temporary Suspension", etc.
   deactivation_reason: string; // Dropdown: "Copyright Infringement", etc.
@@ -546,7 +564,7 @@ export type AllSupportRequestsResponse = {
 };
 
 export type PromotionEmailBody = {
-  artist_name: string;
+  artistName: string;
   content_title: string;
   content_type: string;
   promotion_type: string;

@@ -64,7 +64,7 @@ export async function POST(
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
     }
     const release: songFromApi & { user: { email: string; _id: string } } =
-      await SongModel.findById(songId).populate("user", "email label").lean();
+      await SongModel.findById(songId).populate("user", "email label").populate("artist", "artistName").lean();
 
     if (!release) {
       return NextResponse.json({ msg: "Invalid Request." }, { status: 400 });
@@ -81,13 +81,14 @@ export async function POST(
       // Execute the model method passing the session
       const result = await SongModel.approveAndCreateMetadata(
         songId,
+        release.artist.artistName,
         release.user.label,
       );
       if (result.error) {
         return NextResponse.json({ msg: result.msg }, { status: 400 });
       } else {
         const approvalEmailData = {
-          artistName: release.artistName,
+          artistName: release.artist.artistName,
           releaseTitle: release.releaseTitle,
           releaseDate: new Date(release.releaseDate).toDateString(),
           releaseUrl:
@@ -152,7 +153,7 @@ export async function POST(
         { runValidators: true },
       );
       const rejectEmailData: rejectEmailProps = {
-        artistName: release.artistName,
+        artistName: release.artist.artistName,
         releaseTitle: release.releaseTitle,
         rejectionReason: body.message,
         dashboardUrl: "release",
@@ -259,7 +260,7 @@ export async function GET(
     // Get audio record from database
     const release = await SongModel.findById(songId, projection)
       .populate("user", "email")
-      .populate("artist", "spotifyId appleId -_id")
+      .populate("artist", "artistName spotifyId appleId -_id")
       .lean();
 
     if (!release) {

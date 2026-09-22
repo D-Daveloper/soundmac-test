@@ -47,7 +47,7 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-text-body font-semibold text-sm truncate">
-                  {albumForm.music_image?.name || "Uploaded Image"}
+                  {albumForm.musicImage?.name || "Uploaded Image"}
                 </p>
                 <p className="text-xs text-text-disable mt-0.5">
                   Ready for distribution
@@ -153,8 +153,8 @@ const AlbumPreview: React.FC<AlbumPreviewProps> = ({
           </h2>
           <div className="border-b border-neutral-100/80">
             <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-              {albumForm.release_date
-                ? new Date(albumForm.release_date).toLocaleDateString(
+              {albumForm.releaseDate
+                ? new Date(albumForm.releaseDate).toLocaleDateString(
                     undefined,
                     { dateStyle: "medium" },
                   )

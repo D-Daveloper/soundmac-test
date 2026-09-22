@@ -52,20 +52,17 @@ const UploadTrackForm = ({
 
   const addField = (field: keyof SongForm) => {
     switch (field) {
-      case "featured_artist":
+      case "featuredArtist":
         onChange({
-          featured_artist: [
-            ...track.featured_artist,
+          featuredArtist: [
+            ...track.featuredArtist,
             { artistName: "", spotifyId: "", appleId: "", role: "" },
           ],
         });
         break;
-      case "song_writer":
+      case "songWriter":
         onChange({
-          song_writer: [
-            ...track.song_writer,
-            { first_name: "", last_name: "" },
-          ],
+          songWriter: [...track.songWriter, { first_name: "", last_name: "" }],
         });
         break;
       case "performer":
@@ -87,15 +84,15 @@ const UploadTrackForm = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
     if (
-      name === "another_distribution_check" ||
-      name === "pre_order_check" ||
-      name === "explicit_content"
+      name === "anotherDistributionCheck" ||
+      name === "preOrderCheck" ||
+      name === "explicitContent"
     ) {
       onChange({ ...track, [name]: checked });
-    } else if (name === "song_audio") {
+    } else if (name === "songAudio") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      onChange({ ...track, song_audio: file });
+      onChange({ ...track, songAudio: file });
     } else {
       onChange({ ...track, [name]: value });
     }
@@ -111,22 +108,22 @@ const UploadTrackForm = ({
 
     // let updatedList;
     switch (field) {
-      case "featured_artist":
-        const updatedList = [...track.featured_artist];
+      case "featuredArtist":
+        const updatedList = [...track.featuredArtist];
         updatedList[index] = {
           ...updatedList[index],
           [name as keyof FeaturedArtist]: value,
         };
-        onChange({ ...track, featured_artist: updatedList });
+        onChange({ ...track, featuredArtist: updatedList });
         break;
-      case "song_writer":
-        // work explicitly with the song_writer array so spreading is on an array of objects
-        const updatedListSongwrite = [...track.song_writer];
+      case "songWriter":
+        // work explicitly with the songWriter array so spreading is on an array of objects
+        const updatedListSongwrite = [...track.songWriter];
         updatedListSongwrite[index] = {
           ...updatedListSongwrite[index],
           [name as keyof SongWriter]: value,
         };
-        onChange({ ...track, song_writer: updatedListSongwrite });
+        onChange({ ...track, songWriter: updatedListSongwrite });
         break;
       case "performer":
         const updatedListPerformer = [...track.performer];
@@ -161,20 +158,20 @@ const UploadTrackForm = ({
 
       setIsUploadingTrack(true);
 
-      if (!track.song_audio) {
+      if (!track.songAudio) {
         return toast.info("Track audio is required.");
-      } else if (!track.track_number) {
+      } else if (!track.trackNumber) {
         return toast.info("Track number is required.");
       }
       toast.info(
         "Uploading song. This may take a while depending on your internet speed.",
       );
       const { upc, songS3Key, error, uploadId } = await uploadAlbumTrack(
-        track.song_audio,
+        track.songAudio,
         album.upc,
-        album.artistName,
+        album.artist.artistName,
         api,
-        track.track_number,
+        track.trackNumber,
       );
       console.log("nnnjjj", songS3Key);
       if (error != null) {
@@ -182,7 +179,7 @@ const UploadTrackForm = ({
       }
 
       track.s3key = songS3Key; //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
-      track.song_audio = null;
+      track.songAudio = null;
       toast.success("Uploaded, please continue with the form.");
     } catch (error) {
       if (isAxiosError(error)) {
@@ -197,8 +194,8 @@ const UploadTrackForm = ({
 
   useEffect(() => {
     const string_form = localStorage.getItem("songForm");
-    const featured_artist = localStorage.getItem("featured_artist");
-    const song_writer = localStorage.getItem("song_writer");
+    const featuredArtist = localStorage.getItem("featuredArtist");
+    const songWriter = localStorage.getItem("songWriter");
     const performer = localStorage.getItem("performer");
     const producer = localStorage.getItem("producer");
 
@@ -206,12 +203,12 @@ const UploadTrackForm = ({
       const songForm = JSON.parse(string_form);
 
       // Parse with fallback to default value
-      const featured_artist1 = featured_artist
-        ? JSON.parse(featured_artist)
+      const featuredArtist1 = featuredArtist
+        ? JSON.parse(featuredArtist)
         : [{ artistName: "", spotifyId: "", appleId: "", role: "" }];
 
-      const song_writer1 = song_writer
-        ? JSON.parse(song_writer)
+      const songWriter1 = songWriter
+        ? JSON.parse(songWriter)
         : [{ first_name: "", last_name: "" }];
 
       const performer1 = performer
@@ -222,28 +219,39 @@ const UploadTrackForm = ({
         ? JSON.parse(producer)
         : [{ name: "", role: "" }];
 
-      console.log(featured_artist1);
+      console.log(featuredArtist1);
 
       onChange({
         ...songForm,
-        featured_artist: featured_artist1,
-        song_writer: song_writer1,
+        featuredArtist: featuredArtist1,
+        songWriter: songWriter1,
         performer: performer1,
         producer: producer1,
-        release_date: undefined,
+        releaseDate: undefined,
         preOrderDate: undefined,
-        music_image: null,
-        song_audio: null,
+        musicImage: null,
+        songAudio: null,
       });
     }
   }, []);
   console.log(album);
 
   // useEffect(() => {
-  //   album.unassignedNumbers = album.unassignedNumbers.filter((num,index)=> num != track.track_number )
-  // }, [track.track_number]);
+  //   album.unassignedNumbers = album.unassignedNumbers.filter((num,index)=> num != track.trackNumber )
+  // }, [track.trackNumber]);
   //   console.log(album);
+  // UploadTrackForm.tsx — onChange handler for the file input
+  // const handleFileSelect = async (file: File, trackNumber: string) => {
+  //   const key = `${album.upc}_${trackNumber}`;
+  //   await saveFileForResume(key, file);
 
+  //   updateTrackStore(trackNumber, {
+  //     fileName: file.name,
+  //     fileType: file.type,
+  //     fileSize: file.size,
+  //     uploadStatus: "idle", // idle | uploading | completed | failed
+  //   });
+  // };
   return (
     <div className="bg-main-white h-full w-full flex flex-col">
       {uploading ? (
@@ -349,13 +357,13 @@ const UploadTrackForm = ({
                       <Select
                         isDisabled={false}
                         // isDisabled={track.s3key.length > 0}
-                        selected={track.track_number}
+                        selected={track.trackNumber}
                         setSelected={(t) => {
-                          onChange({ track_number: t });
+                          onChange({ trackNumber: t });
                         }}
                         placeholder="Select track number..."
                         options={album.unassignedNumbers}
-                        name="track_number"
+                        name="trackNumber"
                       />
                     </div>
                     {/* <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
@@ -375,7 +383,7 @@ const UploadTrackForm = ({
                   featured acts, and other contributors.
                 </p>
 
-                {/* featured_artist */}
+                {/* featuredArtist */}
                 <div>
                   <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-10">
                     Other Artists
@@ -384,7 +392,7 @@ const UploadTrackForm = ({
                     You can leave blank if there are no other artists on your
                     release.
                   </p>
-                  {track.featured_artist.map((_, i) => (
+                  {track.featuredArtist.map((_, i) => (
                     <div
                       key={i}
                       className="w-full flex flex-wrap justify-between gap-y-3 mb-1"
@@ -392,8 +400,8 @@ const UploadTrackForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
                           index={i}
-                          field="featured_artist"
-                          value={track.featured_artist[i].artistName}
+                          field="featuredArtist"
+                          value={track.featuredArtist[i].artistName}
                           title={"Artist name"}
                           type={"text"}
                           name={"artistName"}
@@ -403,10 +411,31 @@ const UploadTrackForm = ({
                         />
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
+                        <div className="flex gap-1">
+                          <p className="font-medium mb-2 text-sm">
+                            Role <span className="text-red-500">*</span>
+                          </p>
+                        </div>
+                        <Select
+                          selected={track.featuredArtist[i].role}
+                          setSelected={(t) =>
+                            onChange({
+                              ...track,
+                              featuredArtist: track.featuredArtist.map(
+                                (p, i) => (i === i ? { ...p, role: t } : p),
+                              ),
+                            })
+                          }
+                          placeholder="Select role..."
+                          options={otherArtistRoles}
+                          name="featuredArtist"
+                        />
+                      </div>
+                      <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
                           index={i}
-                          field="featured_artist"
-                          value={track.featured_artist[i].spotifyId}
+                          field="featuredArtist"
+                          value={track.featuredArtist[i].spotifyId}
                           title={"Spotify ID"}
                           type={"text"}
                           name={"spotifyId"}
@@ -417,8 +446,8 @@ const UploadTrackForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
                           index={i}
-                          field="featured_artist"
-                          value={track.featured_artist[i].appleId}
+                          field="featuredArtist"
+                          value={track.featuredArtist[i].appleId}
                           title={"Apple music ID"}
                           type={"text"}
                           name={"appleId"}
@@ -426,34 +455,13 @@ const UploadTrackForm = ({
                           updateValue={handleDynamicChange}
                         />
                       </div>
-                      <div className="flex flex-col w-[40%] max-sm:w-full">
-                        <div className="flex gap-1">
-                          <p className="font-medium mb-2 text-sm">
-                            Role <span className="text-red-500">*</span>
-                          </p>
-                        </div>
-                        <Select
-                          selected={track.featured_artist[i].role}
-                          setSelected={(t) =>
-                            onChange({
-                              ...track,
-                              featured_artist: track.featured_artist.map(
-                                (p, i) => (i === i ? { ...p, role: t } : p),
-                              ),
-                            })
-                          }
-                          placeholder="Select role..."
-                          options={otherArtistRoles}
-                          name="featured_artist"
-                        />
-                      </div>
                     </div>
                   ))}
                   <div className="flex items-center gap-2">
                     <button
-                      disabled={track.featured_artist.length === 5}
+                      disabled={track.featuredArtist.length === 5}
                       onClick={() => {
-                        addField("featured_artist");
+                        addField("featuredArtist");
                       }}
                       className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
                     >
@@ -470,13 +478,13 @@ const UploadTrackForm = ({
                     </button>
                     <button
                       arelia-label="delete featured artist"
-                      disabled={track.featured_artist.length === 1}
+                      disabled={track.featuredArtist.length === 1}
                       onClick={() => {
                         onChange({
                           ...track,
-                          featured_artist: track.featured_artist.filter(
+                          featuredArtist: track.featuredArtist.filter(
                             (_, index) =>
-                              index !== track.featured_artist.length - 1,
+                              index !== track.featuredArtist.length - 1,
                           ),
                         });
                       }}
@@ -493,7 +501,7 @@ const UploadTrackForm = ({
                     Songwriters
                   </h2>
 
-                  {track.song_writer.map((_, index) => (
+                  {track.songWriter.map((_, index) => (
                     <div
                       key={index}
                       className="w-full flex flex-wrap justify-between gap-y-3 mb-1"
@@ -501,8 +509,8 @@ const UploadTrackForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
                           index={index}
-                          field="song_writer"
-                          value={track.song_writer[index].first_name}
+                          field="songWriter"
+                          value={track.songWriter[index].first_name}
                           title={"First name"}
                           type={"text"}
                           name={"first_name"}
@@ -514,8 +522,8 @@ const UploadTrackForm = ({
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         <DynamicInput
                           index={index}
-                          field="song_writer"
-                          value={track.song_writer[index].last_name}
+                          field="songWriter"
+                          value={track.songWriter[index].last_name}
                           title={"Last name"}
                           type={"text"}
                           name={"last_name"}
@@ -528,8 +536,8 @@ const UploadTrackForm = ({
                   ))}
                   <div className="flex items-center gap-2">
                     <button
-                      disabled={track.song_writer.length === 12}
-                      onClick={() => addField("song_writer")}
+                      disabled={track.songWriter.length === 12}
+                      onClick={() => addField("songWriter")}
                       className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
                     >
                       <Image
@@ -545,13 +553,12 @@ const UploadTrackForm = ({
                     </button>
                     <button
                       aria-label="delete song writer"
-                      disabled={track.song_writer.length === 1}
+                      disabled={track.songWriter.length === 1}
                       onClick={() => {
                         onChange({
                           ...track,
-                          song_writer: track.song_writer.filter(
-                            (_, index) =>
-                              index !== track.song_writer.length - 1,
+                          songWriter: track.songWriter.filter(
+                            (_, index) => index !== track.songWriter.length - 1,
                           ),
                         });
                       }}
@@ -831,10 +838,10 @@ const UploadTrackForm = ({
                   <div className="w-full flex flex-wrap justify-between gap-y-10 mt-10">
                     <div className="flex flex-col w-[40%] max-sm:w-full">
                       <Input
-                        value={track.start_clip}
+                        value={track.startClip}
                         title={"Start Time (in seconds)"}
                         type={"text"}
-                        name={"start_clip"}
+                        name={"startClip"}
                         placeholder={"30"}
                         updateValue={handleChange}
                         required={false}
@@ -870,8 +877,8 @@ const UploadTrackForm = ({
                       aria-label="another distribution check box"
                       type="checkbox"
                       className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                      name="another_distribution_check"
-                      checked={track.another_distribution_check}
+                      name="anotherDistributionCheck"
+                      checked={track.anotherDistributionCheck}
                       onChange={handleChange}
                     />
                     <p className="leading-6 text-sm font-medium">
@@ -882,8 +889,8 @@ const UploadTrackForm = ({
                     <input
                       type="checkbox"
                       className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                      name="explicit_content"
-                      checked={track.explicit_content}
+                      name="explicitContent"
+                      checked={track.explicitContent}
                       onChange={handleChange}
                     />
                     <p className="leading-6 text-sm font-medium">
@@ -900,9 +907,9 @@ const UploadTrackForm = ({
                       name={"isrc"}
                       placeholder={"Enter Isrc"}
                       updateValue={handleChange}
-                      disabled={!track.another_distribution_check}
+                      disabled={!track.anotherDistributionCheck}
                       uppercase={true}
-                      required={track.another_distribution_check}
+                      required={track.anotherDistributionCheck}
                     />
                     <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                       Unique code for tracking sales/streams.
@@ -993,7 +1000,7 @@ const UploadTrackForm = ({
 
                       <div className="flex items-center justify-between w-full flex-wrap gap-2">
                         <label
-                          htmlFor="song_audio"
+                          htmlFor="songAudio"
                           className="flex w-60 md:w-80 p-3 gap-3 items-center justify-center h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
                         >
                           <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
@@ -1005,7 +1012,7 @@ const UploadTrackForm = ({
                             />
                           </div>
                           <div className="w-[50%]">
-                            {!track.song_audio ? (
+                            {!track.songAudio ? (
                               <p className="mb-2 text-xs text-gray-500">
                                 <span className="font-bold text-text-body">
                                   Supported Files:
@@ -1015,14 +1022,14 @@ const UploadTrackForm = ({
                             ) : (
                               <p className="font-bold text-[16px] text-[#494949] truncate max-w-[50%]">
                                 <span className="font-semibold truncate">
-                                  {track.song_audio?.name}
+                                  {track.songAudio?.name}
                                 </span>
                               </p>
                             )}
                           </div>
                           <input
-                            id="song_audio"
-                            name="song_audio"
+                            id="songAudio"
+                            name="songAudio"
                             type="file"
                             accept="audio/wav,audio/flac,audio/mp3"
                             className="hidden"
@@ -1030,7 +1037,7 @@ const UploadTrackForm = ({
                           />
                         </label>
                         <button
-                          disabled={!track.song_audio}
+                          disabled={!track.songAudio}
                           onClick={() => {
                             uploadSong();
                           }}

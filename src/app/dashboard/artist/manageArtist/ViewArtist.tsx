@@ -26,7 +26,7 @@ const ViewArtist = ({
     }
     console.log(form);
     try {
-      await mutateAsync({ artist_name: artist.artistName });
+      await mutateAsync({ artistName: artist.artistName });
       setArtist(null);
     } catch (error) {
       if (isAxiosError(error)) {
@@ -130,7 +130,7 @@ const ViewArtist = ({
                 value={artist.artistName || ""}
                 title={"Artist Name"}
                 type={"text"}
-                name={"artist_name"}
+                name={"artistName"}
                 placeholder={artist.artistName}
                 // updateValue={(e) => handleChange(e)}
                 updateValue={(e) => {}}
@@ -154,7 +154,7 @@ const ViewArtist = ({
                 value={artist.appleId || ""}
                 title={"Apple ID"}
                 type={"text"}
-                name={"apple_id"}
+                name={"appleId"}
                 placeholder={"Enter Apple ID"}
                 updateValue={(e) => {}}
                 // updateValue={handleChange}
@@ -176,7 +176,7 @@ const ViewArtist = ({
                 value={artist.spotifyId || ""}
                 title={"spotify id"}
                 type={"text"}
-                name={"spotify_id"}
+                name={"spotifyId"}
                 placeholder={"Enter spotify id"}
                 updateValue={(e) => {}}
                 // updateValue={handleChange}

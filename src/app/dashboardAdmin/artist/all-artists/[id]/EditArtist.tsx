@@ -139,7 +139,7 @@ const EditArtist = ({ id }: { id: string }) => {
                   value={artistDetails.artist.artistName || ""}
                   title={"Artist Name"}
                   type={"text"}
-                  name={"artist_name"}
+                  name={"artistName"}
                   placeholder={artistDetails.artist.artistName}
                   // updateValue={(e) => handleChange(e)}
                   updateValue={(e) => {}}
@@ -163,7 +163,7 @@ const EditArtist = ({ id }: { id: string }) => {
                   value={editArtistForm.appleId}
                   title={"Apple ID"}
                   type={"text"}
-                  name={"apple_id"}
+                  name={"appleId"}
                   placeholder={"Enter Apple ID"}
                   updateValue={(e) => {
                     seteditArtistForm((prev) => ({
@@ -189,7 +189,7 @@ const EditArtist = ({ id }: { id: string }) => {
                   value={editArtistForm.spotifyId}
                   title={"spotify id"}
                   type={"text"}
-                  name={"spotify_id"}
+                  name={"spotifyId"}
                   placeholder={"Enter spotify id"}
                   updateValue={(e) => {
                     seteditArtistForm((prev) => ({

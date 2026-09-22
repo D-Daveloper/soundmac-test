@@ -131,7 +131,7 @@ const Page = () => {
         <div className="flex flex-col justify-center items-center min-h-[90dvh] gap-15">
           <Image
             priority={true}
-            src="/manage_artist_image.png"
+            src="/manage_artistImage.png"
             alt="no artist"
             width={200}
             height={200}

@@ -1,7 +1,10 @@
-import mongoose, { ObjectId } from "mongoose";
+import mongoose, { InferSchemaType, ObjectId } from "mongoose";
 import DpmMetaData from "./DpmCallBackModel";
 import { albumFromApi, CheckboxOption, TrackFromApi } from "@/app/type";
 import TrackModel from "./trackModel";
+
+export type albumType = InferSchemaType<typeof AlbumSchema>
+
 
 export const AlbumSchema = new mongoose.Schema(
   {
@@ -40,11 +43,11 @@ export const AlbumSchema = new mongoose.Schema(
       ],
       trim: true,
     },
-    artistName: {
-      type: String,
-      required: [true, "Artist is required"],
-      trim: true,
-    },
+    // artistName: {
+    //   type: String,
+    //   required: [true, "Artist is required"],
+    //   trim: true,
+    // },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
@@ -163,7 +166,7 @@ export const AlbumSchema = new mongoose.Schema(
     },
     releaseStatus: {
       type: String,
-      enum: ["pending", "completed", "approved", "rejected", "draft", "deleted"],
+      enum: ["pending", "completed", "approved", "rejected", "draft", "inactive"],
       default: "pending",
     },
     catalogNumber: {
@@ -237,26 +240,43 @@ export const AlbumSchema = new mongoose.Schema(
   },
 );
 
-// Admin endpoint
-AlbumSchema.index({ createdAt: -1 });                              // no filters
-AlbumSchema.index({ releaseStatus: 1, createdAt: -1 });            // status only
-AlbumSchema.index({ artistName: 1, releaseStatus: 1, createdAt: -1 }); // combined
-AlbumSchema.index(
-  { releaseTitle: 1, createdAt: -1 },
-  { collation: { locale: "en", strength: 2 } }
-);
+// 1. Global Admin Sort / General Feed (Keep only if doing unfiltered global pagination)
+AlbumSchema.index({ createdAt: -1 });
 
-// User-scoped queries (keep if used elsewhere in your app)
+// 2. Combined Admin Filter (Covers releaseStatus alone AND releaseStatus + artist)
+AlbumSchema.index({ releaseStatus: 1, artist: 1, createdAt: -1 });
+
+// 3. User-Scoped Query & Pagination (Covers user queries + user sorted by createdAt)
 AlbumSchema.index({ user: 1, createdAt: -1 });
+
+// 4. Case-Insensitive Title Search (User-Scoped & Global if user prefix isn't mandatory)
 AlbumSchema.index(
   { user: 1, releaseTitle: 1, createdAt: -1 },
   { collation: { locale: "en", strength: 2 } }
 );
-AlbumSchema.index({ user: 1, artistName: 1, releaseTitle: 1 }, { unique: true });
-AlbumSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true });
-AlbumSchema.index({ upc: 1 }, { unique: true, sparse: true });
 
-AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, label: string) {
+// 5. Unique Title Constraint per Artist per User (Added collation for case-insensitivity)
+AlbumSchema.index(
+  { user: 1, artist: 1, releaseTitle: 1 },
+  { 
+    unique: true, 
+    collation: { locale: "en", strength: 2 },
+    partialFilterExpression: { releaseStatus: { $ne: "inactive" } } 
+  }
+);
+
+// 6. Identifier Unique Constraints (Standardized with partialFilterExpression)
+AlbumSchema.index(
+  { catalogNumber: 1 }, 
+  { unique: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" }, catalogNumber: { $exists: true } } }
+);
+
+AlbumSchema.index(
+  { upc: 1 }, 
+  { unique: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" }, upc: { $exists: true } } }
+);
+
+AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, artistName, label: string) {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -275,14 +295,8 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
 
     if (tracks.length < 2) {
       throw new Error('Tracks not found or less than 2.');
-    } else if (tracks.some(item => item.releaseStatus != "completed")) {
-      throw new Error("Only completed Tracks can be distributed.")
     }
 
-    await TrackModel.updateMany(
-      { upc: song.upc },
-      { $set: { releaseStatus: 'approved' } }, { session }
-    );
     console.log("approve album", song);
 
     // 2. Create the metadata object in the other collection
@@ -293,7 +307,7 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
         upc: song.upc,
         "catalog-number": song.catalogNumber,
         "album-release-id": song.catalogNumber,
-        "album-main-artist": song.artistName,
+        "album-main-artist": artistName,
         "album-title": song.releaseTitle,
         "track-title": "",
         genre: song.genre,
@@ -323,7 +337,7 @@ AlbumSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId,
           upc: song.upc,
           "catalog-number": item.catalogNumber,
           "album-release-id": song.catalogNumber,
-          "album-main-artist": song.artistName,
+          "album-main-artist": artistName,
           "album-title": song.releaseTitle,
           "track-title": item.releaseTitle,
           genre: item.genre,

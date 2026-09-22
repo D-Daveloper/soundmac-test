@@ -80,6 +80,8 @@ import {
   ReleaseRequestResponse,
   salesReportDashboardResponse,
   songFromApi,
+  TrackFromApi,
+  ViewTracksResponse,
   WithdrawalResponse,
   withdrawals,
 } from "@/app/type";
@@ -158,8 +160,8 @@ export function useGetUserArtistsNames() {
       handleReactQueryApiCallError(failedCount, error),
     staleTime: 1000 * 60 * 30, // 5 minutes
     retryOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 }
 
@@ -230,7 +232,7 @@ export function useGetAlbums(params: { albumTitle: string }) {
 
 export function useGetAlbumTracks(params: { albumTitle: string }) {
   const api = UseAxios();
-  return useQuery<any, Error>({
+  return useQuery<ViewTracksResponse, Error>({
     queryKey: ["edit tracks", params.albumTitle],
     queryFn: async () => getAlbumTracks(api, params),
     // placeholderData: (prev) => prev, // avoids UI flicker

@@ -3,7 +3,6 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "@/util/middleware/aws";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import User from "@/util/models/userModel";
 import Artist from "@/util/models/artistModel";
 import dbConnect from "@/util/db";
@@ -210,7 +209,7 @@ export async function PUT(req: Request) {
     await dbConnect();
     const body = await req.json();
 
-    const { fileType, fileSize, upcFromClient, track_number } = body;
+    const { fileType, fileSize, upcFromClient, trackNumber } = body;
     // console.log(body);
 
     if (!fileType || typeof fileType != "string") {
@@ -272,7 +271,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "UPC is required." }, { status: 400 });
     }
 
-    const userAlbum = await AlbumModel.findOne({ upc: upcFromClient }).lean<albumFromApi>();
+    const userAlbum = await AlbumModel.findOne({ upc: upcFromClient }).populate("artist", "artistName").lean<albumFromApi>();
 
     if (!userAlbum) {
       return NextResponse.json({ msg: "Invalid upc" }, { status: 400 });
@@ -299,14 +298,14 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: "File too large" }, { status: 400 });
     }
 
-    if (!track_number || !userAlbum.unassignedNumbers.includes(track_number)) {
+    if (!trackNumber || !userAlbum.unassignedNumbers.includes(trackNumber)) {
       return NextResponse.json(
-        { msg: "track_number required." },
+        { msg: "track number required." },
         { status: 400 },
       );
     }
-    const s3key = `NewReleases/${upc}/${upc}_01_${track_number}.flac`;
-    // const s3key = `NewReleases/${upc}/${upc}_01_${track_number}.${fileType.split("/")[1]}`;
+    const s3key = `NewReleases/${upc}/${upc}_01_${trackNumber}.flac`;
+    // const s3key = `NewReleases/${upc}/${upc}_01_${trackNumber}.${fileType.split("/")[1]}`;
 
     // ---- 3. Create signed URL ----
     const command = new PutObjectCommand({
@@ -327,7 +326,7 @@ export async function PUT(req: Request) {
 
     const update = {
       user: user._id,
-      artistName: userAlbum.artistName,
+      artistName: userAlbum.artist.artistName,
       artist: userAlbum.artist,
       s3Key: s3key,
       upc,

@@ -11,6 +11,7 @@ import { requireActiveSubscription } from "@/util/middleware/subscription";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import User from "@/util/models/userModel";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -51,20 +52,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     } else if (subError) {
       return NextResponse.json({ msg: subError.msg }, { status: subError.status });
-
-      //  else if (user.premium !== true) {
-      //   return NextResponse.json(
-      //     { msg: "Please upgrade your account." },
-      //     { status: 402 },
-      //   );
-      // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-      //   user.premium = false;
-      //   user.premiumExpiration = null;
-      //   await user.save();
-      //   return NextResponse.json(
-      //     { msg: "Please upgrade your account." },
-      //     { status: 402 },
-      //   );
     } else {
       const isAlbumForValid = validateDraftAlbums(payload, user.type.includes("LABEL"));
 
@@ -115,6 +102,7 @@ export async function POST(req: Request) {
     }
 
     const album = new AlbumModel({
+      _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
       genre: payload.genre,
       releaseLanguage: payload.language,
@@ -129,7 +117,6 @@ export async function POST(req: Request) {
       upc: payload.upc || await generateUPC(),
       territories: payload.territories,
       releaseImage: undefined,
-      artistName: userArtist.artistName,
       artist: userArtist._id,
       numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
@@ -142,7 +129,7 @@ export async function POST(req: Request) {
     });
     await album.save();
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    return NextResponse.json({ msg: "Release Uploaded Successfully.", release: album }, { status: 201 });
   } catch (error: unknown) {
     console.log(error);
 
@@ -157,7 +144,7 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
     console.log({ ...formData });
     const payload = parseAlbumFormData(formData);
-    let release: albumFromApi | null = null;
+    let release = null;
 
     if (
       !payload.artist ||
@@ -192,13 +179,14 @@ export async function PUT(req: Request) {
         return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
       }
 
-      const userArtistQuery = await Artist.findOne({
+      const userArtistQuery = Artist.findOne({
         user: userJwt.user,
         artistName: (payload.artist as string).trim(),
       });
-      const releaseQuery = await AlbumModel.findOne({
+
+      const releaseQuery = AlbumModel.findOne({
         upc: payload.upc,
-      }).lean<albumFromApi>();
+      });
 
       [userArtist, release] = await Promise.all([
         userArtistQuery, releaseQuery
@@ -228,37 +216,36 @@ export async function PUT(req: Request) {
     }
     const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
-    await AlbumModel.findByIdAndUpdate(
-      { _id: release._id },
-      {
-        releaseTitle: payload.title,
-        genre: payload.genre,
-        releaseLanguage: payload.language,
-        preOrderCheck: payload.preOrderCheck,
-        anotherDistributionCheck: payload.anotherDistributionCheck,
-        releaseDate: payload.releaseDate == 'undefined' ? null : payload.releaseDate,
-        preOrderDate:
-          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-        copyRightHolder: payload.copyRightHolder,
-        copyRightYear: payload.copyRightYear,
-        dsp: payload.dsp,
-        upc: release.upc,
-        territories: payload.territories,
-        artistName: userArtist.artistName,
-        artist: userArtist._id,
-        numberOfTracks: payload.numberOfTracks,
-        unassignedNumbers: number_of_track_array,
-        user: user._id,
-        releaseStatus: "draft",
-        timeZone: payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
-        description: payload.description || release.description || "",
-        providedBy: payload.providedBy || release.providedBy || "",
-        courtesyLine: payload.courtesyLine || release.courtesyLine || "",
-      },
-      { runValidators: true },
-    );
-
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    // const album = await AlbumModel.findByIdAndUpdate(
+    //   { _id: release._id },
+    //   {
+    release.releaseTitle = payload.title;
+    release.genre = payload.genre;
+    release.releaseLanguage = payload.language;
+    release.preOrderCheck = payload.preOrderCheck;
+    release.anotherDistributionCheck = payload.anotherDistributionCheck;
+    release.releaseDate = payload.releaseDate == 'undefined' ? null : payload.releaseDate;
+    release.preOrderDate =
+      payload.preOrderDate == "undefined" ? null : payload.preOrderDate;
+    release.copyRightHolder = payload.copyRightHolder;
+    release.copyRightYear = payload.copyRightYear;
+    release.dsp = payload.dsp;
+    release.upc = release.upc;
+    release.territories = payload.territories;
+    release.artist = userArtist._id;
+    release.numberOfTracks = payload.numberOfTracks;
+    release.unassignedNumbers = number_of_track_array;
+    release.user = user._id;
+    release.releaseStatus = "draft";
+    release.timeZone = payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
+      release.description = payload.description || release.description || "";
+    release.providedBy = payload.providedBy || release.providedBy || "";
+    release.courtesyLine = payload.courtesyLine || release.courtesyLine || "";
+    //   },
+    //   { runValidators: true, returnDocument: "after" },
+    // );
+    release.save();
+    return NextResponse.json({ msg: "Release edited successfully.", release: release }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 

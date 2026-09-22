@@ -6,9 +6,11 @@ import { handleCopy } from "@/util/middleware/functions";
 
 const ReleaseTable = ({
   releases,
+  artistName,
   isfetching,
 }: {
   releases: AdminRelease[];
+  artistName:string
   isfetching: boolean;
 }) => {
   const getStatusBadge = (status: AdminRelease["releaseStatus"]) => {
@@ -92,7 +94,7 @@ const ReleaseTable = ({
 
                     {/* Artist */}
                     <td className="p-4 whitespace-nowrap text-gray-900 font-semibold truncate max-w-[160px]">
-                      {release.artistName}
+                      {artistName}
                     </td>
 
                     {/* Catalog Number */}

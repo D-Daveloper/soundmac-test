@@ -135,7 +135,7 @@ export async function POST(
         { runValidators: true },
       );
       const userEmailData = {
-        artist_name: "", // "Artist Name"
+        artistName: "", // "Artist Name"
         first_name: user.firstName,
         deactivation_type: "", // Dropdown: "Temporary Suspension", etc.
         deactivation_reason: body.rejecteUserVerificationReason!, // Dropdown: "Copyright Infringement", etc.
@@ -157,7 +157,7 @@ export async function POST(
         { runValidators: true },
       );
       const userEmailData = {
-        artist_name: "", // "Artist Name"
+        artistName: "", // "Artist Name"
         first_name: user.firstName,
         deactivation_type: "", // Dropdown: "Temporary Suspension", etc.
         deactivation_reason: body.rejecteUserVerificationReason!, // Dropdown: "Copyright Infringement", etc.

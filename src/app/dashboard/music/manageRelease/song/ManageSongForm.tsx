@@ -78,27 +78,27 @@ const SongForm = ({
     genre: "",
     language: "",
     artist: "",
-    release_date: undefined,
+    releaseDate: undefined,
     preOrderDate: undefined,
-    featured_artist: [{ artistName: "", spotifyId: "", appleId: "", role: "" }],
+    featuredArtist: [{ artistName: "", spotifyId: "", appleId: "", role: "" }],
     performer: [{ name: "", role: "" }],
-    song_writer: [{ first_name: "", last_name: "" }],
+    songWriter: [{ first_name: "", last_name: "" }],
     producer: [{ name: "", role: "" }],
-    pre_order_check: false,
-    another_distribution_check: false,
+    preOrderCheck: false,
+    anotherDistributionCheck: false,
     territories: [],
-    song_audio: null,
-    music_image: null,
+    songAudio: null,
+    musicImage: null,
     dsp: [],
     lyrics: "",
-    start_clip: "",
+    startClip: "",
     isrc: "",
     upc: "",
     copyRightHolder: "",
     copyRightYear: "",
-    explicit_content: false,
+    explicitContent: false,
     timeZone: { label: "", value: "", name: "" },
-    cover_song: false,
+    coverSong: false,
     license: null,
     compositionType: "",
     instrumentalSource: "",
@@ -109,19 +109,19 @@ const SongForm = ({
 
   const addField = (field: keyof SongForm) => {
     switch (field) {
-      case "featured_artist":
+      case "featuredArtist":
         setSongForm((prev) => ({
           ...prev,
-          featured_artist: [
-            ...prev.featured_artist,
+          featuredArtist: [
+            ...prev.featuredArtist,
             { artistName: "", spotifyId: "", appleId: "", role: "" },
           ],
         }));
         break;
-      case "song_writer":
+      case "songWriter":
         setSongForm((prev) => ({
           ...prev,
-          song_writer: [...prev.song_writer, { first_name: "", last_name: "" }],
+          songWriter: [...prev.songWriter, { first_name: "", last_name: "" }],
         }));
         break;
       case "performer":
@@ -145,19 +145,19 @@ const SongForm = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
     if (
-      name === "another_distribution_check" ||
-      name === "pre_order_check" ||
-      name === "explicit_content"
+      name === "anotherDistributionCheck" ||
+      name === "preOrderCheck" ||
+      name === "explicitContent"
     ) {
       setSongForm((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "song_audio") {
+    } else if (name === "songAudio") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setSongForm((prev) => ({ ...prev, song_audio: file }));
-    } else if (name === "music_image") {
+      setSongForm((prev) => ({ ...prev, songAudio: file }));
+    } else if (name === "musicImage") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setSongForm((prev) => ({ ...prev, music_image: file }));
+      setSongForm((prev) => ({ ...prev, musicImage: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -176,31 +176,31 @@ const SongForm = ({
     // console.log(name,value);
 
     switch (field) {
-      case "featured_artist":
+      case "featuredArtist":
         setSongForm((prev) => {
-          // work explicitly with the featured_artist array so spreading is on an array of objects
-          const updatedList = [...prev.featured_artist];
+          // work explicitly with the featuredArtist array so spreading is on an array of objects
+          const updatedList = [...prev.featuredArtist];
           updatedList[index] = {
             ...updatedList[index],
             [name as keyof FeaturedArtist]: value,
           };
-          return { ...prev, featured_artist: updatedList };
+          return { ...prev, featuredArtist: updatedList };
         });
         break;
-      case "song_writer":
+      case "songWriter":
         setSongForm((prev) => {
-          // work explicitly with the song_writer array so spreading is on an array of objects
-          const updatedList = [...prev.song_writer];
+          // work explicitly with the songWriter array so spreading is on an array of objects
+          const updatedList = [...prev.songWriter];
           updatedList[index] = {
             ...updatedList[index],
             [name as keyof SongWriter]: value,
           };
-          return { ...prev, song_writer: updatedList };
+          return { ...prev, songWriter: updatedList };
         });
         break;
       case "performer":
         setSongForm((prev) => {
-          // work explicitly with the song_writer array so spreading is on an array of objects
+          // work explicitly with the songWriter array so spreading is on an array of objects
           const updatedList = [...prev.performer];
           updatedList[index] = {
             ...updatedList[index],
@@ -211,7 +211,7 @@ const SongForm = ({
         break;
       case "producer":
         setSongForm((prev) => {
-          // work explicitly with the song_writer array so spreading is on an array of objects
+          // work explicitly with the songWriter array so spreading is on an array of objects
           const updatedList = [...prev.producer];
           updatedList[index] = {
             ...updatedList[index],
@@ -262,12 +262,12 @@ const SongForm = ({
         setIsSubmittingForm(false);
         return toast.warn(validForm);
       }
-      if (songForm.song_audio) {
+      if (songForm.songAudio) {
         const { upc, songS3Key, error, uploadId } = await uploadTrack(
-          form.song_audio!,
+          form.songAudio!,
           form.upc,
           form.artist,
-          form.another_distribution_check,
+          form.anotherDistributionCheck,
           api,
           songFormFromApi._id,
         );
@@ -314,8 +314,8 @@ const SongForm = ({
       }
       toast.success(res?.data?.msg);
       localStorage.removeItem("songForm");
-      localStorage.removeItem("song_writer");
-      localStorage.removeItem("featured_artist");
+      localStorage.removeItem("songWriter");
+      localStorage.removeItem("featuredArtist");
       localStorage.removeItem("performer");
       localStorage.removeItem("producer");
       setSongForm({
@@ -323,33 +323,33 @@ const SongForm = ({
         genre: "",
         language: "",
         artist: "",
-        release_date: undefined,
+        releaseDate: undefined,
         preOrderDate: undefined,
-        featured_artist: [
+        featuredArtist: [
           { artistName: "", spotifyId: "", appleId: "", role: "" },
         ],
         performer: [{ name: "", role: "" }],
-        song_writer: [{ first_name: "", last_name: "" }],
+        songWriter: [{ first_name: "", last_name: "" }],
         producer: [{ name: "", role: "" }],
-        pre_order_check: false,
-        another_distribution_check: false,
+        preOrderCheck: false,
+        anotherDistributionCheck: false,
         territories: [],
-        song_audio: null,
-        music_image: null,
+        songAudio: null,
+        musicImage: null,
         dsp: [],
         lyrics: "",
-        start_clip: "",
+        startClip: "",
         isrc: "",
         upc: "",
         copyRightHolder: "",
         copyRightYear: "",
-        explicit_content: false,
-        old_audio: null,
-        old_image: null,
+        explicitContent: false,
+        oldAudio: null,
+        oldImage: null,
         timeZone: { label: "", value: "", name: "" },
-        cover_song: false,
+        coverSong: false,
         license: null,
-        old_license: null,
+        oldLicense: null,
         compositionType: "",
         instrumentalSource: "",
         countryOfRecording: "",
@@ -364,8 +364,8 @@ const SongForm = ({
         return;
       }
       toast.error("something went wrong.");
-      songForm.music_image = null;
-      songForm.song_audio = null;
+      songForm.musicImage = null;
+      songForm.songAudio = null;
     } finally {
       setIsSubmittingForm(false);
       // router.replace("?type=single");
@@ -377,13 +377,13 @@ const SongForm = ({
 
     if (preview === false) {
       const string_form = JSON.stringify(form);
-      const featured_artist = JSON.stringify(form.featured_artist);
-      const song_writer = JSON.stringify(form.song_writer);
+      const featuredArtist = JSON.stringify(form.featuredArtist);
+      const songWriter = JSON.stringify(form.songWriter);
       const performer = JSON.stringify(form.performer);
       const producer = JSON.stringify(form.producer);
-      localStorage.setItem("M_song_writer", song_writer);
+      localStorage.setItem("M_songWriter", songWriter);
       localStorage.setItem("M_songForm", string_form);
-      localStorage.setItem("M_featured_artist", featured_artist);
+      localStorage.setItem("M_featuredArtist", featuredArtist);
       localStorage.setItem("M_performer", performer);
       localStorage.setItem("M_producer", producer);
       setPreview(true);
@@ -395,8 +395,8 @@ const SongForm = ({
 
   useEffect(() => {
     const string_form = localStorage.getItem("M_songForm");
-    const featured_artist = localStorage.getItem("M_featured_artist");
-    const song_writer = localStorage.getItem("M_song_writer");
+    const featuredArtist = localStorage.getItem("M_featuredArtist");
+    const songWriter = localStorage.getItem("M_songWriter");
     const performer = localStorage.getItem("M_performer");
     const producer = localStorage.getItem("M_producer");
 
@@ -404,12 +404,12 @@ const SongForm = ({
       const songForm = JSON.parse(string_form);
 
       // Parse with fallback to default value
-      const featured_artist1 = featured_artist
-        ? JSON.parse(featured_artist)
+      const featuredArtist1 = featuredArtist
+        ? JSON.parse(featuredArtist)
         : [{ artistName: "", spotifyId: "", appleId: "", role: "" }];
 
-      const song_writer1 = song_writer
-        ? JSON.parse(song_writer)
+      const songWriter1 = songWriter
+        ? JSON.parse(songWriter)
         : [{ first_name: "", last_name: "" }];
 
       const performer1 = performer
@@ -420,23 +420,23 @@ const SongForm = ({
         ? JSON.parse(producer)
         : [{ name: "", role: "" }];
 
-      console.log(featured_artist1);
+      console.log(featuredArtist1);
 
       setSongForm({
         ...songForm,
-        featured_artist: featured_artist1,
-        song_writer: song_writer1,
+        featuredArtist: featuredArtist1,
+        songWriter: songWriter1,
         performer: performer1,
         producer: producer1,
-        release_date: songForm.release_date
-          ? new Date(songForm.release_date)
+        releaseDate: songForm.releaseDate
+          ? new Date(songForm.releaseDate)
           : undefined,
         preOrderDate: songForm.preOrderDate
           ? new Date(songForm.preOrderDate)
           : undefined,
-        music_image: null,
-        song_audio: null,
-        cover_song: false,
+        musicImage: null,
+        songAudio: null,
+        coverSong: false,
         license: null,
       });
     }
@@ -447,32 +447,32 @@ const SongForm = ({
       title: songFormFromApi.releaseTitle,
       genre: songFormFromApi.genre,
       language: songFormFromApi.releaseLanguage,
-      artist: songFormFromApi.artistName,
-      release_date: songFormFromApi.releaseDate,
+      artist: songFormFromApi.artist.artistName,
+      releaseDate: songFormFromApi.releaseDate,
       preOrderDate: songFormFromApi.preOrderDate || undefined,
-      featured_artist: songFormFromApi.featuredArtist,
+      featuredArtist: songFormFromApi.featuredArtist,
       performer: songFormFromApi.performer,
-      song_writer: songFormFromApi.songWriter,
+      songWriter: songFormFromApi.songWriter,
       producer: songFormFromApi.producer,
-      pre_order_check: songFormFromApi.preOrderCheck,
-      another_distribution_check: songFormFromApi.anotherDistributionCheck,
+      preOrderCheck: songFormFromApi.preOrderCheck,
+      anotherDistributionCheck: songFormFromApi.anotherDistributionCheck,
       territories: songFormFromApi.territories,
-      song_audio: null,
-      music_image: null,
+      songAudio: null,
+      musicImage: null,
       dsp: songFormFromApi.dsp,
       lyrics: songFormFromApi.lyrics,
-      start_clip: songFormFromApi.startClip,
+      startClip: songFormFromApi.startClip,
       isrc: songFormFromApi.isrc || "",
       upc: songFormFromApi.upc || "",
       copyRightHolder: songFormFromApi.copyRightHolder || "",
       copyRightYear: songFormFromApi.copyRightYear || "",
-      explicit_content: songFormFromApi.explicitContent,
-      old_audio: songFormFromApi.releaseAudio || null,
-      old_image: songFormFromApi.releaseImage || null,
+      explicitContent: songFormFromApi.explicitContent,
+      oldAudio: songFormFromApi.releaseAudio || null,
+      oldImage: songFormFromApi.releaseImage || null,
       timeZone: songFormFromApi.timeZone || { label: "", value: "", name: "" },
-      cover_song: songFormFromApi.isCoverSong,
+      coverSong: songFormFromApi.isCoverSong,
       license: null,
-      old_license: songFormFromApi.license || null,
+      oldLicense: songFormFromApi.license || null,
       compositionType: songFormFromApi.compositionType || "",
       instrumentalSource: songFormFromApi.instrumentalSource || "",
       countryOfRecording: songFormFromApi.countryOfRecording || "",
@@ -741,7 +741,7 @@ const SongForm = ({
                       </div>
                     </div>
 
-                    {/* featured_artist */}
+                    {/* featuredArtist */}
                     <div>
                       <h2 className="text-sm font-bold leading-[20px] tracking-[-0.5px] text-primary mt-5">
                         Featured Artists
@@ -750,7 +750,7 @@ const SongForm = ({
                         You can leave blank if there are no featured artists on
                         your release.
                       </p>
-                      {songForm.featured_artist.map((_, i) => (
+                      {songForm.featuredArtist.map((_, i) => (
                         <div
                           key={i}
                           className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
@@ -758,8 +758,8 @@ const SongForm = ({
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={i}
-                              field="featured_artist"
-                              value={songForm.featured_artist[i].artistName}
+                              field="featuredArtist"
+                              value={songForm.featuredArtist[i].artistName}
                               title={"Artist name"}
                               type={"text"}
                               name={"artistName"}
@@ -771,8 +771,8 @@ const SongForm = ({
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={i}
-                              field="featured_artist"
-                              value={songForm.featured_artist[i].spotifyId}
+                              field="featuredArtist"
+                              value={songForm.featuredArtist[i].spotifyId}
                               title={"Spotify ID"}
                               type={"text"}
                               name={"spotifyId"}
@@ -783,8 +783,8 @@ const SongForm = ({
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={i}
-                              field="featured_artist"
-                              value={songForm.featured_artist[i].appleId}
+                              field="featuredArtist"
+                              value={songForm.featuredArtist[i].appleId}
                               title={"Apple music ID"}
                               type={"text"}
                               name={"appleId"}
@@ -796,9 +796,9 @@ const SongForm = ({
                       ))}
                       <div className="flex gap-2 items-center">
                         <button
-                          disabled={songForm.featured_artist.length === 5}
+                          disabled={songForm.featuredArtist.length === 5}
                           onClick={() => {
-                            addField("featured_artist");
+                            addField("featuredArtist");
                           }}
                           className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
                         >
@@ -815,13 +815,13 @@ const SongForm = ({
                         </button>
                         <button
                           arelia-label="delete featured artist"
-                          disabled={songForm.featured_artist.length === 1}
+                          disabled={songForm.featuredArtist.length === 1}
                           onClick={() => {
                             setSongForm((prev) => ({
                               ...prev,
-                              featured_artist: prev.featured_artist.filter(
+                              featuredArtist: prev.featuredArtist.filter(
                                 (_, index) =>
-                                  index !== prev.featured_artist.length - 1,
+                                  index !== prev.featuredArtist.length - 1,
                               ),
                             }));
                           }}
@@ -841,7 +841,7 @@ const SongForm = ({
                         You can leave blank if there are no songwriters on your
                         release
                       </p> */}
-                      {songForm.song_writer.map((_, index) => (
+                      {songForm.songWriter.map((_, index) => (
                         <div
                           key={index}
                           className="w-full flex flex-wrap justify-between gap-y-3 px-1 mb-1"
@@ -849,8 +849,8 @@ const SongForm = ({
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={index}
-                              field="song_writer"
-                              value={songForm.song_writer[index].first_name}
+                              field="songWriter"
+                              value={songForm.songWriter[index].first_name}
                               title={"First name"}
                               type={"text"}
                               name={"first_name"}
@@ -862,8 +862,8 @@ const SongForm = ({
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <DynamicInput
                               index={index}
-                              field="song_writer"
-                              value={songForm.song_writer[index].last_name}
+                              field="songWriter"
+                              value={songForm.songWriter[index].last_name}
                               title={"Last name"}
                               type={"text"}
                               name={"last_name"}
@@ -876,8 +876,8 @@ const SongForm = ({
                       ))}
                       <div className="flex gap-2 items-center">
                         <button
-                          disabled={songForm.song_writer.length === 12}
-                          onClick={() => addField("song_writer")}
+                          disabled={songForm.songWriter.length === 12}
+                          onClick={() => addField("songWriter")}
                           className="font-bold text-sm rounded-lg  px-4 py-2.5 hover:bg-primary/20 mt-9 border-3 border-primary text-main-heading flex"
                         >
                           <Image
@@ -893,13 +893,13 @@ const SongForm = ({
                         </button>
                         <button
                           aria-label="delete song writer"
-                          disabled={songForm.song_writer.length === 1}
+                          disabled={songForm.songWriter.length === 1}
                           onClick={() => {
                             setSongForm((prev) => ({
                               ...prev,
-                              song_writer: prev.song_writer.filter(
+                              songWriter: prev.songWriter.filter(
                                 (_, index) =>
-                                  index !== prev.song_writer.length - 1,
+                                  index !== prev.songWriter.length - 1,
                               ),
                             }));
                           }}
@@ -1113,10 +1113,10 @@ const SongForm = ({
                             setDate={(date) =>
                               setSongForm((prev) => ({
                                 ...prev,
-                                release_date: date,
+                                releaseDate: date,
                               }))
                             }
-                            value={songForm.release_date}
+                            value={songForm.releaseDate}
                             type="first"
                             toYear={toYear}
                             fromYear={fromYear}
@@ -1195,7 +1195,7 @@ const SongForm = ({
                             Pre order date{" "}
                           </p>
                           <SelectDate
-                            disabled={!songForm.pre_order_check}
+                            disabled={!songForm.preOrderCheck}
                             setDate={(date) =>
                               setSongForm((prev) => ({
                                 ...prev,
@@ -1203,7 +1203,7 @@ const SongForm = ({
                               }))
                             }
                             value={songForm.preOrderDate}
-                            releaseDate={songForm.release_date}
+                            releaseDate={songForm.releaseDate}
                             type="second"
                             toYear={toYear}
                             fromYear={fromYear}
@@ -1218,8 +1218,8 @@ const SongForm = ({
                             <input
                               type="checkbox"
                               className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                              name="pre_order_check"
-                              checked={songForm.pre_order_check}
+                              name="preOrderCheck"
+                              checked={songForm.preOrderCheck}
                               onChange={handleChange}
                             />
                             <p className="leading-6 text-sm  font-medium">
@@ -1309,7 +1309,7 @@ const SongForm = ({
 
                         <div className="flex items-center justify-center w-64 lg:w-80">
                           <label
-                            htmlFor="song_audio"
+                            htmlFor="songAudio"
                             className="flex p-3 gap-3 items-center justify-center w-full h-24 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  dark:bg-gray-700 hover:bg-gray-100 dark:hover:border-gray-500"
                           >
                             <div className="w-[50%] flex max-w-[50%] items-center justify-center p-3 rounded-2xl bg-[#103958] text-white">
@@ -1321,7 +1321,7 @@ const SongForm = ({
                               />
                             </div>
                             <div className="w-[50%]">
-                              {!songForm.song_audio ? (
+                              {!songForm.songAudio ? (
                                 <p className="mb-2 text-xs text-gray-500">
                                   <span className="font-bold text-text-body">
                                     Supported Files:
@@ -1331,14 +1331,14 @@ const SongForm = ({
                               ) : (
                                 <p className="font-bold text-[16px] text-[#494949] truncate max-w-[50%]">
                                   <span className="font-semibold truncate">
-                                    {songForm.song_audio?.name}
+                                    {songForm.songAudio?.name}
                                   </span>
                                 </p>
                               )}
                             </div>
                             <input
-                              id="song_audio"
-                              name="song_audio"
+                              id="songAudio"
+                              name="songAudio"
                               type="file"
                               accept="audio/wav,audio/flac,audio/mp3"
                               className="hidden"
@@ -1447,10 +1447,10 @@ const SongForm = ({
                       <div className="w-full flex flex-wrap justify-between gap-y-5 px-1 mt-5">
                         <div className="flex flex-col w-[40%] max-sm:w-full">
                           <Input
-                            value={songForm.start_clip}
+                            value={songForm.startClip}
                             title={"Start Time (in seconds)"}
                             type={"text"}
-                            name={"start_clip"}
+                            name={"startClip"}
                             placeholder={"30"}
                             updateValue={handleChange}
                             required={false}
@@ -1496,7 +1496,7 @@ const SongForm = ({
                           </div>
                           <div className="flex items-center justify-center w-64 lg:w-80">
                             <label
-                              htmlFor="music_image"
+                              htmlFor="musicImage"
                               className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
                               <div
@@ -1530,14 +1530,14 @@ const SongForm = ({
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
                                     <span className="font-semibold">
-                                      {songForm.music_image?.name}
+                                      {songForm.musicImage?.name}
                                     </span>
                                   </p>
                                 )}
                               </div>
                               <input
-                                id="music_image"
-                                name="music_image"
+                                id="musicImage"
+                                name="musicImage"
                                 type="file"
                                 accept="image/png,image/jpeg"
                                 className="hidden"
@@ -1571,8 +1571,8 @@ const SongForm = ({
                           aria-label="another distribution check box"
                           type="checkbox"
                           className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                          name="another_distribution_check"
-                          checked={songForm.another_distribution_check}
+                          name="anotherDistributionCheck"
+                          checked={songForm.anotherDistributionCheck}
                           onChange={handleChange}
                         />
                         <p className="leading-6 text-sm font-medium">
@@ -1583,8 +1583,8 @@ const SongForm = ({
                         <input
                           type="checkbox"
                           className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                          name="explicit_content"
-                          checked={songForm.explicit_content}
+                          name="explicitContent"
+                          checked={songForm.explicitContent}
                           onChange={handleChange}
                         />
                         <p className="leading-6 text-sm font-medium">
@@ -1603,7 +1603,7 @@ const SongForm = ({
                           updateValue={handleChange}
                           disabled={true}
                           uppercase={true}
-                          required={songForm.another_distribution_check}
+                          required={songForm.anotherDistributionCheck}
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           Unique code for tracking sales/streams.
@@ -1619,7 +1619,7 @@ const SongForm = ({
                           updateValue={handleChange}
                           disabled={true}
                           uppercase={true}
-                          required={songForm.another_distribution_check}
+                          required={songForm.anotherDistributionCheck}
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           Unique code for tracking sales/streams.
@@ -1814,7 +1814,7 @@ const SongForm = ({
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-text-body font-bold text-sm truncate">
-                                {songForm.music_image?.name ||
+                                {songForm.musicImage?.name ||
                                   "Uploaded Artwork"}
                               </p>
                             </div>
@@ -1829,7 +1829,7 @@ const SongForm = ({
                               />
                             </div>
                             <p className="text-text-body font-bold text-sm leading-[18px] tracking-[0.5px] truncate flex-1">
-                              {songForm.music_image?.name || "Uploaded Artwork"}
+                              {songForm.musicImage?.name || "Uploaded Artwork"}
                             </p> */}
                           </>
                         ) : (
@@ -1887,8 +1887,8 @@ const SongForm = ({
                         Featured Artists
                       </h2>
                       <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
-                        {songForm.featured_artist?.length > 0
-                          ? songForm.featured_artist
+                        {songForm.featuredArtist?.length > 0
+                          ? songForm.featuredArtist
                               .map((item) => item.artistName)
                               .join(", ")
                           : ""}
@@ -1917,8 +1917,8 @@ const SongForm = ({
                         Songwriter
                       </h2>
                       <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
-                        {songForm.song_writer?.length > 0
-                          ? songForm.song_writer
+                        {songForm.songWriter?.length > 0
+                          ? songForm.songWriter
                               .map((item) => item.first_name)
                               .join(", ")
                           : ""}
@@ -2046,8 +2046,8 @@ const SongForm = ({
                         Release Date
                       </h2>
                       <p className="truncate text-text-body text-xs font-normal leading-[32px] tracking-tight">
-                        {songForm.release_date !== undefined
-                          ? new Date(songForm.release_date).toLocaleDateString()
+                        {songForm.releaseDate !== undefined
+                          ? new Date(songForm.releaseDate).toLocaleDateString()
                           : ""}
                       </p>
                       <div className="border-b border-neutral-100"></div>
@@ -2103,14 +2103,16 @@ const SongForm = ({
             <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
               {/* Left group / Early buttons on mobile */}
               <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
-                <button
-                  onClick={() => handleSubmit(songForm, "draft")}
-                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
-                    !preview ? "hidden" : "flex"
-                  }`}
-                >
-                  Save as Draft
-                </button>
+                {songFormFromApi.releaseStatus === "draft" && (
+                  <button
+                    onClick={() => handleSubmit(songForm, "draft")}
+                    className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
+                      !preview ? "hidden" : "flex"
+                    }`}
+                  >
+                    Save as Draft
+                  </button>
+                )}
 
                 <button
                   onClick={() => handleSubmit(songForm, "upload")}

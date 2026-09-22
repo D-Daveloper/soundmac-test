@@ -38,7 +38,7 @@ type pitchFormArrayType = {
 type pitchPlayFormType = {
   // Required fields
   artist: string;
-  // release_date: Date | undefined;
+  // releaseDate: Date | undefined;
   promotionPackage: string;
   promotionType: string;
   releaseTitle: string;
@@ -111,7 +111,7 @@ const pitchplayFormFields: pitchFormArrayType[] = [
   //   required: false,
   // },
   // {
-  //   name: "release_date",
+  //   name: "releaseDate",
   //   title: "Release date",
   //   type: "date",
   //   required: true,

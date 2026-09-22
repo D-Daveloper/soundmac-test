@@ -34,27 +34,27 @@ const TrackSchema = new mongoose.Schema(
       ],
       trim: true,
     },
-    albumName: {
-      type: String,
-      required: [true, "Album Name is required"],
-      trim: true,
-    },
+    // albumName: {
+    //   type: String,
+    //   required: [true, "Album Name is required"],
+    //   trim: true,
+    // },
     album: {
       type: mongoose.Schema.Types.ObjectId,
       required: [true, "Album ID is required"],
       trim: true,
       ref: "Album",
     },
-    artistName: {
-      type: String,
-      required: [true, "Artist is required"],
-      trim: true,
-    },
-    artist: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Artist",
-      required: [true, "Provide an Artist!"],
-    },
+    // artistName: {
+    //   type: String,
+    //   required: [true, "Artist is required"],
+    //   trim: true,
+    // },
+    // artist: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Artist",
+    //   required: [true, "Provide an Artist!"],
+    // },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -197,11 +197,11 @@ const TrackSchema = new mongoose.Schema(
         "Explicit content flag is required",
       ],
     },
-    releaseStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected", "draft", "deleted"],
-      default: "pending",
-    },
+    // releaseStatus: {
+    //   type: String,
+    //   enum: ["pending", "approved", "rejected", "draft", "deleted"],
+    //   default: "pending",
+    // },
     catalogNumber: {
       type: String,
       required: [function (this: any) {
@@ -230,11 +230,12 @@ const TrackSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
+TrackSchema.index({ album: 1 })
 TrackSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true });
-TrackSchema.index({ artistName: 1, releaseDate: -1 });
+// TrackSchema.index({ artistName: 1, releaseDate: -1 });
 TrackSchema.index({ user: 1, releaseTitle: 1 });
-TrackSchema.index({ user: 1, artist: 1 });
-TrackSchema.index({ user: 1, upc: 1 });
+// TrackSchema.index({ user: 1, artist: 1 });
+// TrackSchema.index({ user: 1, upc: 1 });
 // enforce uniqueness
 TrackSchema.index({ upc: 1, releaseTitle: 1 }, { unique: true });
 // TrackSchema.index({ genre: 1 });
@@ -247,14 +248,14 @@ const TrackModel =
 export default TrackModel;
 // Pre-validation hook to enforce required fields based on releaseStatus
 TrackSchema.pre("validate", function (next) {
-  if (this.releaseStatus !== "draft") {
-    const requiredFields = ["releaseTitle", "releaseAudio", "isrc", "upc"];
+  // if (this.releaseStatus !== "draft") {
+  const requiredFields = ["releaseTitle", "releaseAudio", "isrc", "upc"];
 
-    for (const field of requiredFields) {
-      if (!(this as any)[field]) {
-        this.invalidate(field, `${field} is required before publishing`);
-      }
+  for (const field of requiredFields) {
+    if (!(this as any)[field]) {
+      this.invalidate(field, `${field} is required before publishing`);
     }
   }
+  // }
   next();
 });

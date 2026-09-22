@@ -5,7 +5,6 @@ import {
   createEmptyTrack,
   isTrackFormValid,
 } from "@/util/middleware/functions";
-import Image from "next/image";
 import React, { use, useContext, useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "react-toastify";
@@ -29,9 +28,6 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
   const api = UseAxios();
 
-  const { data: album, isLoading: isAlbumLoading } = useGetAlbums({
-    albumTitle: track.replaceAll("-", " "),
-  });
   const { data, isLoading, isError, error, refetch } = useGetAlbumTracks({
     albumTitle: track.replaceAll("-", " "),
   });
@@ -57,45 +53,45 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
     }
     if (!data?.data?.length) return;
 
-    const mappedTracks: TrackForm[] = data.data.map((item: TrackFromApi) => ({
-      id: item._id, // must exist
-      title: item.releaseTitle || "",
-      genre: item.genre || "",
-      language: item.releaseLanguage || "",
-      artist: item.artistName || "",
-      release_date: item.releaseDate || null,
-      preOrderDate: item.preOrderDate || null,
+    const mappedTracks: TrackForm[] = data.data.map(
+      (item: TrackFromApi): TrackForm => ({
+        id: item._id, // must exist
+        title: item.releaseTitle || "",
+        genre: item.genre || "",
+        language: item.releaseLanguage || "",
 
-      featured_artist:
-        item.featuredArtist.length > 0
-          ? item.featuredArtist
-          : [{ artistName: "", spotifyId: "", appleId: "" }],
-      performer:
-        item.performer.length > 0 ? item.performer : [{ name: "", role: "" }],
-      song_writer:
-        item.songWriter.length > 0
-          ? item.songWriter
-          : [{ first_name: "", last_name: "" }],
-      producer: item.producer.length > 0 ? item.producer : [{ name: "" }],
+        featuredArtist:
+          item.featuredArtist.length > 0
+            ? item.featuredArtist
+            : [{ artistName: "", spotifyId: "", appleId: "", role: "" }],
+        performer:
+          item.performer.length > 0 ? item.performer : [{ name: "", role: "" }],
+        songWriter:
+          item.songWriter.length > 0
+            ? item.songWriter
+            : [{ first_name: "", last_name: "" }],
+        producer:
+          item.producer.length > 0 ? item.producer : [{ name: "", role: "" }],
+        anotherDistributionCheck: item.anotherDistributionCheck || false,
 
-      pre_order_check: item.preOrderCheck || false,
-      another_distribution_check: item.anotherDistributionCheck || false,
+        songAudio: null, // new upload
+        oldAudio: item.releaseAudio || null, // existing file
 
-      song_audio: null, // new upload
-      old_audio: item.releaseAudio || null, // existing file
+        lyrics: item.lyrics || "",
+        startClip: item.startClip || "",
 
-      lyrics: item.lyrics || "",
-      start_clip: item.startClip || "",
+        isrc: item.isrc || "",
+        trackNumber: item.trackNumber,
 
-      isrc: item.isrc || "",
-      upc: item.upc || "",
-      track_number: item.trackNumber,
-
-      explicit_content: item.explicitContent || false,
-      compositionType: item.compositionType || "",
-      instrumentalSource: item.instrumentalSource || "",
-      countryOfRecording: item.countryOfRecording || "",
-    }));
+        explicitContent: item.explicitContent || false,
+        compositionType: item.compositionType || "",
+        instrumentalSource: item.instrumentalSource || "",
+        countryOfRecording: item.countryOfRecording || "",
+        validationError: "",
+        uploadStatus: "idle",
+        s3key: "",
+      }),
+    );
 
     setTracks(mappedTracks);
     setActiveTrackId(mappedTracks[0].id);
@@ -103,11 +99,11 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
   console.log(tracks);
 
-  if (isAlbumLoading || !album || album.data.length < 1 || !data) {
+  if (isLoading || !data) {
     return <InlineLoadingScreen />;
   }
 
-  const maxTracks = parseInt(album.data[0].numberOfTracks, 10);
+  const maxTracks = parseInt(data.album.numberOfTracks, 10);
   const activeTrack = tracks.find((t) => t.id === activeTrackId)!;
   // console.log("dss", activeTrack);
 
@@ -142,8 +138,6 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
     try {
       setIsSubmittingForm(true);
       for (let i = 0; i < tracks.length; i++) {
-        tracks[i].artist = album.data[0].artistName;
-        tracks[i].upc = album.data[0].upc;
         if (tracks[i].title.length < 3 || tracks[i].title.length > 32) {
           return (
             "track" +
@@ -175,7 +169,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         );
         res = await api.put(
           "v1/music/album/track",
-          JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
+          JSON.stringify({ tracks, albumId: data.album._id }),
           {
             headers: { "Content-Type": "application/json" },
           },
@@ -183,7 +177,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       } else {
         res = await api.put(
           "v1/music/album/track/draft",
-          JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
+          JSON.stringify({ tracks, albumId: data.album._id }),
           {
             headers: { "Content-Type": "application/json" },
           },
@@ -191,7 +185,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       }
       toast.success(res?.data?.msg);
       await queryClient.invalidateQueries({
-        queryKey: ["edit tracks", album.data[0].releaseTitle],
+        queryKey: ["edit tracks", data.album.releaseTitle],
         exact: true,
       });
       router.push("/dashboard/music/manageRelease?type=album");
@@ -213,7 +207,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   //   );
   // };
 
-  return isLoading || !activeTrack || !activeTrackId || isSubmittingForm ? (
+  return (!activeTrack || !activeTrackId || isSubmittingForm) ? (
     <InlineLoadingScreen />
   ) : (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-20 lg:pb-5">
@@ -266,7 +260,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
           track={activeTrack}
           onChange={(patch) => updateTrack(activeTrack.id, patch)}
           onRemove={() => removeTrack(activeTrack.id)}
-          album={album.data[0]}
+          album={data.album}
         />
         <div className="fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-md border-t border-neutral-100 flex justify-end items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-10 z-20 shadow-lg">
           {/* Delete Track Action Button */}
@@ -285,7 +279,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
           </button>
 
           {/* Save as Draft Action Button */}
-          <button
+          {/* <button
             type="button"
             disabled={isSubmittingForm}
             onClick={() => {
@@ -294,7 +288,7 @@ const EditTrack = ({ params }: { params: Promise<{ track: string }> }) => {
             className="font-bold text-xs sm:text-sm rounded-xl px-4 py-2.5 border-2 border-neutral-200 text-neutral-700 bg-white hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-50 disabled:hover:bg-white transition-all flex items-center justify-center"
           >
             Save as Draft
-          </button>
+          </button> */}
 
           {/* Distribute/Submit Form Action Button */}
           <button

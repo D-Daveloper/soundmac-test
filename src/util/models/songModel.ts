@@ -134,11 +134,11 @@ const SongModelSchema = new mongoose.Schema(
       ],
       trim: true,
     },
-    artistName: {
-      type: String,
-      required: [true, "Artist is required"],
-      trim: true,
-    },
+    // artistName: {
+    //   type: String,
+    //   required: [true, "Artist is required"],
+    //   trim: true,
+    // },
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Artist",
@@ -397,7 +397,7 @@ const SongModelSchema = new mongoose.Schema(
     },
     releaseStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected", "draft"],
+      enum: ["pending", "approved", "rejected", "draft", "inactive"],
       default: "pending",
     },
     catalogNumber: {
@@ -484,10 +484,10 @@ const SongModelSchema = new mongoose.Schema(
 );
 
 // Uniqueness constraints
-SongModelSchema.index({ user: 1, artistName: 1, releaseTitle: 1 }, { unique: true });
-SongModelSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true });
-SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true });
-SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true });
+SongModelSchema.index({ user: 1, artist: 1, releaseTitle: 1 }, { unique: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } }});
+SongModelSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
+SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
+SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
 
 // Admin endpoint
 SongModelSchema.index({ createdAt: -1 }); // no filters
@@ -505,7 +505,7 @@ SongModelSchema.index({ user: 1, createdAt: -1 });
  * @param {ObjectId} songId - The ID of the song to approve
  * @param {string} label - The user label
  */
-SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, label: string) {
+SongModelSchema.statics.approveAndCreateMetadata = async function (songId: ObjectId, artistName, label: string) {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -529,7 +529,7 @@ SongModelSchema.statics.approveAndCreateMetadata = async function (songId: Objec
         upc: song.upc,
         "catalog-number": song.catalogNumber,
         "album-release-id": song.catalogNumber,
-        "album-main-artist": song.artistName,
+        "album-main-artist": artistName,
         "album-title": song.releaseTitle,
         "track-title": song.releaseTitle,
         genre: song.genre,

@@ -1,6 +1,6 @@
 // // lib/axiosInstance.ts
 
-import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, ApiKeyData, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, WithdrawalResponse, withdrawals } from "@/app/type";
+import { AdminAlbumDetailsResponse, adminDashboardType, AdminRelease, AdminSingleDetailsResponse, AdminUserDetailsResponse, AdminWithdrawalDetailsResponse, albumFromApi, AllArtistResponse, AllLabelResponse, AllSupportRequestsResponse, ApiKeyData, Artist, ArtistDetails, ArtistStat, ChartRegistration, CreateArtistForm, DPMDsp, labelResponse, PAGINATION, PayStackBankListResponse, ReleaseRequestResponse, salesReportDashboardResponse, songFromApi, ViewTracksResponse, WithdrawalResponse, withdrawals } from "@/app/type";
 import axios, { AxiosInstance } from "axios";
 import { IUser } from "../models/userModel";
 import { IPromotion } from "../models/promotionModel";
@@ -55,7 +55,7 @@ export const createArtist = async (
 
 export const DeleteArtist = async (
   api: AxiosInstance,
-  form: { artist_name: string }
+  form: { artistName: string }
 ) => {
   const res = await api.delete("v1/artist", {
     data: form,
@@ -75,12 +75,9 @@ export const getSongs = async (
 };
 export const DeleteSong = async (
   api: AxiosInstance,
-  form: { artist_name: string, releaseTitle: string }
+  id: string
 ) => {
-  const res = await api.delete("v1/music/song", {
-    data: form,
-    headers: { "Content-Type": "application/json" },
-  });
+  const res = await api.delete("v1/music/song/" + id);
   return res.data;
 };
 
@@ -107,8 +104,8 @@ export const getAlbum = async (
 export const getAlbumTracks = async (
   api: AxiosInstance,
   params: { albumTitle: string }
-): Promise<any> => {
-  const res = await api.get<Promise<any>>("v1/music/album/track", {
+): Promise<ViewTracksResponse> => {
+  const res = await api.get<Promise<ViewTracksResponse>>("v1/music/album/track", {
     params: params,
   });
   return res.data;

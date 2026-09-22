@@ -3,6 +3,7 @@ import dbConnect from "@/util/db";
 import { buildSort } from "@/util/middleware/functions";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import AlbumModel from "@/util/models/AlbumModel";
+import Artist from "@/util/models/artistModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { SortOrder } from "mongoose";
@@ -45,12 +46,19 @@ export async function GET(req: Request) {
     if (releaseStatusFilter && releaseStatusFilter !== "all") {
       query.releaseStatus = releaseStatusFilter;
     }
-    if (artist && artist != "none") query.artistName = artist;
+    if (artist && artist !== "none") {
+      const artists = await Artist.find({ artistName: artist })
+        .collation({ locale: "en", strength: 2 })
+        .select("_id")
+        .lean();
+
+      query.artist = { $in: artists.map((a) => a._id) };
+    }
     if (releaseTitle?.trim()) {
       query = {
         ...query, $or: [
           { upc: releaseTitle },
-          { releaseTitle: {$regex: `^${releaseTitle}`, $options: "i" }}]
+          { releaseTitle: { $regex: `^${releaseTitle}`, $options: "i" } }]
       };
 
       // page = 1;
@@ -85,13 +93,15 @@ export async function GET(req: Request) {
 
     if (releaseType != "single") {
       releases = await AlbumModel.find(query, albumProjection)
+        .populate("artist", " artistName spotifyId appleId -_id")
         .collation({ locale: "en", strength: 2 })
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit);
       totalCount = await AlbumModel.countDocuments(query);
     } else {
-      releases = await SongModel.find(query, singlesProjection).populate("artist", "spotifyId appleId -_id")
+      releases = await SongModel.find(query, singlesProjection)
+        .populate("artist", " artistName spotifyId appleId -_id")
         .collation({ locale: "en", strength: 2 })
         .sort({ createdAt: -1 })
         .skip((page - 1) * limit)

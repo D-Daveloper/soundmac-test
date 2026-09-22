@@ -22,7 +22,6 @@ const ArtistSchema = new Schema<IArtist>(
       trim: true,
       minlength: 3,
       maxlength: 32,
-      unique: [true, "Artist name already exists"],
     },
     artistImage: {
       type: String,
@@ -56,7 +55,10 @@ const ArtistSchema = new Schema<IArtist>(
 );
 ArtistSchema.index({ user: 1, createdAt: -1 }); //example 1 Optimizes queries that filter by user and sort by createdAt in descending order (newest first). It's ideal for "get the most recent artists for a specific user."
 ArtistSchema.index({ user: 1, updatedAt: -1 }); //example 2 Optimizes queries filtering by user and sorting by updatedAt descending (most recently updated first). Great for "get the recently edited artists for a user."
-ArtistSchema.index({ user: 1, artistName: 1 }, { unique: true });
+ArtistSchema.index({ user: 1, artistName: 1 }, {
+  unique: true, collation: { locale: "en", strength: 2 }, // MUST match .collation({ locale: "en", strength: 2 })
+  name: "user_artistName_collation_idx"
+});
 // ArtistSchema.index({ artistName: "text" })  // or { name: "text" } if searching text
 // ArtistSchema.index({ artistName: 1 },{unique:true})  // or { name: "text" } if searching text, example 3 Optimizes queries that filter by user and then by artistName (e.g., for searching or listing artists alphabetically within a user's scope).
 // ArtistSchema.index({ artistName: "text" })  // or { name: "text" } if searching text

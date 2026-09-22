@@ -658,7 +658,7 @@ export default function Page({
                           </h4>
                           <div className="flex items-center justify-center w-60">
                             <label
-                              htmlFor="music_image"
+                              htmlFor="musicImage"
                               className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
                               <div
@@ -705,8 +705,8 @@ export default function Page({
                                 )}
                               </div>
                               <input
-                                id="music_image"
-                                name="music_image"
+                                id="musicImage"
+                                name="musicImage"
                                 type="file"
                                 accept="image/png,image/jpeg"
                                 className="hidden"
@@ -731,7 +731,7 @@ export default function Page({
                               </h4>
                               <div className="flex items-center justify-center w-60">
                                 <label
-                                  htmlFor="music_image"
+                                  htmlFor="musicImage"
                                   className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                                 >
                                   <div
@@ -762,8 +762,8 @@ export default function Page({
                                     </p>
                                   </div>
                                   <input
-                                    id="music_image"
-                                    name="music_image"
+                                    id="musicImage"
+                                    name="musicImage"
                                     type="file"
                                     accept="image/png,image/jpeg"
                                     className="hidden"
@@ -786,7 +786,7 @@ export default function Page({
                             </h4>
                             <div className="flex items-center justify-center w-60">
                               <label
-                                htmlFor="music_image"
+                                htmlFor="musicImage"
                                 className="flex p-3 gap-3 items-center justify-center w-full h-28 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                               >
                                 <div
@@ -817,8 +817,8 @@ export default function Page({
                                   </p>
                                 </div>
                                 <input
-                                  id="music_image"
-                                  name="music_image"
+                                  id="musicImage"
+                                  name="musicImage"
                                   type="file"
                                   accept="image/png,image/jpeg"
                                   className="hidden"

@@ -71,7 +71,7 @@ const SongPreview: React.FC<SongPreviewProps> = ({
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-text-body font-bold text-sm truncate">
-                    {songForm.music_image?.name}
+                    {songForm.musicImage?.name}
                   </p>
                 </div>
               </>
@@ -137,7 +137,7 @@ const SongPreview: React.FC<SongPreviewProps> = ({
           </h2>
           <div className="">
             <p className="truncate text-text-body font-normal leading-[30px] tracking-[1px] min-h-[30px]">
-              {songForm.featured_artist
+              {songForm.featuredArtist
                 .map((item) => item.artistName)
                 .join(", ")}
             </p>
@@ -165,7 +165,7 @@ const SongPreview: React.FC<SongPreviewProps> = ({
           </h2>
           <div className="pb">
             <p className="truncate text-text-body font-normal text-xs leading-[30px] tracking-[1px] min-h-[30px]">
-              {songForm.song_writer.map((item) => item.first_name).join(", ")}
+              {songForm.songWriter.map((item) => item.first_name).join(", ")}
             </p>
             <div className="border border-neutral-100"></div>
           </div>
@@ -295,7 +295,7 @@ const SongPreview: React.FC<SongPreviewProps> = ({
           </h2>
           <div className="">
             <p className="truncate text-text-body font-normal leading-[30px] text-xs tracking-[1px] min-h-[30px]">
-              {songForm.release_date?.toLocaleDateString() || ""}
+              {songForm.releaseDate?.toLocaleDateString() || ""}
             </p>
             <div className="border border-neutral-100"></div>
           </div>

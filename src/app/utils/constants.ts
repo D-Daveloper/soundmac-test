@@ -817,35 +817,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -858,35 +858,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -899,35 +899,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -940,35 +940,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -981,35 +981,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1022,35 +1022,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Alex Rivera",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Mia Lopez", spotifyId: "spotify_mia", appleId: "apple_mia" }
 //     ],
 //     performer: [
 //       { name: "Alex Rivera", role: "Lead Vocals" },
 //       { name: "Jordan Smith", role: "Guitar" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Alex", last_name: "Rivera" },
 //       { first_name: "Jordan", last_name: "Smith" }
 //     ],
 //     producer: [
 //       { first_name: "Chris", last_name: "Johnson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Canada"],
-//     song_audio: "https://example.com/audio/electric-dreams.mp3",
+//     songAudio: "https://example.com/audio/electric-dreams.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "YouTube Music"],
 //     lyrics: "Verse 1: In the city lights...",
-//     start_clip: "https://example.com/clip/electric-dreams.mp3",
+//     startClip: "https://example.com/clip/electric-dreams.mp3",
 //     isrc: "US-ABC-23-12345",
 //     upc: "123456789012",
 //     copyRightHolder: "Alex Rivera Music",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1063,32 +1063,32 @@ export const country_list = [
 //     songLanguage: "Spanish",
 //     artistName: "Sofia Martinez",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: null,
-//     featured_artist: [],
+//     featuredArtist: [],
 //     performer: [
 //       { name: "Sofia Martinez", role: "Piano" },
 //       { name: "Carlos Ruiz", role: "Saxophone" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Sofia", last_name: "Martinez" }
 //     ],
 //     producer: [
 //       { first_name: "Elena", last_name: "Gomez" }
 //     ],
-//     pre_order_check: false,
-//     another_distribution_check: true,
+//     preOrderCheck: false,
+//     anotherDistributionCheck: true,
 //     territories: ["Spain", "Mexico", "Argentina"],
-//     song_audio: "https://example.com/audio/midnight-serenade.mp3",
+//     songAudio: "https://example.com/audio/midnight-serenade.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Deezer"],
 //     lyrics: "Verso 1: Bajo la luna llena...",
-//     start_clip: "https://example.com/clip/midnight-serenade.mp3",
+//     startClip: "https://example.com/clip/midnight-serenade.mp3",
 //     isrc: "ES-XYZ-22-67890",
 //     upc: "987654321098",
 //     copyRightHolder: "Sofia Martinez Productions",
 //     copyRightYear: "2022",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1101,9 +1101,9 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "The Thunderbolts",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Jake Thompson", spotifyId: "spotify_jake", appleId: "apple_jake" },
 //       { artistName: "Lisa Wong", spotifyId: "spotify_lisa", appleId: "apple_lisa" }
 //     ],
@@ -1111,26 +1111,26 @@ export const country_list = [
 //       { name: "Mike Harris", role: "Drums" },
 //       { name: "Jake Thompson", role: "Vocals" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Mike", last_name: "Harris" },
 //       { first_name: "Jake", last_name: "Thompson" }
 //     ],
 //     producer: [
 //       { first_name: "Tom", last_name: "Anderson" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: false,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: false,
 //     territories: ["US", "UK", "Australia"],
-//     song_audio: "https://example.com/audio/rock-the-night.mp3",
+//     songAudio: "https://example.com/audio/rock-the-night.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "Tidal"],
 //     lyrics: "Verse 1: Lights are flashing...",
-//     start_clip: "https://example.com/clip/rock-the-night.mp3",
+//     startClip: "https://example.com/clip/rock-the-night.mp3",
 //     isrc: "US-DEF-24-54321",
 //     upc: "112233445566",
 //     copyRightHolder: "Thunderbolts Records",
 //     copyRightYear: "2024",
-//     explicit_content: true,
+//     explicitContent: true,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1143,31 +1143,31 @@ export const country_list = [
 //     songLanguage: "Instrumental",
 //     artistName: "Nature Sounds Collective",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: null,
-//     featured_artist: [],
+//     featuredArtist: [],
 //     performer: [
 //       { name: "Anna Lee", role: "Synthesizer" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Anna", last_name: "Lee" }
 //     ],
 //     producer: [
 //       { first_name: "Ben", last_name: "Clark" }
 //     ],
-//     pre_order_check: false,
-//     another_distribution_check: false,
+//     preOrderCheck: false,
+//     anotherDistributionCheck: false,
 //     territories: ["Global"],
-//     song_audio: "https://example.com/audio/ocean-waves.mp3",
+//     songAudio: "https://example.com/audio/ocean-waves.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "YouTube Music"],
 //     lyrics: "", // Instrumental
-//     start_clip: "https://example.com/clip/ocean-waves.mp3",
+//     startClip: "https://example.com/clip/ocean-waves.mp3",
 //     isrc: "GB-HIJ-23-98765",
 //     upc: "556677889900",
 //     copyRightHolder: "Nature Sounds Collective",
 //     copyRightYear: "2023",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1180,35 +1180,35 @@ export const country_list = [
 //     songLanguage: "English",
 //     artistName: "Pop Starz",
 //     artist: {artistImage:"image", artistName: "Mia Lopez", createdAt: new Date("2026-01-23T23:00:00.000+00:00"),updatedAt:new Date("2026-01-23T23:00:00.000+00:00") }, // Assuming Artist has name and id
-//     release_date: new Date("2026-01-23T23:00:00.000+00:00"),
+//     releaseDate: new Date("2026-01-23T23:00:00.000+00:00"),
 //     preOrderDate: new Date("2026-01-23T23:00:00.000+00:00"),
-//     featured_artist: [
+//     featuredArtist: [
 //       { artistName: "Remy Dubois", spotifyId: "spotify_remy", appleId: "apple_remy" }
 //     ],
 //     performer: [
 //       { name: "Taylor Quinn", role: "Vocals" },
 //       { name: "Remy Dubois", role: "Backing Vocals" }
 //     ],
-//     song_writer: [
+//     songWriter: [
 //       { first_name: "Taylor", last_name: "Quinn" },
 //       { first_name: "Remy", last_name: "Dubois" }
 //     ],
 //     producer: [
 //       { first_name: "Sam", last_name: "Lee" }
 //     ],
-//     pre_order_check: true,
-//     another_distribution_check: true,
+//     preOrderCheck: true,
+//     anotherDistributionCheck: true,
 //     territories: ["US", "France", "Japan"],
-//     song_audio: "https://example.com/audio/dance-fever.mp3",
+//     songAudio: "https://example.com/audio/dance-fever.mp3",
 //     song_image: "https://soundmac1.s3.eu-north-1.amazonaws.com/testing/test_1767560802701/test_1767560802701.jpeg",
 //     dsp: ["Spotify", "Apple Music", "TikTok"],
 //     lyrics: "Verse 1: Feel the beat drop...",
-//     start_clip: "https://example.com/clip/dance-fever.mp3",
+//     startClip: "https://example.com/clip/dance-fever.mp3",
 //     isrc: "FR-KLM-24-11223",
 //     upc: "778899001122",
 //     copyRightHolder: "Pop Starz Entertainment",
 //     copyRightYear: "2024",
-//     explicit_content: false,
+//     explicitContent: false,
 //     createdAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     updatedAt: new Date("2026-01-23T23:00:00.000+00:00"),
 //     __v: 0,
@@ -1313,27 +1313,30 @@ export const adminNotifyUserReasons = [
   "Other",
 
 ];
-export const ReleaseMock: AdminRelease[] = [
-  {
-    releaseTitle: "Falling Skies",
-    releaseStatus: "pending",
-    artistName: "TomBaggz",
-    releaseDate: "2026-01-19T10:23:01.128+00:00",
-    _id: "string",
-    catalogNumber: "string",
-    isrc: "string",
-    upc: "string",
-    releaseImage: "string",
-    genre: "string",
-    featuredArtist: [],
-    songWriter: [],
-    producer: [],
-    artist: {
-      appleId: "string",
-      spotifyId: "string",
-    },
-  },
-]
+// export const ReleaseMock: AdminRelease[] = [
+//   {
+//     releaseTitle: "Falling Skies",
+//     releaseStatus: "pending",
+//     artistName: "TomBaggz",
+//     releaseDate: "2026-01-19T10:23:01.128+00:00",
+//     _id: "string",
+//     catalogNumber: "string",
+//     isrc: "string",
+//     upc: "string",
+//     releaseImage: "string",
+//     genre: "string",
+//     featuredArtist: [],
+//     songWriter: [],
+//     producer: [],
+//     artist: {
+//       _id:"sss",
+//       artistImage:"str",
+//       artistName:"aass",
+//       appleId: "string",
+//       spotifyId: "string",
+//     },
+//   },
+// ]
 
 export const royaltySource = [
   "DPM Network"

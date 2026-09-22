@@ -2,7 +2,7 @@ import { formatNumber } from "@/util/middleware/functions";
 import Image from "next/image";
 import React from "react";
 
-const PerformanceCard = ({title,featured_artist,image,date,streams,likes,downloads}:{title:string,featured_artist:string,image:string,date:string,streams:string,likes:string,downloads:string}) => {
+const PerformanceCard = ({title,featuredArtist,image,date,streams,likes,downloads}:{title:string,featuredArtist:string,image:string,date:string,streams:string,likes:string,downloads:string}) => {
   return (
     <div className="bg-neutral-50 border border-neutral-100 w-full p-3 rounded-2xl">
       <div className="flex flex-col gap-7">
@@ -22,7 +22,7 @@ const PerformanceCard = ({title,featured_artist,image,date,streams,likes,downloa
             <p className="text-main-heading text-xl capitalize font-normal line-clamp-1">
               {title}
             </p>
-            <p className="text-sm font-semibold text-text-body line-clamp-1">feat: {featured_artist}</p>
+            <p className="text-sm font-semibold text-text-body line-clamp-1">feat: {featuredArtist}</p>
             <p className="text-sm w-full font-normal text-text-disable flex space-x-1 items-center">
               <span className="font-semibold tracking-tight text-primary-500 text-xs md:text-base">
                 Release Date:

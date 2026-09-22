@@ -100,7 +100,7 @@ const ReleaseTable = ({
 
                       {/* Artist */}
                       <td className="p-4 whitespace-nowrap text-gray-900 font-semibold truncate max-w-[150px]">
-                        {release.artistName}
+                        {release.artist.artistName}
                       </td>
 
                       {/* Catalog Number */}

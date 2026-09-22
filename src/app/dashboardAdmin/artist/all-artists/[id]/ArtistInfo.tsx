@@ -68,13 +68,13 @@ export default function ArtistInfo({ id }: { id: string }) {
                   Kingsley & The Vibe Collective
                 </h1>
                 <p className="text-md font-semibold leading-[20px] tracking-tighter text-text-body">
-                  Kingsley Okafor
+                  {artistDetails?.artist.artistName}
                 </p>
               </div>
             </div>
             <div className="mt-auto">
               <p className="text-success-800 font-bold leading-[18px] tracking-tighter text-xs">
-                Active since {new Date().toDateString()}
+                Active since {artistDetails?.artist.createdAt ?new Date(artistDetails?.artist.createdAt).toDateString() : ""}
               </p>
             </div>
           </div>
@@ -237,6 +237,7 @@ export default function ArtistInfo({ id }: { id: string }) {
           <div className="mt-5 flex flex-col mb-10">
             <ReleaseTable
               releases={artistDetails.data}
+              artistName={artistDetails.artist.artistName}
               isfetching={isLoadingAllReleases}
             />
             {/* Pagination */}

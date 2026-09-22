@@ -119,12 +119,12 @@ export async function POST(req: Request) {
 
 
     if (
-      payload.song_writer &&
-      (!(payload.song_writer instanceof Array) ||
-        (payload.song_writer.length > 0 &&
-          payload.song_writer.some((artist) => artist.first_name === "" && artist.last_name === "")))
+      payload.songWriter &&
+      (!(payload.songWriter instanceof Array) ||
+        (payload.songWriter.length > 0 &&
+          payload.songWriter.some((artist) => artist.first_name === "" && artist.last_name === "")))
     ) {
-      payload.song_writer = [];
+      payload.songWriter = [];
     }
     if (
       payload.performer &&
@@ -135,12 +135,12 @@ export async function POST(req: Request) {
       payload.performer = [];
     }
     if (
-      payload.featured_artist &&
-      (!(payload.featured_artist instanceof Array) ||
-        (payload.featured_artist.length > 0 &&
-          payload.featured_artist.some((artist) => artist.artistName === "" && artist.role === "")))
+      payload.featuredArtist &&
+      (!(payload.featuredArtist instanceof Array) ||
+        (payload.featuredArtist.length > 0 &&
+          payload.featuredArtist.some((artist) => artist.artistName === "" && artist.role === "")))
     ) {
-      payload.featured_artist = [];
+      payload.featuredArtist = [];
     }
     if (
       payload.producer &&
@@ -159,10 +159,10 @@ export async function POST(req: Request) {
       releaseTitle: payload.title,
       genre: payload.genre,
       releaseLanguage: payload.language,
-      songWriter: payload.song_writer,
+      songWriter: payload.songWriter,
       producer: payload.producer,
       performer: payload.performer,
-      featuredArtist: payload.featured_artist,
+      featuredArtist: payload.featuredArtist,
       preOrderCheck: payload.preOrderCheck,
       anotherDistributionCheck: payload.anotherDistributionCheck,
       explicitContent: payload.explicitContent,
@@ -294,12 +294,12 @@ export async function PUT(req: Request) {
 
 
     if (
-      payload.song_writer &&
-      (!(payload.song_writer instanceof Array) ||
-        (payload.song_writer.length > 0 &&
-          payload.song_writer.some((artist) => artist.first_name === "" && artist.last_name === "")))
+      payload.songWriter &&
+      (!(payload.songWriter instanceof Array) ||
+        (payload.songWriter.length > 0 &&
+          payload.songWriter.some((artist) => artist.first_name === "" && artist.last_name === "")))
     ) {
-      payload.song_writer = [];
+      payload.songWriter = [];
     }
     if (
       payload.performer &&
@@ -310,12 +310,12 @@ export async function PUT(req: Request) {
       payload.performer = [];
     }
     if (
-      payload.featured_artist &&
-      (!(payload.featured_artist instanceof Array) ||
-        (payload.featured_artist.length > 0 &&
-          payload.featured_artist.some((artist) => artist.artistName === "" && artist.role === "")))
+      payload.featuredArtist &&
+      (!(payload.featuredArtist instanceof Array) ||
+        (payload.featuredArtist.length > 0 &&
+          payload.featuredArtist.some((artist) => artist.artistName === "" && artist.role === "")))
     ) {
-      payload.featured_artist = [];
+      payload.featuredArtist = [];
     }
     if (
       payload.producer &&
@@ -341,10 +341,10 @@ export async function PUT(req: Request) {
         releaseTitle: payload.title,
         genre: payload.genre,
         releaseLanguage: payload.language,
-        songWriter: payload.song_writer,
+        songWriter: payload.songWriter,
         producer: payload.producer,
         performer: payload.performer,
-        featuredArtist: payload.featured_artist,
+        featuredArtist: payload.featuredArtist,
         preOrderCheck: payload.preOrderCheck,
         anotherDistributionCheck: payload.anotherDistributionCheck,
         explicitContent: payload.explicitContent,

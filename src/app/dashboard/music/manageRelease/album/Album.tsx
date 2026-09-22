@@ -28,8 +28,10 @@ import {
 import ManageAlbumForm from "./ManageAlbumForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import useAxios from "@/util/customHooks/UseAxios";
 
 const Album = () => {
+  const api = useAxios();
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
   const dashboardContext = useContext(DashboardContext);
@@ -73,7 +75,7 @@ const Album = () => {
     artist,
   });
 
-  const { mutateAsync, isPending: isDeletePending } = useDeleteAlbumMutation();
+  const [isDeletePending, setisDeletePending] = useState(false);
   const {
     mutateAsync: markAlbumCompletedAsync,
     isPending: isPendingMarkAlbumCompletedAsync,
@@ -163,12 +165,17 @@ const Album = () => {
       if (release.releaseStatus === "approved") {
         return toast.info("Approved albums cannot be deleted");
       }
-      await mutateAsync({ releaseTitle: release.releaseTitle });
+      setisDeletePending(true);
+
+      const res = await api.delete("v1/music/album/" + release._id);
+      toast.success(res?.data?.msg);
       setShowDeletePopUp(false);
       setSelectedIndex(null);
       refetch();
     } catch (error) {
       console.error("error deleting album", error);
+    }finally{
+      setisDeletePending(false)
     }
   };
 
@@ -459,6 +466,8 @@ const Album = () => {
                                 if (options.name !== "View Album") {
                                   handleArtistOptionChange(index);
                                 }
+                                setSelectedIndex(index);
+
                                 // handleArtistOptionChange(index);
                               }}
                               className="flex items-center gap-2.5 hover:bg-neutral-50 px-3 py-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors duration-150 text-left w-full"
@@ -510,7 +519,7 @@ const Album = () => {
               irreversible.
             </p>
             <p className="font-light italic text-warning-700 text-xs text-center mb-5">
-              Note: Only pending and draft releases can be deleted.
+              Note: Only pending, rejected and draft releases can be deleted.
             </p>
             <div className="flex gap-5">
               <button
@@ -522,7 +531,11 @@ const Album = () => {
               </button>
               <button
                 disabled={isDeletePending}
-                onClick={() => handleDeleteAlbum(data!.data[selectedIndex!])}
+                onClick={() => {
+                  if (data && data.data.length > 0 && selectedIndex !== null) {
+                    handleDeleteAlbum(data.data[selectedIndex]);
+                  }
+                }}
                 className="font-bold text-sm rounded-lg px-4 py-2.5 text-white bg-error-500 hover:bg-error-600"
               >
                 Delete

@@ -164,7 +164,7 @@ export const ReleaseDetailsModal: React.FC<ReleaseDetailsModalProps> = ({
                       </p>
                       <div>
                         <p className="text-gray-900 text-base md:text-lg font-medium">
-                          {releaseDetails.artistName}
+                          {releaseDetails.artist.artistName}
                         </p>
                         <div className="flex flex-wrap items-center gap-3 mt-1.5">
                           {releaseDetails.artist?.spotifyId && (

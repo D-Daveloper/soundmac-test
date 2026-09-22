@@ -144,6 +144,7 @@ export default function ArtistEarnings({ id }: { id: string }) {
         <div className="mt-5 flex flex-col mb-10">
           <ReleaseTable
             releases={artistDetails.data}
+            artistName={artistDetails.artist.artistName}
             isfetching={isLoadingAllReleases}
           />
           {/* Pagination */}

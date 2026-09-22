@@ -4,7 +4,12 @@ import CheckboxSelectDsp from "@/app/components/checkBox/CheckBoxSelectDsp";
 import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { languagesList, NumberOfTracks, years } from "@/app/constant";
+import {
+  languagesList,
+  NumberOfTracks,
+  timeZones,
+  years,
+} from "@/app/constant";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import type {
   AlbumForm,
@@ -65,12 +70,12 @@ const ManageAlbumForm = ({
     genre: "",
     language: "",
     artist: "",
-    release_date: undefined,
+    releaseDate: undefined,
     preOrderDate: undefined,
-    pre_order_check: false,
-    another_distribution_check: false,
+    preOrderCheck: false,
+    anotherDistributionCheck: false,
     territories: [],
-    music_image: null,
+    musicImage: null,
     dsp: [],
     upc: "",
     copyRightHolder: "",
@@ -84,12 +89,12 @@ const ManageAlbumForm = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
-    if (name === "another_distribution_check" || name === "pre_order_check") {
+    if (name === "anotherDistributionCheck" || name === "preOrderCheck") {
       setAlbumForm((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "music_image") {
+    } else if (name === "musicImage") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setAlbumForm((prev) => ({ ...prev, music_image: file }));
+      setAlbumForm((prev) => ({ ...prev, musicImage: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -145,12 +150,12 @@ const ManageAlbumForm = ({
         genre: "",
         language: "",
         artist: "",
-        release_date: undefined,
+        releaseDate: undefined,
         preOrderDate: undefined,
-        pre_order_check: false,
-        another_distribution_check: false,
+        preOrderCheck: false,
+        anotherDistributionCheck: false,
         territories: [],
-        music_image: null,
+        musicImage: null,
         dsp: [],
         upc: "",
         copyRightHolder: "",
@@ -165,6 +170,9 @@ const ManageAlbumForm = ({
       await queryClient.invalidateQueries({
         queryKey: ["getAlbum", albumFromApi.releaseTitle],
         exact: true,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["manageAlbums"]
       });
 
       refetch();
@@ -200,13 +208,13 @@ const ManageAlbumForm = ({
 
       setAlbumForm({
         ...albumForm,
-        release_date: albumForm.release_date
-          ? new Date(albumForm.release_date)
+        releaseDate: albumForm.releaseDate
+          ? new Date(albumForm.releaseDate)
           : undefined,
         preOrderDate: albumForm.preOrderDate
           ? new Date(albumForm.preOrderDate)
           : undefined,
-        music_image: null,
+        musicImage: null,
       });
     }
   }, []);
@@ -216,13 +224,13 @@ const ManageAlbumForm = ({
       title: albumFromApi.releaseTitle,
       genre: albumFromApi.genre,
       language: albumFromApi.releaseLanguage,
-      artist: albumFromApi.artistName,
-      release_date: albumFromApi.releaseDate,
+      artist: albumFromApi.artist.artistName,
+      releaseDate: albumFromApi.releaseDate || undefined,
       preOrderDate: albumFromApi.preOrderDate || undefined,
-      pre_order_check: albumFromApi.preOrderCheck,
-      another_distribution_check: albumFromApi.anotherDistributionCheck,
+      preOrderCheck: albumFromApi.preOrderCheck,
+      anotherDistributionCheck: albumFromApi.anotherDistributionCheck,
       territories: albumFromApi.territories,
-      music_image: null,
+      musicImage: null,
       dsp: albumFromApi.dsp,
       upc: albumFromApi.upc,
       copyRightHolder: albumFromApi.copyRightHolder,
@@ -231,7 +239,7 @@ const ManageAlbumForm = ({
       courtesyLine: albumFromApi.courtesyLine || "",
       providedBy: albumFromApi.providedBy || "",
       description: albumFromApi.description || "",
-      old_image: albumFromApi.releaseImage,
+      oldImage: albumFromApi.releaseImage,
       timeZone: albumFromApi.timeZone || { label: "", value: "", name: "" },
     }));
     setImage(albumFromApi?.releaseImage || null);
@@ -465,10 +473,10 @@ const ManageAlbumForm = ({
                             setDate={(date) =>
                               setAlbumForm((prev) => ({
                                 ...prev,
-                                release_date: date,
+                                releaseDate: date,
                               }))
                             }
-                            value={albumForm.release_date}
+                            value={albumForm.releaseDate}
                             type="first"
                             toYear={toYear}
                             fromYear={fromYear}
@@ -476,6 +484,35 @@ const ManageAlbumForm = ({
                           <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px] mt-1">
                             Release date must be 2 weeks ahead the upload date
                           </p>
+                        </div>
+                        <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
+                          <div className="flex">
+                            <p className=" capitalize font-medium text-sm mr-1">
+                              Time Zones <span className="text-red-500">*</span>
+                            </p>
+                          </div>
+                          <div className="w-full">
+                            <Select
+                              selected={albumForm.timeZone.label}
+                              setSelected={(t) => {
+                                // Find the timezone object where label matches the selected value (t)
+                                const selectedTimeZone = timeZones.find(
+                                  (item) => item.label === t,
+                                );
+
+                                // Update form with the value (or full object if needed)
+                                setAlbumForm((prev) => ({
+                                  ...prev,
+                                  timeZone: selectedTimeZone
+                                    ? selectedTimeZone
+                                    : { label: "", value: "", name: "" },
+                                }));
+                              }}
+                              placeholder="Select TimeZone..."
+                              options={timeZones.map((item) => item.label)}
+                              name="timeZone"
+                            />
+                          </div>
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full gap-2">
                           <div className="flex flex-col">
@@ -509,8 +546,8 @@ const ManageAlbumForm = ({
                             <input
                               type="checkbox"
                               className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                              name="pre_order_check"
-                              checked={albumForm.pre_order_check}
+                              name="preOrderCheck"
+                              checked={albumForm.preOrderCheck}
                               onChange={handleChange}
                             />
                             <p className="leading-6 text-sm md:text-base font-medium">
@@ -519,7 +556,7 @@ const ManageAlbumForm = ({
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <SelectDate
-                              disabled={!albumForm.pre_order_check}
+                              disabled={!albumForm.preOrderCheck}
                               setDate={(date) =>
                                 setAlbumForm((prev) => ({
                                   ...prev,
@@ -527,7 +564,7 @@ const ManageAlbumForm = ({
                                 }))
                               }
                               value={albumForm.preOrderDate}
-                              releaseDate={albumForm.release_date}
+                              releaseDate={albumForm.releaseDate}
                               type="second"
                               toYear={toYear}
                               fromYear={fromYear}
@@ -621,13 +658,13 @@ const ManageAlbumForm = ({
                           </div>
                           <div className="flex items-center justify-center w-64 md:w-80">
                             <label
-                              htmlFor="music_image"
+                              htmlFor="musicImage"
                               className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-100"
                             >
                               <div
                                 className={
                                   "w-[50%] flex items-center justify-center p-2 rounded-2xl  text-white border border-neutral-100" +
-                                  (!albumForm.music_image && " bg-neutral-50 ")
+                                  (!albumForm.musicImage && " bg-neutral-50 ")
                                 }
                               >
                                 <Image
@@ -636,14 +673,14 @@ const ManageAlbumForm = ({
                                   height={60}
                                   alt="music note icon"
                                   className={
-                                    albumForm.music_image
+                                    albumForm.musicImage
                                       ? " w-full object-fit min-w-15 h-15"
                                       : undefined
                                   }
                                 />
                               </div>
                               <div className="w-[50%]">
-                                {!albumForm.music_image ? (
+                                {!albumForm.musicImage ? (
                                   <p className="mb-2 text-xs text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
@@ -655,14 +692,14 @@ const ManageAlbumForm = ({
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
                                     <span className="font-semibold">
-                                      {albumForm.music_image?.name}
+                                      {albumForm.musicImage?.name}
                                     </span>
                                   </p>
                                 )}
                               </div>
                               <input
-                                id="music_image"
-                                name="music_image"
+                                id="musicImage"
+                                name="musicImage"
                                 type="file"
                                 accept="image/png,image/jpeg"
                                 className="hidden"
@@ -724,7 +761,7 @@ const ManageAlbumForm = ({
                       <input
                         type="checkbox"
                         className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                        name="another_distribution_check"
+                        name="anotherDistributionCheck"
                         checked={false}
                         onChange={handleChange}
                       />
@@ -890,7 +927,7 @@ const ManageAlbumForm = ({
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-text-body font-semibold text-sm truncate">
-                              {albumForm.music_image?.name || "Uploaded Image"}
+                              {albumForm.musicImage?.name || "Uploaded Image"}
                             </p>
                             <p className="text-xs text-text-disable mt-0.5">
                               Ready for distribution
@@ -996,9 +1033,9 @@ const ManageAlbumForm = ({
                       </h2>
                       <div className="border-b border-neutral-100/80">
                         <p className="truncate text-text-body font-medium text-xs py-1 min-h-[32px]">
-                          {albumForm.release_date
+                          {albumForm.releaseDate
                             ? new Date(
-                                albumForm.release_date,
+                                albumForm.releaseDate,
                               ).toLocaleDateString(undefined, {
                                 dateStyle: "medium",
                               })
@@ -1122,36 +1159,40 @@ const ManageAlbumForm = ({
               </div>
             </div>
             {/* buttons */}
-            <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
-              {/* Left group / Early buttons on mobile */}
-              <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
-                <button
-                  onClick={() => handleSubmit(albumForm, "draft")}
-                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
-                    !preview ? "hidden" : "flex"
-                  }`}
-                >
-                  Save as Draft
-                </button>
+            {albumFromApi.releaseStatus === "approved" ? null : (
+              <div className="bg-[#F0F0E7]/95 backdrop-blur-xs border-t border-neutral-200/60 flex items-center justify-between sm:justify-end gap-3 sm:gap-5 h-auto py-4 sm:h-20 px-4 sm:px-10 fixed bottom-0 z-2 left-0 w-full shadow-md">
+                {/* Left group / Early buttons on mobile */}
+                <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto justify-start">
+                  {albumFromApi.releaseStatus === "draft" && (
+                    <button
+                      onClick={() => handleSubmit(albumForm, "draft")}
+                      className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary/10 border-2 border-primary text-main-heading transition-colors shrink-0 ${
+                        !preview ? "hidden" : "flex"
+                      }`}
+                    >
+                      Save as Draft
+                    </button>
+                  )}
 
+                  <button
+                    onClick={() => handleSubmit(albumForm, "upload")}
+                    className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors shrink-0 ${
+                      !preview ? "hidden" : "flex"
+                    }`}
+                  >
+                    Distribute
+                  </button>
+                </div>
+
+                {/* Primary action toggle (Pushed right on mobile if other buttons are hidden) */}
                 <button
-                  onClick={() => handleSubmit(albumForm, "upload")}
-                  className={`font-bold text-xs sm:text-sm rounded-lg px-3 sm:px-4 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors shrink-0 ${
-                    !preview ? "hidden" : "flex"
-                  }`}
+                  onClick={() => handlePreview(albumForm)}
+                  className="font-bold text-xs sm:text-sm rounded-lg px-4 sm:px-5 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors ml-auto sm:ml-0 shrink-0 flex items-center justify-center"
                 >
-                  Distribute
+                  {preview ? "Edit" : "Preview"}
                 </button>
               </div>
-
-              {/* Primary action toggle (Pushed right on mobile if other buttons are hidden) */}
-              <button
-                onClick={() => handlePreview(albumForm)}
-                className="font-bold text-xs sm:text-sm rounded-lg px-4 sm:px-5 py-2.5 hover:bg-primary-500/90 border-2 border-primary text-white bg-primary-500 transition-colors ml-auto sm:ml-0 shrink-0 flex items-center justify-center"
-              >
-                {preview ? "Edit" : "Preview"}
-              </button>
-            </div>
+            )}
 
             {/* <div className="bg-[#F0F0E7] border border-neutral-100 flex justify-end items-center gap-5 h-20 pr-10 fixed bottom-0 z-2 left-0 w-full">
               <button

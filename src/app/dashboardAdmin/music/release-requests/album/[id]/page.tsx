@@ -222,7 +222,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </p>
                       <div>
                         <p className="text-gray-900 text-lg font-medium mb-1">
-                          {albumDetails.release.artistName}
+                          {albumDetails.release.artist.artistName}
                         </p>
                         <div className="flex  flex-wrap md:flex-nowrap items-center gap-3">
                           <div className="flex items-center gap-1.5">
@@ -590,7 +590,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       {albumDetails.release.releaseTitle}
                     </h1>
                     <p className="text-md capitalize font-light leading-[20px] tracking-tighter text-main-heading">
-                      {albumDetails.release.artistName}
+                      {albumDetails.release.artist.artistName}
                     </p>
                   </div>
                 </div>

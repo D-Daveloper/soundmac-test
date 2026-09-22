@@ -88,8 +88,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       }
       setIsSubmittingForm(true);
       for (let i = 0; i < tracks.length; i++) {
-        tracks[i].artist = album.data[0].artistName;
-        tracks[i].upc = album.data[0].upc;
+        // tracks[i].artist = album.data[0].artist.artistName;
         if (tracks[i].title.length < 3 || tracks[i].title.length > 32) {
           return toast.warn(
             "track" +
@@ -103,8 +102,8 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
             "track" + " " + (i + 1) + " " + "Song title can not contain emojis",
           );
         } else if (
-          !tracks[i].track_number ||
-          !numRegex.test(tracks[i].track_number)
+          !tracks[i].trackNumber ||
+          !numRegex.test(tracks[i].trackNumber)
         ) {
           return toast.warn(
             "track" +
@@ -114,12 +113,14 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
               "Track number is required and must be a number.",
           );
         } else if (
-          !album.data[0].unassignedNumbers.includes(tracks[i].track_number)
+          !album.data[0].unassignedNumbers.includes(tracks[i].trackNumber)
         ) {
+          // console.log(album.data[0].unassignedNumbers);
           return toast.warn(
             "track" + " " + (i + 1) + " " + "Invalid Track number.",
           );
         }
+        
         if (action === "upload") {
           const validForm = isTrackFormValid(tracks[i]);
           if (validForm != "true") {
@@ -127,6 +128,10 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
             return toast.warn("track" + " " + (i + 1) + " " + validForm);
           }
         }
+        // album.data[0].unassignedNumbers =
+        //   album.data[0].unassignedNumbers.filter(
+        //     (item, index) => item != tracks[i].trackNumber,
+        //   );
       }
 
       let res;
@@ -134,7 +139,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       if (action === "upload") {
         res = await api.post(
           "v1/music/album/track",
-          JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
+          JSON.stringify({ tracks, albumId: album.data[0]._id }),
           {
             headers: { "Content-Type": "application/json" },
           },
@@ -142,7 +147,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       } else {
         res = await api.post(
           "v1/music/album/track/draft",
-          JSON.stringify({ tracks, album: album.data[0].releaseTitle }),
+          JSON.stringify({ tracks, albumId: album.data[0]._id }),
           {
             headers: { "Content-Type": "application/json" },
           },
@@ -150,8 +155,8 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       }
       toast.success(res?.data?.msg);
       //   localStorage.removeItem("songForm");
-      //   localStorage.removeItem("song_writer");
-      //   localStorage.removeItem("featured_artist");
+      //   localStorage.removeItem("songWriter");
+      //   localStorage.removeItem("featuredArtist");
       //   localStorage.removeItem("performer");
       //   localStorage.removeItem("producer");
       refetch();
@@ -163,20 +168,14 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         return;
       }
       toast.error("something went wrong.");
-      // songForm.music_image = null;
-      // songForm.song_audio = null;
+      // songForm.musicImage = null;
+      // songForm.songAudio = null;
     } finally {
       setIsSubmittingForm(false);
       // setPreview(false);
     }
   };
 
-  // const saveToLocalStorage = () => {
-  //   localStorage.setItem(
-  //     "albumTracks",
-  //     JSON.stringify(tracks.map((track) => JSON.stringify(track))),
-  //   );
-  // };
 
   return (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
@@ -184,20 +183,6 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
         <InlineLoadingScreen />
       ) : (
         <>
-          {/* <button
-            onClick={() => {
-              // saveToLocalStorage();
-              router.push("/dashboard/music/manageRelease?type=album");
-            }}
-            className="bg-main-white/70 p-3 w-[48px] h-[48px] text-primary text-2xl rounded-full shadow-2xl shadow-black my-2"
-          >
-            <Image
-              src={"/arrow-left.svg"}
-              height={32}
-              width={32}
-              alt="arrow left"
-            />
-          </button> */}
           <div className="py-4 px-2">
             <div className="flex flex-wrap gap-2 mb-4">
               {tracks.map((track, index) => (
@@ -252,7 +237,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
               </button>
 
               {/* Save as Draft Action Button */}
-              <button
+              {/* <button
                 type="button"
                 disabled={isSubmittingForm}
                 onClick={() => {
@@ -261,7 +246,7 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
                 className="font-bold text-xs sm:text-sm rounded-xl px-4 py-2.5 border-2 border-neutral-200 text-neutral-700 bg-white hover:bg-neutral-50 hover:border-neutral-300 disabled:opacity-50 disabled:hover:bg-white transition-all flex items-center justify-center"
               >
                 Save as Draft
-              </button>
+              </button> */}
 
               {/* Distribute/Submit Form Action Button */}
               <button

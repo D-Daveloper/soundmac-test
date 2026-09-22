@@ -12,14 +12,15 @@ import {
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
-import { useDeleteSongMutation } from "@/util/customHooks/useMutations";
 import { songFromApi } from "@/app/type";
 import { toast } from "react-toastify";
 import SongForm from "./ManageSongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import useAxios from "@/util/customHooks/UseAxios";
 
 const Song = () => {
+  const api = useAxios();
   const { setParam, getParam } = useTabQuery();
   const type = getParam("type");
   const dashboardContext = useContext(DashboardContext);
@@ -42,8 +43,8 @@ const Song = () => {
   const [query, setQuery] = useState("");
   const [artist, setArtist] = useState("");
   const songTitle = useDebounce<string>(query, 500);
-  const { mutateAsync, isPending: isDeletePending } = useDeleteSongMutation();
   const [wantsToEdit, setWantsToEdit] = useState(false);
+  const [isDeletePending, setisDeletePending] = useState(false);
 
   const {
     data,
@@ -118,19 +119,20 @@ const Song = () => {
 
   const handleDeleteSong = async (release: songFromApi) => {
     try {
-      if (release.releaseStatus !== "draft") {
-        return toast.info("Only draft Songs can be deleted");
+      if (release.releaseStatus === "approved") {
+        return toast.info("Approved Songs can not be deleted.");
       }
+      setisDeletePending(true)
 
-      await mutateAsync({
-        artist_name: release.artistName,
-        releaseTitle: release.releaseTitle,
-      });
+      const res = await api.delete("v1/music/song/"+release._id);
+      toast.success(res?.data?.msg)
       setShowDeletePopUp(false);
       setSelectedIndex(null);
       refetch();
     } catch (error) {
       console.log("error deleting song", error);
+    }finally{
+      setisDeletePending(false);
     }
   };
 
@@ -468,7 +470,7 @@ const Song = () => {
                     irreversible. Are you sure you want to continue?
                   </p>
                   <p className="font-semibold text-xs text-warning-600 bg-warning-50 border border-warning-100 px-3 py-1.5 rounded-lg inline-block">
-                    Note: Only pending and draft releases can be deleted.
+                    Note: Only pending, rejected and draft releases can be deleted.
                   </p>
                 </div>
 

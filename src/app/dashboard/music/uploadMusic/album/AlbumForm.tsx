@@ -57,12 +57,12 @@ const AlbumForm = () => {
     genre: "",
     language: "",
     artist: "",
-    release_date: undefined,
+    releaseDate: undefined,
     preOrderDate: undefined,
-    pre_order_check: false,
-    another_distribution_check: false,
+    preOrderCheck: false,
+    anotherDistributionCheck: false,
     territories: [],
-    music_image: null,
+    musicImage: null,
     dsp: [],
     upc: "",
     copyRightHolder: "",
@@ -76,12 +76,12 @@ const AlbumForm = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name, checked } = e.target;
-    if (name === "another_distribution_check" || name === "pre_order_check") {
+    if (name === "anotherDistributionCheck" || name === "preOrderCheck") {
       setAlbumForm((prev) => ({ ...prev, [name]: checked }));
-    } else if (name === "music_image") {
+    } else if (name === "musicImage") {
       const file =
         e.target.files && e.target.files.length ? e.target.files[0] : null;
-      setAlbumForm((prev) => ({ ...prev, music_image: file }));
+      setAlbumForm((prev) => ({ ...prev, musicImage: file }));
       if (file) {
         setImage(URL.createObjectURL(file));
       }
@@ -134,6 +134,8 @@ const AlbumForm = () => {
       }
       if (action === "upload") {
         toast.success("You're getting redirected to add tracks to your album.");
+      } else {
+        toast.success(res.data?.msg || "");
       }
       localStorage.removeItem("albumForm");
       setAlbumForm({
@@ -141,12 +143,12 @@ const AlbumForm = () => {
         genre: "",
         language: "",
         artist: "",
-        release_date: undefined,
+        releaseDate: undefined,
         preOrderDate: undefined,
-        pre_order_check: false,
-        another_distribution_check: false,
+        preOrderCheck: false,
+        anotherDistributionCheck: false,
         territories: [],
-        music_image: null,
+        musicImage: null,
         dsp: [],
         upc: "",
         copyRightHolder: "",
@@ -198,13 +200,13 @@ const AlbumForm = () => {
 
       setAlbumForm({
         ...albumForm,
-        release_date: albumForm.release_date
-          ? new Date(albumForm.release_date)
+        releaseDate: albumForm.releaseDate
+          ? new Date(albumForm.releaseDate)
           : undefined,
         preOrderDate: albumForm.preOrderDate
           ? new Date(albumForm.preOrderDate)
           : undefined,
-        music_image: null,
+        musicImage: null,
       });
     }
   }, []);
@@ -444,10 +446,10 @@ const AlbumForm = () => {
                             setDate={(date) =>
                               setAlbumForm((prev) => ({
                                 ...prev,
-                                release_date: date,
+                                releaseDate: date,
                               }))
                             }
-                            value={albumForm.release_date}
+                            value={albumForm.releaseDate}
                             type="first"
                             toYear={toYear}
                             fromYear={fromYear}
@@ -526,17 +528,17 @@ const AlbumForm = () => {
                             <input
                               type="checkbox"
                               className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                              name="pre_order_check"
+                              name="preOrderCheck"
                               checked={
-                                !albumForm.release_date ||
-                                isDateInPast(new Date(albumForm.release_date))
+                                !albumForm.releaseDate ||
+                                isDateInPast(new Date(albumForm.releaseDate))
                                   ? false
-                                  : albumForm.pre_order_check
+                                  : albumForm.preOrderCheck
                               }
                               onChange={handleChange}
                               disabled={
-                                !albumForm.release_date ||
-                                isDateInPast(new Date(albumForm.release_date))
+                                !albumForm.releaseDate ||
+                                isDateInPast(new Date(albumForm.releaseDate))
                               }
                             />
                             <p className="leading-6 text-sm  font-medium">
@@ -545,7 +547,7 @@ const AlbumForm = () => {
                           </div>
                           <div className="flex flex-col w-[40%] max-sm:w-full">
                             <SelectDate
-                              disabled={!albumForm.pre_order_check}
+                              disabled={!albumForm.preOrderCheck}
                               setDate={(date) =>
                                 setAlbumForm((prev) => ({
                                   ...prev,
@@ -553,12 +555,12 @@ const AlbumForm = () => {
                                 }))
                               }
                               value={
-                                !albumForm.release_date ||
-                                isDateInPast(new Date(albumForm.release_date))
+                                !albumForm.releaseDate ||
+                                isDateInPast(new Date(albumForm.releaseDate))
                                   ? undefined
                                   : albumForm.preOrderDate
                               }
-                              releaseDate={albumForm.release_date}
+                              releaseDate={albumForm.releaseDate}
                               type="second"
                               toYear={toYear}
                               fromYear={fromYear}
@@ -652,13 +654,13 @@ const AlbumForm = () => {
                           </div>
                           <div className="flex items-center justify-center w-64 lg:w-80">
                             <label
-                              htmlFor="music_image"
+                              htmlFor="musicImage"
                               className="flex p-3 gap-3 items-center justify-center w-full h-25 border-2 border-gray-300 rounded-3xl cursor-pointer bg-gray-50  hover:bg-gray-50"
                             >
                               <div
                                 className={
                                   "w-[50%] flex items-center justify-center p-3 rounded-2xl  text-white border border-neutral-100" +
-                                  (!albumForm.music_image && " bg-neutral-50 ")
+                                  (!albumForm.musicImage && " bg-neutral-50 ")
                                 }
                               >
                                 <Image
@@ -667,14 +669,14 @@ const AlbumForm = () => {
                                   height={60}
                                   alt="music note icon"
                                   className={
-                                    albumForm.music_image
+                                    albumForm.musicImage
                                       ? " w-full object-cover min-w-15 h-15"
                                       : undefined
                                   }
                                 />
                               </div>
                               <div className="w-[50%]">
-                                {!albumForm.music_image ? (
+                                {!albumForm.musicImage ? (
                                   <p className="mb-2 text-[12px] text-gray-500">
                                     <span className="font-bold text-text-body">
                                       Supported Files:
@@ -686,14 +688,14 @@ const AlbumForm = () => {
                                 ) : (
                                   <p className="font-bold text-[16px] text-[#494949] truncate">
                                     <span className="font-semibold">
-                                      {albumForm.music_image?.name}
+                                      {albumForm.musicImage?.name}
                                     </span>
                                   </p>
                                 )}
                               </div>
                               <input
-                                id="music_image"
-                                name="music_image"
+                                id="musicImage"
+                                name="musicImage"
                                 type="file"
                                 accept="image/png,image/jpeg"
                                 className="hidden"
@@ -756,8 +758,8 @@ const AlbumForm = () => {
                 <input
                   type="checkbox"
                   className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                  name="another_distribution_check"
-                  checked={albumForm.another_distribution_check}
+                  name="anotherDistributionCheck"
+                  checked={albumForm.anotherDistributionCheck}
                   onChange={handleChange}
                 />
                 <p className="leading-6 text-sm font-medium">
@@ -768,8 +770,8 @@ const AlbumForm = () => {
                       <input
                         type="checkbox"
                         className="p-5 max-sm:p-3 rounded-lg accent-primary hover:accent-primary"
-                        name="another_distribution_check"
-                        checked={albumForm.another_distribution_check}
+                        name="anotherDistributionCheck"
+                        checked={albumForm.anotherDistributionCheck}
                         onChange={handleChange}
                       />
                       <p className="leading-6 text-sm font-medium">
@@ -785,9 +787,9 @@ const AlbumForm = () => {
                           name={"upc"}
                           placeholder={"Enter upc"}
                           updateValue={handleChange}
-                          disabled={!albumForm.another_distribution_check}
+                          disabled={!albumForm.anotherDistributionCheck}
                           uppercase={true}
-                          required={albumForm.another_distribution_check}
+                          required={albumForm.anotherDistributionCheck}
                         />
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
                           Don’t have this? Soundmac will generate for you.
@@ -820,11 +822,9 @@ const AlbumForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                            {user?.type.includes("LABEL")
-                              ? "If not provided, the label name will be used as the default value for this field."
-                              : "Only Labels can edit."}
-                          </p>
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -854,11 +854,9 @@ const AlbumForm = () => {
                           />
                         )}
                         <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                          <p className="font-light italic text-warning-700 text-xs leading-[18px] tracking-[0.5px]">
-                            {user?.type.includes("LABEL")
-                              ? "If not provided, the label name will be used as the default value for this field."
-                              : "Only Labels can edit."}
-                          </p>
+                          {user?.type.includes("LABEL")
+                            ? "If not provided, the label name will be used as the default value for this field."
+                            : "Only Labels can edit."}
                         </p>
                       </div>
                       <div className="flex flex-col w-[40%] max-sm:w-full">
@@ -919,7 +917,7 @@ const AlbumForm = () => {
               {/* the image side bar */}
               <div className="bg-main-white border-2 border-neutral-100 flex-1 rounded-lg p-2 max-xl:hidden h-70 flex flex-col ">
                 <div className="w-full h-[80%] flex-2">
-                  {albumForm.music_image ? (
+                  {albumForm.musicImage ? (
                     <Image
                       src={image ? image : ""}
                       width={0}

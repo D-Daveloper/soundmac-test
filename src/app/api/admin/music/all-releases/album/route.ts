@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       albumFromApi & { user: { email: string } }
     >(body.albumId)
       .populate("user", "email")
+      .populate("artist", "artistName")
       .lean<albumFromApi & { user: { email: string } }>();
 
     if (!release || release.unassignedNumbers.length > 0) {
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
 
     if (body.requestType == "approved") {
       // Execute the model method passing the session
-      const result = await (AlbumModel as any).approveAndCreateMetadata(release._id, release.user.label);
+      const result = await (AlbumModel as any).approveAndCreateMetadata(release._id, release.artist.artistName, release.user.label);
       if (result.error) {
         return NextResponse.json(
           { msg: result.msg },
@@ -78,7 +79,7 @@ export async function POST(req: Request) {
         );
       } else {
         const approvalEmailData = {
-          artistName: release.artistName,
+          artistName: release.artist.artistName,
           releaseTitle: release.releaseTitle,
           releaseDate: new Date(release.releaseDate).toDateString(),
           releaseUrl: process.env.FRONTEND_URL + "/dashboard/music/manageRelease?type=album",
@@ -135,7 +136,7 @@ export async function POST(req: Request) {
       );
 
       const rejectEmailData: rejectEmailProps = {
-        artistName: release.artistName,
+        artistName: release.artist.artistName,
         releaseTitle: release.releaseTitle,
         rejectionReason: body.message?.trim(),
         dashboardUrl: "release",

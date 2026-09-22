@@ -3,7 +3,6 @@ import { generateCatalogNumber, generateUPC } from "@/services/dsp/dsp.service";
 import { handleMongooseValidationError } from "@/util/customError/error";
 import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
-import { deleteSingleFromS3 } from "@/util/middleware/aws";
 import {
   buildSort,
   isDateInPast,
@@ -12,17 +11,15 @@ import {
   validateNonDraftAlbums,
 } from "@/util/middleware/functions";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
-import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
-import AlbumModel, { AlbumSchema } from "@/util/models/AlbumModel";
+import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
-import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
 import UserNotification from "@/util/models/userNotification";
 import mongoose, { SortOrder } from "mongoose";
+import { Types } from "mongoose";
 import { NextResponse } from "next/server";
 import sharp from "sharp";
-const bucketName = process.env.AWS_S3_BUCKET!;
 
 export async function POST(req: Request) {
   try {
@@ -50,7 +47,7 @@ export async function POST(req: Request) {
 
     const user = userJwt.user ? await User.findById(userJwt.user) : null;
     if (!user) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 404 });
+      return NextResponse.json({ msg: "User unathorized." }, { status: 401 });
     } else if (!user.confirmed) {
       return NextResponse.json(
         { msg: "Please verify your email address" },
@@ -59,20 +56,7 @@ export async function POST(req: Request) {
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 400 });
     }
-    // else if (user.premium !== true) {
-    //   return NextResponse.json(
-    //     { msg: "Please upgrade your account." },
-    //     { status: 402 },
-    //   );
-    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-    //   user.premium = false;
-    //   user.premiumExpiration = null;
-    //   await user.save();
-    //   return NextResponse.json(
-    //     { msg: "Please upgrade your account." },
-    //     { status: 402 },
-    //   );
-    // } 
+
     else if (user!.type === "EMERGING_ARTIST") {
       return NextResponse.json(
         { msg: "Emerging artists can not upload Album" },
@@ -148,6 +132,7 @@ export async function POST(req: Request) {
     }
 
     const album = new AlbumModel({
+      _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
       genre: payload.genre,
       releaseLanguage: payload.language,
@@ -162,7 +147,6 @@ export async function POST(req: Request) {
       upc: payload.upc,
       territories: payload.territories,
       releaseImage: imageUrl.coverUrl,
-      artistName: userArtist.artistName,
       artist: userArtist._id,
       numberOfTracks: payload.numberOfTracks,
       unassignedNumbers: number_of_track_array,
@@ -182,7 +166,7 @@ export async function POST(req: Request) {
       status: "delivered",
     });
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    return NextResponse.json({ msg: "Release uploaded successfully.", release: album }, { status: 201 });
   } catch (error: unknown) {
     console.log(error);
 
@@ -215,18 +199,29 @@ export async function GET(req: Request) {
     const query: any = {
       user: userJwt.user
     };
-    if (albumStatusFilter && albumStatusFilter !== "all") {
+
+    if (albumStatusFilter && albumStatusFilter !== "all" && albumStatusFilter != "inactive") {
       query.releaseStatus = albumStatusFilter;
+    } else if (albumStatusFilter === "all" || !albumStatusFilter) {
+      query.releaseStatus = { $ne: "inactive" }
     }
-    if (artist) query.artistName = artist;
+
+    if (artist) {
+      const userArtist = await Artist.findOne({ user: userJwt.user, artistName: artist }).lean();
+      query.artist = userArtist?._id;
+    }
+
     if (albumTitle?.trim()) {
       query.releaseTitle = { $regex: `^${albumTitle}`, $options: "i" };
     }
+
     albums = await AlbumModel.find(query)
       .collation({ locale: "en", strength: 2 })
       .sort(sortQuery)
       .skip((page - 1) * limit)
-      .limit(limit).populate("user", "label")
+      .limit(limit)
+      .populate("user", "label")
+      .populate("artist", "artistName")
       .lean();
     totalCount = await AlbumModel.countDocuments(query);
 
@@ -393,34 +388,34 @@ export async function PUT(req: Request) {
       // await AlbumModel.findByIdAndUpdate(
       //   { _id: release._id },
       //   {
-          release.releaseTitle = payload.title!,
-          release.genre = payload.genre!,
-          release.releaseLanguage = payload.language!,
-          release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-          release.anotherDistributionCheck = payload.anotherDistributionCheck,
-          release.releaseDate = new Date(payload.releaseDate!),
-          release.preOrderDate =
-            !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
-          release.copyRightHolder = payload.copyRightHolder!,
-          release.copyRightYear = payload.copyRightYear!,
-          release.dsp = payload.dsp,
-          release.upc = payload.upc!,
-          release.territories = payload.territories,
-          release.releaseImage = imageUrl.coverUrl || payload.oldImage || release.releaseImage,
-          release.artistName = userArtist.artistName,
-          release.artist = userArtist._id,
-          release.numberOfTracks = payload.numberOfTracks!,
-          release.unassignedNumbers = number_of_track_array,
-          release.user = user._id,
-          release.releaseStatus = "pending",
-          release.timeZone = payload.timeZone || release.timeZone,
-          release.providedBy = payload.providedBy || release.providedBy,
-          release.courtesyLine = payload.courtesyLine || release.courtesyLine,
-          release.description = payload.description || release.description || "",
-      //   },
-      //   { runValidators: true },
-      // );
-      await release.save({ session });
+      release.releaseTitle = payload.title!,
+        release.genre = payload.genre!,
+        release.releaseLanguage = payload.language!,
+        release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+        release.anotherDistributionCheck = payload.anotherDistributionCheck,
+        release.releaseDate = new Date(payload.releaseDate!),
+        release.preOrderDate =
+        !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
+        release.copyRightHolder = payload.copyRightHolder!,
+        release.copyRightYear = payload.copyRightYear!,
+        release.dsp = payload.dsp,
+        release.upc = payload.upc!,
+        release.territories = payload.territories,
+        release.releaseImage = imageUrl.coverUrl || payload.oldImage || release.releaseImage,
+        // release.artistName = userArtist.artistName,
+        release.artist = userArtist._id,
+        // release.numberOfTracks = payload.numberOfTracks!,
+        // release.unassignedNumbers = number_of_track_array,
+        release.user = user._id,
+        release.releaseStatus = "pending",
+        release.timeZone = payload.timeZone || release.timeZone,
+        release.providedBy = payload.providedBy || release.providedBy,
+        release.courtesyLine = payload.courtesyLine || release.courtesyLine,
+        release.description = payload.description || release.description || "",
+        //   },
+        //   { runValidators: true },
+        // );
+        await release.save({ session });
       await TrackModel.updateMany(
         { upc: payload.upc },
         { $set: { albumName: payload.title } },
@@ -434,25 +429,20 @@ export async function PUT(req: Request) {
       await session.endSession();
     }
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    return NextResponse.json({ msg: "success", release }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 
     return handleMongooseValidationError(error);
   }
 }
+
 export async function PATCH(req: Request) {
   try {
-    type Track = {
-      _id: string;
-      releaseStatus: string;
-      trackNumber: string;
-    };
     let release: albumFromApi | null = null;
-    let tracks:
-      | { _id: string; releaseStatus: string; trackNumber: string }[]
-      | null = null;
+
     const formData = await req.json();
+
     if (!formData.releaseId) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
     }
@@ -466,7 +456,7 @@ export async function PATCH(req: Request) {
     await dbConnect();
     const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
     if (!user) {
-      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+      return NextResponse.json({ msg: "User unathorized." }, { status: 401 });
     } else if (!user.confirmed) {
       return NextResponse.json(
         { msg: "Please verify your email address" },
@@ -474,27 +464,18 @@ export async function PATCH(req: Request) {
       );
     } else if (user.otp !== null) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+    } else if (!Types.ObjectId.isValid(formData.releaseId)) {
+      return NextResponse.json({ msg: "Invalid release id" }, { status: 400 });
     } else {
-      // Find and verify release belongs to user before deleting
-      const releaseQuery = AlbumModel.findById(formData.releaseId).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
-      const tracksQuery = TrackModel.find<Track>(
-        {
-          user: user._id,
-          album: formData.releaseId,
-        },
-        { releaseStatus: 1, trackNumber: 1 },
-      ).lean<Track[]>();
-
-      [release, tracks] = await Promise.all([
-        releaseQuery, tracksQuery
-      ]).catch(err => { throw err; });
+      release = await AlbumModel.findById(formData.releaseId).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
     }
-    if (!release || tracks.length === 0) {
+
+    if (!release || release.releaseStatus === "inactive") {
       return NextResponse.json(
         {
-          msg: "Invalid Release",
+          msg: "Release not found.",
         },
-        { status: 400 },
+        { status: 404 },
       );
     } else if (release.user.toString() !== user!._id.toString()) {
       return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
@@ -514,47 +495,17 @@ export async function PATCH(req: Request) {
         { status: 400 },
       );
     }
-    for (let i = 0; i < tracks.length; i++) {
-      const track = tracks[i];
-      if (track.releaseStatus != "pending")
-        return NextResponse.json(
-          {
-            msg: `Track ${track.trackNumber} has status as ${track.releaseStatus}`,
-            msg1: "please distribute all tracks to change status to pending"
-          },
-          { status: 400 },
-        );
-    }
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      await AlbumModel.findOneAndUpdate(
-        { user: user._id, _id: formData.releaseId },
-        { releaseStatus: "completed" },
-        { session }
-      ),
-        await TrackModel.updateMany(
-          { user: user._id, album: formData.releaseId },
-          { releaseStatus: "completed" },
-          { session }
-        ),
-        await session.commitTransaction();
-      return NextResponse.json(
-        { msg: "Release Marked as Completed!" },
-        { status: 200 },
-      );
-    } catch (error) {
-      console.error("mark as completed error", error);
-      if (session.inTransaction()) {
-        await session.abortTransaction();
-      }
-      return NextResponse.json(
-        { msg: "Failed to update status" },
-        { status: 500 },
-      );
-    } finally {
-      await session.endSession();
-    }
+
+    await AlbumModel.findOneAndUpdate(
+      { user: user._id, _id: formData.releaseId },
+      { releaseStatus: "completed" },
+    )
+
+    return NextResponse.json(
+      { msg: "Release Marked as Completed!" },
+      { status: 200 },
+    );
+
   } catch (error: unknown) {
     console.error("mark as completed error", error);
 
@@ -564,95 +515,220 @@ export async function PATCH(req: Request) {
     );
   }
 }
-export async function DELETE(req: Request) {
-  // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
 
-  try {
-    let release: any = null;
-    const formData = await req.json();
-    if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
-      return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
-    }
-    const userData = await verifyJWT();
-    const userJwt = verifyUser(userData);
-    if (userJwt.msg) {
-      return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
-    }
+// export async function PATCH(req: Request) {
+//   try {
+//     type Track = {
+//       _id: string;
+//       releaseStatus: string;
+//       trackNumber: string;
+//     };
+//     let release: albumFromApi | null = null;
+//     let tracks:
+//       | { _id: string; releaseStatus: string; trackNumber: string }[]
+//       | null = null;
+//     const formData = await req.json();
+//     if (!formData.releaseId) {
+//       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+//     }
 
-    await dbConnect();
-    const user = userJwt.user ? await User.findById(userJwt.user) : null;
-    if (!user) {
-      return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
-    } else if (!user.confirmed) {
-      return NextResponse.json(
-        { msg: "Please verify your email address" },
-        { status: 401 },
-      );
-    } else if (user.otp !== null) {
-      return NextResponse.json({ msg: "Please Login" }, { status: 401 });
-    } else {
-      // Find and verify release belongs to user before deleting
-      release = await AlbumModel.findOne({
-        user: user._id,
-        releaseTitle: formData.releaseTitle,
-      });
+//     const userJwt = await authenticate(req);
 
-      if (!release) {
-        return NextResponse.json(
-          {
-            msg: "Invalid Release",
-          },
-          { status: 400 },
-        );
-      }
+//     if (userJwt.msg) {
+//       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+//     }
 
-      if (release.releaseStatus === "pending" || release.releaseStatus === "completed") {
-        const isImageDeleted = await deleteSingleFromS3(
-          bucketName,
-          release.releaseImage,
-        );
-        if (isImageDeleted) {
-          const deleteSongsResult = await AlbumModel.findByIdAndDelete({
-            _id: release._id,
-          });
-          await AudioUploadTrackerModel.findOneAndDelete({
-            upc: release.upc,
-          });
-          if (deleteSongsResult.deletedCount < 1) {
-            return NextResponse.json(
-              { msg: "Failed to delete." },
-              { status: 400 },
-            );
-          }
-          await TrackModel.deleteMany({ upc: release.upc });
-          return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
-        } else {
-          return NextResponse.json(
-            { msg: "failed to delete album" },
-            { status: 200 },
-          );
-        }
-      } else if (release.releaseStatus === "draft") {
-        const deleteSongsResult = await AlbumModel.findByIdAndDelete({
-          _id: release._id,
-        });
+//     await dbConnect();
+//     const user = userJwt.user ? await User.findById(userJwt.user).lean() : null;
+//     if (!user) {
+//       return NextResponse.json({ msg: "User unathorized." }, { status: 401 });
+//     } else if (!user.confirmed) {
+//       return NextResponse.json(
+//         { msg: "Please verify your email address" },
+//         { status: 401 },
+//       );
+//     } else if (user.otp !== null) {
+//       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+//     } else {
+//       // Find and verify release belongs to user before deleting
+//       const releaseQuery = AlbumModel.findById(formData.releaseId).lean<albumFromApi>(); //returns a plain json document instead of mongoose hydrated doc
+//       const tracksQuery = TrackModel.find<Track>(
+//         {
+//           user: user._id,
+//           album: formData.releaseId,
+//         },
+//         { releaseStatus: 1, trackNumber: 1 },
+//       ).lean<Track[]>();
 
-        if (deleteSongsResult.deletedCount < 1) {
-          return NextResponse.json(
-            { msg: "Failed to delete." },
-            { status: 400 },
-          );
-        }
-        return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
-      }
-      return NextResponse.json(
-        { msg: "Only pending albums or drafts can be deleted!" },
-        { status: 400 },
-      );
-    }
-  } catch (error: unknown) {
-    console.log("album delete error", error);
+//       [release, tracks] = await Promise.all([
+//         releaseQuery, tracksQuery
+//       ]).catch(err => { throw err; });
+//     }
+//     if (!release || tracks.length === 0) {
+//       return NextResponse.json(
+//         {
+//           msg: "Invalid Release",
+//         },
+//         { status: 400 },
+//       );
+//     } else if (release.user.toString() !== user!._id.toString()) {
+//       return NextResponse.json({ msg: "Unauthorized" }, { status: 403 });
+//     }
+//     if (release.releaseStatus != "pending") {
+//       return NextResponse.json(
+//         {
+//           msg: "Only pending albums can be marked as completed",
+//         },
+//         { status: 400 },
+//       );
+//     } else if (release.unassignedNumbers.length > 0) {
+//       return NextResponse.json(
+//         {
+//           msg: "Please assign all track numbers.",
+//         },
+//         { status: 400 },
+//       );
+//     }
+//     for (let i = 0; i < tracks.length; i++) {
+//       const track = tracks[i];
+//       if (track.releaseStatus != "pending")
+//         return NextResponse.json(
+//           {
+//             msg: `Track ${track.trackNumber} has status as ${track.releaseStatus}`,
+//             msg1: "please distribute all tracks to change status to pending"
+//           },
+//           { status: 400 },
+//         );
+//     }
+//     const session = await mongoose.startSession();
+//     try {
+//       session.startTransaction();
+//       await AlbumModel.findOneAndUpdate(
+//         { user: user._id, _id: formData.releaseId },
+//         { releaseStatus: "completed" },
+//         { session }
+//       ),
+//         await TrackModel.updateMany(
+//           { user: user._id, album: formData.releaseId },
+//           { releaseStatus: "completed" },
+//           { session }
+//         ),
+//         await session.commitTransaction();
+//       return NextResponse.json(
+//         { msg: "Release Marked as Completed!" },
+//         { status: 200 },
+//       );
+//     } catch (error) {
+//       console.error("mark as completed error", error);
+//       if (session.inTransaction()) {
+//         await session.abortTransaction();
+//       }
+//       return NextResponse.json(
+//         { msg: "Failed to update status" },
+//         { status: 500 },
+//       );
+//     } finally {
+//       await session.endSession();
+//     }
+//   } catch (error: unknown) {
+//     console.error("mark as completed error", error);
 
-    return handleMongooseValidationError(error);
-  }
-}
+//     return NextResponse.json(
+//       { msg: "Failed to update status" },
+//       { status: 500 },
+//     );
+//   }
+// }
+
+// export async function DELETE(req: Request) {
+//   // return NextResponse.json({ msg: "Not Available at this time, please try again later" }, { status: 400 });
+
+//   try {
+//     let release: any = null;
+//     const formData = await req.json();
+//     if (formData.releaseTitle.trim() === "" || !formData.releaseTitle) {
+//       return NextResponse.json({ msg: "Invalid Request" }, { status: 400 });
+//     }
+//     const userData = await verifyJWT();
+//     const userJwt = verifyUser(userData);
+//     if (userJwt.msg) {
+//       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
+//     }
+
+//     await dbConnect();
+//     const user = userJwt.user ? await User.findById(userJwt.user) : null;
+//     if (!user) {
+//       return NextResponse.json({ msg: "Invalid User" }, { status: 401 });
+//     } else if (!user.confirmed) {
+//       return NextResponse.json(
+//         { msg: "Please verify your email address" },
+//         { status: 401 },
+//       );
+//     } else if (user.otp !== null) {
+//       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
+//     } else {
+//       // Find and verify release belongs to user before deleting
+//       release = await AlbumModel.findOne({
+//         user: user._id,
+//         releaseTitle: formData.releaseTitle,
+//       });
+
+//       if (!release) {
+//         return NextResponse.json(
+//           {
+//             msg: "Invalid Release",
+//           },
+//           { status: 400 },
+//         );
+//       }
+
+//       if (release.releaseStatus === "pending" || release.releaseStatus === "completed") {
+//         const isImageDeleted = await deleteSingleFromS3(
+//           bucketName,
+//           release.releaseImage,
+//         );
+//         if (isImageDeleted) {
+//           const deleteSongsResult = await AlbumModel.findByIdAndDelete({
+//             _id: release._id,
+//           });
+//           await AudioUploadTrackerModel.findOneAndDelete({
+//             upc: release.upc,
+//           });
+//           if (deleteSongsResult.deletedCount < 1) {
+//             return NextResponse.json(
+//               { msg: "Failed to delete." },
+//               { status: 400 },
+//             );
+//           }
+//           await TrackModel.deleteMany({ upc: release.upc });
+//           return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
+//         } else {
+//           return NextResponse.json(
+//             { msg: "failed to delete album" },
+//             { status: 200 },
+//           );
+//         }
+//       } else if (release.releaseStatus === "draft") {
+//         const deleteSongsResult = await AlbumModel.findByIdAndDelete({
+//           _id: release._id,
+//         });
+
+//         if (deleteSongsResult.deletedCount < 1) {
+//           return NextResponse.json(
+//             { msg: "Failed to delete." },
+//             { status: 400 },
+//           );
+//         }
+//         return NextResponse.json({ msg: "Album Deleted" }, { status: 200 });
+//       }
+//       return NextResponse.json(
+//         { msg: "Only pending albums or drafts can be deleted!" },
+//         { status: 400 },
+//       );
+//     }
+//   } catch (error: unknown) {
+//     console.log("album delete error", error);
+
+//     return handleMongooseValidationError(error);
+//   }
+// }

@@ -187,7 +187,7 @@ export async function POST(
         { runValidators: true },
       );
       const promotionEmailData: PromotionEmailBody = {
-        artist_name: promotion.artistName,
+        artistName: promotion.artistName,
         content_title: promotion.releaseTitle,
         content_type: "Music",
         promotion_type: promotion.category,
@@ -215,7 +215,7 @@ export async function POST(
       );
     } else if (body.requestType == "rejected") {
       const promotionEmailData: PromotionEmailBody = {
-        artist_name: promotion.artistName,
+        artistName: promotion.artistName,
         content_title: promotion.releaseTitle,
         content_type: "Music",
         promotion_type: promotion.category,
@@ -250,7 +250,7 @@ export async function POST(
         { runValidators: true },
       );
       const promotionEmailData: PromotionEmailBody = {
-        artist_name: promotion.artistName,
+        artistName: promotion.artistName,
         content_title: promotion.releaseTitle,
         content_type: "Music",
         promotion_type: promotion.category,

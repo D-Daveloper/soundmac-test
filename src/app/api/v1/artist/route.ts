@@ -8,9 +8,6 @@ import { buildSort, uploadImage } from "@/util/middleware/functions";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import mongoose from "mongoose";
 import EntityDeactivation from "@/util/models/deactivateEntity";
-import SongModel from "@/util/models/songModel";
-import AlbumModel from "@/util/models/AlbumModel";
-import TrackModel from "@/util/models/trackModel";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
 
 
@@ -25,10 +22,10 @@ export async function POST(req: Request) {
     const formData = await req.formData();
 
     // Get the file
-    const file = formData.get("artist_image") as File | null;
-    const artistName = formData.get("artist_name") as string | null;
-    const appleId = formData.get("apple_id") as string | null;
-    const spotifyId = formData.get("spotify_id") as string | null;
+    const file = formData.get("artistImage") as File | null;
+    const artistName = formData.get("artistName") as string | null;
+    const appleId = formData.get("appleId") as string | null;
+    const spotifyId = formData.get("spotifyId") as string | null;
 
     if (!file) {
       return NextResponse.json({ msg: "No file uploaded" }, { status: 400 });
@@ -60,7 +57,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Please Login" }, { status: 401 });
     } else {
       const subError = requireActiveSubscription(user)
-      if(subError) {
+      if (subError) {
         return NextResponse.json({ msg: subError.msg }, { status: subError.status });
       }
     }
@@ -78,7 +75,7 @@ export async function POST(req: Request) {
     //     { status: 402 },
     //   );
     // } 
-     {
+    {
       artist = await Artist.find({
         user: user._id,
         artistName: artistName,
@@ -164,7 +161,7 @@ export async function PATCH(req: Request) {
 
     const body = await req.json();
 
-    if (body.artist_name.trim() === "" || !body.artist_name) {
+    if (body.artistName.trim() === "" || !body.artistName) {
       return NextResponse.json({ msg: "Invalid Request" }, { status: 401 });
     }
 
@@ -183,7 +180,7 @@ export async function PATCH(req: Request) {
       // Find and verify artist belongs to user before deleting
       const artist = await Artist.findOne({
         user: user._id,
-        artistName: body.artist_name,
+        artistName: body.artistName,
       });
 
       if (!artist || artist.artistStatus === "inactive") {
@@ -199,7 +196,7 @@ export async function PATCH(req: Request) {
 
         await Artist.updateOne({
           user: user._id,
-          artistName: body.artist_name,
+          artistName: body.artistName,
         }, { artistStatus: "inactive" }, { session });
 
         await EntityDeactivation.create([{
@@ -244,7 +241,7 @@ export async function PATCH(req: Request) {
 //   //     return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
 //   //   }
 //   //   const formData = await req.json();
-//   //   if (formData.artist_name.trim() === "" || !formData.artist_name) {
+//   //   if (formData.artistName.trim() === "" || !formData.artistName) {
 //   //     return NextResponse.json({ msg: "Invalid Request" }, { status: 401 });
 //   //   }
 
@@ -262,7 +259,7 @@ export async function PATCH(req: Request) {
 //   //   } else {
 //   //     // Find and verify artist belongs to user before deleting
 //   //     const artist = await Artist.findOne({
-//   //       artistName: formData.artist_name,
+//   //       artistName: formData.artistName,
 //   //       user: user._id,
 //   //     }).session(session);
 
@@ -273,7 +270,7 @@ export async function PATCH(req: Request) {
 
 //   //     const deleteArtistResult = await Artist.deleteOne(
 //   //       {
-//   //         artistName: formData.artist_name.trim(),
+//   //         artistName: formData.artistName.trim(),
 //   //         user: user._id,
 //   //       },
 //   //       { session }
@@ -285,7 +282,7 @@ export async function PATCH(req: Request) {
 //   //     }
 
 //   //     const deleteSongsResult = await SongModel.deleteMany(
-//   //       { artistName: formData.artist_name.trim(), user: user._id },
+//   //       { artistName: formData.artistName.trim(), user: user._id },
 //   //       { session }
 //   //     );
 //   //   } //test this one then try deleting the songs from s3 bucket too
@@ -318,8 +315,8 @@ export async function PUT(req: Request) {
     const formData = await req.formData();
 
     // Get the file
-    const file = formData.get("artist_image") as File | null;
-    const artistName = formData.get("artist_name") as string;
+    const file = formData.get("artistImage") as File | null;
+    const artistName = formData.get("artistName") as string;
     const artistId = formData.get("artist_id") as string;
 
     if (file && !(file instanceof File)) {
@@ -392,32 +389,33 @@ export async function PUT(req: Request) {
     }
 
     if (artistName && artist.artistName != artistName) {
-      const session = await mongoose.startSession();
-      try {
-        session.startTransaction();
+      artist.artistName = artistName;
+      // const session = await mongoose.startSession();
+      // try {
+      //   session.startTransaction();
 
-        await SongModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-          await AlbumModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-          await TrackModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
-          artist.artistName = artistName;
-        await artist.save({ session }),
+      //   // await SongModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+      //   //   await AlbumModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
+      //   //   await TrackModel.updateMany({ user: user._id, artistName: artist.artistName }, { artistName: artistName }, { session }),
 
-          await session.commitTransaction();
-        return NextResponse.json(
-          { msg: "Artist Edited successfully", artist },
-          { status: 201 }
-        );
-      } catch (error) {
-        console.error("error editing artist", error);
-        if (session.inTransaction()) {
-          await session.abortTransaction();
-        }
-        return NextResponse.json({ msg: "Failed to edit artist" }, { status: 500 });
+      //     await session.commitTransaction();
+      //   return NextResponse.json(
+      //     { msg: "Artist Edited successfully", artist },
+      //     { status: 201 }
+      //   );
+      // } catch (error) {
+      //   console.error("error editing artist", error);
+      //   if (session.inTransaction()) {
+      //     await session.abortTransaction();
+      //   }
+      //   return NextResponse.json({ msg: "Failed to edit artist" }, { status: 500 });
 
-      } finally {
-        await session.endSession();
-      }
+      // } finally {
+      //   await session.endSession();
+      // }
     }
+    await artist.save()
+
     return NextResponse.json(
       { msg: "Artist Edited successfully", artist },
       { status: 201 }

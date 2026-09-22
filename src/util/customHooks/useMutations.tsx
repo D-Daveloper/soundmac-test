@@ -93,6 +93,7 @@ export const useCreatArtistMutation = () => {
     onSuccess: async (data) => {
       toast.success(data.msg);
       await queryClient.invalidateQueries({ queryKey: ["artists"] });
+      await queryClient.invalidateQueries({ queryKey: ["userArtistsNames"] });
       localStorage.removeItem("artistForm");
     },
     onError: (error) => {
@@ -110,7 +111,7 @@ export const useDeleteArtistMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: { artist_name: string }) =>
+    mutationFn: async (form: { artistName: string }) =>
       DeleteArtist(api, form),
     onSuccess: async (data) => {
       toast.success(data.msg);
@@ -125,25 +126,7 @@ export const useDeleteArtistMutation = () => {
     },
   });
 };
-export const useDeleteSongMutation = () => {
-  const queryClient = useQueryClient();
-  const api = useAxios();
 
-  return useMutation({
-    mutationFn: async (form: { artist_name: string; releaseTitle: string }) =>
-      DeleteSong(api, form),
-    onSuccess: async (data, variables) => {
-      toast.success(data.msg);
-    },
-    onError: (error) => {
-      if (isAxiosError(error)) {
-        console.log(error);
-        return;
-      }
-      toast.error(error.message || "Something went wrong, Please try again.");
-    },
-  });
-};
 export const useMarkAlbumCompleteMutation = () => {
   const api = useAxios();
 

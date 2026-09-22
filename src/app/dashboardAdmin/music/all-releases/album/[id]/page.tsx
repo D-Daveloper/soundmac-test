@@ -145,7 +145,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
                       </p>
                       <div>
                         <p className="text-gray-900 text-lg font-medium mb-1">
-                          {albumDetails.release.artistName}
+                          {albumDetails.release.artist.artistName}
                         </p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1.5">

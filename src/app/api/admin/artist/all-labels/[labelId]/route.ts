@@ -201,7 +201,7 @@ export async function PUT(
       artistStatus: "inactive",
     });
     const deactivateEmail: DetactivateEmail = {
-      artist_name: label.firstName, // "Artist Name"
+      artistName: label.firstName, // "Artist Name"
       first_name: "",
       deactivation_type: body.deactivateOption, // Dropdown: "Temporary Suspension", etc.
       deactivation_reason: body.deactivateReason, // Dropdown: "Copyright Infringement", etc.
