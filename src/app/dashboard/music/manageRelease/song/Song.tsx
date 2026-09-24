@@ -18,18 +18,23 @@ import SongForm from "./ManageSongForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import useAxios from "@/util/customHooks/UseAxios";
+import Link from "next/link";
 
 const Song = () => {
   const api = useAxios();
-  const { setParam, getParam } = useTabQuery();
-  const type = getParam("type");
+  const { getParam, handleUpdateParams } = useTabQuery();
+  const songStatusFilter = getParam("status") || "all";
+  const artist = getParam("artist") || "";
+  const query = getParam("query") || "";
+  const page = getParam("page") || "1";
+
   const dashboardContext = useContext(DashboardContext);
 
   useEffect(() => {
     dashboardContext?.setHeader({
       title: "Manage Songs",
       showBackButton: false,
-      onBack: () => router.back()
+      onBack: () => router.back(),
     });
   }, []);
 
@@ -37,11 +42,11 @@ const Song = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showDeletePopUp, setShowDeletePopUp] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
-  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("-createdAt");
-  const [songStatusFilter, setSongStatusFilter] = useState("all");
-  const [query, setQuery] = useState("");
-  const [artist, setArtist] = useState("");
+  // const [page, setPage] = useState(1);
+  // const [songStatusFilter, setSongStatusFilter] = useState("all");
+  // const [query, setQuery] = useState("");
+  // const [artist, setArtist] = useState("");
   const songTitle = useDebounce<string>(query, 500);
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [isDeletePending, setisDeletePending] = useState(false);
@@ -50,13 +55,12 @@ const Song = () => {
     data,
     isLoading,
     isError,
-    error,
     isFetching,
     isPending: isPendingSongs,
     isRefetching: isRefetchingSongs,
     refetch,
   } = usePaginatedSongs({
-    page,
+    page: parseInt(page, 10),
     sort: filter,
     songTitle: songTitle,
     songStatusFilter,
@@ -66,8 +70,6 @@ const Song = () => {
   const {
     isLoading: isLoadingArtistNames,
     data: artistNames,
-    isPending,
-    isRefetching,
   } = useGetUserArtistsNames();
 
   const songOptions = [
@@ -98,19 +100,21 @@ const Song = () => {
 
   const handleFilterChange = (filter: string) => {
     setFilter(filter);
-    setPage(1);
+    handleUpdateParams({ query: query, status: songStatusFilter, page: "1" });
     setIsFilterOpen(false);
   };
 
   const handleReleaseStatusFilterChange = (filter: string) => {
-    setSongStatusFilter(filter);
-    setPage(1);
+    // setSongStatusFilter(filter);
+    // setPage(1);
+    handleUpdateParams({ query: query, status: filter, page: "1" });
   };
 
   const handleSearchQueryChange = (filter: string) => {
-    setQuery(filter);
-    setPage(1);
-    setSongStatusFilter("all");
+    // setQuery(filter);
+    // setPage(1);
+    // setSongStatusFilter("all");
+    handleUpdateParams({ query: filter, status: songStatusFilter, page: "1" });
   };
 
   const handleShowDeletePopup = () => {
@@ -122,16 +126,16 @@ const Song = () => {
       if (release.releaseStatus === "approved") {
         return toast.info("Approved Songs can not be deleted.");
       }
-      setisDeletePending(true)
+      setisDeletePending(true);
 
-      const res = await api.delete("v1/music/song/"+release._id);
-      toast.success(res?.data?.msg)
+      const res = await api.delete("v1/music/song/" + release._id);
+      toast.success(res?.data?.msg);
       setShowDeletePopUp(false);
       setSelectedIndex(null);
       refetch();
     } catch (error) {
       console.log("error deleting song", error);
-    }finally{
+    } finally {
       setisDeletePending(false);
     }
   };
@@ -142,33 +146,24 @@ const Song = () => {
     !isDataLoading && (isError || !data || data.data.length === 0);
 
   return !wantsToEdit ? (
-    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 px-4 sm:px-4 mx-auto">
-      {/* Content Type Tabs */}
+    <>
+      {" "}
       <div className="flex gap-3 mt-6">
-        <button
-          type="button"
-          onClick={() => setParam("type", "single")}
-          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${
-            type === "single"
-              ? "bg-primary text-white shadow-xs"
-              : "bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"
-          }`}
+        <Link
+          href={"/dashboard/music/manageRelease/song"}
+          aria-label="mange songs"
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${"bg-primary text-white! shadow-xs"}`}
         >
           Singles
-        </button>
-        <button
-          type="button"
-          onClick={() => setParam("type", "album")}
-          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${
-            type === "album"
-              ? "bg-primary text-white shadow-xs"
-              : "bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"
-          }`}
+        </Link>
+        <Link
+          href={"/dashboard/music/manageRelease/album"}
+          aria-label="manage albums"
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${"bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"}`}
         >
           Albums
-        </button>
+        </Link>
       </div>
-
       {isLoadingArtistNames ? (
         <div className="flex-1 flex justify-center items-center min-h-[400px]">
           <InlineLoadingScreen />
@@ -205,7 +200,14 @@ const Song = () => {
                 </p>
                 <Select
                   selected={artist}
-                  setSelected={(t) => setArtist(t)}
+                  setSelected={(a) =>
+                    handleUpdateParams({
+                      query: query,
+                      status: songStatusFilter,
+                      page: "1",
+                      artist: a,
+                    })
+                  }
                   placeholder="Select Artist..."
                   options={artistNames || []}
                   name="artist"
@@ -445,9 +447,15 @@ const Song = () => {
               {/* Pagination Section Bar block */}
               <div className="mt-auto border-t border-neutral-100 pt-5 pb-2">
                 <Pagination
-                  currentPage={page}
+                  currentPage={parseInt(page, 10)}
                   totalPages={data ? data.totalPages : 0}
-                  onChange={(p) => setPage(p)}
+                  onChange={(p) =>
+                    handleUpdateParams({
+                      query: query,
+                      status: songStatusFilter,
+                      page: p.toString(),
+                    })
+                  }
                 />
               </div>
             </div>
@@ -470,7 +478,8 @@ const Song = () => {
                     irreversible. Are you sure you want to continue?
                   </p>
                   <p className="font-semibold text-xs text-warning-600 bg-warning-50 border border-warning-100 px-3 py-1.5 rounded-lg inline-block">
-                    Note: Only pending, rejected and draft releases can be deleted.
+                    Note: Only pending, rejected and draft releases can be
+                    deleted.
                   </p>
                 </div>
 
@@ -506,7 +515,7 @@ const Song = () => {
           )}
         </div>
       )}
-    </div>
+    </>
   ) : (
     data?.data[selectedIndex!] && (
       <SongForm

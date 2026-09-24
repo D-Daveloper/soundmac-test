@@ -17,7 +17,7 @@ const Page = () => {
     <div className="bg-main-white max-sm:min-h-auto min-h-[90.5dvh] h-full w-full flex flex-col px-5 ">
       <div className="flex gap-3 my-5">
         <Link
-          href={"/dashboard/explore/promotion/explore-promotions"}
+          href={"/dashboard/explore/promotion"}
           className={
             "px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm bg-primary hover:bg-primary/90 text-white!"
           }
@@ -33,9 +33,9 @@ const Page = () => {
           My Promotions
         </Link>
       </div>
-      <div className="max-w-[2000px] mx-auto">
+      <div className="">
         <>
-          <p className="text-text-body font-medium leading-[18px] tracking-tighter text-sm mb-5 max-w-[50%] max-sm:max-w-[70%] max-xs:!max-w-full w-full">
+          <p className="text-text-body font-medium leading-[18px] tracking-tighter text-sm max-w-[50%] max-sm:max-w-[70%] max-xs:!max-w-full w-full">
             Promote your music and reach more listeners. Create campaigns that
             boost streams, grow your audience, and spotlight your latest
             releases.

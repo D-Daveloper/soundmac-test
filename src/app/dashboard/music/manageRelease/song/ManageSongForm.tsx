@@ -5,7 +5,6 @@ import { SelectDate } from "@/app/components/datepicker/SelectDate";
 import DynamicInput from "@/app/components/input/DynamicInput";
 import Input from "@/app/components/input/Input";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
-import { ToggleSwitch } from "@/app/components/roundRadioButton/toggleButton";
 import { languagesList, timeZones, years } from "@/app/constant";
 import type {
   CheckboxOption,
@@ -41,7 +40,6 @@ import Link from "next/link";
 import React, { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
-import { useRouter } from "next/navigation";
 
 const SongForm = ({
   songFormFromApi,
@@ -58,7 +56,7 @@ const SongForm = ({
 
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const { isLoading, data, isFetching, isPending, isRefetching, isError } =
+  const { isLoading, data, isError } =
     useGetUserArtistsNames();
   const {
     isLoading: isLoadingDsp,
@@ -70,7 +68,6 @@ const SongForm = ({
   const fromYear = new Date();
   const toYear = new Date(new Date().setFullYear(new Date().getFullYear() + 5));
   const dashboardContext = useContext(DashboardContext);
-  const router = useRouter();
   const [preview, setPreview] = useState(false);
 
   const [songForm, setSongForm] = useState<SongForm>({
@@ -443,7 +440,7 @@ const SongForm = ({
   }, []);
 
   useEffect(() => {
-    setSongForm((prev) => ({
+    setSongForm(() => ({
       title: songFormFromApi.releaseTitle,
       genre: songFormFromApi.genre,
       language: songFormFromApi.releaseLanguage,
@@ -504,7 +501,7 @@ const SongForm = ({
   }
 
   return (
-    <div className="bg-main-white md:px-4 h-full w-full flex flex-col">
+    <div className="bg-main-white h-full w-full flex flex-col">
       {isLoading || isSubmittingForm || isLoadingDsp || loadingUser ? (
         <InlineLoadingScreen />
       ) : (

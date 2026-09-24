@@ -43,7 +43,7 @@ const sidebarComponents = [
       {
         title: "manage release",
         icon: "/musiclibrary2.svg",
-        href: "/dashboard/music/manageRelease?type=single",
+        href: "/dashboard/music/manageRelease/song",
         query: "manageRelease",
       },
       //   {

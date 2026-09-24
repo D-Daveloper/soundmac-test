@@ -22,7 +22,7 @@ const artistOptions = [
 
 const Page = () => {
   const router = useRouter();
-  const { handleUpdateParams,getParam } = useTabQuery();
+  const { handleUpdateParams, getParam } = useTabQuery();
   // 1. Read the parameters from the URL (provide fallbacks if empty)
   const query = getParam("query") || "";
   const page = getParam("page") || "1";
@@ -95,7 +95,7 @@ const Page = () => {
 
   const handleFilterChange = (newFilter: string) => {
     setFilter(newFilter);
-    handleUpdateParams(query, "1");
+    handleUpdateParams({ page: "1" });
     setIsFilterOpen(false);
   };
 
@@ -140,7 +140,9 @@ const Page = () => {
             type="search"
             // value={query}
             className="w-full p-1 text-[16px] sm:text-sm outline-0"
-            onChange={(e) => handleUpdateParams(e.target.value, "1")}
+            onChange={(e) =>
+              handleUpdateParams({ query: e.target.value, page: page })
+            }
             placeholder="Search"
           />
         </div>
@@ -260,7 +262,9 @@ const Page = () => {
           <Pagination
             currentPage={parseInt(page, 10)}
             totalPages={data?.totalPages || 0}
-            onChange={(page) => handleUpdateParams(query, page.toString())}
+            onChange={(page) =>
+              handleUpdateParams({ query: query, page: page.toString() })
+            }
           />
         </div>
       )}

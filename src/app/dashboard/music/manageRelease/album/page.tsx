@@ -22,18 +22,21 @@ import Pagination from "@/app/components/pagination/Pagination";
 import { albumFromApi } from "@/app/type";
 import { toast } from "react-toastify";
 import {
-  useDeleteAlbumMutation,
   useMarkAlbumCompleteMutation,
 } from "@/util/customHooks/useMutations";
 import ManageAlbumForm from "./ManageAlbumForm";
 import { useTabQuery } from "@/util/customHooks/useTabQuery";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
 import useAxios from "@/util/customHooks/UseAxios";
+import Link from "next/link";
 
 const Album = () => {
   const api = useAxios();
-  const { setParam, getParam } = useTabQuery();
-  const type = getParam("type");
+  const { getParam, handleUpdateParams } = useTabQuery();
+  const albumStatusFilter = getParam("status") || "all";
+  const artist = getParam("artist") || "";
+  const query = getParam("query") || "";
+  const page = getParam("page") || "1";
   const dashboardContext = useContext(DashboardContext);
 
   useEffect(() => {
@@ -47,11 +50,11 @@ const Album = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [showDeletePopUp, setShowDeletePopUp] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
-  const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("-createdAt");
-  const [albumStatusFilter, setAlbumStatusFilter] = useState("all");
-  const [query, setQuery] = useState("");
-  const [artist, setArtist] = useState("");
+  // const [albumStatusFilter, setAlbumStatusFilter] = useState("all");
+  // const [page, setPage] = useState(1);
+  // const [query, setQuery] = useState("");
+  // const [artist, setArtist] = useState("");
   const albumTitle = useDebounce<string>(query, 500);
   const [wantsToEdit, setWantsToEdit] = useState(false);
   const [showCannotAddTracks, setShowCannotAddTracks] = useState(false);
@@ -68,7 +71,7 @@ const Album = () => {
     isRefetching: isRefetchingAlbums,
     refetch,
   } = usePaginatedAlbums({
-    page,
+    page: parseInt(page, 10),
     sort: filter,
     albumTitle,
     albumStatusFilter,
@@ -143,21 +146,23 @@ const Album = () => {
     setSelectedIndex(index);
   };
 
-  const handleFilterChange = (selectedFilter: string) => {
-    setFilter(selectedFilter);
-    setPage(1);
+  const handleFilterChange = (filter: string) => {
+    setFilter(filter);
+    handleUpdateParams({ query: query, status: albumStatusFilter, page: "1" });
     setIsFilterOpen(false);
   };
 
-  const handleReleaseStatusFilterChange = (selectedFilter: string) => {
-    setAlbumStatusFilter(selectedFilter);
-    setPage(1);
+  const handleReleaseStatusFilterChange = (filter: string) => {
+    // setAlbumStatusFilter(selectedFilter);
+    // setPage(1);
+    handleUpdateParams({ query: query, status: filter, page: "1" });
   };
 
   const handleSearchQueryChange = (value: string) => {
-    setQuery(value);
-    setPage(1);
-    setAlbumStatusFilter("all");
+    // setQuery(value);
+    // setPage(1);
+    // setAlbumStatusFilter("all");
+    handleUpdateParams({ query: value, status: albumStatusFilter, page: "1" });
   };
 
   const handleDeleteAlbum = async (release: albumFromApi) => {
@@ -174,8 +179,8 @@ const Album = () => {
       refetch();
     } catch (error) {
       console.error("error deleting album", error);
-    }finally{
-      setisDeletePending(false)
+    } finally {
+      setisDeletePending(false);
     }
   };
 
@@ -220,31 +225,23 @@ const Album = () => {
   }
 
   return (
-    <div className="bg-main-white max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10 px-5">
+    <div className="bg-main-white min-h-[90dvh] w-full flex flex-col pb-10 px-4 sm:px-4 mx-auto">
       {/* Tab Selectors */}
-      <div className="flex gap-3 mt-5">
-        <button
-          type="button"
-          onClick={() => setParam("type", "single")}
-          className={`px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm ${
-            type === "single"
-              ? "bg-primary text-white"
-              : "bg-transparent border-2 border-text-disable text-text-disable"
-          }`}
+      <div className="flex gap-3 mt-6">
+        <Link
+          href={"/dashboard/music/manageRelease/song"}
+          aria-label="mange songs"
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${"bg-transparent border-2 border-text-disable text-text-disable hover:bg-neutral-50"}`}
         >
-          Songs
-        </button>
-        <button
-          type="button"
-          onClick={() => setParam("type", "album")}
-          className={`px-5 py-2 font-bold rounded-xl text-center max-w-fit hover:cursor-pointer text-sm ${
-            type === "album"
-              ? "bg-primary text-white"
-              : "bg-transparent border-2 border-text-disable text-text-disable"
-          }`}
+          Singles
+        </Link>
+        <Link
+          href={"/dashboard/music/manageRelease/album"}
+          aria-label="manage albums"
+          className={`px-5 py-2 font-bold rounded-xl text-center text-sm transition-all cursor-pointer ${"bg-primary text-white! shadow-xs"}`}
         >
           Albums
-        </button>
+        </Link>
       </div>
 
       {isLoadingArtistNames ? (
@@ -276,7 +273,14 @@ const Album = () => {
                 <p className="font-medium mb-2 sm:text-sm text-lg">Artists</p>
                 <Select
                   selected={artist}
-                  setSelected={setArtist}
+                  setSelected={(a) =>
+                    handleUpdateParams({
+                      query: query,
+                      status: albumStatusFilter,
+                      page: "1",
+                      artist: a,
+                    })
+                  }
                   placeholder="Select Artist..."
                   options={artistNames || []}
                   name="artist"
@@ -492,9 +496,15 @@ const Album = () => {
           {!hasNoData && (
             <div className="mt-auto">
               <Pagination
-                currentPage={page}
+                currentPage={parseInt(page, 10)}
                 totalPages={data ? data.totalPages : 0}
-                onChange={setPage}
+                onChange={(p) =>
+                  handleUpdateParams({
+                    query: query,
+                    status: albumStatusFilter,
+                    page: p.toString(),
+                  })
+                }
               />
             </div>
           )}
