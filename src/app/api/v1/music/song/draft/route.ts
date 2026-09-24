@@ -12,6 +12,7 @@ import Artist from "@/util/models/artistModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks } from "date-fns";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -155,7 +156,25 @@ export async function POST(req: Request) {
     if (!payload.isrc) {
       payload.isrc = await generateISRC()
     }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
     const savedSong = new SongModel({
+      _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
       genre: payload.genre,
       releaseLanguage: payload.language,
@@ -200,7 +219,7 @@ export async function POST(req: Request) {
 
     await savedSong.save();
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    return NextResponse.json({ msg: "Release uploaded successfull", release:savedSong }, { status: 201 });
   } catch (error: unknown) {
     console.log(error);
 
@@ -332,6 +351,23 @@ export async function PUT(req: Request) {
     if (isDraftSongValid != null) {
       return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
     }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
     const savedSong = await SongModel.findOneAndUpdate(
       {
         user: userJwt.user,
@@ -372,10 +408,10 @@ export async function PUT(req: Request) {
         providedBy: payload.providedBy,
         courtesyLine: payload.courtesyLine,
       },
-      { runValidators: true },
+      { runValidators: true, returnDocument: "after" },
     );
 
-    return NextResponse.json({ msg: "success" }, { status: 200 });
+    return NextResponse.json({ msg: "Release edited successfully", release: savedSong }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 

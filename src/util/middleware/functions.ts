@@ -911,21 +911,21 @@ export function validateNonDraftSongs(
         return "Country of recording is invalid";
     }
 
-    if (!payload.providedBy) {
-        return "Provided by is required";
-    }
+    // if (!payload.providedBy) {
+    //     return "Provided by is required";
+    // }
 
-    if (!isUserALabel && payload.providedBy != "SoundMac") {
-        return "Only label Accounts can provide their own name in the provided by field";
-    }
+    // if (!isUserALabel && payload.providedBy != "SoundMac") {
+    //     return "Only label Accounts can provide their own name in the provided by field";
+    // }
 
-    if (!payload.courtesyLine) {
-        return "Courtesy line is required";
-    }
+    // if (!payload.courtesyLine) {
+    //     return "Courtesy line is required";
+    // }
 
-    if (!isUserALabel && payload.courtesyLine != "SoundMac") {
-        return "Only label Accounts can provide their own name in the courtesy line field";
-    }
+    // if (!isUserALabel && payload.courtesyLine != "SoundMac") {
+    //     return "Only label Accounts can provide their own name in the courtesy line field";
+    // }
 
     return null;
 }
@@ -1018,21 +1018,21 @@ export function validateNonDraftAlbums(
         return "Time zone is required";
     }
 
-    if (!payload.providedBy) {
-        return "Provided by is required";
-    }
+    // if (!payload.providedBy) {
+    //     return "Provided by is required";
+    // }
 
-    if (!isUserALabel && payload.providedBy != "SoundMac") {
-        return "Only label Accounts can provide their own name in the provided by field";
-    }
+    // if (!isUserALabel && payload.providedBy != "SoundMac") {
+    //     return "Only label Accounts can provide their own name in the provided by field";
+    // }
 
-    if (!payload.courtesyLine) {
-        return "Courtesy line is required";
-    }
+    // if (!payload.courtesyLine) {
+    //     return "Courtesy line is required";
+    // }
 
-    if (!isUserALabel && payload.courtesyLine != "SoundMac") {
-        return "Only label Accounts can provide their own name in the courtesy line field";
-    }
+    // if (!isUserALabel && payload.courtesyLine != "SoundMac") {
+    //     return "Only label Accounts can provide their own name in the courtesy line field";
+    // }
 
     return null;
 }
@@ -1152,13 +1152,13 @@ export function validateDraftSongs(
         }
     }
 
-    if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
-        return "Only label Accounts can provide their own name in the provided by field";
-    }
+    // if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
+    //     return "Only label Accounts can provide their own name in the provided by field";
+    // }
 
-    if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
-        return "Only label Accounts can provide their own name in the courtesy line field";
-    }
+    // if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
+    //     return "Only label Accounts can provide their own name in the courtesy line field";
+    // }
 
     // if (payload.copyRightHolder === "" || payload.copyRightYear === "") {
     //   return "Copy write year and Copy write holder is required";

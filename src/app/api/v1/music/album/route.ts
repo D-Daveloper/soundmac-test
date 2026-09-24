@@ -131,6 +131,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
     }
 
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
     const album = new AlbumModel({
       _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
@@ -382,54 +398,71 @@ export async function PUT(req: Request) {
         );
       }
     }
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      // await AlbumModel.findByIdAndUpdate(
-      //   { _id: release._id },
-      //   {
-      release.releaseTitle = payload.title!,
-        release.genre = payload.genre!,
-        release.releaseLanguage = payload.language!,
-        release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-        release.anotherDistributionCheck = payload.anotherDistributionCheck,
-        release.releaseDate = new Date(payload.releaseDate!),
-        release.preOrderDate =
-        !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
-        release.copyRightHolder = payload.copyRightHolder!,
-        release.copyRightYear = payload.copyRightYear!,
-        release.dsp = payload.dsp,
-        release.upc = payload.upc!,
-        release.territories = payload.territories,
-        release.releaseImage = imageUrl.coverUrl || payload.oldImage || release.releaseImage,
-        // release.artistName = userArtist.artistName,
-        release.artist = userArtist._id,
-        // release.numberOfTracks = payload.numberOfTracks!,
-        // release.unassignedNumbers = number_of_track_array,
-        release.user = user._id,
-        release.releaseStatus = "pending",
-        release.timeZone = payload.timeZone || release.timeZone,
-        release.providedBy = payload.providedBy || release.providedBy,
-        release.courtesyLine = payload.courtesyLine || release.courtesyLine,
-        release.description = payload.description || release.description || "",
-        //   },
-        //   { runValidators: true },
-        // );
-        await release.save({ session });
-      await TrackModel.updateMany(
-        { upc: payload.upc },
-        { $set: { albumName: payload.title } },
-      );
-      await session.commitTransaction();
-    } catch (error) {
-      if (session.inTransaction()) {
-        await session.abortTransaction();
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
       }
-    } finally {
-      await session.endSession();
+    } else {
+      payload.providedBy = "SoundMac"
     }
 
-    return NextResponse.json({ msg: "success", release }, { status: 200 });
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
+    // const session = await mongoose.startSession();
+    // try {
+    // session.startTransaction();
+    const updatedRelease = await AlbumModel.findByIdAndUpdate(
+      { _id: release._id },
+      {
+        releaseTitle: payload.title!,
+        genre: payload.genre!,
+        releaseLanguage: payload.language!,
+        preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        releaseDate: new Date(payload.releaseDate!),
+        preOrderDate:
+          !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
+        copyRightHolder: payload.copyRightHolder!,
+        copyRightYear: payload.copyRightYear!,
+        dsp: payload.dsp,
+        upc: payload.upc!,
+        territories: payload.territories,
+        releaseImage: imageUrl.coverUrl || payload.oldImage || release.releaseImage,
+        // release.artistName: userArtist.artistName,
+        artist: userArtist._id,
+        // numberOfTracks: payload.numberOfTracks!,
+        // unassignedNumbers: number_of_track_array,
+        user: user._id,
+        releaseStatus: "pending",
+        timeZone: payload.timeZone || release.timeZone,
+        providedBy: payload.providedBy || release.providedBy,
+        courtesyLine: payload.courtesyLine || release.courtesyLine,
+        description: payload.description || release.description || "",
+      },
+      { runValidators: true },
+    );
+    // await release.save({ session });
+    // await TrackModel.updateMany(
+    //   { upc: payload.upc },
+    //   { $set: { albumName: payload.title } },
+    // );
+    // await session.commitTransaction();
+    return NextResponse.json({ msg: "Release edited successfully", release: updatedRelease }, { status: 200 });
+    // } catch (error) {
+    //   if (session.inTransaction()) {
+    //     await session.abortTransaction();
+    //   }
+    // } finally {
+    //   await session.endSession();
+    // }
+
   } catch (error: unknown) {
     console.log(error);
 

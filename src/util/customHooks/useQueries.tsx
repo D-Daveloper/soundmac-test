@@ -785,10 +785,11 @@ export const useGetUserNotifications = () => {
     queryKey: ["notifications"],
     queryFn: () => getUserNotification(api),
     staleTime: 1000 * 60 * 5, // 15 minutes: consider data fresh
-    refetchInterval:30000,
+    refetchInterval:5 * 60 * 1000,
     refetchOnWindowFocus: true,
     retry: false,    
     enabled: isSuccess && !!authUser,
+    refetchIntervalInBackground: false, // pauses interval when tab is hidden/unfocused
   });
 };
 

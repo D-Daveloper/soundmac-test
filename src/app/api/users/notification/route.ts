@@ -4,7 +4,6 @@ import User from "@/util/models/userModel";
 import { verifyJWT, verifyUser } from "@/util/middleware/verifyJwt";
 import UserNotification from "@/util/models/userNotification";
 import { handleMongooseValidationError } from "@/util/customError/error";
-import mongoose from "mongoose";
 
 export async function GET(req: Request) {
     try {
@@ -23,13 +22,17 @@ export async function GET(req: Request) {
                 { status: 401 },
             );
         }
-        const notificationsQuery = UserNotification.find({ userId: userJwt.user }).sort({ statusWeight: 1 }).lean()
-        const unDeliveredNotificationsQuery = UserNotification.findOne({ userId: userJwt.user, statusWeight: 1 })
-        const unreadCountQuery = UserNotification.countDocuments({ userId: userJwt.user, statusWeight: 1 });
-        const [notifications, unDeliveredNotifications, unreadCount] = await Promise.all([
-            notificationsQuery, unDeliveredNotificationsQuery, unreadCountQuery
-        ])
-        return NextResponse.json({ notifications, unreadCount, hasNewNotification: unDeliveredNotifications ? true : false }, { status: 200 })
+        // const notificationsQuery = UserNotification.find({ userId: userJwt.user }).sort({ statusWeight: 1 }).lean()
+        const unDeliveredNotifications = await UserNotification.find({ userId: userJwt.user, statusWeight: 1 })
+        // const unreadCountQuery = UserNotification.countDocuments({ userId: userJwt.user, statusWeight: 1 });
+
+        // const [notifications, unDeliveredNotifications,] = await Promise.all([
+        //     notificationsQuery, unDeliveredNotificationsQuery,
+        // ]);
+
+        const unreadCount = unDeliveredNotifications.length
+
+        return NextResponse.json({ notifications: unDeliveredNotifications, unreadCount, hasNewNotification: unreadCount > 0 ? true : false }, { status: 200 })
     } catch (error: unknown) {
         console.log(error);
 

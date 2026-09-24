@@ -101,6 +101,22 @@ export async function POST(req: Request) {
       number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
     }
 
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
     const album = new AlbumModel({
       _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
@@ -194,6 +210,10 @@ export async function PUT(req: Request) {
     }
     console.log(release);
 
+    if (!userArtist) {
+      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+    }
+    
     if (!release) {
       return NextResponse.json({ msg: "Invalid Release" }, { status: 400 });
     } else if (release.releaseStatus !== "draft") {
@@ -201,11 +221,21 @@ export async function PUT(req: Request) {
         { msg: "Only drafts can be saved as drafts" },
         { status: 400 },
       );
+    } else if (release.releaseTitle != payload.title) {
+      const checkReleaseTitle = await AlbumModel.find({
+        user: user!._id,
+        artistName: userArtist.artistName,
+        releaseTitle: payload.title
+      }).lean();
+      if (checkReleaseTitle.length > 0) {
+        return NextResponse.json(
+          { msg: "Release title already exists" },
+          { status: 400 },
+        );
+      }
     }
 
-    if (!userArtist) {
-      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    }
+
 
     const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
     if (isNaN(num) || num < 1) {
@@ -216,36 +246,36 @@ export async function PUT(req: Request) {
     }
     const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
 
-    // const album = await AlbumModel.findByIdAndUpdate(
-    //   { _id: release._id },
-    //   {
-    release.releaseTitle = payload.title;
-    release.genre = payload.genre;
-    release.releaseLanguage = payload.language;
-    release.preOrderCheck = payload.preOrderCheck;
-    release.anotherDistributionCheck = payload.anotherDistributionCheck;
-    release.releaseDate = payload.releaseDate == 'undefined' ? null : payload.releaseDate;
-    release.preOrderDate =
-      payload.preOrderDate == "undefined" ? null : payload.preOrderDate;
-    release.copyRightHolder = payload.copyRightHolder;
-    release.copyRightYear = payload.copyRightYear;
-    release.dsp = payload.dsp;
-    release.upc = release.upc;
-    release.territories = payload.territories;
-    release.artist = userArtist._id;
-    release.numberOfTracks = payload.numberOfTracks;
-    release.unassignedNumbers = number_of_track_array;
-    release.user = user._id;
-    release.releaseStatus = "draft";
-    release.timeZone = payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
-      release.description = payload.description || release.description || "";
-    release.providedBy = payload.providedBy || release.providedBy || "";
-    release.courtesyLine = payload.courtesyLine || release.courtesyLine || "";
-    //   },
-    //   { runValidators: true, returnDocument: "after" },
-    // );
-    release.save();
-    return NextResponse.json({ msg: "Release edited successfully.", release: release }, { status: 200 });
+    const album = await AlbumModel.findByIdAndUpdate(
+      { _id: release._id },
+      {
+        releaseTitle: payload.title,
+        genre: payload.genre,
+        releaseLanguage: payload.language,
+        preOrderCheck: payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        releaseDate: payload.releaseDate == 'undefined' ? null : payload.releaseDate,
+        preOrderDate:
+          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        copyRightHolder: payload.copyRightHolder,
+        copyRightYear: payload.copyRightYear,
+        dsp: payload.dsp,
+        upc: release.upc,
+        territories: payload.territories,
+        artist: userArtist._id,
+        numberOfTracks: payload.numberOfTracks,
+        unassignedNumbers: number_of_track_array,
+        user: user._id,
+        releaseStatus: "draft",
+        timeZone: payload.timeZone || release.timeZone || { label: "", value: "", name: "" },
+        description: payload.description || release.description || "",
+        providedBy: payload.providedBy || release.providedBy || "",
+        courtesyLine: payload.courtesyLine || release.courtesyLine || "",
+      },
+      { runValidators: true, returnDocument: "after" },
+    );
+    // release.save();
+    return NextResponse.json({ msg: "Release edited successfully.", release: album }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 

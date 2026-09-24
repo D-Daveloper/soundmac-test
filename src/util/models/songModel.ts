@@ -436,11 +436,11 @@ const SongModelSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: async function (v: any) {
-          const userType = await mongoose.model("User").findById(this.user).select("type");
-          console.log("userType", userType, this.user);
-          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
-            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
-          }
+          // const userType = await mongoose.model("User").findById(this.user).select("type");
+          // console.log("userType", userType, this.user);
+          // if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+          //   return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          // }
           return typeof v === "string" && v.trim().length > 0;
         },
         message: "Provided by is Invalid.",
@@ -452,11 +452,11 @@ const SongModelSchema = new mongoose.Schema(
       }, "Courtesy line is required"], trim: true,
       validate: {
         validator: async function (v: any) {
-          const userType = await mongoose.model("User").findById(this.user).select("type");
-          console.log("userType", userType);
-          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
-            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
-          }
+          // const userType = await mongoose.model("User").findById(this.user).select("type");
+          // console.log("userType", userType);
+          // if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+          //   return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          // }
           return typeof v === "string" && v.trim().length > 0;
         },
         message: "Courtesy line is Invalid.",
@@ -484,10 +484,38 @@ const SongModelSchema = new mongoose.Schema(
 );
 
 // Uniqueness constraints
-SongModelSchema.index({ user: 1, artist: 1, releaseTitle: 1 }, { unique: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } }});
-SongModelSchema.index({ catalogNumber: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
-SongModelSchema.index({ isrc: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
-SongModelSchema.index({ upc: 1 }, { unique: true, sparse: true, partialFilterExpression: { releaseStatus: { $ne: "inactive" } } });
+SongModelSchema.index(
+  { user: 1, artist: 1, releaseTitle: 1 },
+  {
+    unique: true,
+    collation: { locale: "en", strength: 2 },
+    partialFilterExpression: { releaseStatus: { $ne: "inactive" } },
+  }
+);
+
+SongModelSchema.index({ catalogNumber: 1 }, {
+    unique: true,
+    partialFilterExpression: {
+      catalogNumber: { $exists: true, $type: "string" },
+      releaseStatus: { $ne: "inactive" },
+    },
+  });
+
+SongModelSchema.index({ isrc: 1 }, {
+    unique: true,
+    partialFilterExpression: {
+      isrc: { $exists: true, $type: "string" },
+      releaseStatus: { $ne: "inactive" },
+    },
+  });
+
+SongModelSchema.index({ upc: 1 }, {
+    unique: true,
+    partialFilterExpression: {
+      upc: { $exists: true, $type: "string" },
+      releaseStatus: { $ne: "inactive" },
+    },
+  });
 
 // Admin endpoint
 SongModelSchema.index({ createdAt: -1 }); // no filters

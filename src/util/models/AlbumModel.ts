@@ -208,11 +208,11 @@ export const AlbumSchema = new mongoose.Schema(
       trim: true,
       validate: {
         validator: async function (v: any) {
-          const userType = await mongoose.model("User").findById(this.user).select("type");
-          console.log("userType", userType);
-          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
-            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
-          }
+          // const userType = await mongoose.model("User").findById(this.user).select("type");
+          // console.log("userType", userType);
+          // if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+          //   return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          // }
           return typeof v === "string" && v.trim().length > 0;
         },
         message: "Provided by is Invalid.",
@@ -224,11 +224,11 @@ export const AlbumSchema = new mongoose.Schema(
       }, "Courtesy line is required"], trim: true,
       validate: {
         validator: async function (v: any) {
-          const userType = await mongoose.model("User").findById(this.user).select("type");
-          console.log("userType", userType);
-          if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
-            return false; // Invalid if user is not a label and providedBy is not "SoundMac"
-          }
+          // const userType = await mongoose.model("User").findById(this.user).select("type");
+          // console.log("userType", userType);
+          // if (userType.type.includes("LABEL") === false && v !== "SoundMac") {
+          //   return false; // Invalid if user is not a label and providedBy is not "SoundMac"
+          // }
           return typeof v === "string" && v.trim().length > 0;
         },
         message: "Courtesy line is Invalid.",

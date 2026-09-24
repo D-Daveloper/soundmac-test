@@ -212,6 +212,7 @@ export async function POST(req: Request) {
       }
     }
     let catalogNumber = null
+
     if (payload.isrc) {
       catalogNumber = await generateCatalogNumber();
 
@@ -220,6 +221,24 @@ export async function POST(req: Request) {
         generateCatalogNumber(), generateISRC()
       ]).catch((err) => { throw err })
     }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
+
     const savedSong = new SongModel({
       _id: new mongoose.Types.ObjectId(),
       releaseTitle: payload.title,
@@ -769,7 +788,7 @@ export async function GET(req: Request) {
     }
 
     if (artist) {
-      const userArtist = await Artist.findOne({user:userJwt.user, artistName: artist }).lean();
+      const userArtist = await Artist.findOne({ user: userJwt.user, artistName: artist }).lean();
       query.artist = userArtist?._id;
     }
 
@@ -1043,56 +1062,72 @@ export async function PUT(req: Request) {
       }
     }
 
+    if (user?.type.includes("LABEL")) {
+      if (!payload.providedBy) {
+        payload.providedBy = user.label
+      }
+    } else {
+      payload.providedBy = "SoundMac"
+    }
+
+    if (user?.type.includes("LABEL")) {
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = user.label
+      }
+    } else {
+      payload.courtesyLine = "SoundMac"
+    }
+
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      // await SongModel.findByIdAndUpdate(
-      //   { _id: release._id },
-      //   {
-      release.releaseTitle = payload.title,
-        release.releaseImage = imageUrl.coverUrl || payload.oldImage,
-        release.releaseAudio = payload.s3KeyAudio || payload.oldAudio,
-        release.genre = payload.genre,
-        release.releaseLanguage = payload.language,
-        release.songWriter = payload.songWriter,
-        release.producer = payload.producer,
-        release.performer = payload.performer,
-        release.featuredArtist = payload.featuredArtist,
-        release.preOrderCheck = isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-        release.anotherDistributionCheck = payload.anotherDistributionCheck,
-        release.explicitContent = payload.explicitContent,
-        release.releaseDate =
-        user!.type === "EMERGING_ARTIST"
-          ? addWeeks(new Date(), 2)
-          : payload.releaseDate,
-        release.preOrderDate =
-        release.payload?.preOrderDate ? isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate : null,
-        release.copyRightHolder =
-        release.user!.type === "EMERGING_ARTIST"
-          ? "Distributed by SoundMac"
-          : payload.copyRightHolder,
-        release.copyRightYear = user!.type === "EMERGING_ARTIST"
-          ? new Date().getFullYear()
-          : payload.copyRightYear,
-        release.lyrics = payload.lyrics,
-        release.startClip = payload.startClip,
-        release.dsp = payload.dsp,
-        // upc: payload.upc,
-        // isrc: payload.isrc,
-        release.territories = payload.territories,
-        release.artistName = userArtist.artistName,
-        release.artist = userArtist._id,
-        release.user = user!._id,
-        release.releaseStatus = "pending",
-        release.compositionType = payload.compositionType,
-        release.instrumentalSource = payload.instrumentalSource,
-        release.countryOfRecording = payload.countryOfRecording,
-        release.providedBy = payload.providedBy,
-        release.courtesyLine = payload.courtesyLine,
-        //   },
-        //   { runValidators: true },
-        // )
-        await release.save({ session });
+      const updatedRelease = await SongModel.findByIdAndUpdate(
+        { _id: release._id },
+        {
+          releaseTitle: payload.title,
+          releaseImage: imageUrl.coverUrl || payload.oldImage,
+          releaseAudio: payload.s3KeyAudio || payload.oldAudio,
+          genre: payload.genre,
+          releaseLanguage: payload.language,
+          songWriter: payload.songWriter,
+          producer: payload.producer,
+          performer: payload.performer,
+          featuredArtist: payload.featuredArtist,
+          preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+          anotherDistributionCheck: payload.anotherDistributionCheck,
+          explicitContent: payload.explicitContent,
+          releaseDate:
+            user!.type === "EMERGING_ARTIST"
+              ? addWeeks(new Date(), 2)
+              : payload.releaseDate,
+          preOrderDate:
+            payload?.preOrderDate ? isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate : null,
+          copyRightHolder:
+            user!.type === "EMERGING_ARTIST"
+              ? "Distributed by SoundMac"
+              : payload.copyRightHolder,
+          copyRightYear: user!.type === "EMERGING_ARTIST"
+            ? new Date().getFullYear()
+            : payload.copyRightYear,
+          lyrics: payload.lyrics,
+          startClip: payload.startClip,
+          dsp: payload.dsp,
+          // upc: payload.upc,
+          // isrc: payload.isrc,
+          territories: payload.territories,
+          artistName: userArtist.artistName,
+          artist: userArtist._id,
+          user: user!._id,
+          releaseStatus: "pending",
+          compositionType: payload.compositionType,
+          instrumentalSource: payload.instrumentalSource,
+          countryOfRecording: payload.countryOfRecording,
+          providedBy: payload.providedBy,
+          courtesyLine: payload.courtesyLine,
+        },
+        { runValidators: true, returnDocument: "after", session },
+      )
+      // await release.save({ session });
 
       if (payload.uploadId) {
         await AudioUploadTrackerModel.findOneAndUpdate(
@@ -1106,6 +1141,7 @@ export async function PUT(req: Request) {
         ).session(session);
       }
       await session.commitTransaction();
+      return NextResponse.json({ msg: "Release edited successfully", release: updatedRelease }, { status: 200 });
     } catch (error) {
       if (session.inTransaction()) {
         await session.abortTransaction();
@@ -1114,8 +1150,6 @@ export async function PUT(req: Request) {
     } finally {
       await session.endSession();
     }
-
-    return NextResponse.json({ msg: "success", release: release }, { status: 200 });
   } catch (error: unknown) {
     console.log(error);
 

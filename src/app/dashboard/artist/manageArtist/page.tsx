@@ -1,20 +1,19 @@
 "use client";
 
-import {
-  InlineLoadingScreen,
-} from "@/app/components/Loader/loader";
+import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import Pagination from "@/app/components/pagination/Pagination";
 import useDebounce from "@/app/components/searchBox/searchBox";
 import { filterOptions } from "@/app/constant";
 import { Artist } from "@/app/type";
 import { usePaginatedArtists } from "@/util/customHooks/useQueries";
-import { FileSearchIcon, ChartNoAxesCombined, Ellipsis} from "lucide-react";
+import { FileSearchIcon, ChartNoAxesCombined, Ellipsis } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import ViewArtist from "./ViewArtist";
 import ViewStats from "./ViewStats";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import { useTabQuery } from "@/util/customHooks/useTabQuery";
 
 const artistOptions = [
   { name: "View", icon: <FileSearchIcon strokeWidth={1} /> },
@@ -23,24 +22,32 @@ const artistOptions = [
 
 const Page = () => {
   const router = useRouter();
+  const { handleUpdateParams,getParam } = useTabQuery();
+  // 1. Read the parameters from the URL (provide fallbacks if empty)
+  const query = getParam("query") || "";
+  const page = getParam("page") || "1";
+
   const dashboardContext = useContext(DashboardContext);
 
-  const [currentView, setCurrentView] = useState<"list" | "view" | "stats">("list");
+  const [currentView, setCurrentView] = useState<"list" | "view" | "stats">(
+    "list",
+  );
   const [selectedArtist, setSelectedArtist] = useState<Artist | null>(null);
 
-  const [page, setPage] = useState(1);
+  // const [page, setPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<null | number>(null);
   const [filter, setFilter] = useState("-createdAt");
-  const [query, setQuery] = useState("");
+  // const [query, setQuery] = useState("");
 
   const artistName = useDebounce<string>(query, 500);
 
-  const { data, isLoading, isError, error, isFetching } = usePaginatedArtists({
-    page,
-    sort: filter,
-    artistName: artistName,
-  });
+  const { data, isLoading, isError, error, isFetching, isPending } =
+    usePaginatedArtists({
+      page: parseInt(page, 10),
+      sort: filter,
+      artistName: artistName,
+    });
 
   // Restore selected artist from sessionStorage on mount
   useEffect(() => {
@@ -88,7 +95,7 @@ const Page = () => {
 
   const handleFilterChange = (newFilter: string) => {
     setFilter(newFilter);
-    setPage(1);
+    handleUpdateParams(query, "1");
     setIsFilterOpen(false);
   };
 
@@ -104,12 +111,7 @@ const Page = () => {
 
   // Show ViewArtist component
   if (currentView === "view" && selectedArtist) {
-    return (
-      <ViewArtist
-        artist={selectedArtist}
-        setArtist={handleGoBack}
-      />
-    );
+    return <ViewArtist artist={selectedArtist} setArtist={handleGoBack} />;
   }
 
   // Show ViewStats component
@@ -125,19 +127,67 @@ const Page = () => {
   // Main Artist List View
   return (
     <div className="bg-main-white min-h-[90dvh] w-full flex flex-col px-2 md:px-3">
-      {isLoading ? (
+      <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-base sm:max-w-[40%] mt-5">
+        View and manage all your artist profiles. Edit details, link streaming
+        platforms, and track performance.
+      </p>
+
+      {/* Search + Filter */}
+      <div className="flex justify-between w-full mt-3 items-center">
+        <div className="flex p-2 outline-1 m-2 rounded-lg mb-5 max-w-[60%] w-full">
+          <Image src="/search-normal.svg" alt="search" width={20} height={20} />
+          <input
+            type="search"
+            // value={query}
+            className="w-full p-1 text-[16px] sm:text-sm outline-0"
+            onChange={(e) => handleUpdateParams(e.target.value, "1")}
+            placeholder="Search"
+          />
+        </div>
+
+        {/* Filter Button */}
+        <div className="relative">
+          <button
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="border-2 border-[#11456B] w-[40px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 md:mr-5"
+          >
+            <div className="bg-primary w-[25px] h-[2px]"></div>
+            <div className="bg-primary w-[15px] h-[2px]"></div>
+            <div className="bg-primary w-[10px] h-[2px]"></div>
+          </button>
+
+          {isFilterOpen && (
+            <div className="absolute mt-2 right-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+              {filterOptions.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => handleFilterChange(option.value)}
+                  className="flex items-center gap-2 px-3 py-2 w-full hover:bg-neutral-50"
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full bg-primary ${filter !== option.value && "opacity-0"}`}
+                  />
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      {isLoading || isPending ? (
         <InlineLoadingScreen />
       ) : isError || !data || data.data.length === 0 ? (
         <div className="flex flex-col justify-center items-center min-h-[90dvh] gap-15">
           <Image
             priority={true}
-            src="/manage_artistImage.png"
+            src="/manage_artist_image.png"
             alt="no artist"
             width={200}
             height={200}
           />
           <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-[16px] sm:max-w-[40%] text-center">
-            No Artist Profile Yet. Create your first artist profile to start releasing and managing music.
+            No Artist Profile Yet. Create your first artist profile to start
+            releasing and managing music.
           </p>
           <button
             onClick={() => router.push("/dashboard/artist/createArtist")}
@@ -148,56 +198,15 @@ const Page = () => {
         </div>
       ) : (
         <div className="min-h-full md:px-2 lg:px-0">
-          <p className="text-text-body font-normal leading-[18px] tracking-[-0.5px] text-base sm:max-w-[40%] mt-5">
-            View and manage all your artist profiles. Edit details, link streaming platforms, and track performance.
-          </p>
-
-          {/* Search + Filter */}
-          <div className="flex justify-between w-full mt-3 items-center">
-            <div className="flex p-2 outline-1 m-2 rounded-lg mb-5 max-w-[60%] w-full">
-              <Image src="/search-normal.svg" alt="search" width={20} height={20} />
-              <input
-                type="search"
-                className="w-full p-1 text-[16px] sm:text-sm outline-0"
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search"
-              />
-            </div>
-
-            {/* Filter Button */}
-            <div className="relative">
-              <button
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className="border-2 border-[#11456B] w-[40px] h-[40px] rounded-lg flex flex-col justify-center items-center gap-1 md:mr-5"
-              >
-                <div className="bg-primary w-[25px] h-[2px]"></div>
-                <div className="bg-primary w-[15px] h-[2px]"></div>
-                <div className="bg-primary w-[10px] h-[2px]"></div>
-              </button>
-
-
-              {isFilterOpen && (
-                <div className="absolute mt-2 right-0 w-40 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                  {filterOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleFilterChange(option.value)}
-                      className="flex items-center gap-2 px-3 py-2 w-full hover:bg-neutral-50"
-                    >
-                      <div className={`w-2 h-2 rounded-full bg-primary ${filter !== option.value && "opacity-0"}`} />
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
           <div className="border w-full px-3"></div>
 
           {/* Artists Grid */}
           <div className="grid grid-cols-2 gap-5 items-center max-md:grid-cols-1 md:px-3 mt-4">
             {data.data.map((artist, index) => (
-              <div key={index} className="bg-[#F4F4F4]/50 border-2 border-neutral-100 rounded-lg px-2 py-1 flex justify-between gap- relative">
+              <div
+                key={index}
+                className="bg-[#F4F4F4]/50 border-2 border-neutral-100 rounded-lg px-2 py-1 flex justify-between gap- relative"
+              >
                 <div className="flex items-center">
                   <div className="relative w-[100px] my-1">
                     <Image
@@ -206,7 +215,7 @@ const Page = () => {
                       width={70}
                       height={70}
                       // fill
-                      className="object-fit rounded" 
+                      className="object-fit rounded"
                     />
                   </div>
 
@@ -215,7 +224,6 @@ const Page = () => {
                       {artist.artistName}
                     </h1>
                   </div>
-
                 </div>
 
                 <button
@@ -231,7 +239,12 @@ const Page = () => {
                     {artistOptions.map((option, idx) => (
                       <button
                         key={idx}
-                        onClick={() => handleSelectArtist(artist, option.name.toLowerCase() as "view" | "stats")}
+                        onClick={() =>
+                          handleSelectArtist(
+                            artist,
+                            option.name.toLowerCase() as "view" | "stats",
+                          )
+                        }
                         className="flex items-center gap-2 px-4 py-2 w-full hover:bg-neutral-50 text-left"
                       >
                         {option.icon}
@@ -245,9 +258,9 @@ const Page = () => {
           </div>
 
           <Pagination
-            currentPage={page}
+            currentPage={parseInt(page, 10)}
             totalPages={data?.totalPages || 0}
-            onChange={setPage}
+            onChange={(page) => handleUpdateParams(query, page.toString())}
           />
         </div>
       )}
