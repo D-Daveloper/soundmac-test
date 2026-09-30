@@ -48,7 +48,7 @@ export async function POST(req: Request) {
             new HeadObjectCommand({ Bucket: process.env.AWS_S3_BUCKET!, Key: tracker.s3Key }),
         );
 
-        const MAX_SIZE = 200 * 1024 * 1024;
+        const MAX_SIZE = 100 * 1024 * 1024;
         if ((head.ContentLength ?? 0) > MAX_SIZE || head.ContentLength !== tracker.fileSize) {
             await s3.send(new DeleteObjectCommand({ Bucket: process.env.AWS_S3_BUCKET!, Key: tracker.s3Key }));
             tracker.status = "FAILED";

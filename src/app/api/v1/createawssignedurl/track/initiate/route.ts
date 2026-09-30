@@ -208,7 +208,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const s3key = `testing/${upc}/${upc}_01_${trackNumber}.${ext}`;
+    const s3key = `NewReleases/${upc}/${upc}_01_${trackNumber}.flac`;
 
     // Already finished for this track number? Don't silently overwrite it.
     const existingTracker = await AudioUploadTrackerModel.findOne({

@@ -141,7 +141,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const MAX_SIZE = 200 * 1024 * 1024; // 200MB
+    const MAX_SIZE =100 * 1024 * 1024; // 200MB
     if (fileSize > MAX_SIZE) {
       return NextResponse.json({ error: "File too large" }, { status: 400 });
     }
@@ -203,7 +203,7 @@ export async function POST(req: Request) {
   }
 }
 
-//for track
+//for track - legacy
 export async function PUT(req: Request) {
   try {
     await dbConnect();
