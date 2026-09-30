@@ -17,6 +17,8 @@ const AudioUploadTrackerSchema = new mongoose.Schema({
   s3Key: { type: String, required: true },
   upc: { type: String, required: true },
   trackNumber: { type: String },
+  fileType: { type: String },
+  fileSize: { type: Number },
 
   s3UploadId: { type: String }, // S3's multipart upload id, needed to sign/complete/abort parts
   totalParts: { type: Number },

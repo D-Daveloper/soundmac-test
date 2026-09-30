@@ -165,20 +165,20 @@ const EditTrackForm = ({
       toast.info(
         "Uploading song. This may take a while depending on your internet speed.",
       );
-      const { upc, songS3Key, error, uploadId } = await uploadAlbumTrack(
-        track.songAudio,
-        album.upc,
-        album.artist.artistName,
-        api,
-        track.trackNumber,
-      );
-      console.log("nnnjjj", songS3Key);
-      if (error != null) {
-        return;
-      }
+      // const { upc, songS3Key, error, uploadId } = await uploadAlbumTrack(
+      //   track.songAudio,
+      //   album.upc,
+      //   album.artist.artistName,
+      //   api,
+      //   track.trackNumber,
+      // );
+      // console.log("nnnjjj", songS3Key);
+      // if (error != null) {
+      //   return;
+      // }
 
-      track.s3key = songS3Key; //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
-      track.songAudio = null;
+      // track.s3key = songS3Key; //the key from ther server i.e the storage location in the s3 bucket reference createawssignedurl route.ts
+      // track.songAudio = null;
       toast.success("Uploaded, please continue with the form.");
     } catch (error) {
       if (isAxiosError(error)) {

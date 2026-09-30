@@ -235,6 +235,8 @@ export interface NonRetryableErrorCode {
   };
 }
 
+export type UploadStatus = "idle" | "uploading" | "completed" | "failed";
+
 export interface TrackForm {
   title: string;
   genre: string;
@@ -255,9 +257,12 @@ export interface TrackForm {
   id: string; // frontend-only (uuid)
   trackNumber: string;
   validationError: string | null;
-  uploadStatus?: "idle" | "uploading" | "done" | "error";
+  // uploadStatus?: "idle" | "uploading" | "done" | "error";
   s3key: string;
   songAudio: File | null;
+  uploadStatus: UploadStatus;
+  uploadProgress: number; // 0–100
+  uploadError: string | null;
 }
 
 export interface TrackFromApi extends songFromApi {

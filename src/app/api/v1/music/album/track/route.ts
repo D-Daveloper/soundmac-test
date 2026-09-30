@@ -55,7 +55,7 @@ export async function GET(req: Request) {
     }
 
     tracks = await TrackModel.find({
-      album:album._id
+      album: album._id
     }).lean();
 
     if (tracks && tracks.length <= 0) {
@@ -127,11 +127,25 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Unauthorized Album." }, { status: 400 });
     }
 
-    const uploladedTracks = await TrackModel.find({
+    const uploadedTracks = await TrackModel.find({
       upc: userAlbum.upc,
     });
 
-    if (uploladedTracks.length === parseInt(userAlbum.numberOfTracks!, 10)) {
+    const trackers = await AudioUploadTrackerModel.find({
+      user: user._id,
+      upc: userAlbum.upc,
+      s3Key: { $in: tracks.map((t) => t.s3key) },
+      status: "COMPLETED",
+    }).lean();
+
+    if (trackers.length !== tracks.length) {
+      return NextResponse.json(
+        { code: "AUDIO_NOT_UPLOADED", msg: "One or more tracks have no completed upload" },
+        { status: 400 },
+      );
+    }
+
+    if (uploadedTracks.length === parseInt(userAlbum.numberOfTracks!, 10)) {
       return NextResponse.json(
         { msg: "Maximum number of tracks reached" },
         { status: 400 },
@@ -329,14 +343,14 @@ export async function PUT(req: Request) {
       // Run all updates in one efficient command
       await TrackModel.bulkWrite(bulkOps, { session });
 
-      await AudioUploadTrackerModel.updateMany(
-        {
-          upc: userAlbum.upc,
-          status: "PENDING",
-        },
-        { $set: { status: "ACTIVE" } },
-        { session },
-      );
+      // await AudioUploadTrackerModel.updateMany(
+      //   {
+      //     upc: userAlbum.upc,
+      //     status: "PENDING",
+      //   },
+      //   { $set: { status: "ACTIVE" } },
+      //   { session },
+      // );
       await session.commitTransaction();
 
     } catch (error) {

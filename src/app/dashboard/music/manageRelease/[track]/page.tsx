@@ -5,6 +5,8 @@ import {
   createEmptyTrack,
   isTrackFormValid,
   numRegex,
+  runWithConcurrency,
+  uploadAlbumTrack,
 } from "@/util/middleware/functions";
 import Image from "next/image";
 import React, { use, useContext, useEffect, useState } from "react";
@@ -17,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useGetAlbums } from "@/util/customHooks/useQueries";
 import { InlineLoadingScreen } from "@/app/components/Loader/loader";
 import DashboardContext from "@/app/context/dashboardContext/dashboardContext";
+import { useBeforeUnloadGuard } from "@/util/customHooks/useBeforeUnloadGuard";
 
 const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   const dashboardContext = useContext(DashboardContext);
@@ -32,7 +35,6 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
 
   const api = UseAxios();
   const router = useRouter();
-  // const [album, setAlbum] = useState<albumFromApi | null>(null);
   const {
     data: album,
     isLoading,
@@ -43,6 +45,12 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   const [tracks, setTracks] = useState<TrackForm[]>([createEmptyTrack()]);
   const [activeTrackId, setActiveTrackId] = useState(tracks[0].id);
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [isDistributing, setIsDistributing] = useState(false);
+
+  useBeforeUnloadGuard(
+    isDistributing || tracks.some((t) => t.uploadStatus === "uploading"),
+  );
+
   if (isLoading || !album) {
     return <InlineLoadingScreen />;
   } else if (album.data.length < 1) {
@@ -79,100 +87,145 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
       prev.map((track) => (track.id === id ? { ...track, ...patch } : track)),
     );
   }
+  // Returns the s3 key on success, null on failure. Shared by the manual button and Distribute.
+  async function uploadTrackAudio(track: TrackForm): Promise<string | null> {
+    if (!track.songAudio) return track.s3key || null;
+
+    updateTrack(track.id, {
+      uploadStatus: "uploading",
+      uploadProgress: 0,
+      uploadError: null,
+    });
+
+    const { s3key, error } = await uploadAlbumTrack(
+      track.songAudio,
+      album!.data[0].upc,
+      api,
+      track.trackNumber,
+      false,
+      (pct) => updateTrack(track.id, { uploadProgress: pct }),
+    );
+
+    if (error !== null) {
+      updateTrack(track.id, { uploadStatus: "failed", uploadError: error });
+      return null;
+    }
+
+    updateTrack(track.id, {
+      s3key,
+      songAudio: null,
+      uploadStatus: "completed",
+      uploadProgress: 100,
+      uploadError: null,
+    });
+    return s3key;
+  }
+
+  async function handleManualUpload(track: TrackForm) {
+    if (!dashboardContext?.isPremium) {
+      dashboardContext?.setOpenUpgradePopUp(true);
+      return;
+    }
+    if (!track.songAudio) return toast.info("Track audio is required.");
+    if (!track.trackNumber) return toast.info("Track number is required.");
+
+    const s3key = await uploadTrackAudio(track);
+    if (s3key) toast.success("Uploaded, please continue with the form.");
+  }
 
   const handleSubmit = async (action: "draft" | "upload") => {
-    try {
-      if (!dashboardContext?.isPremium) {
-        dashboardContext?.setOpenUpgradePopUp(true);
-        return;
-      }
-      setIsSubmittingForm(true);
-      for (let i = 0; i < tracks.length; i++) {
-        // tracks[i].artist = album.data[0].artist.artistName;
-        if (tracks[i].title.length < 3 || tracks[i].title.length > 32) {
-          return toast.warn(
-            "track" +
-              " " +
-              (i + 1) +
-              " " +
-              "Song title must be longer than 3 not more than 32",
-          );
-        } else if (containsEmoji(tracks[i].title)) {
-          return toast.warn(
-            "track" + " " + (i + 1) + " " + "Song title can not contain emojis",
-          );
-        } else if (
-          !tracks[i].trackNumber ||
-          !numRegex.test(tracks[i].trackNumber)
-        ) {
-          return toast.warn(
-            "track" +
-              " " +
-              (i + 1) +
-              " " +
-              "Track number is required and must be a number.",
-          );
-        } else if (
-          !album.data[0].unassignedNumbers.includes(tracks[i].trackNumber)
-        ) {
-          // console.log(album.data[0].unassignedNumbers);
-          return toast.warn(
-            "track" + " " + (i + 1) + " " + "Invalid Track number.",
-          );
-        }
-        
-        if (action === "upload") {
-          const validForm = isTrackFormValid(tracks[i]);
-          if (validForm != "true") {
-            setIsSubmittingForm(false);
-            return toast.warn("track" + " " + (i + 1) + " " + validForm);
-          }
-        }
-        // album.data[0].unassignedNumbers =
-        //   album.data[0].unassignedNumbers.filter(
-        //     (item, index) => item != tracks[i].trackNumber,
-        //   );
-      }
+    if (!dashboardContext?.isPremium) {
+      dashboardContext?.setOpenUpgradePopUp(true);
+      return;
+    }
+    if (isDistributing || isSubmittingForm) return;
 
-      let res;
+    // 1. Validate everything BEFORE uploading a single byte
+    for (let i = 0; i < tracks.length; i++) {
+      const t = tracks[i];
+      const label = "track " + (i + 1) + " ";
+
+      if (t.title.length < 3 || t.title.length > 32) {
+        return toast.warn(
+          label + "Song title must be longer than 3 not more than 32",
+        );
+      } else if (containsEmoji(t.title)) {
+        return toast.warn(label + "Song title can not contain emojis");
+      } else if (!t.trackNumber || !numRegex.test(t.trackNumber)) {
+        return toast.warn(
+          label + "Track number is required and must be a number.",
+        );
+      }
 
       if (action === "upload") {
-        res = await api.post(
-          "v1/music/album/track",
-          JSON.stringify({ tracks, albumId: album.data[0]._id }),
-          {
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-      } else {
-        res = await api.post(
-          "v1/music/album/track/draft",
-          JSON.stringify({ tracks, albumId: album.data[0]._id }),
-          {
-            headers: { "Content-Type": "application/json" },
-          },
-        );
+        if (!t.songAudio && !t.s3key) {
+          return toast.warn(label + "audio is required.");
+        }
+        // The audio may not be uploaded yet, so give the validator a stand-in key
+        const validForm = isTrackFormValid({
+          ...t,
+          s3key: t.s3key || "pending-upload",
+        });
+        if (validForm != "true") {
+          return toast.warn(label + validForm);
+        }
       }
+    }
+
+    try {
+      let finalTracks: TrackForm[] = tracks;
+
+      if (action === "upload") {
+        // 2. Upload every track that still needs it, two at a time
+        setIsDistributing(true);
+        const pending = tracks.filter(
+          (t) => t.songAudio && t.uploadStatus !== "completed",
+        );
+
+        const uploaded = await runWithConcurrency(pending, 2, async (t) => ({
+          id: t.id,
+          s3key: await uploadTrackAudio(t),
+        }));
+
+        const failedCount = uploaded.filter((u) => !u.s3key).length;
+        if (failedCount > 0) {
+          toast.error(
+            `${failedCount} track(s) failed to upload. Check the tabs marked with "!", then press Distribute again. Finished tracks won't upload twice.`,
+          );
+          return;
+        }
+
+        // `tracks` above is a snapshot from before the uploads, so merge in the new keys
+        const keyById = new Map(uploaded.map((u) => [u.id, u.s3key as string]));
+        finalTracks = tracks.map((t) => ({
+          ...t,
+          s3key: keyById.get(t.id) ?? t.s3key,
+          songAudio: null,
+        }));
+      }
+
+      // 3. Save everything
+      setIsSubmittingForm(true);
+      const res = await api.post(
+        action === "upload"
+          ? "v1/music/album/track"
+          : "v1/music/album/track/draft",
+        JSON.stringify({ tracks: finalTracks, albumId: album.data[0]._id }),
+        { headers: { "Content-Type": "application/json" } },
+      );
+
       toast.success(res?.data?.msg);
-      //   localStorage.removeItem("songForm");
-      //   localStorage.removeItem("songWriter");
-      //   localStorage.removeItem("featuredArtist");
-      //   localStorage.removeItem("performer");
-      //   localStorage.removeItem("producer");
       refetch();
       router.back();
-      //   setImage(null);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error(error);
         return;
       }
       toast.error("something went wrong.");
-      // songForm.musicImage = null;
-      // songForm.songAudio = null;
     } finally {
+      setIsDistributing(false);
       setIsSubmittingForm(false);
-      // setPreview(false);
     }
   };
 
@@ -199,6 +252,17 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
                   }}
                 >
                   Track {index + 1}
+                  {track.uploadStatus === "uploading" && (
+                    <span className="ml-1 text-xs">
+                      ({track.uploadProgress}%)
+                    </span>
+                  )}
+                  {track.uploadStatus === "completed" && (
+                    <span className="ml-1">✓</span>
+                  )}
+                  {track.uploadStatus === "failed" && (
+                    <span className="ml-1 text-red-500">!</span>
+                  )}
                 </button>
               ))}
 
@@ -213,13 +277,19 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
                 </button>
               )}
             </div>
-            <UploadTrackForm
-              setIsUploadingTrack={(v) => setIsSubmittingForm(v)}
-              track={activeTrack}
-              onChange={(patch) => updateTrack(activeTrack.id, patch)}
-              onRemove={() => removeTrack(activeTrack.id)}
-              album={album.data[0]}
-            />
+
+            <div
+              className={isDistributing ? "pointer-events-none opacity-60" : ""}
+            >
+              <UploadTrackForm
+                track={activeTrack}
+                onChange={(patch) => updateTrack(activeTrack.id, patch)}
+                onRemove={() => removeTrack(activeTrack.id)}
+                onUpload={() => handleManualUpload(activeTrack)}
+                album={album.data[0]}
+              />
+            </div>
+
             <div className="fixed bottom-0 left-0 w-full bg-[#F0F0E7]/95 backdrop-blur-md border-t border-neutral-100 flex justify-end items-center gap-3 sm:gap-4 py-3 sm:py-4 px-4 sm:px-10 z-20 shadow-lg">
               {/* Delete Track Action Button */}
               <button

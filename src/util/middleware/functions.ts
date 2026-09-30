@@ -311,65 +311,156 @@ export const uploadTrack = async (
     }
 };
 
-export const uploadAlbumTrack = async (
-    file: File,
-    upc: string,
-    artist: string,
-    api: AxiosInstance,
-    trackNumber: string,
-) => {
-    try {
-        // 1. Ask for permission
-        const res = await api.put("v1/createawssignedurl", {
-            fileType: file.type,
-            fileSize: file.size,
-            upcFromClient: upc, //the initial upc the user inputed if any. it serves as the file name in aws
-            artist,
-            trackNumber,
-        });
+// export const uploadAlbumTrack = async (
+//     file: File,
+//     upc: string,
+//     artist: string,
+//     api: AxiosInstance,
+//     trackNumber: string,
+//     onProgress?: (pct: number) => void,
+// ) => {
+//     try {
+//         const res = await api.put("v1/createawssignedurl", {
+//             fileType: file.type,
+//             fileSize: file.size,
+//             upcFromClient: upc,
+//             artist,
+//             trackNumber,
+//         });
 
-        const { uploadUrl, s3key, upcFromServer, uploadId } = await res.data;
+//         const { uploadUrl, s3key, upcFromServer, uploadId } = res.data;
 
-        // 2. Upload directly to S3
-        await axios.put(uploadUrl, file, {
-            headers: { "Content-Type": file.type },
-        });
-        console.log("ressss", res);
+//         await axios.put(uploadUrl, file, {
+//             headers: { "Content-Type": file.type },
+//             onUploadProgress: (e) => {
+//                 if (e.total && onProgress) {
+//                     onProgress(Math.round((e.loaded / e.total) * 100));
+//                 }
+//             },
+//         });
 
-        return { upc: upcFromServer, songS3Key: s3key, error: null, uploadId };
-    } catch (error) {
-        if (isAxiosError(error)) {
-            return {
-                upc: null,
-                songS3Key: null,
-                error: "Something went wrong please try again later!",
-            };
-        }
-        console.log("upload track error function line 181", error);
-        toast.error("Something went wrong please try again later!");
-        return {
-            upc: null,
-            songS3Key: null,
-            error: "Something went wrong please try again later!",
-        };
-    }
+//         return { upc: upcFromServer, songS3Key: s3key, error: null, uploadId };
+//     } catch (error) {
+//         console.log("upload track error function line 181", error);
+//         // toast.error("Something went wrong please try again later!")
+//         return {
+//             upc: null,
+//             songS3Key: null,
+//             error: "Something went wrong please try again later!",
+//         };
+//     }
+// };
+const MIME_BY_EXT: Record<string, string> = {
+  flac: "audio/flac",
+  wav: "audio/wav",
+  mp3: "audio/mpeg",
 };
 
-// idb.ts — minimal wrapper, one object store "pendingFiles" keyed by trackNumber+upc
-// export async function saveFileForResume(key: string, file: File) {
-//   const db = await openDB();
-//   await db.put("pendingFiles", file, key);
-// }
+// Some browsers/OSes report an empty file.type for .flac, so fall back to the extension
+export const resolveAudioType = (file: File): string =>
+  file.type ||
+  MIME_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""] ||
+  "";
 
-// export async function getSavedFile(key: string): Promise<File | undefined> {
-//   const db = await openDB();
-//   return db.get("pendingFiles", key);
-// }
+// Network drops, timeouts, 5xx and 429 are worth retrying. A 403 is only retryable
+// on the S3 step, where it means the presigned URL expired and we need a fresh one.
+const isRetryable = (error: unknown, step: "create" | "put" | "complete") => {
+  if (!isAxiosError(error)) return false;
+  const status = error.response?.status;
+  if (!status) return true;
+  if (status >= 500 || status === 408 || status === 429) return true;
+  return step === "put" && status === 403;
+};
 
-// export async function clearSavedFile(key: string) {
-//   const db = await openDB();
-//   await db.delete("pendingFiles", key);
-// }
+export type UploadAlbumTrackResult =
+  | { s3key: string; uploadId: string; error: null }
+  | { s3key: null; uploadId: null; error: string };
+
+export const uploadAlbumTrack = async (
+  file: File,
+  upc: string,
+  api: AxiosInstance,
+  trackNumber: string,
+  replace: boolean,
+  onProgress?: (pct: number) => void,
+): Promise<UploadAlbumTrackResult> => {
+  const fileType = resolveAudioType(file);
+  if (!fileType) {
+    return {
+      s3key: null,
+      uploadId: null,
+      error: "Unsupported audio format. Use WAV, FLAC or MP3.",
+    };
+  }
+
+  const MAX_ATTEMPTS = 3;
+  let lastError = "Something went wrong please try again later!";
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    let step: "create" | "put" | "complete" = "create";
+
+    try {
+      // 1. Idempotent: same user + upc + trackNumber returns a fresh URL each call
+      const { data } = await api.post("v1/createawssignedurl/track/initiate", {
+        upc,
+        trackNumber,
+        fileType,
+        fileSize: file.size,
+        replace
+      });
+      const { uploadId, uploadUrl, s3key, requiredHeaders } = data;
+
+      // 2. Straight to S3 (global axios, so no auth interceptors touch it)
+      step = "put";
+      await axios.put(uploadUrl, file, {
+        headers: requiredHeaders,
+        onUploadProgress: (e) => {
+          if (e.total && onProgress) {
+            onProgress(Math.round((e.loaded / e.total) * 100));
+          }
+        },
+      });
+
+      // 3. Server verifies the object exists and the size matches
+      step = "complete";
+      await api.post("v1/createawssignedurl/track/complete", { uploadId });
+
+      return { s3key, uploadId, error: null };
+    } catch (error) {
+      if (isAxiosError(error) && step !== "put") {
+        lastError = error.response?.data?.msg ?? lastError;
+      }
+      if (!isRetryable(error, step) || attempt === MAX_ATTEMPTS) break;
+      onProgress?.(0);
+      await sleep(1000 * 2 ** attempt); // 2s, 4s
+    }
+  }
+
+  return { s3key: null, uploadId: null, error: lastError };
+};
+
+// Runs worker over items with at most `limit` in flight at once
+export async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+
+  const runners = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (next < items.length) {
+        const i = next++;
+        results[i] = await worker(items[i]);
+      }
+    },
+  );
+
+  await Promise.all(runners);
+  return results;
+}
 
 export const uploadImage = async (
     fileType: string,
@@ -1472,6 +1563,8 @@ export const createEmptyTrack = (): TrackForm => ({
     compositionType: "",
     instrumentalSource: "",
     countryOfRecording: "",
+    uploadProgress: 0,
+    uploadError: null,
 });
 
 export async function handleChargeSuccess(data: any) {
