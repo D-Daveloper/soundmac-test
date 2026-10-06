@@ -1,6 +1,6 @@
 import { Artist } from "./type";
 
-export const SERVER = process.env.NEXT_PUBLIC_APP_URL;
+export const SERVER = process.env.NEXT_PUBLIC_BACKEND_API_URL;
 export const AYNCardItems = [
   {
     title: "Global Distribution",
