@@ -118,7 +118,7 @@ export const isSongFormValid = (form: SongForm): string => {
     } else if (form.dsp.length <= 0) {
         return "DSP is required";
     } else if (
-        !form.oldAudio &&
+        !(form.oldAudio || form.s3keyAudio) &&
         (!form.songAudio || !(form.songAudio instanceof File))
     ) {
         return "Audio is required";
@@ -351,115 +351,115 @@ export const uploadTrack = async (
 //     }
 // };
 const MIME_BY_EXT: Record<string, string> = {
-  flac: "audio/flac",
-  wav: "audio/wav",
-  mp3: "audio/mpeg",
+    flac: "audio/flac",
+    wav: "audio/wav",
+    mp3: "audio/mpeg",
 };
 
 // Some browsers/OSes report an empty file.type for .flac, so fall back to the extension
 export const resolveAudioType = (file: File): string =>
-  file.type ||
-  MIME_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""] ||
-  "";
+    file.type ||
+    MIME_BY_EXT[file.name.split(".").pop()?.toLowerCase() ?? ""] ||
+    "";
 
 // Network drops, timeouts, 5xx and 429 are worth retrying. A 403 is only retryable
 // on the S3 step, where it means the presigned URL expired and we need a fresh one.
 const isRetryable = (error: unknown, step: "create" | "put" | "complete") => {
-  if (!isAxiosError(error)) return false;
-  const status = error.response?.status;
-  if (!status) return true;
-  if (status >= 500 || status === 408 || status === 429) return true;
-  return step === "put" && status === 403;
+    if (!isAxiosError(error)) return false;
+    const status = error.response?.status;
+    if (!status) return true;
+    if (status >= 500 || status === 408 || status === 429) return true;
+    return step === "put" && status === 403;
 };
 
 export type UploadAlbumTrackResult =
-  | { s3key: string; uploadId: string; error: null }
-  | { s3key: null; uploadId: null; error: string };
+    | { s3key: string; uploadId: string; error: null }
+    | { s3key: null; uploadId: null; error: string };
 
 export const uploadAlbumTrack = async (
-  file: File,
-  upc: string,
-  api: AxiosInstance,
-  trackNumber: string,
-  replace: boolean,
-  onProgress?: (pct: number) => void,
+    file: File,
+    upc: string,
+    api: AxiosInstance,
+    trackNumber: string,
+    replace: boolean,
+    onProgress?: (pct: number) => void,
 ): Promise<UploadAlbumTrackResult> => {
-  const fileType = resolveAudioType(file);
-  if (!fileType) {
-    return {
-      s3key: null,
-      uploadId: null,
-      error: "Unsupported audio format. Use WAV, FLAC or MP3.",
-    };
-  }
-
-  const MAX_ATTEMPTS = 3;
-  let lastError = "Something went wrong please try again later!";
-
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    let step: "create" | "put" | "complete" = "create";
-
-    try {
-      // 1. Idempotent: same user + upc + trackNumber returns a fresh URL each call
-      const { data } = await api.post("v1/createawssignedurl/track/initiate", {
-        upc,
-        trackNumber,
-        fileType,
-        fileSize: file.size,
-        replace
-      });
-      const { uploadId, uploadUrl, s3key, requiredHeaders } = data;
-
-      // 2. Straight to S3 (global axios, so no auth interceptors touch it)
-      step = "put";
-      await axios.put(uploadUrl, file, {
-        headers: requiredHeaders,
-        onUploadProgress: (e) => {
-          if (e.total && onProgress) {
-            onProgress(Math.round((e.loaded / e.total) * 100));
-          }
-        },
-      });
-
-      // 3. Server verifies the object exists and the size matches
-      step = "complete";
-      await api.post("v1/createawssignedurl/track/complete", { uploadId });
-
-      return { s3key, uploadId, error: null };
-    } catch (error) {
-      if (isAxiosError(error) && step !== "put") {
-        lastError = error.response?.data?.msg ?? lastError;
-      }
-      if (!isRetryable(error, step) || attempt === MAX_ATTEMPTS) break;
-      onProgress?.(0);
-      await sleep(1000 * 2 ** attempt); // 2s, 4s
+    const fileType = resolveAudioType(file);
+    if (!fileType) {
+        return {
+            s3key: null,
+            uploadId: null,
+            error: "Unsupported audio format. Use WAV, FLAC or MP3.",
+        };
     }
-  }
 
-  return { s3key: null, uploadId: null, error: lastError };
+    const MAX_ATTEMPTS = 3;
+    let lastError = "Something went wrong please try again later!";
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        let step: "create" | "put" | "complete" = "create";
+
+        try {
+            // 1. Idempotent: same user + upc + trackNumber returns a fresh URL each call
+            const { data } = await api.post("v1/createawssignedurl/track/initiate", {
+                upc,
+                trackNumber,
+                fileType,
+                fileSize: file.size,
+                replace
+            });
+            const { uploadId, uploadUrl, s3key, requiredHeaders } = data;
+
+            // 2. Straight to S3 (global axios, so no auth interceptors touch it)
+            step = "put";
+            await axios.put(uploadUrl, file, {
+                headers: requiredHeaders,
+                onUploadProgress: (e) => {
+                    if (e.total && onProgress) {
+                        onProgress(Math.round((e.loaded / e.total) * 100));
+                    }
+                },
+            });
+
+            // 3. Server verifies the object exists and the size matches
+            step = "complete";
+            await api.post("v1/createawssignedurl/track/complete", { uploadId });
+
+            return { s3key, uploadId, error: null };
+        } catch (error) {
+            if (isAxiosError(error) && step !== "put") {
+                lastError = error.response?.data?.msg ?? lastError;
+            }
+            if (!isRetryable(error, step) || attempt === MAX_ATTEMPTS) break;
+            onProgress?.(0);
+            await sleep(1000 * 2 ** attempt); // 2s, 4s
+        }
+    }
+
+    return { s3key: null, uploadId: null, error: lastError };
 };
 
 // Runs worker over items with at most `limit` in flight at once
 export async function runWithConcurrency<T, R>(
-  items: T[],
-  limit: number,
-  worker: (item: T) => Promise<R>,
+    items: T[],
+    limit: number,
+    worker: (item: T) => Promise<R>,
 ): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let next = 0;
+    const results: R[] = new Array(items.length);
+    let next = 0;
 
-  const runners = Array.from(
-    { length: Math.min(limit, items.length) },
-    async () => {
-      while (next < items.length) {
-        const i = next++;
-        results[i] = await worker(items[i]);
-      }
-    },
-  );
+    const runners = Array.from(
+        { length: Math.min(limit, items.length) },
+        async () => {
+            while (next < items.length) {
+                const i = next++;
+                results[i] = await worker(items[i]);
+            }
+        },
+    );
 
-  await Promise.all(runners);
-  return results;
+    await Promise.all(runners);
+    return results;
 }
 
 export const uploadImage = async (
@@ -898,11 +898,14 @@ export function validateNonDraftSongs(
     //     return "Release date must be at least 2 weeks ahead";
     // }
 
-    if (
-        (payload.featuredArtist && (!(payload.featuredArtist instanceof Array)) ||
-            payload.featuredArtist.some((artist) => artist.artistName === "" || artist.role === "" || otherArtistRoles.includes(artist.role) === false)
-        )) {
-        return "Featured artist name and role are required.";
+    if
+        (payload.featuredArtist && (payload.featuredArtist instanceof Array)) {
+
+        if (payload.featuredArtist.length > 1 && payload.featuredArtist.some((artist) => artist.artistName === "" || artist.role === "" || otherArtistRoles.includes(artist.role) === false)) {
+            return "Featured artist name and role are required";
+        } else if (payload.featuredArtist.length === 1 && ((payload.featuredArtist[0].artistName && payload.featuredArtist[0].role === "") || (payload.featuredArtist[0].role && otherArtistRoles.includes(payload.featuredArtist[0].role) === false && payload.featuredArtist[0].artistName === ""))) {
+            return "Featured artist role is invalid";
+        }
     }
 
     if (
@@ -1345,13 +1348,13 @@ export function validateDraftAlbums(
     ) {
         return "Number of tracks must be a valid number greater than 0.";
     }
-    if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
-        return "Only label Accounts can provide their own name in the provided by field";
-    }
+    // if (payload.providedBy && (!isUserALabel && payload.providedBy != "SoundMac")) {
+    //     return "Only label Accounts can provide their own name in the provided by field";
+    // }
 
-    if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
-        return "Only label Accounts can provide their own name in the courtesy line field";
-    }
+    // if (payload.courtesyLine && (!isUserALabel && payload.courtesyLine != "SoundMac")) {
+    //     return "Only label Accounts can provide their own name in the courtesy line field";
+    // }
     return null;
 }
 

@@ -11,6 +11,7 @@ import {
   validateNonDraftAlbums,
 } from "@/util/middleware/functions";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
+import { withIdempotency } from "@/util/middleware/withIdempotency";
 import AlbumModel from "@/util/models/AlbumModel";
 import Artist from "@/util/models/artistModel";
 import TrackModel from "@/util/models/trackModel";
@@ -18,15 +19,12 @@ import User from "@/util/models/userModel";
 import UserNotification from "@/util/models/userNotification";
 import mongoose, { SortOrder } from "mongoose";
 import { Types } from "mongoose";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    let userArtist = null;
-    let release = null;
-
-    const formData = await req.formData();
+    const formData = await req.clone().formData();
     console.log({ ...formData });
     const payload = parseAlbumFormData(formData);
 
@@ -37,6 +35,13 @@ export async function POST(req: Request) {
     ) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
+
+    const isAlbumForValid = validateNonDraftAlbums(payload, false);// check if the album is valid for the user type, i hard coded false because the user type is not available at this point, so i will check it later after authentication
+
+    if (isAlbumForValid != null) {
+      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
+    }
+
     const userJwt = await authenticate(req);
 
     if (userJwt.msg) {
@@ -69,120 +74,116 @@ export async function POST(req: Request) {
       }
     }
 
-    const isAlbumForValid = validateNonDraftAlbums(payload, user.type.includes("LABEL"));
+    return withIdempotency(req, user!._id, async () => {
 
-    if (isAlbumForValid != null) {
-      return NextResponse.json({ msg: isAlbumForValid }, { status: 400 });
-    }
+      let userArtist = null;
+      let release = null;
 
-    [userArtist, release] = await Promise.all([
-      Artist.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string).trim(),
-      }).lean(),
+      [userArtist, release] = await Promise.all([
+        Artist.findOne({
+          user: userJwt.user,
+          artistName: (payload.artist as string).trim(),
+        }).lean(),
 
-      AlbumModel.findOne({
-        user: userJwt.user,
-        artistName: (payload.artist as string).trim(),
-        releaseTitle: payload.title!.trim(),
-      }).lean<albumFromApi>()]).catch(err => { throw err; });
+        AlbumModel.findOne({
+          user: userJwt.user,
+          artistName: (payload.artist as string).trim(),
+          releaseTitle: payload.title!.trim(),
+        }).lean<albumFromApi>()]).catch(err => { throw err; });
 
 
-    if (!userArtist) {
-      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    } else if (release) {
-      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
-    }
+      if (!userArtist) {
+        return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+      } else if (release) {
+        return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
+      }
 
-    const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
+      const num = parseInt(payload.numberOfTracks as string, 10); // Convert string to number
 
-    if (isNaN(num) ||
-      num <= 1 ||
-      num >= 26
-    ) {
-      return NextResponse.json(
-        {
-          msg: "No. of tracks must be greater and 1 but less than 26.",
-        },
-        { status: 400 },
+      if (isNaN(num) ||
+        num <= 1 ||
+        num >= 26
+      ) {
+        return NextResponse.json(
+          {
+            msg: "No. of tracks must be greater and 1 but less than 26.",
+          },
+          { status: 400 },
+        );
+      }
+
+      payload.upc = payload.upc || await generateUPC(); //incase they dont have a upc, generate one for them
+      const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
+
+      const buffer = Buffer.from(
+        await (payload.musicImage as File).arrayBuffer(),
       );
-    }
-
-    payload.upc = payload.upc || await generateUPC(); //incase they dont have a upc, generate one for them
-    const number_of_track_array = Array.from({ length: num }, (_, i) => i + 1);
-
-    const buffer = Buffer.from(
-      await (payload.musicImage as File).arrayBuffer(),
-    );
-    // ---- Resize to distributor standard ----
-    const resized = await sharp(buffer)
-      .resize(3000, 3000, { fit: "cover" })
-      .jpeg({ quality: 90 })
-      .toBuffer(); //resize the image for dpm
-    const imageType = payload.musicImage!.type.split("/")[1];
-    const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.jpg`;
-    // const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`;
-    const imageUrl = await uploadImage(
-      imageType,
-      resized as Buffer<ArrayBuffer>,
-      imageStorageLocation,
-    );
-    if (imageUrl.coverUrl == null) {
-      return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
-    }
-
-    if (user?.type.includes("LABEL")) {
-      if (!payload.providedBy) {
-        payload.providedBy = user.label
+      // ---- Resize to distributor standard ----
+      const resized = await sharp(buffer)
+        .resize(3000, 3000, { fit: "cover" })
+        .jpeg({ quality: 90 })
+        .toBuffer(); //resize the image for dpm
+      const imageType = payload.musicImage!.type.split("/")[1];
+      const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.jpg`;
+      // const imageStorageLocation = `NewReleases/${payload.upc}/${payload.upc}.${imageType}`;
+      const imageUrl = await uploadImage(
+        imageType,
+        resized as Buffer<ArrayBuffer>,
+        imageStorageLocation,
+      );
+      if (imageUrl.coverUrl == null) {
+        return NextResponse.json({ msg: imageUrl.error }, { status: 500 });
       }
-    } else {
-      payload.providedBy = "SoundMac"
-    }
 
-    if (user?.type.includes("LABEL")) {
-      if (!payload.courtesyLine) {
-        payload.courtesyLine = user.label
+      if (user?.type.includes("LABEL")) {
+        if (!payload.providedBy) {
+          payload.providedBy = user.label
+        }
+        if (!payload.courtesyLine) {
+          payload.courtesyLine = user.label
+        }
+      } else {
+        payload.providedBy = "SoundMac"
+        payload.courtesyLine = "SoundMac"
       }
-    } else {
-      payload.courtesyLine = "SoundMac"
-    }
 
-    const album = new AlbumModel({
-      _id: new mongoose.Types.ObjectId(),
-      releaseTitle: payload.title,
-      genre: payload.genre,
-      releaseLanguage: payload.language,
-      preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
-      anotherDistributionCheck: payload.anotherDistributionCheck,
-      releaseDate: payload.releaseDate,
-      preOrderDate:
-        payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
-      copyRightHolder: payload.copyRightHolder,
-      copyRightYear: payload.copyRightYear,
-      dsp: payload.dsp,
-      upc: payload.upc,
-      territories: payload.territories,
-      releaseImage: imageUrl.coverUrl,
-      artist: userArtist._id,
-      numberOfTracks: payload.numberOfTracks,
-      unassignedNumbers: number_of_track_array,
-      user: user._id,
-      catalogNumber: await generateCatalogNumber(),
-      timeZone: payload.timeZone,
-      providedBy: payload.providedBy,
-      courtesyLine: payload.courtesyLine,
-      description: payload.description || "",
-    });
-    await album.save();
+      const album = new AlbumModel({
+        _id: new mongoose.Types.ObjectId(),
+        releaseTitle: payload.title,
+        genre: payload.genre,
+        releaseLanguage: payload.language,
+        preOrderCheck: isDateInPast(new Date(payload.releaseDate!)) ? false : payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        releaseDate: payload.releaseDate,
+        preOrderDate:
+          payload.preOrderDate == "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : payload.preOrderDate,
+        copyRightHolder: payload.copyRightHolder,
+        copyRightYear: payload.copyRightYear,
+        dsp: payload.dsp,
+        upc: payload.upc,
+        territories: payload.territories,
+        releaseImage: imageUrl.coverUrl,
+        artist: userArtist._id,
+        numberOfTracks: payload.numberOfTracks,
+        unassignedNumbers: number_of_track_array,
+        user: user._id,
+        catalogNumber: await generateCatalogNumber(),
+        timeZone: payload.timeZone,
+        providedBy: payload.providedBy,
+        courtesyLine: payload.courtesyLine,
+        description: payload.description || "",
+      });
+      await album.save();
 
-    await UserNotification.create({
-      userId: user!._id,
-      reason: "Album Upload Successful",
-      message: `Your release "${payload.title}" has been submitted and is pending review.`,
-      status: "delivered",
-    });
+      await UserNotification.create({
+        userId: user!._id,
+        reason: "Album Upload Successful",
+        message: `Your release "${payload.title}" has been submitted and is pending review.`,
+        status: "delivered",
+      });
 
-    return NextResponse.json({ msg: "Release uploaded successfully.", release: album }, { status: 201 });
+      return NextResponse.json({ msg: "Release uploaded successfully.", release: album }, { status: 201 });
+    })
   } catch (error: unknown) {
     console.log(error);
 
@@ -345,7 +346,7 @@ export async function PUT(req: Request) {
     } else if (release.releaseTitle != payload.title) {
       const checkReleaseTitle = await AlbumModel.find({
         user: user!._id,
-        artistName: userArtist.artistName,
+        artist: userArtist._id,
         releaseTitle: payload.title
       }).lean();
       if (checkReleaseTitle.length > 0) {
@@ -401,20 +402,18 @@ export async function PUT(req: Request) {
 
     if (user?.type.includes("LABEL")) {
       if (!payload.providedBy) {
-        payload.providedBy = user.label
+        payload.providedBy = release.providedBy
+      }
+      if (!payload.courtesyLine) {
+        payload.courtesyLine = release.courtesyLine
       }
     } else {
       payload.providedBy = "SoundMac"
-    }
-
-    if (user?.type.includes("LABEL")) {
-      if (!payload.courtesyLine) {
-        payload.courtesyLine = user.label
-      }
-    } else {
       payload.courtesyLine = "SoundMac"
     }
 
+    console.log(payload.preOrderDate);
+    
     // const session = await mongoose.startSession();
     // try {
     // session.startTransaction();
@@ -428,7 +427,7 @@ export async function PUT(req: Request) {
         anotherDistributionCheck: payload.anotherDistributionCheck,
         releaseDate: new Date(payload.releaseDate!),
         preOrderDate:
-          !payload.preOrderDate ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
+          !payload.preOrderDate || payload.preOrderDate === "undefined" ? null : isDateInPast(new Date(payload.releaseDate!)) ? null : new Date(payload.preOrderDate),
         copyRightHolder: payload.copyRightHolder!,
         copyRightYear: payload.copyRightYear!,
         dsp: payload.dsp,
@@ -442,8 +441,8 @@ export async function PUT(req: Request) {
         user: user._id,
         releaseStatus: "pending",
         timeZone: payload.timeZone || release.timeZone,
-        providedBy: payload.providedBy || release.providedBy,
-        courtesyLine: payload.courtesyLine || release.courtesyLine,
+        providedBy: payload.providedBy,
+        courtesyLine: payload.courtesyLine,
         description: payload.description || release.description || "",
       },
       { runValidators: true },

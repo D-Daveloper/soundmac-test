@@ -89,7 +89,8 @@ export const useCreatArtistMutation = () => {
   const api = useAxios();
 
   return useMutation({
-    mutationFn: async (form: CreateArtistForm) => createArtist(api, form),
+    mutationFn: async ({ form, idempotencyKey }: { form: FormData; idempotencyKey: string }) =>
+      createArtist(api, form, idempotencyKey),
     onSuccess: async (data) => {
       toast.success(data.msg);
       await queryClient.invalidateQueries({ queryKey: ["artists"] });

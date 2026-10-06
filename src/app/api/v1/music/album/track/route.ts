@@ -5,12 +5,13 @@ import dbConnect from "@/util/db";
 import { authenticate } from "@/util/middleware/authMiddleware";
 import { validateNonDraftTracks } from "@/util/middleware/functions";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
+import { withIdempotency } from "@/util/middleware/withIdempotency";
 import AlbumModel, { albumType } from "@/util/models/AlbumModel";
 import AudioUploadTrackerModel from "@/util/models/AudioUploadTrackerModel";
 import TrackModel from "@/util/models/trackModel";
 import User from "@/util/models/userModel";
 import mongoose, { Types } from "mongoose";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: Request) {
   try {
@@ -85,10 +86,10 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const { tracks, albumId }: { tracks: TrackForm[]; albumId: string } =
-      await req.json();
+      await req.clone().json();
     console.log(tracks);
 
     if (!Array.isArray(tracks) || tracks.length === 0) {
@@ -118,130 +119,135 @@ export async function POST(req: Request) {
         { msg: "Emerging artists can not upload tracks" },
         { status: 403 },
       );
+    } else if (!albumId || !Types.ObjectId.isValid(albumId)) {
+      return NextResponse.json({ msg: "Invalid album id." }, { status: 400 });
     }
 
-    const userAlbum = await AlbumModel.findById<albumType>(albumId);
-    if (!userAlbum || userAlbum.releaseStatus === "inactive") {
-      return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
-    } else if (userAlbum.user.toString() != user._id.toString()) {
-      return NextResponse.json({ msg: "Unauthorized Album." }, { status: 400 });
-    }
+    return withIdempotency(req, user!._id, async () => {
 
-    const uploadedTracks = await TrackModel.find({
-      upc: userAlbum.upc,
-    });
-
-    const trackers = await AudioUploadTrackerModel.find({
-      user: user._id,
-      upc: userAlbum.upc,
-      s3Key: { $in: tracks.map((t) => t.s3key) },
-      status: "COMPLETED",
-    }).lean();
-
-    if (trackers.length !== tracks.length) {
-      return NextResponse.json(
-        { code: "AUDIO_NOT_UPLOADED", msg: "One or more tracks have no completed upload" },
-        { status: 400 },
-      );
-    }
-
-    if (uploadedTracks.length === parseInt(userAlbum.numberOfTracks!, 10)) {
-      return NextResponse.json(
-        { msg: "Maximum number of tracks reached" },
-        { status: 400 },
-      );
-    }
-    // console.log("first",userAlbum.unassignedNumbers);
-    const array_of_tracks_dont_have_isrc = [];
-    for (let i = 0; i < tracks.length; i++) {
-      if (
-        tracks[i].featuredArtist.length === 1 &&
-        tracks[i].featuredArtist.some((artist) => artist.artistName === "")
-      ) {
-        tracks[i].featuredArtist = [];
+      const userAlbum = await AlbumModel.findById<albumType>(albumId);
+      if (!userAlbum || userAlbum.releaseStatus === "inactive") {
+        return NextResponse.json({ msg: "Invalid Album" }, { status: 400 });
+      } else if (userAlbum.user.toString() != user._id.toString()) {
+        return NextResponse.json({ msg: "Unauthorized Album." }, { status: 400 });
       }
-      if (!tracks[i].isrc) {
-        array_of_tracks_dont_have_isrc.push(1)
-      }
-      const err = validateNonDraftTracks(
-        tracks[i],
-        userAlbum.unassignedNumbers,
-      );
-      userAlbum.unassignedNumbers = userAlbum.unassignedNumbers.filter(
-        (item, index) => item != tracks[i].trackNumber,
-      );
-      if (err) {
+
+      const uploadedTracks = await TrackModel.find({
+        upc: userAlbum.upc,
+      });
+
+      const trackers = await AudioUploadTrackerModel.find({
+        user: user._id,
+        upc: userAlbum.upc,
+        s3Key: { $in: tracks.map((t) => t.s3key) },
+        status: "COMPLETED",
+      }).lean();
+
+      if (trackers.length !== tracks.length) {
         return NextResponse.json(
-          { msg: "Track " + (i + 1) + " " + err },
+          { code: "AUDIO_NOT_UPLOADED", msg: "One or more tracks have no completed upload" },
           { status: 400 },
         );
       }
-    }
-    let multipleIsrc: string[] = []
-    if (array_of_tracks_dont_have_isrc.length > 0) { multipleIsrc = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length); }
 
-    const catalogNumbers = await generateMultipleCatalogNumber(tracks.length)
-    console.log(multipleIsrc, catalogNumbers);
-
-    const docs = tracks.map((track, index) => ({
-      _id: new mongoose.Types.ObjectId(),
-      releaseTitle: track.title,
-      genre: track.genre,
-      releaseLanguage: track.language,
-      releaseAudio: track.s3key,
-      songWriter: track.songWriter,
-      producer: track.producer,
-      performer: track.performer,
-      featuredArtist: track.featuredArtist || [],
-      explicitContent: track.explicitContent,
-      lyrics: track.lyrics,
-      startClip: track.startClip,
-      upc: userAlbum.upc,
-      isrc: track.isrc || multipleIsrc.length > 0 ? multipleIsrc[index] : null,
-      // artistName: userAlbum.artistName,
-      artist: userAlbum.artist,
-      // albumName: userAlbum.releaseTitle,
-      album: albumId,
-      trackNumber: track.trackNumber,
-      anotherDistributionCheck: track.anotherDistributionCheck,
-      user: user!._id,
-      // releaseStatus: "pending",
-      catalogNumber: catalogNumbers[index],
-      compositionType: track.compositionType,
-      instrumentalSource: track.instrumentalSource,
-      countryOfRecording: track.countryOfRecording,
-    }));
-
-
-    console.log(docs);
-
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      await AudioUploadTrackerModel.updateMany(
-        {
-          upc: userAlbum.upc,
-          status: "PENDING",
-        },
-        { $set: { status: "ACTIVE" } },
-        { session },
-      ),
-        await TrackModel.insertMany(docs, { session }),
-        await AlbumModel.findByIdAndUpdate(albumId, {
-          unassignedNumbers: userAlbum.unassignedNumbers,
-        }, { session })
-      await session.commitTransaction();
-    } catch (error) {
-      if (session.inTransaction()) {
-        await session.abortTransaction();
+      if (uploadedTracks.length === parseInt(userAlbum.numberOfTracks!, 10)) {
+        return NextResponse.json(
+          { msg: "Maximum number of tracks reached" },
+          { status: 400 },
+        );
       }
-      throw error;
-    } finally {
-      await session.endSession();
-    }
+      // console.log("first",userAlbum.unassignedNumbers);
+      const array_of_tracks_dont_have_isrc = [];
+      for (let i = 0; i < tracks.length; i++) {
+        if (
+          tracks[i].featuredArtist.length === 1 &&
+          tracks[i].featuredArtist.some((artist) => artist.artistName === "")
+        ) {
+          tracks[i].featuredArtist = [];
+        }
+        if (!tracks[i].isrc) {
+          array_of_tracks_dont_have_isrc.push(1)
+        }
+        const err = validateNonDraftTracks(
+          tracks[i],
+          userAlbum.unassignedNumbers,
+        );
+        userAlbum.unassignedNumbers = userAlbum.unassignedNumbers.filter(
+          (item, index) => item != tracks[i].trackNumber,
+        );
+        if (err) {
+          return NextResponse.json(
+            { msg: "Track " + (i + 1) + " " + err },
+            { status: 400 },
+          );
+        }
+      }
+      let multipleIsrc: string[] = []
+      if (array_of_tracks_dont_have_isrc.length > 0) { multipleIsrc = await generateMultipleISRC(array_of_tracks_dont_have_isrc.length); }
+
+      const catalogNumbers = await generateMultipleCatalogNumber(tracks.length)
+      console.log(multipleIsrc, catalogNumbers);
+
+      const docs = tracks.map((track, index) => ({
+        _id: new mongoose.Types.ObjectId(),
+        releaseTitle: track.title,
+        genre: track.genre,
+        releaseLanguage: track.language,
+        releaseAudio: track.s3key,
+        songWriter: track.songWriter,
+        producer: track.producer,
+        performer: track.performer,
+        featuredArtist: track.featuredArtist || [],
+        explicitContent: track.explicitContent,
+        lyrics: track.lyrics,
+        startClip: track.startClip,
+        upc: userAlbum.upc,
+        isrc: track.isrc || multipleIsrc.length > 0 ? multipleIsrc[index] : null,
+        // artistName: userAlbum.artistName,
+        // artist: userAlbum.artist,
+        // albumName: userAlbum.releaseTitle,
+        album: albumId,
+        trackNumber: track.trackNumber,
+        anotherDistributionCheck: track.anotherDistributionCheck,
+        user: user!._id,
+        // releaseStatus: "pending",
+        catalogNumber: catalogNumbers[index],
+        compositionType: track.compositionType,
+        instrumentalSource: track.instrumentalSource,
+        countryOfRecording: track.countryOfRecording,
+      }));
 
 
-    return NextResponse.json({ msg: "Tracks saved", tracks: docs }, { status: 201 });
+      console.log(docs);
+
+      const session = await mongoose.startSession();
+      try {
+        session.startTransaction();
+        await AudioUploadTrackerModel.updateMany(
+          {
+            upc: userAlbum.upc,
+            status: "PENDING",
+          },
+          { $set: { status: "ACTIVE" } },
+          { session },
+        ),
+          await TrackModel.insertMany(docs, { session }),
+          await AlbumModel.findByIdAndUpdate(albumId, {
+            unassignedNumbers: userAlbum.unassignedNumbers,
+          }, { session })
+        await session.commitTransaction();
+      } catch (error) {
+        if (session.inTransaction()) {
+          await session.abortTransaction();
+        }
+        throw error;
+      } finally {
+        await session.endSession();
+      }
+
+
+      return NextResponse.json({ msg: "Tracks saved", tracks: docs }, { status: 201 });
+    })
   } catch (error) {
     console.log(error);
     return handleMongooseValidationError(error);

@@ -71,7 +71,7 @@ export async function POST(req: Request) {
 
     if (body.requestType == "approved") {
       // Execute the model method passing the session
-      const result = await (AlbumModel as any).approveAndCreateMetadata(release._id, release.artist.artistName, release.user.label);
+      const result = await (AlbumModel as any).approveAndCreateMetadata(release._id, release.artist.artistName, release.artist.spotifyId, release.artist.appleId, release.user.label);
       if (result.error) {
         return NextResponse.json(
           { msg: result.msg },

@@ -45,10 +45,11 @@ export const getArtistStats = async (
 
 export const createArtist = async (
   api: AxiosInstance,
-  form: CreateArtistForm
+  form: FormData,
+  idempotencyKey: string
 ) => {
   const res = await api.post("v1/artist", form, {
-    headers: { "Content-Type": "multipart/form-data" },
+    headers: { "Content-Type": "multipart/form-data", "Idempotency-Key": idempotencyKey },
   });
   return res.data;
 };

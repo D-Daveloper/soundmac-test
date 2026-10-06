@@ -104,6 +104,8 @@ export interface SongForm extends musicFormBase {
   compositionType: string;
   instrumentalSource: string;
   countryOfRecording: string;
+  uploadId?: string;
+  s3keyAudio?: string;
 }
 
 export interface AlbumForm extends musicFormBase {

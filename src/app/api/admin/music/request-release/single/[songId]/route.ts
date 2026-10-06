@@ -82,6 +82,8 @@ export async function POST(
       const result = await SongModel.approveAndCreateMetadata(
         songId,
         release.artist.artistName,
+        release.artist.spotifyId,
+        release.artist.appleId,
         release.user.label,
       );
       if (result.error) {

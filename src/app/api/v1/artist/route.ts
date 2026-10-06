@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/util/db";
 import User from "@/util/models/userModel";
 import Artist, { IArtist } from "@/util/models/artistModel";
@@ -9,9 +9,10 @@ import { authenticate } from "@/util/middleware/authMiddleware";
 import mongoose from "mongoose";
 import EntityDeactivation from "@/util/models/deactivateEntity";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
+import { withIdempotency } from "@/util/middleware/withIdempotency";
 
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   let artist = null;
   try {
     const userJwt = await authenticate(req);
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     if (userJwt.msg) {
       return NextResponse.json({ msg: userJwt.msg }, { status: 401 });
     }
-    const formData = await req.formData();
+    const formData = await req.clone().formData();
 
     // Get the file
     const file = formData.get("artistImage") as File | null;
@@ -75,76 +76,78 @@ export async function POST(req: Request) {
     //     { status: 402 },
     //   );
     // } 
-    {
+    return withIdempotency(req, user!._id, async () => {
+
       artist = await Artist.find({
         user: user._id,
         artistName: artistName,
       }).lean();
       // .explain("executionStats");
-    }
 
-    if (artist.length > 0) {
-      return NextResponse.json(
-        { msg: "Artist already exists" },
-        { status: 400 },
+
+      if (artist.length > 0) {
+        return NextResponse.json(
+          { msg: "Artist already exists" },
+          { status: 400 },
+        );
+      }
+      const total_artists = await Artist.countDocuments({ user: user._id });
+      let total_artists_allowed = 1;
+      switch (user.type) {
+        case "EMERGING_ARTIST":
+          total_artists_allowed = 1;
+          break;
+        case "INDEPENDENT_ARTIST":
+          total_artists_allowed = 1;
+          break;
+        case "INDIE_LABEL":
+          total_artists_allowed = 10;
+          break;
+        case "MAJOR_LABEL":
+          total_artists_allowed = 100;
+          break;
+
+        default:
+          total_artists_allowed = 1;
+          break;
+      }
+
+      if (total_artists >= total_artists_allowed) {
+        return NextResponse.json(
+          { msg: "Artist creation limit reached, please upgrade your account." },
+          { status: 402 },
+        );
+      }
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const imageType = file.type.split("/")[1];
+      const imageStorageLocation = `userImages/${user?.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
+      const selectedImage = await uploadImage(
+        imageType,
+        buffer,
+        imageStorageLocation,
       );
-    }
-    const total_artists = await Artist.countDocuments({ user: user._id });
-    let total_artists_allowed = 1;
-    switch (user.type) {
-      case "EMERGING_ARTIST":
-        total_artists_allowed = 1;
-        break;
-      case "INDEPENDENT_ARTIST":
-        total_artists_allowed = 1;
-        break;
-      case "INDIE_LABEL":
-        total_artists_allowed = 10;
-        break;
-      case "MAJOR_LABEL":
-        total_artists_allowed = 100;
-        break;
-
-      default:
-        total_artists_allowed = 1;
-        break;
-    }
-
-    if (total_artists >= total_artists_allowed) {
+      if (selectedImage.coverUrl === null) {
+        return NextResponse.json(
+          {
+            msg: selectedImage.error,
+          },
+          { status: 500 },
+        );
+      }
+      artist = new Artist({
+        user: user._id,
+        artistName: artistName.toLocaleLowerCase(),
+        artistImage: selectedImage.coverUrl,
+        appleId: appleId,
+        spotifyId: spotifyId,
+      });
+      await artist.save();
       return NextResponse.json(
-        { msg: "Artist creation limit reached, please upgrade your account." },
-        { status: 402 },
+        { msg: "Artist created successfully", artist },
+        { status: 201 },
       );
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const imageType = file.type.split("/")[1];
-    const imageStorageLocation = `userImages/${user?.email}/${artistName.trim().replaceAll(" ", "_")}.${imageType}`; //reconstruct the s3 key for the image using the upc as the name and adding the jpg extension
-    const selectedImage = await uploadImage(
-      imageType,
-      buffer,
-      imageStorageLocation,
-    );
-    if (selectedImage.coverUrl === null) {
-      return NextResponse.json(
-        {
-          msg: selectedImage.error,
-        },
-        { status: 500 },
-      );
-    }
-    artist = new Artist({
-      user: user._id,
-      artistName: artistName.toLocaleLowerCase(),
-      artistImage: selectedImage.coverUrl,
-      appleId: appleId,
-      spotifyId: spotifyId,
-    });
-    await artist.save();
-    return NextResponse.json(
-      { msg: "Artist created successfully", artist },
-      { status: 201 },
-    );
+    })
   } catch (error: unknown) {
     return handleMongooseValidationError(error);
   }

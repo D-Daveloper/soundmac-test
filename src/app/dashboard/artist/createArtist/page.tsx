@@ -67,6 +67,11 @@ const CreateArtistForm = () => {
       dashboardContext?.setOpenUpgradePopUp(true);
       return;
     }
+    let idempotencyKey = localStorage.getItem("artist-idempotency-key");
+    if (!idempotencyKey) {
+      idempotencyKey = crypto.randomUUID();
+      localStorage.setItem("artist-idempotency-key", idempotencyKey);
+    }
     const formData = new FormData();
     Object.entries(form).forEach(([key, value]) => {
       if (typeof value === "boolean" || typeof value === "string") {
@@ -77,7 +82,7 @@ const CreateArtistForm = () => {
       formData.append("artistImage", artistForm.artistImage);
     console.log(...formData);
     try {
-      await mutateAsync(form);
+      await mutateAsync({form: formData, idempotencyKey});
       setshowSuccessPage(true);
       router.replace("?");
     } catch (error) {
@@ -87,6 +92,7 @@ const CreateArtistForm = () => {
       toast.error("something went wrong");
     } finally {
       setPreview(false);
+      localStorage.removeItem("artist-idempotency-key");
     }
   };
 
@@ -117,6 +123,8 @@ const CreateArtistForm = () => {
   };
 
   useEffect(() => {
+    localStorage.removeItem("artist-idempotency-key");
+
     const string_form = localStorage.getItem("artistForm");
 
     if (string_form) {

@@ -1,19 +1,24 @@
 "use client";
 import { useAuthUser, useDashboard } from "@/util/customHooks/useQueries";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import DashboardContext from "../context/dashboardContext/dashboardContext";
 import { formatAmount } from "@/util/middleware/functions";
 import { InlineLoadingScreen } from "../components/Loader/loader";
+import AudioConverter from "../components/audioConverter/AudioConverter";
 
 const Dashboard = () => {
   const { data, isLoading, isError, error } = useDashboard();
   const { data: user } = useAuthUser();
   const dashboardContext = useContext(DashboardContext);
+  const [wantsToConvertAudio, setWantsToConvertAudio] = useState(false);
 
   useEffect(() => {
     if (user?.firstName) {
-      dashboardContext?.setHeader({ title: "Welcome, " +  user.firstName,  showBackButton:false});
+      dashboardContext?.setHeader({
+        title: "Welcome, " + user.firstName,
+        showBackButton: false,
+      });
     }
   }, []);
 
@@ -21,23 +26,28 @@ const Dashboard = () => {
     return (
       <div className="flex items-center justify-center min-h-[50dvh] w-full p-5">
         <div className="text-center bg-red-50 p-6 rounded-2xl border border-red-100 max-w-md">
-          <h2 className="text-lg font-semibold text-red-800">Failed to load dashboard statistics</h2>
-          <p className="text-sm text-red-600 mt-1">{error?.message || "Something went wrong. Please try again later."}</p>
+          <h2 className="text-lg font-semibold text-red-800">
+            Failed to load dashboard statistics
+          </h2>
+          <p className="text-sm text-red-600 mt-1">
+            {error?.message || "Something went wrong. Please try again later."}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className= "flex-1 space-y-6 px-4 py-3 2xl:py-0">
-      
-{/* Top Cards Statistics Section Row Grid */}
+    <div className="flex-1 space-y-6 px-4 py-3 2xl:py-0">
+      {/* Top Cards Statistics Section Row Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 w-full">
-        
-{/* Card 1: Upcoming Release */}
-        <div className={`h-[120px] w-full rounded-3xl bg-warning-50 border border-neutral-100 overflow-hidden transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}>
-          {!isLoading && data && (
-            data.pendingRelease ? (
+        {/* Card 1: Upcoming Release */}
+        <div
+          className={`h-[120px] w-full rounded-3xl bg-warning-50 border border-neutral-100 overflow-hidden transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}
+        >
+          {!isLoading &&
+            data &&
+            (data.pendingRelease ? (
               <div className="grid grid-cols-2 w-full h-full">
                 <div className="flex flex-col p-4 justify-between h-full">
                   <div>
@@ -72,16 +82,18 @@ const Dashboard = () => {
                     No Pending Release
                   </h2>
                   <p className="text-text-disable text-xs mt-1 leading-normal">
-                    Upload your first track and start sharing your sound with the world.
+                    Upload your first track and start sharing your sound with
+                    the world.
                   </p>
                 </div>
               </div>
-            )
-          )}
+            ))}
         </div>
 
-{/* Card 2: Total Albums */}
-        <div className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}>
+        {/* Card 2: Total Albums */}
+        <div
+          className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}
+        >
           {!isLoading && (
             <div className="capitalize flex flex-col p-4 h-full justify-between">
               <div className="flex justify-between items-start w-full">
@@ -106,8 +118,10 @@ const Dashboard = () => {
           )}
         </div>
 
-{/* Card 3: Total Songs */}
-        <div className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}>
+        {/* Card 3: Total Songs */}
+        <div
+          className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}
+        >
           {!isLoading && (
             <div className="capitalize flex flex-col p-4 h-full justify-between">
               <div className="flex justify-between items-start w-full">
@@ -132,8 +146,10 @@ const Dashboard = () => {
           )}
         </div>
 
-{/* Card 4: Total Earnings */}
-        <div className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}>
+        {/* Card 4: Total Earnings */}
+        <div
+          className={`bg-neutral-50 border border-neutral-100 rounded-3xl h-[120px] w-full transition ${isLoading ? "shimmer min-h-[160px]" : ""}`}
+        >
           {!isLoading && (
             <div className="capitalize flex flex-col p-4 h-full justify-between">
               <div className="flex justify-between items-start w-full">
@@ -153,22 +169,24 @@ const Dashboard = () => {
               </div>
               <div className="w-full">
                 <h2 className="text-2xl font-extrabold tracking-tight text-text-body text-end truncate">
-                  {data?.totalEarnings ? formatAmount(data.totalEarnings) : formatAmount(0)}
+                  {data?.totalEarnings
+                    ? formatAmount(data.totalEarnings)
+                    : formatAmount(0)}
                 </h2>
               </div>
             </div>
           )}
         </div>
-
       </div>
 
-{/* Main Double Dashboard Metric Blocks Row Grid */}
+      {/* Main Double Dashboard Metric Blocks Row Grid */}
       <div className="flex flex-col md:flex-row gap-5 ">
-        
-{/* Left Double Height Block Panel Block */}
-        <div className={`bg-neutral-50 border border-neutral-100 rounded-3xl md:h-[380px] md:w-[400px] flex flex-col overflow-hidden transition ${isLoading ? "shimmer" : ""}`}>
-          {!isLoading && (
-            data && data.lastRelease ? (
+        {/* Left Double Height Block Panel Block */}
+        <div
+          className={`bg-neutral-50 border border-neutral-100 rounded-3xl md:h-[380px] md:w-[400px] flex flex-col overflow-hidden transition ${isLoading ? "shimmer" : ""}`}
+        >
+          {!isLoading &&
+            (data && data.lastRelease ? (
               <div className="px-2 py-3 flex flex-col h- justify-between flex-1 space-y-2 md:pb-10">
                 <div className="space-y-2 flex-1">
                   <div>
@@ -185,7 +203,7 @@ const Dashboard = () => {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <h2 className="text-xl font-bold capitalize tracking-tight text-text-body truncate">
                       {data?.lastRelease.releaseTitle || "No Release name"}
@@ -203,22 +221,53 @@ const Dashboard = () => {
                   <div className="flex items-center justify-between gap-x-2 flex-wrap sm:flex-nowrap">
                     <div className="flex items-center gap-4">
                       <div className="flex flex-col items-center p-2.5">
-                        <Image src="/applemusic.svg" priority={false} height={24} width={24} alt="apple music icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-xs mt-1">40</span>
+                        <Image
+                          src="/applemusic.svg"
+                          priority={false}
+                          height={24}
+                          width={24}
+                          alt="apple music icon"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-text-body font-bold text-xs mt-1">
+                          40
+                        </span>
                       </div>
                       <div className="flex flex-col items-center p-2.5">
-                        <Image src="/spotify.svg" priority={false} height={24} width={24} alt="spotify icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-xs mt-1">123</span>
+                        <Image
+                          src="/spotify.svg"
+                          priority={false}
+                          height={24}
+                          width={24}
+                          alt="spotify icon"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-text-body font-bold text-xs mt-1">
+                          123
+                        </span>
                       </div>
                       <div className="flex flex-col items-center p-2.5">
-                        <Image src="/boomplay.svg" priority={false} height={24} width={24} alt="boomplay icon" className="w-6 h-6 object-contain" />
-                        <span className="text-text-body font-bold text-xs mt-1">40</span>
+                        <Image
+                          src="/boomplay.svg"
+                          priority={false}
+                          height={24}
+                          width={24}
+                          alt="boomplay icon"
+                          className="w-6 h-6 object-contain"
+                        />
+                        <span className="text-text-body font-bold text-xs mt-1">
+                          40
+                        </span>
                       </div>
                     </div>
-                    
+
                     <div className="bg-primary-300 py-2 px-4 rounded-[15px] text-main-white items-center justify-center flex flex-col">
-                      <p className="font-black text-xs tracking-tight leading-none">319</p>
-                      <p className="font-light text-[10px] uppercase tracking-wider opacity-90">Total</p>
+                      <p className="font-black text-xs tracking-tight leading-none">
+                        319
+                      </p>
+                      <p className="font-light text-[10px] uppercase tracking-wider opacity-90">
+                        Total
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -229,14 +278,14 @@ const Dashboard = () => {
                   No Approved Release
                 </h2>
                 <p className="text-text-disable text-sm mt-1 max-w-[280px]">
-                  Upload your first track and start sharing your sound with the world.
-                  </p>
+                  Upload your first track and start sharing your sound with the
+                  world.
+                </p>
               </div>
-            )
-          )}
+            ))}
         </div>
 
-{/* Right Double Height Block Panel Block */}
+        {/* Right Double Height Block Panel Block */}
         <div className="bg-neutral-50 border border-neutral-100 rounded-3xl w-full md:h-[380px] p-5 flex flex-col justify-between">
           <div className="flex flex-col h-full flex-1 space-y-4">
             <div className="space-y-4">
@@ -254,14 +303,20 @@ const Dashboard = () => {
               </h2>
             </div>
             {/* <div className="pt-"> */}
-              <button className="text-main-white bg-primary py-2.5 px-6 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-primary/90 transition w-full sm:max-w-[180px]">
-                Try Converter
-              </button>
+            <button
+              onClick={() => setWantsToConvertAudio(true)}
+              className="text-main-white bg-primary py-2.5 px-6 rounded-xl font-bold text-sm tracking-wide shadow-md hover:bg-primary/90 transition w-full sm:max-w-[180px]"
+            >
+              Try Converter
+            </button>
             {/* </div> */}
           </div>
         </div>
-
       </div>
+
+      {wantsToConvertAudio && (
+        <AudioConverter cancelAction={() => setWantsToConvertAudio(false)} />
+      )}
     </div>
   );
 };

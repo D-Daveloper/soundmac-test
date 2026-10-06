@@ -121,15 +121,26 @@ const AlbumForm = () => {
       formData.append("action", action);
       console.log(...formData);
       let res;
+      let idempotencyKey = localStorage.getItem("album-idempotency-key");
+      if (!idempotencyKey) {
+        idempotencyKey = crypto.randomUUID();
+        localStorage.setItem("album-idempotency-key", idempotencyKey);
+      }
       if (action === "upload") {
         const validForm = isAlbumFormValid(form);
         if (validForm != "true") return toast.warn(validForm);
         res = await api.post("v1/music/album", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Idempotency-Key": idempotencyKey,
+          },
         });
       } else {
         res = await api.post("v1/music/album/draft", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Idempotency-Key": idempotencyKey,
+          },
         });
       }
       if (action === "upload") {
@@ -178,6 +189,7 @@ const AlbumForm = () => {
       toast.error("something went wrong.");
     } finally {
       setIsSubmittingForm(false);
+      localStorage.removeItem("album-idempotency-key");
     }
   };
 
@@ -193,6 +205,7 @@ const AlbumForm = () => {
   };
 
   useEffect(() => {
+    localStorage.removeItem("album-idempotency-key");
     const string_form = localStorage.getItem("albumForm");
 
     if (string_form) {
@@ -798,7 +811,7 @@ const AlbumForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={albumForm.providedBy || user.label}
+                            value={albumForm.providedBy}
                             title={"Provided By"}
                             type={"text"}
                             name={"providedBy"}
@@ -830,7 +843,7 @@ const AlbumForm = () => {
                       <div className="flex flex-col w-[40%] max-sm:w-full">
                         {user?.type.includes("LABEL") ? (
                           <Input
-                            value={albumForm.courtesyLine || user.label}
+                            value={albumForm.courtesyLine}
                             title={"Courtesy Line"}
                             type={"text"}
                             name={"courtesyLine"}

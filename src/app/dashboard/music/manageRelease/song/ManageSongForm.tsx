@@ -56,8 +56,7 @@ const SongForm = ({
 
   const api = UseAxios();
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
-  const { isLoading, data, isError } =
-    useGetUserArtistsNames();
+  const { isLoading, data, isError } = useGetUserArtistsNames();
   const {
     isLoading: isLoadingDsp,
     data: dspData,
@@ -1168,11 +1167,6 @@ const SongForm = ({
                                 <span className="text-red-500">*</span>
                               </p>
                             </div>
-                            <p className="text-xs text-warning-700 font-light italic mt-1">
-                              Choose where your music will be available. Select
-                              “Worldwide” to distribute your release to
-                              listeners around the world
-                            </p>
                           </div>
 
                           <CheckboxSelect
@@ -1186,6 +1180,11 @@ const SongForm = ({
                               }));
                             }}
                           />
+                          <p className="text-xs text-warning-700 font-light italic mt-1">
+                            Choose where your music will be available. Select
+                            “Worldwide” to distribute your release to listeners
+                            around the world
+                          </p>
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full px-1">
                           <p className=" capitalize font-medium text-sm ">

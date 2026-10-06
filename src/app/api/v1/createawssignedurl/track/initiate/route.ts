@@ -175,7 +175,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const MAX_SIZE = 200 * 1024 * 1024; // 200MB
+    const MAX_SIZE = 100 * 1024 * 1024; // 100MB
     if (fileSize > MAX_SIZE) {
       return NextResponse.json({ msg: "File too large" }, { status: 400 });
     }

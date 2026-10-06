@@ -8,27 +8,26 @@ import {
   validateDraftSongs,
 } from "@/util/middleware/functions";
 import { requireActiveSubscription } from "@/util/middleware/subscription";
+import { withIdempotency } from "@/util/middleware/withIdempotency";
 import Artist from "@/util/models/artistModel";
 import SongModel from "@/util/models/songModel";
 import User from "@/util/models/userModel";
 import { addWeeks } from "date-fns";
 import mongoose from "mongoose";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    let userArtist = null;
-    let release = null;
-    let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
-    const formData = await req.formData();
+
+    const formData = await req.clone().formData();
 
     const payload = parseSongFormData(formData);
-    payload.upc = formData.get("upc")?.toString() ?? null; //different name for drafts
 
     if (!payload) {
       return NextResponse.json({ msg: "Invalid form data" }, { status: 400 });
     }
 
+    payload.upc = formData.get("upc")?.toString() ?? null;
     if (
       !payload.artist ||
       payload.artist.trim() === "" ||
@@ -37,6 +36,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ msg: "Artist is required" }, { status: 400 });
     }
 
+    const isDraftSongValid = validateDraftSongs(payload, false);// check if the album is valid for the user type, i hard coded false because the user type is not available at this point, so i will check it later after authentication
+
+    if (isDraftSongValid != null) {
+      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
+    }
+    let Uploaderror: { msg: string; status: number } | null = null; //saying what every errors occurs during upload so i can track the error then return it and also delete the uploaded song
     await dbConnect();
 
     const userJwt = await authenticate(req);
@@ -57,14 +62,6 @@ export async function POST(req: Request) {
       Uploaderror = requireActiveSubscription(user);
     }
 
-    //  else if (user.premium !== true) {
-    //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
-    // } else if (user.premium && new Date() > new Date(user.premiumExpiration!)) {
-    //   user.premium = false;
-    //   user.premiumExpiration = null;
-    //   await user.save();
-    //   Uploaderror = { msg: "Please upgrade your account.", status: 402 };
-    // }
     if (Uploaderror != null) {
       return NextResponse.json(
         { msg: Uploaderror.msg },
@@ -72,157 +69,154 @@ export async function POST(req: Request) {
       );
     } // return any errors up to this point and delete the song
 
-    if (user!.type === "EMERGING_ARTIST") {
-      const { startOfYear, endOfYear } = getYearRange();
 
-      const releasesThisYear = await SongModel.countDocuments({
+    return withIdempotency(req, user!._id, async () => {
+
+      let userArtist = null;
+      let release = null;
+
+      if (user!.type === "EMERGING_ARTIST") {
+        const { startOfYear, endOfYear } = getYearRange();
+
+        const releasesThisYear = await SongModel.countDocuments({
+          user: user!._id,
+          createdAt: {
+            $gte: startOfYear,
+            $lt: endOfYear,
+          },
+        });
+
+        if (releasesThisYear >= 2) {
+          return NextResponse.json(
+            { msg: "Emerging artists can only upload 2 releases per year" },
+            { status: 403 },
+          );
+        }
+      }
+      const userArtistQuery = Artist.findOne({
+        user: userJwt.user,
+        artistName: (payload.artist as string).trim(),
+      }).lean();
+
+      const releaseQuery = SongModel.findOne({
         user: user!._id,
-        createdAt: {
-          $gte: startOfYear,
-          $lt: endOfYear,
-        },
+        artistName: (payload.artist as string).trim(),
+        releaseTitle: payload.title!.trim(),
+      }).lean();
+
+      [userArtist, release] = await Promise.all([
+        userArtistQuery, releaseQuery
+      ]).catch(err => { throw err; });
+
+
+
+      if (!userArtist) {
+        return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
+      } else if (release) {
+        return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
+      }
+
+
+      if (
+        payload.songWriter &&
+        (!(payload.songWriter instanceof Array) ||
+          (payload.songWriter.length > 0 &&
+            payload.songWriter.some((artist) => artist.first_name === "" && artist.last_name === "")))
+      ) {
+        payload.songWriter = [];
+      }
+      if (
+        payload.performer &&
+        (!(payload.performer instanceof Array) ||
+          (payload.performer.length > 0 &&
+            payload.performer.some((artist) => artist.name === "" && artist.role === "")))
+      ) {
+        payload.performer = [];
+      }
+      if (
+        payload.featuredArtist &&
+        (!(payload.featuredArtist instanceof Array) ||
+          (payload.featuredArtist.length > 0 &&
+            payload.featuredArtist.some((artist) => artist.artistName === "" && artist.role === "")))
+      ) {
+        payload.featuredArtist = [];
+      }
+      if (
+        payload.producer &&
+        (!(payload.producer instanceof Array) ||
+          (payload.producer.length > 0 &&
+            payload.producer.some((artist) => artist.name === "" && artist.role === "")))
+      ) {
+        payload.producer = [];
+      }
+      console.log({ ...payload });
+
+      if (!payload.isrc) {
+        payload.isrc = await generateISRC()
+      }
+
+      if (user?.type.includes("LABEL")) {
+        if (!payload.providedBy) {
+          payload.providedBy = user.label
+        }
+        if (!payload.courtesyLine) {
+          payload.courtesyLine = user.label
+        }
+      } else {
+        payload.providedBy = "SoundMac"
+        payload.courtesyLine = "SoundMac"
+      }
+
+      const savedSong = new SongModel({
+        _id: new mongoose.Types.ObjectId(),
+        releaseTitle: payload.title,
+        genre: payload.genre,
+        releaseLanguage: payload.language,
+        songWriter: payload.songWriter,
+        producer: payload.producer,
+        performer: payload.performer,
+        featuredArtist: payload.featuredArtist,
+        preOrderCheck: payload.preOrderCheck,
+        anotherDistributionCheck: payload.anotherDistributionCheck,
+        explicitContent: payload.explicitContent,
+        releaseDate:
+          user!.type === "EMERGING_ARTIST"
+            ? addWeeks(new Date(), 2)
+            : payload.releaseDate == 'undefined' ? null : new Date(payload.releaseDate!),
+        preOrderDate:
+          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+        copyRightHolder:
+          user!.type === "EMERGING_ARTIST"
+            ? "Distributed by SoundMac"
+            : payload.copyRightHolder,
+        copyRightYear: user!.type === "EMERGING_ARTIST"
+          ? new Date().getFullYear()
+          : payload.copyRightYear,
+        lyrics: payload.lyrics,
+        startClip: payload.startClip,
+        dsp: payload.dsp,
+        upc: payload.upc,
+        isrc: payload.isrc,
+        territories: payload.territories,
+        artistName: userArtist.artistName,
+        artist: userArtist._id,
+        user: user!._id,
+        releaseStatus: "draft",
+        timeZone: payload?.timeZone,
+        isCoverSong: payload.isCoverSong,
+        compositionType: payload.compositionType,
+        instrumentalSource: payload.instrumentalSource,
+        countryOfRecording: payload.countryOfRecording,
+        providedBy: payload.providedBy,
+        courtesyLine: payload.courtesyLine,
       });
 
-      if (releasesThisYear >= 2) {
-        return NextResponse.json(
-          { msg: "Emerging artists can only upload 2 releases per year" },
-          { status: 403 },
-        );
-      }
-    }
-    const isDraftSongValid = validateDraftSongs(payload, user?.type.includes("LABEL") ?? false);
+      await savedSong.save();
 
-    if (isDraftSongValid != null) {
-      return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
-    }
-    const userArtistQuery = Artist.findOne({
-      user: userJwt.user,
-      artistName: (payload.artist as string).trim(),
-    }).lean();
-
-    const releaseQuery = SongModel.findOne({
-      user: user!._id,
-      artistName: (payload.artist as string).trim(),
-      releaseTitle: payload.title!.trim(),
-    }).lean();
-
-    [userArtist, release] = await Promise.all([
-      userArtistQuery, releaseQuery
-    ]).catch(err => { throw err; });
-
-
-
-    if (!userArtist) {
-      return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
-    } else if (release) {
-      return NextResponse.json({ msg: "You already have a release with the same title, please change the title and try again." }, { status: 400 });
-    }
-
-
-    if (
-      payload.songWriter &&
-      (!(payload.songWriter instanceof Array) ||
-        (payload.songWriter.length > 0 &&
-          payload.songWriter.some((artist) => artist.first_name === "" && artist.last_name === "")))
-    ) {
-      payload.songWriter = [];
-    }
-    if (
-      payload.performer &&
-      (!(payload.performer instanceof Array) ||
-        (payload.performer.length > 0 &&
-          payload.performer.some((artist) => artist.name === "" && artist.role === "")))
-    ) {
-      payload.performer = [];
-    }
-    if (
-      payload.featuredArtist &&
-      (!(payload.featuredArtist instanceof Array) ||
-        (payload.featuredArtist.length > 0 &&
-          payload.featuredArtist.some((artist) => artist.artistName === "" && artist.role === "")))
-    ) {
-      payload.featuredArtist = [];
-    }
-    if (
-      payload.producer &&
-      (!(payload.producer instanceof Array) ||
-        (payload.producer.length > 0 &&
-          payload.producer.some((artist) => artist.name === "" && artist.role === "")))
-    ) {
-      payload.producer = [];
-    }
-    console.log({ ...payload });
-
-    if (!payload.isrc) {
-      payload.isrc = await generateISRC()
-    }
-
-    if (user?.type.includes("LABEL")) {
-      if (!payload.providedBy) {
-        payload.providedBy = user.label
-      }
-    } else {
-      payload.providedBy = "SoundMac"
-    }
-
-    if (user?.type.includes("LABEL")) {
-      if (!payload.courtesyLine) {
-        payload.courtesyLine = user.label
-      }
-    } else {
-      payload.courtesyLine = "SoundMac"
-    }
-
-    const savedSong = new SongModel({
-      _id: new mongoose.Types.ObjectId(),
-      releaseTitle: payload.title,
-      genre: payload.genre,
-      releaseLanguage: payload.language,
-      songWriter: payload.songWriter,
-      producer: payload.producer,
-      performer: payload.performer,
-      featuredArtist: payload.featuredArtist,
-      preOrderCheck: payload.preOrderCheck,
-      anotherDistributionCheck: payload.anotherDistributionCheck,
-      explicitContent: payload.explicitContent,
-      releaseDate:
-        user!.type === "EMERGING_ARTIST"
-          ? addWeeks(new Date(), 2)
-          : payload.releaseDate == 'undefined' ? null : new Date(payload.releaseDate!),
-      preOrderDate:
-        payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
-      copyRightHolder:
-        user!.type === "EMERGING_ARTIST"
-          ? "Distributed by SoundMac"
-          : payload.copyRightHolder,
-      copyRightYear: user!.type === "EMERGING_ARTIST"
-        ? new Date().getFullYear()
-        : payload.copyRightYear,
-      lyrics: payload.lyrics,
-      startClip: payload.startClip,
-      dsp: payload.dsp,
-      upc: payload.upc ? payload.upc : await generateUPC(),
-      isrc: payload.isrc,
-      territories: payload.territories,
-      artistName: userArtist.artistName,
-      artist: userArtist._id,
-      user: user!._id,
-      releaseStatus: "draft",
-      timeZone: payload?.timeZone,
-      isCoverSong: payload.isCoverSong,
-      compositionType: payload.compositionType,
-      instrumentalSource: payload.instrumentalSource,
-      countryOfRecording: payload.countryOfRecording,
-      providedBy: payload.providedBy,
-      courtesyLine: payload.courtesyLine,
-    });
-
-    await savedSong.save();
-
-    return NextResponse.json({ msg: "Release uploaded successfull", release:savedSong }, { status: 201 });
+      return NextResponse.json({ msg: "Release uploaded successfull", release: savedSong }, { status: 201 });
+    })
   } catch (error: unknown) {
     console.log(error);
-
     return handleMongooseValidationError(error);
   }
 }
@@ -283,24 +277,24 @@ export async function PUT(req: Request) {
     if (!userArtist) {
       return NextResponse.json({ msg: "Invalid Artist" }, { status: 400 });
     }
-    let releaseTitleAlreadyExist = null;
+    let release = null;
 
-    releaseTitleAlreadyExist = await SongModel.findOne({
+    release = await SongModel.findOne({
       upc: payload.upc
     }).lean();
 
-    if (!releaseTitleAlreadyExist) {
+    if (!release) {
       return NextResponse.json({ msg: "Invalid Release" }, { status: 400 })
     }
 
-    if (releaseTitleAlreadyExist.releaseStatus != "draft") {
+    if (release.releaseStatus != "draft") {
       return NextResponse.json({ msg: "Only draft Release can be edited here." }, { status: 400 })
     }
 
-    if (releaseTitleAlreadyExist.releaseTitle != payload.title) {
+    if (release.releaseTitle != payload.title) {
       const checkReleaseTitle = await SongModel.find({
         user: user!._id,
-        artistName: userArtist.artistName,
+        artist: userArtist._id,
         releaseTitle: payload.title
       }).lean();
       if (checkReleaseTitle.length > 0) {
@@ -352,21 +346,17 @@ export async function PUT(req: Request) {
       return NextResponse.json({ msg: isDraftSongValid }, { status: 400 });
     }
 
-    if (user?.type.includes("LABEL")) {
+      if (user?.type.includes("LABEL")) {
       if (!payload.providedBy) {
-        payload.providedBy = user.label
+        payload.providedBy = release.providedBy
       }
-    } else {
-      payload.providedBy = "SoundMac"
-    }
-
-    if (user?.type.includes("LABEL")) {
       if (!payload.courtesyLine) {
-        payload.courtesyLine = user.label
+        payload.courtesyLine = release.courtesyLine
       }
-    } else {
-      payload.courtesyLine = "SoundMac"
-    }
+      } else {
+        payload.providedBy = "SoundMac"
+        payload.courtesyLine = "SoundMac"
+      }
 
     const savedSong = await SongModel.findOneAndUpdate(
       {
@@ -387,9 +377,9 @@ export async function PUT(req: Request) {
         releaseDate:
           user!.type === "EMERGING_ARTIST"
             ? addWeeks(new Date(), 2)
-            : payload.releaseDate == 'undefined' ? null : payload.releaseDate,
+            : payload.releaseDate == 'undefined' || !payload.releaseDate ? null : payload.releaseDate,
         preOrderDate:
-          payload.preOrderDate == "undefined" ? null : payload.preOrderDate,
+          payload.preOrderDate == "undefined" || !payload.preOrderDate ? null : payload.preOrderDate,
         copyRightHolder:
           user!.type === "EMERGING_ARTIST"
             ? "Distributed by SoundMac"

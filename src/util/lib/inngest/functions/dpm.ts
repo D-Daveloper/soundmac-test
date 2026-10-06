@@ -62,7 +62,7 @@ export const releaseDelivery = inngest.createFunction(
                         await DpmMetaData.findOneAndDelete({ upc }, { session });
                     } else {
                         await AlbumModel.findByIdAndUpdate(releaseId, { releaseStatus: "completed" }, { session });
-                        await TrackModel.updateMany({ upc }, { releaseStatus: "completed" }, { session });
+                        // await TrackModel.updateMany({ upc }, { releaseStatus: "completed" }, { session });
                         await DpmMetaData.deleteMany({ upc }, { session });
                     }
                     await session.commitTransaction()

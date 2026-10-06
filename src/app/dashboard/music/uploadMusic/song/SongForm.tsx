@@ -247,22 +247,24 @@ const SongForm = () => {
         setIsSubmittingForm(false);
         return toast.warn(validForm);
       }
-      const { upc, songS3Key, error, uploadId } = await uploadTrack(
-        form.songAudio!,
-        form.upc,
-        form.artist,
-        form.anotherDistributionCheck,
-        api,
-      );
-      if (error != null) {
-        setIsSubmittingForm(false);
-        toast.error(error);
-        return;
+      if (form.songAudio) {
+        const { upc, songS3Key, error, uploadId } = await uploadTrack(
+          form.songAudio,
+          form.upc,
+          form.artist,
+          form.anotherDistributionCheck,
+          api,
+        );
+        if (error != null) {
+          setIsSubmittingForm(false);
+          toast.error(error);
+          return;
+        }
+        form.s3keyAudio = songS3Key;
+        form.uploadId = uploadId;
+        form.upc = upc;
+        form.songAudio = null;
       }
-      formData.append("s3keyAudio", songS3Key);
-      formData.append("uploadId", uploadId);
-      form.upc = upc;
-      form.songAudio = null;
     }
 
     Object.entries(form).forEach(([key, value]) => {
@@ -276,7 +278,7 @@ const SongForm = () => {
         formData.append(key, value);
       }
     });
-    
+
     if (action === "draft") {
       if (
         form.featuredArtist.length === 1 &&
@@ -341,22 +343,33 @@ const SongForm = () => {
 
     formData.append("action", action);
     let res;
+    let idempotencyKey = localStorage.getItem("single-idempotency-key");
+    if (!idempotencyKey) {
+      idempotencyKey = crypto.randomUUID();
+      localStorage.setItem("single-idempotency-key", idempotencyKey);
+    }
     try {
       if (action === "upload") {
         toast.info(
           "Uploading song. This may take a while depending on your internet speed.",
         );
         res = await api.post("v1/music/song", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Idempotency-Key": idempotencyKey,
+          },
         });
       } else {
         res = await api.post("v1/music/song/draft", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "Idempotency-Key": idempotencyKey,
+          },
         });
       }
       toast.success(res?.data?.msg);
+      setshowSuccessPage(true);
       if (action === "upload") {
-        setshowSuccessPage(true);
         queryClient.invalidateQueries({
           queryKey: ["notifications"],
         });
@@ -378,6 +391,7 @@ const SongForm = () => {
       songForm.musicImage = null;
       songForm.songAudio = null;
     } finally {
+      localStorage.removeItem("single-idempotency-key");
       setIsSubmittingForm(false);
       setPreview(false);
     }
@@ -444,6 +458,7 @@ const SongForm = () => {
   };
 
   useEffect(() => {
+    localStorage.removeItem("single-idempotency-key");
     const string_form = localStorage.getItem("songForm");
     const featuredArtist = localStorage.getItem("featuredArtist");
     const songWriter = localStorage.getItem("songWriter");
@@ -1150,13 +1165,7 @@ const SongForm = () => {
                                 <span className="text-red-500">*</span>
                               </p>
                             </div>
-                            <p className="text-xs text-warning-700 font-light italic mt-1">
-                              Choose where your music will be available. Select
-                              “Worldwide” to distribute your release to
-                              listeners around the world
-                            </p>
                           </div>
-
                           <CheckboxSelect
                             title="Select Territories"
                             options={territories}
@@ -1168,6 +1177,11 @@ const SongForm = () => {
                               }));
                             }}
                           />
+                          <p className="text-xs text-warning-700 font-light italic mt-1">
+                            Choose where your music will be available. Select
+                            “Worldwide” to distribute your release to listeners
+                            around the world
+                          </p>
                         </div>
                         <div className="flex flex-col w-[40%] max-sm:w-full px-1">
                           <p className=" capitalize font-medium text-base">
@@ -1793,7 +1807,7 @@ const SongForm = () => {
                         Upload Another
                       </button>
                       <Link
-                        href="/dashboard/music/manageRelease?type=single"
+                        href="/dashboard/music/manageRelease/song"
                         className="w-full sm:w-1/2 px-5 py-3 font-bold rounded-xl text-center text-sm transition-all cursor-pointer bg-primary hover:bg-primary/90 text-white flex items-center justify-center shrink-0 shadow-sm"
                       >
                         <p className="text-white">View Song </p>

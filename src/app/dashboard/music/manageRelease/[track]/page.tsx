@@ -23,13 +23,16 @@ import { useBeforeUnloadGuard } from "@/util/customHooks/useBeforeUnloadGuard";
 
 const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
   const dashboardContext = useContext(DashboardContext);
+  
   useEffect(() => {
+    localStorage.removeItem("track-idempotency-key");
     dashboardContext?.setHeader({
       title: "Upload tracks",
       showBackButton: true,
       onBack: () => router.back(),
     });
   }, []);
+
   const { track } = use(params);
   console.log(track);
 
@@ -175,6 +178,12 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
     try {
       let finalTracks: TrackForm[] = tracks;
 
+      let idempotencyKey = localStorage.getItem("track-idempotency-key");
+      if (!idempotencyKey) {
+        idempotencyKey = crypto.randomUUID();
+        localStorage.setItem("track-idempotency-key", idempotencyKey);
+      }
+
       if (action === "upload") {
         // 2. Upload every track that still needs it, two at a time
         setIsDistributing(true);
@@ -211,7 +220,12 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
           ? "v1/music/album/track"
           : "v1/music/album/track/draft",
         JSON.stringify({ tracks: finalTracks, albumId: album.data[0]._id }),
-        { headers: { "Content-Type": "application/json" } },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": idempotencyKey,
+          },
+        },
       );
 
       toast.success(res?.data?.msg);
@@ -226,9 +240,9 @@ const UploadTrack = ({ params }: { params: Promise<{ track: string }> }) => {
     } finally {
       setIsDistributing(false);
       setIsSubmittingForm(false);
+      localStorage.removeItem("track-idempotency-key");
     }
   };
-
 
   return (
     <div className="bg-main-white  max-sm:min-h-[90dvh] min-h-[90dvh] h-full w-full flex flex-col pb-10">
