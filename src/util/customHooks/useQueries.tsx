@@ -794,9 +794,10 @@ export const useGetUserNotifications = () => {
 };
 
 export const useGetDPMDsp = () => {
+    const api = UseAxios(); 
   return useQuery<DPMDsp, Error>({
     queryKey: ["dpm-dsp"],
-    queryFn: () => getDPMDsp(),
+    queryFn: () => getDPMDsp(api),
     staleTime: 1000 * 60 * 60 * 24, // 24 hours: consider data fresh
     retryOnMount: false,
     refetchOnWindowFocus: false,
