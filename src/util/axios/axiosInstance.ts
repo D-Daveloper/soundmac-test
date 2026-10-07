@@ -401,7 +401,7 @@ export async function markNotificationsAsRead(api: AxiosInstance, id?: string) {
 }
 
 export async function getDPMDsp(): Promise<DPMDsp> {
-  const res = await axios.get(process.env.DPM_HOST! +"public/partners/dsps", {
+  const res = await axios.get(process.env.NEXT_PUBLIC_GET_DSPS_URL!, {
     headers: {
       Authorization: `Basic ${process.env.NEXT_PUBLIC_GET_DSPS_BASIC_AUTH_PASSWORD}`
     }
